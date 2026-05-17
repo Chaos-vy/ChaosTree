@@ -1,11 +1,13 @@
 package chaos.tree.core;
 
-public abstract class BiTreeAbstract<T extends Comparable<T>> implements ITree<T> {
+import java.util.List;
+
+public abstract class AbstractBiTree<T extends Comparable<T>> implements ITree<T> {
 
 //    Order of Implementation
-    public abstract void inorder();
-    public abstract void preorder();
-    public abstract void postorder();
+    public abstract List<T> inorder();
+    public abstract List<T> preorder();
+    public abstract List<T> postorder();
 
 //    Get minimum Value
     public abstract T getMin();
