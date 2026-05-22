@@ -26,6 +26,4 @@ public interface ITree<T extends Comparable<T>> {
 
 //  Clear all the tree nodes
     void clear();
-
-
 }

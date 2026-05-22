@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-class BSTNode<T> extends BiNode<T> {
+class BSTNode<T> extends BiNode<T,BSTNode<T>> {
     public BSTNode(T value) {
         super(value);
     }
@@ -31,13 +31,13 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
             if(curr.getRight() == null) {
                 curr.setRight(new BSTNode<>(value));
             } else {
-                insertHelper((BSTNode<T>) curr.getRight(), value);
+                insertHelper(curr.getRight(), value);
             }
         } else {
             if(curr.getLeft() == null) {
                 curr.setLeft(new BSTNode<>(value));
             } else {
-                insertHelper((BSTNode<T>) curr.getLeft(), value);
+                insertHelper(curr.getLeft(), value);
             }
         }
     }
@@ -53,10 +53,10 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
         if(value.compareTo(curr.getValue())==0)return true;
 
         if(value.compareTo(curr.getValue())>0){
-           return searchHelper((BSTNode<T>) curr.getRight(),value);
+           return searchHelper(curr.getRight(),value);
         }
         else{
-            return searchHelper((BSTNode<T>)curr.getLeft(),value);
+            return searchHelper(curr.getLeft(),value);
         }
     }
     private boolean deleteFlag =false;
@@ -72,10 +72,10 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
         if (curr == null) return null;
 
         if (value.compareTo(curr.getValue())<0) {
-            curr.setLeft(deleteHelper((BSTNode<T>) curr.getLeft(), value));
+            curr.setLeft(deleteHelper(curr.getLeft(), value));
 
         } else if (value.compareTo(curr.getValue())>0) {
-            curr.setRight(deleteHelper((BSTNode<T>) curr.getRight(), value));
+            curr.setRight(deleteHelper(curr.getRight(), value));
         }
         else {
             deleteFlag = true;
@@ -83,17 +83,17 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
                 return null;
             }
             if (curr.getLeft() == null) {
-                return (BSTNode<T>) curr.getRight();
+                return curr.getRight();
             }
             if (curr.getRight() == null) {
-                return (BSTNode<T>) curr.getLeft();
+                return curr.getLeft();
             }
-            BSTNode<T> successor = (BSTNode<T>)curr.getRight();
+            BSTNode<T> successor = curr.getRight();
             while (successor.getLeft() != null) {
-                successor = (BSTNode<T>) successor.getLeft();
+                successor = successor.getLeft();
             }
             curr.setValue(successor.getValue());
-            curr.setRight(deleteHelper((BSTNode<T>) curr.getRight(), successor.getValue()));
+            curr.setRight(deleteHelper(curr.getRight(), successor.getValue()));
         }
         return curr;
     }
@@ -111,8 +111,8 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
     private int heightHelper(BSTNode<T> curr) {
         if(curr == null) return -1;
 
-        int leftHeight = heightHelper((BSTNode<T>) curr.getLeft());
-        int rightHeight = heightHelper((BSTNode<T>) curr.getRight());
+        int leftHeight = heightHelper(curr.getLeft());
+        int rightHeight = heightHelper(curr.getRight());
 
         return Math.max(leftHeight, rightHeight) + 1;
     }
@@ -139,9 +139,9 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
 
     private void inorderHelper(BSTNode<T> curr,List<T> list) {
         if(curr==null)return;
-        inorderHelper((BSTNode<T>) curr.getLeft(),list);
+        inorderHelper(curr.getLeft(),list);
         list.add(curr.getValue());
-        inorderHelper((BSTNode<T>) curr.getRight(),list);
+        inorderHelper(curr.getRight(),list);
     }
 
     @Override
@@ -154,8 +154,8 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
     private void preorderHelper(BSTNode<T> curr, List<T> list) {
         if(curr==null)return;
         list.add(curr.getValue());
-        preorderHelper((BSTNode<T>) curr.getLeft(),list);
-        preorderHelper((BSTNode<T>) curr.getRight(),list);
+        preorderHelper(curr.getLeft(),list);
+        preorderHelper(curr.getRight(),list);
     }
 
     @Override
@@ -167,8 +167,8 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
 
     private void postorderHelper(BSTNode<T> curr, List<T> list){
         if(curr==null)return;
-        postorderHelper((BSTNode<T>) curr.getLeft(),list);
-        postorderHelper((BSTNode<T>) curr.getRight(),list);
+        postorderHelper(curr.getLeft(),list);
+        postorderHelper(curr.getRight(),list);
         list.add(curr.getValue());
     }
 
@@ -179,7 +179,7 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
         }
         BSTNode<T> curr =root;
         while (curr.getLeft()!=null){
-            curr = (BSTNode<T>) curr.getLeft();
+            curr = curr.getLeft();
         }
         return curr.getValue();
     }
@@ -192,7 +192,7 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T> {
         }
         BSTNode<T> curr =root;
         while (curr.getRight()!=null){
-            curr = (BSTNode<T>) curr.getRight();
+            curr = curr.getRight();
         }
         return curr.getValue();
     }
