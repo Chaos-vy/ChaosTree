@@ -3,6 +3,8 @@ package chaos.tree.core;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.traversal.Traversal;
 
+import java.util.List;
+
 public interface ITree<T extends Comparable<T>> extends Traversal<T> {
     /**
      * Inserts the specified value into the tree.
@@ -12,7 +14,12 @@ public interface ITree<T extends Comparable<T>> extends Traversal<T> {
      * @throws DuplicateNodeException if value already exists in the tree
      */
     void insert(T value);
-
+    /**
+     * Inserts all values from the list into the tree.
+     *
+     * @param values the list of values to insert
+     */
+    void insertAll(List<T> values);
     /**
      * Search the element in the tree
      *

@@ -48,6 +48,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         return root;
     }
 
+    public void insertAll(List<T> values) {
+        values.forEach(this::insert);
+    }
+
     /**
      * Inserts a value into the subtree rooted at the specified node.
      *

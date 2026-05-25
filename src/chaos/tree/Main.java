@@ -1,5 +1,6 @@
 package chaos.tree;
  import chaos.tree.binary.BST;
+ import chaos.tree.core.ITree;
 
  import java.util.List;
 
@@ -25,5 +26,12 @@ public class Main {
         System.out.println("Size = "+bst.size());
         List<Integer> list = bst.preorder();
         System.out.println(list);
+
+        bst.insertAll(List.of(112,150,152,145,298,352));
+        System.out.println(bst.inorder());
+
+        ITree<Integer> bst1 = new BST<>();
+        bst1.insertAll(List.of(112,150,152,145,298,352));
+        System.out.println(bst1.inorder());
     }
 }
