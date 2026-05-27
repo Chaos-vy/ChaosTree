@@ -100,10 +100,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
             if(root.getRight()!=null && root.getLeft()==null){
                 return root.getRight();
             }
-            N successor = root.getRight();
-            while (successor.getLeft()!=null){
-                successor = successor.getLeft();
-            }
+            N successor = getMinNode(root.getRight());
             root.setValue(successor.getValue());
             root.setRight(delete(root.getRight(), successor.getValue()));
 
@@ -124,6 +121,15 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         return a.getValue().compareTo(b.getValue());
     }
 
+    /**
+     * Compares the values of two nodes.
+     *
+     * @param value the value to compare
+     * @param curr the second node to compare
+     * @return a negative integer, zero, or a positive integer
+     *         if the first node value is less than, equal to,
+     *         or greater than the second node value
+     */
     protected int compare(T value, N curr){
         return value.compareTo(curr.getValue());
     }
@@ -207,11 +213,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         if(isEmpty()){
             throw new EmptyTreeException("Tree is empty");
         }
-        N curr = root;
-        while (curr.getLeft()!=null){
-            curr = curr.getLeft();
-        }
-        return curr.getValue();
+        return getMinNode(root).getValue();
     }
 
     /**
@@ -222,11 +224,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         if(isEmpty()){
             throw new EmptyTreeException("Tree is empty");
         }
-        N curr = root;
-        while (curr.getRight()!=null){
-            curr = curr.getRight();
-        }
-        return curr.getValue();
+        return getMaxNode(root).getValue();
     }
     @Override
     public List<T> preorder(){
@@ -290,6 +288,33 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
             }
         }
         return levelOrder;
+    }
+
+    /**
+     * Returns the min node from the current node.
+     *
+     * @param node the node which determines the source
+     * @return Min node if present else null
+     */
+    protected N getMinNode(N node){
+        if(node==null)return null;
+        while (node.getLeft()!=null){
+            node =node.getLeft();
+        }
+        return node;
+    }
+    /**
+     * Returns the max node from the current node.
+     *
+     * @param node the node which determines the source
+     * @return Max node if present else null
+     */
+    protected N getMaxNode(N node){
+        if(node==null)return null;
+        while (node.getRight()!=null){
+            node=node.getRight();
+        }
+        return node;
     }
 
 }
