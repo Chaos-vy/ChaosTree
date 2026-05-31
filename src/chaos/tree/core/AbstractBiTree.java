@@ -5,6 +5,10 @@ import chaos.tree.exception.EmptyTreeException;
 
 import java.util.*;
 
+/**
+ * This implementation is not thread safe.
+ * For concurrent access, external synchronization is required.
+ */
 public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,N>> implements ITree<T> {
 
     /**
@@ -111,19 +115,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
     /**
      * Compares the values of two nodes.
      *
-     * @param a the first node to compare
-     * @param b the second node to compare
-     * @return a negative integer, zero, or a positive integer
-     *         if the first node value is less than, equal to,
-     *         or greater than the second node value
-     */
-    protected int compare(N a, N b) {
-        return a.getValue().compareTo(b.getValue());
-    }
-
-    /**
-     * Compares the values of two nodes.
-     *
      * @param value the value to compare
      * @param curr the second node to compare
      * @return a negative integer, zero, or a positive integer
@@ -168,13 +159,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
     }
 
     @Override
-    public boolean delete(T value){
+    public void delete(T value){
         if(!contain(value)){
-            return false;
+            return;
         }
         root = delete(root,value);
         size--;
-        return true;
     }
 
     @Override
@@ -316,5 +306,37 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         }
         return node;
     }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        buildString(root, "", true, sb);
+        return sb.toString();
+    }
+    protected String nodeText(N node) {
+        return String.valueOf(node.getValue());
+    }
+    private void buildString(N node, String prefix, boolean isTail, StringBuilder sb)
+    {
+        if (node == null) {
+            return;
+        }
+        sb.append(prefix).append(isTail ? "└── " : "├── ").append(nodeText(node)).append('\n');
+        boolean hasLeft  = node.getLeft()  != null;
+        boolean hasRight = node.getRight() != null;
+        if (!hasLeft && !hasRight) {
+            return;
+        }
+        if (hasLeft && hasRight) {
+            buildString(node.getLeft(), prefix + (isTail ? "    " : "│   "), false, sb);
+            buildString(node.getRight(), prefix + (isTail ? "    " : "│   "), true, sb);
+
+        } else if (hasLeft) {
+            buildString(node.getLeft(), prefix + (isTail ? "    " : "│   "), true, sb);
+
+        } else {
+            buildString(node.getRight(), prefix + (isTail ? "    " : "│   "), true, sb);
+        }
+    }
+
 
 }
