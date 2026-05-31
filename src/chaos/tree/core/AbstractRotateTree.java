@@ -5,7 +5,7 @@ public abstract class AbstractRotateTree<T extends Comparable<T>, N extends BiNo
      * Update the root after the rotation
      * @param root the node to be rotated
      */
-    protected abstract void updateMetadata(N root);
+    protected void updateMetadata(N root){}
 
     /**
      * Does left Rotation
