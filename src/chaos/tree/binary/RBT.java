@@ -267,4 +267,18 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
             }
         }
     }
+    public boolean isBalanced() {
+        return blackHeight(root) != -1;
+    }
+    private int blackHeight(RBTNode<T> node) {
+        if (node == null) {
+            return 1;
+        }
+        int left = blackHeight(node.getLeft());
+        int right = blackHeight(node.getRight());
+        if (left == -1 || right == -1 || left != right) {
+            return -1;
+        }
+        return left + (node.getColor() == BLACK ? 1 : 0);
+    }
 }
