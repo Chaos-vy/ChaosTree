@@ -15,6 +15,10 @@ public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T,AVLNode<T
     }
 
     @Override
+    protected String nodeText(AVLNode<T> node) {
+        return node.getValue() + "(h=" + node.getHeight() + ")";
+    }
+    @Override
     public int height(){
         return nodeHeight(root);
     }
