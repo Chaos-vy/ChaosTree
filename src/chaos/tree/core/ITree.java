@@ -32,9 +32,8 @@ public interface ITree<T extends Comparable<T>> extends Traversal<T> {
      * Delete the element in the tree
      *
      * @param value the value to be deleted if present: deleted
-     * @return true if value is found to be deleted otherwise false
      */
-    boolean delete(T value);
+    void delete(T value);
 
 
     /**
