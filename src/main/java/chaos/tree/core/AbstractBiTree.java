@@ -306,6 +306,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         }
         return node;
     }
+    private static final String BRANCH = "+-- ";
+    private static final String LAST_BRANCH = "\\-- ";
+    private static final String VERTICAL = "|   ";
+    private static final String SPACE = "    ";
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -315,28 +319,30 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
     protected String nodeText(N node) {
         return String.valueOf(node.getValue());
     }
-    private void buildString(N node, String prefix, boolean isTail, StringBuilder sb)
-    {
+    private void buildString(N node, String prefix, boolean isTail, StringBuilder sb) {
         if (node == null) {
             return;
         }
-        sb.append(prefix).append(isTail ? "└── " : "├── ").append(nodeText(node)).append('\n');
-        boolean hasLeft  = node.getLeft()  != null;
+        sb.append(prefix).append(isTail ? LAST_BRANCH : BRANCH).append(nodeText(node)).append('\n');
+
+        boolean hasLeft = node.getLeft() != null;
         boolean hasRight = node.getRight() != null;
+
         if (!hasLeft && !hasRight) {
             return;
         }
+
+        String childPrefix = prefix + (isTail ? SPACE : VERTICAL);
+
         if (hasLeft && hasRight) {
-            buildString(node.getLeft(), prefix + (isTail ? "    " : "│   "), false, sb);
-            buildString(node.getRight(), prefix + (isTail ? "    " : "│   "), true, sb);
+            buildString(node.getLeft(), childPrefix, false, sb);
+            buildString(node.getRight(), childPrefix, true, sb);
 
         } else if (hasLeft) {
-            buildString(node.getLeft(), prefix + (isTail ? "    " : "│   "), true, sb);
+            buildString(node.getLeft(), childPrefix, true, sb);
 
         } else {
-            buildString(node.getRight(), prefix + (isTail ? "    " : "│   "), true, sb);
+            buildString(node.getRight(), childPrefix, true, sb);
         }
     }
-
-
 }
