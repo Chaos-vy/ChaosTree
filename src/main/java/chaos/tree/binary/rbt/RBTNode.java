@@ -1,12 +1,12 @@
-package chaos.tree.binary;
+package chaos.tree.binary.rbt;
 
-import chaos.tree.core.BiNode;
+import chaos.tree.core.binary.ParentBiNode;
 
 /**
  * Red Black tree  node structure
  * @param <T> value to be stored in node
  */
-public class RBTNode<T> extends BiNode<T,RBTNode<T>> {
+public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
 
     /**
      * Determine color of the node.
@@ -15,10 +15,6 @@ public class RBTNode<T> extends BiNode<T,RBTNode<T>> {
      */
     private boolean color;
 
-    /**
-     * Reference to parent node
-     */
-    private RBTNode<T> parent;
 
     /**
      * Constructs the node with the specified value
@@ -47,21 +43,4 @@ public class RBTNode<T> extends BiNode<T,RBTNode<T>> {
         this.color = color;
     }
 
-    /**
-     * Returns the parent node of child.
-     *
-     * @return the parent node of child
-     */
-    public RBTNode<T> getParent(){
-        return parent;
-    }
-
-    /**
-     * Set the parent node.
-     *
-     * @param parent the parent node to be set
-     */
-    public void setParent(RBTNode<T> parent){
-        this.parent = parent;
-    }
 }

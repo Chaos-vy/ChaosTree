@@ -1,9 +1,9 @@
-package chaos.tree.binary;
+package chaos.tree.binary.rbt;
 
-import chaos.tree.core.AbstractRotateTree;
+import chaos.tree.core.binary.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 
-public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T>> {
+public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
 
     private static final boolean RED = false;
     private static final boolean BLACK = true;
@@ -15,44 +15,7 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
 
     @Override
     protected String nodeText(RBTNode<T> node) {
-        return node.getValue()
-                + (node.getColor() ? "(B)" : "(R)");
-    }
-    @Override
-    protected RBTNode<T> leftRotate(RBTNode<T> node) {
-        RBTNode<T> parent = node.getParent();
-        RBTNode<T> newNode = super.leftRotate(node);
-        newNode.getLeft().setParent(newNode);
-        if(parent==null){
-            root = newNode;
-        }
-        else {
-            if(parent.getLeft()==node){
-                parent.setLeft(newNode);
-            }
-            else parent.setRight(newNode);
-        }
-        newNode.setParent(parent);
-        return newNode;
-    }
-
-    @Override
-    protected RBTNode<T> rightRotate(RBTNode<T> node) {
-
-        RBTNode<T> parent = node.getParent();
-        RBTNode<T> newNode = super.rightRotate(node);
-        newNode.getRight().setParent(newNode);
-        if(parent==null){
-            root = newNode;
-        }
-        else {
-            if(parent.getLeft()==node){
-                parent.setLeft(newNode);
-            }
-            else parent.setRight(newNode);
-        }
-        newNode.setParent(parent);
-        return newNode;
+        return node.getValue() + (node.getColor() ? "(B)" : "(R)");
     }
 
     private boolean isRed(RBTNode<T> node) {
@@ -62,12 +25,14 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
     private void setColor(RBTNode<T> node, boolean color) {
         if (node != null) node.setColor(color);
     }
+
     @Override
     public void insert(T value) {
         root = insert(root, value);
         setColor(root, BLACK);
         size++;
     }
+
     @Override
     protected RBTNode<T> insert(RBTNode<T> node, T value) {
         if (node == null) {
@@ -93,10 +58,12 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
         setColor(node.getLeft(), BLACK);
         setColor(node.getRight(), BLACK);
     }
-    private void refactorUncleBlack(RBTNode<T> node, RBTNode<T> child){
-        setColor(node,BLACK);
-        setColor(child,RED);
+
+    private void refactorUncleBlack(RBTNode<T> node, RBTNode<T> child) {
+        setColor(node, BLACK);
+        setColor(child, RED);
     }
+
     @Override
     protected RBTNode<T> afterInsert(RBTNode<T> node) {
 
@@ -104,104 +71,92 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
         RBTNode<T> right = node.getRight();
 
         if (isRed(left) && isRed(left.getLeft())) {
-            if(!isRed(right)){
+            if (!isRed(right)) {
                 node = rightRotate(node);
-                refactorUncleBlack(node,node.getRight());
-            }
-            else {
+                refactorUncleBlack(node, node.getRight());
+            } else {
                 refactorUncleRed(node);
             }
         } else if (isRed(left) && isRed(left.getRight())) {
-            if(!isRed(right)){
+            if (!isRed(right)) {
                 node.setLeft(leftRotate(left));
-                node=rightRotate(node);
-                refactorUncleBlack(node,node.getRight());
-            }
-            else{
+                node = rightRotate(node);
+                refactorUncleBlack(node, node.getRight());
+            } else {
                 refactorUncleRed(node);
             }
         } else if (isRed(right) && isRed(right.getRight())) {
-            if(!isRed(left)){
+            if (!isRed(left)) {
                 node = leftRotate(node);
-                refactorUncleBlack(node,node.getLeft());
-            }
-            else {
+                refactorUncleBlack(node, node.getLeft());
+            } else {
                 refactorUncleRed(node);
             }
         } else if (isRed(right) && isRed(right.getLeft())) {
-            if(!isRed(left)){
+            if (!isRed(left)) {
                 node.setRight(rightRotate(right));
-                node=leftRotate(node);
-                refactorUncleBlack(node,node.getLeft());
-            }
-            else {
+                node = leftRotate(node);
+                refactorUncleBlack(node, node.getLeft());
+            } else {
                 refactorUncleRed(node);
             }
         }
         return node;
     }
 
+    @Override
+    public void delete(T value) {
+        RBTNode<T> target = findNode(root, value);
+        if (target == null) {
+            return;
+        }
+        deleteNode(target);
+        size--;
+    }
+    private void deleteNode(RBTNode<T> node) {
+        if (node.getLeft() != null && node.getRight() != null) {
+            RBTNode<T> successor = getMinNode(node.getRight());
+            node.setValue(successor.getValue());
+            deleteNode(successor);
+            return;
+        }
 
-    private void rewire(RBTNode<T> parent, RBTNode<T> node,RBTNode<T> replacement){
-        boolean isLeftChild = parent.getLeft()==node;
-        if(replacement==null){
-            if(isLeftChild){
-                parent.setLeft(null);
-            }
-            else{
-                parent.setRight(null);
-            }
+        RBTNode<T> child = node.getLeft() != null ? node.getLeft() : node.getRight();
+
+        if (isRed(node)) {
+            rewireParent(node.getParent(), node, null);
+            return;
+        }
+
+        if (isRed(child)) {
+            child.setColor(BLACK);
+            rewireParent(node.getParent(), node, child);
+            return;
+        }
+
+        if (node == root) { root = null; return; }
+
+        fixDoubleBlack(node);
+        rewireParent(node.getParent(), node, null);
+    }
+
+    private void rewireParent(RBTNode<T> parent, RBTNode<T> node, RBTNode<T> child) {
+        if (parent == null){
+            root = child;
+            if (child != null) child.setParent(null);
+            return;
+        }
+        boolean isLeftNode = parent.getLeft()==node;
+        if(child != null){
+            child.setParent(parent);
+        }
+        if(isLeftNode){
+            parent.setLeft(child);
         }
         else {
-            if(isLeftChild){
-                parent.setLeft(replacement);
-                replacement.setParent(parent);
-            }
-            else{
-                parent.setRight(replacement);
-                replacement.setParent(parent);
-            }
+            parent.setRight(child);
         }
     }
-
-    @Override
-    protected RBTNode<T> delete(RBTNode<T> node, T value) {
-        if (node == null) return null;
-
-        int cmp = compare(value, node);
-
-        if (cmp > 0) {
-            delete(node.getRight(), value);
-
-        } else if (cmp < 0) {
-            delete(node.getLeft(), value);
-
-        } else
-        {
-            if(node.getLeft()!=null && node.getRight()!=null) {
-                RBTNode<T> successor = getMinNode(node.getRight());
-                node.setValue(successor.getValue());
-                delete(node.getRight(), successor.getValue());
-                return node;
-            }
-            if(isRed(node)){
-                rewire(node.getParent(),node,null);
-                return null;
-            }
-            RBTNode<T> descendantNode = node.getLeft()==null?node.getRight():node.getLeft();
-            if(isRed(descendantNode)){
-                descendantNode.setColor(BLACK);
-                rewire(node.getParent(),node,descendantNode);
-                return null;
-            }
-
-            fixDoubleBlack(node);
-            rewire(node.getParent(),node,null);
-            return null;
-        }
-        return node;
-    }
-
     private void fixDoubleBlack(RBTNode<T> node) {
 
         if (node == null) return;
@@ -244,7 +199,9 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
             }
             else {
                 sibling.getLeft().setColor(BLACK);
+
                 rightRotate(sibling);
+
                 sibling = parent.getRight();
                 sibling.setColor(parent.getColor());
                 parent.setColor(BLACK);
@@ -267,18 +224,5 @@ public class RBT<T extends Comparable<T>> extends AbstractRotateTree<T,RBTNode<T
             }
         }
     }
-    public boolean isBalanced() {
-        return blackHeight(root) != -1;
-    }
-    private int blackHeight(RBTNode<T> node) {
-        if (node == null) {
-            return 1;
-        }
-        int left = blackHeight(node.getLeft());
-        int right = blackHeight(node.getRight());
-        if (left == -1 || right == -1 || left != right) {
-            return -1;
-        }
-        return left + (node.getColor() == BLACK ? 1 : 0);
-    }
+
 }
