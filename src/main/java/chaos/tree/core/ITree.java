@@ -2,63 +2,90 @@ package chaos.tree.core;
 
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.traversal.Traversal;
-
-import java.util.List;
-
+/**
+ * Root interface for all tree data structures in the ChaosTree library.
+ *
+ * <p>Defines the fundamental contract that every tree implementation must fulfill,
+ * including insertion, deletion, search, and structural queries. All operations
+ * are defined in terms of a single comparable element type {@code T}.
+ *
+ * <p>Implementations of this interface are not required to be thread-safe.
+ * External synchronization is recommended when multiple threads access
+ * a tree instance concurrently.
+ *
+ * @param <T> the type of elements held in this tree;
+ *            must implement {@link Comparable}
+ *
+ * @author Chaos
+ * @version 1.0
+ * @since 1.0
+ */
 public interface ITree<T extends Comparable<T>> extends Traversal<T> {
     /**
-     * Inserts the specified value into the tree.
-     * Duplicate values are not allowed.
+     * Inserts the specified value into this tree.
+     * The tree will not be modified if the value already exists.
      *
-     * @param value the value to insert, must not be null
-     * @throws DuplicateNodeException if value already exists in the tree
+     * @param value the value to insert; must not be {@code null}
+     * @throws DuplicateNodeException if the specified value already
+     *         exists in this tree
+     * @throws NullPointerException if {@code value} is {@code null}
      */
     void insert(T value);
     /**
-     * Inserts all values from the list into the tree.
+     * Inserts all values from the provided iterable into this tree.
      *
-     * @param values the list of values to insert
+     * @param values the values to insert
+     * @throws DuplicateNodeException if a duplicate value is encountered
+     * @throws NullPointerException if {@code value} is {@code null}
      */
-    void insertAll(List<T> values);
+    void insertAll(Iterable<? extends T> values);
     /**
-     * Search the element in the tree
+     * Check the value is present in the tree.
+     * This operation does not modify tree.
      *
-     * @param value the value to be searched
-     * @return true if value is present in the tree otherwise false
+     * @param value the value to search
+     * @return {@code true} the value exist in the tree;
+     *         {@code false} otherwise
+     * @throws NullPointerException if value is {@code null};
     */
-    boolean search(T value);
+    boolean contains(T value);
 
     /**
-     * Delete the element in the tree
+     * Delete the node contains {@code value} in the tree.
+     * The tree will not modify if the element does not exist.
      *
-     * @param value the value to be deleted if present: deleted
+     * @param value the value to be deleted; must not be {@code null}
+     * @throws NullPointerException if the value is {@code null}
      */
     void delete(T value);
 
 
     /**
-     * Return the total no of element present in the tree
+     * Return no of element in this tree
      *
-     * @return the total no of element
+     * @return the number of element; {@code 0} if tree is empty
     */
     int size();
 
     /**
-     * Return the height of tree where root height reference is 0
+     * Return the height of this tree.
      *
-     * @return the height of tree
+     * @return the height of this tree;
+     * {@code -1} if tree is empty,
+     * {@code 0} tree having only root element
      */
     int height();
 
     /**
      * Check whether the tree is empty or not
      *
-     * @return true if tree is empty otherwise false
+     * @return {@code true} this tree does not have any element;
+     * {@code false} this tree has one or more element
      */
     boolean isEmpty();
-
     /**
-     * Make the tree empty
+     * Removes all elements from this tree.
+     * The tree will be empty after this call returns.
      */
     void clear();
 }

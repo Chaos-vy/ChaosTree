@@ -1,4 +1,4 @@
-package chaos.tree.core;
+package chaos.tree.core.binary;
 
 public abstract class AbstractRotateTree<T extends Comparable<T>, N extends BiNode<T,N>> extends AbstractBiTree<T,N> {
     /**

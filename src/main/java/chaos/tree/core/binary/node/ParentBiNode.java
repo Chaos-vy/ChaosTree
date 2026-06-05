@@ -1,6 +1,8 @@
-package chaos.tree.core;
+package chaos.tree.core.binary;
 
-public abstract class ParentBiNode<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends BiNode<T,N> implements INode<T>{
+import chaos.tree.core.INode;
+
+public abstract class ParentBiNode<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends BiNode<T,N> implements INode<T> {
 
     private N parent;
 

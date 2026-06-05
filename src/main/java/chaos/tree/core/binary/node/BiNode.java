@@ -1,5 +1,7 @@
-package chaos.tree.core;
+package chaos.tree.core.binary;
 
+
+import chaos.tree.core.INode;
 
 public abstract class BiNode<T,N extends BiNode<T,N>> implements INode<T> {
 
