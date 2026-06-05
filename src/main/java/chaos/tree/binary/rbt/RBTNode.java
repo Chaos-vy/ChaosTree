@@ -1,45 +1,45 @@
 package chaos.tree.binary.rbt;
 
 import chaos.tree.core.binary.ParentBiNode;
-
+import static chaos.tree.binary.rbt.Color.*;
 /**
  * Red Black tree  node structure
- * @param <T> value to be stored in node
+ * @param <T> value type to be stored in node
  */
 public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
 
-    /**
-     * Determine color of the node.
-     * true represents Black node
-     * false represents Red node
-     */
-    private boolean color;
+    /** Color of this node; newly created nodes are RED by default. */
+    private Color color;
 
 
     /**
-     * Constructs the node with the specified value
+     * Constructs a Red-Black Tree node with the specified value.
      *
-     * @param value the value to be stored in current node
+     * <p>Newly created nodes are initialized with
+     * {@link Color#RED} as required by the Red-Black Tree
+     * insertion algorithm.</p>
+     *
+     * @param value the value to be stored in this node
      */
     public RBTNode(T value) {
         super(value);
-        this.color=false;
+        this.color=RED;
     }
 
 
     /**
-     * Returns the color of the node.
-     * @return the color of the node
+     * Returns the current color of the node.
+     * @return the node color
      */
-    public boolean getColor(){
+    public Color getColor(){
         return color;
     }
 
     /**
-     * Set the color of the node.
-     * @param color to be set
+     * Set the current color of the node.
+     * @param color the new color
      */
-    public void setColor(boolean color){
+    public void setColor(Color color){
         this.color = color;
     }
 
