@@ -1,8 +1,8 @@
-package chaos.tree.binary;
+package chaos.tree.binary.avl;
 
-import chaos.tree.core.AbstractRotateTree;
+import chaos.tree.core.binary.rotation.AbstractRotateTree;
 
-public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T,AVLNode<T>> {
+public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<T>> {
     @Override
     protected AVLNode<T> createNode(T value) {
         return new AVLNode<>(value);

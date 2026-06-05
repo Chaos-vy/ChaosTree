@@ -1,4 +1,6 @@
-package chaos.tree.core;
+package chaos.tree.core.nary;
+
+import chaos.tree.core.ITree;
 
 import java.util.List;
 

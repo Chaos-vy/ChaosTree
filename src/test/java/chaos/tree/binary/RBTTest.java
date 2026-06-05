@@ -1,6 +1,5 @@
 package chaos.tree.binary;
 import chaos.tree.binary.rbt.RBT;
-import chaos.tree.core.binary.BinaryTree;
 import chaos.tree.exception.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

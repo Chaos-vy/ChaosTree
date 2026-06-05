@@ -1,6 +1,6 @@
 package chaos.tree.binary.rbt;
 import static chaos.tree.binary.rbt.Color.*;
-import chaos.tree.core.binary.AbstractParentRotateTree;
+import chaos.tree.core.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 
 /**
@@ -248,14 +248,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         }
     }
 
-    /**
-     * Checks RBT tree Rules
-     * {@code root} is black.
-     * {@code red-red} node violation.
-     * {@code Black-Height} from root.
-     * @return {@code true} all above test are true.
-     * {@code false} otherwise
-     */
+    /** For internal testing only. Will be removed in a stable release. */
     public boolean validateRBT() {
         return validateRootBlack() && validateNoRedRed(root) && validateBlackHeight(root) != -1;
     }

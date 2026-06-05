@@ -1,31 +1,43 @@
 package chaos.tree;
- import chaos.tree.binary.AVL;
- import chaos.tree.binary.BST;
- import chaos.tree.binary.RBT;
- import chaos.tree.core.ITree;
 
- import java.util.List;
+import chaos.tree.binary.avl.AVL;
+import chaos.tree.binary.rbt.RBT;
+import chaos.tree.core.binary.BinaryTree;
+import chaos.tree.exception.DuplicateNodeException;
+
+import java.util.Random;
 
 public class Main {
 
     public static void main(String[] args) {
-        ITree<Integer> bst = new BST<>();
-        ITree<Integer> avl = new AVL<>();
-        ITree<Integer> rbt = new RBT<>();
-        for (int i = 1; i <= 20; i++) {
-            bst.insert(i);
-            avl.insert(i);
-            rbt.insert(i);
-        }
-        System.out.println(bst);
+
+        BinaryTree<String> avl = new AVL<>();
+
+        avl.insert("10");
+        avl.insert("11");
+        avl.insert("15");
+        avl.insert("13");
         System.out.println(avl);
-        System.out.println(rbt);
-        System.out.println(rbt.size());
-        rbt.delete(5);
-        avl.delete(5);
-        bst.delete(5);
-        System.out.println(rbt.size());
-        System.out.println(avl.size());
-        System.out.println(bst.size());
+        System.out.println(avl.ceil("14"));
+        System.out.println(avl.ceil("12"));
+
+        avl = new RBT<>();
+        avl.insert("11");
+        avl.insert("45");
+        avl.insert("5");
+        avl.insert("12");
+        System.out.println(avl);
+        AVL<Integer> tree = new AVL<>();
+        Random r = new Random(42);
+
+        for(int i = 0; i < 131072; i++) {
+            try {
+                tree.insert(r.nextInt());
+            } catch (DuplicateNodeException ignored) {
+            }
+        }
+
+        System.out.println(tree.height());
+        System.out.println(tree.size());
     }
 }

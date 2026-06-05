@@ -1,9 +1,11 @@
-package chaos.tree.core;
+package chaos.tree.core.nary;
+
+import chaos.tree.core.INode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractNaryNode<T> implements INode<T>{
+public abstract class AbstractNaryNode<T> implements INode<T> {
     private T value;
     private List<AbstractNaryNode<T>> children;
 
