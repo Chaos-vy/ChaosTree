@@ -1,4 +1,4 @@
-package chaos.tree.core.binary;
+package chaos.tree.core.binary.node;
 
 
 import chaos.tree.core.INode;

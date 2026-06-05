@@ -1,21 +1,24 @@
-package chaos.tree.core;
-
-import chaos.tree.exception.DuplicateNodeException;
+package chaos.tree.core.binary;
+import chaos.tree.core.binary.node.BiNode;
+import chaos.tree.exception.*;
 import chaos.tree.exception.EmptyTreeException;
-
 import java.util.*;
 
 /**
  * This implementation is not thread safe.
  * For concurrent access, external synchronization is required.
  */
-public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,N>> implements ITree<T> {
+public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,N>> implements BinaryTree<T> {
 
     /**
      * Root of the tree
      */
     protected N root;
-
+    @Override
+    public T root(){
+        treeIsEmpty();
+        return root.getValue();
+    }
     /**
      * Total element in tree
      */
@@ -25,6 +28,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
      *Construct an empty Binary tree
      */
     protected AbstractBiTree(){}
+
+    protected void checkValue(T value){
+        Objects.requireNonNull(value, "Value cannot be null");
+    }
 
     /**
      * Creates a new node with the specified value.
@@ -43,17 +50,19 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         return root;
     }
 
-    /**
-     * Does the update of metadata of respective tree after delete
-     * @param root the root associated to tree
-     * @return the root of tree
-     */
-    protected N afterDelete(N root) {
-        return root;
+    @Override
+    public void insert(T value) {
+        checkValue(value);
+        root = insert(root, value);
+        size++;
     }
 
-    public void insertAll(List<T> values) {
-        values.forEach(this::insert);
+    @Override
+    public void insertAll(Iterable<? extends T> values) {
+        Objects.requireNonNull(values);
+        for (T value : values) {
+            insert(value);
+        }
     }
 
     /**
@@ -79,38 +88,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         return afterInsert(root);
     }
 
-    /**
-     * Deletes a value from the subtree rooted at the specified node.
-     *
-     * @param root the root of the current subtree
-     * @param value the value to delete
-     * @return the updated subtree root
-     */
-    protected N delete(N root, T value){
-        if(root == null) return null;
-        if(compare(value, root)>0){
-            root.setRight(delete(root.getRight(),value));
-        }
-        else if(compare(value, root)<0){
-            root.setLeft(delete(root.getLeft(),value));
-        }
-        else{
-            if(root.getLeft()==null && root.getRight()==null){
-                return null;
-            }
-            if(root.getRight()==null && root.getLeft()!=null){
-                return root.getLeft();
-            }
-            if(root.getRight()!=null && root.getLeft()==null){
-                return root.getRight();
-            }
-            N successor = getMinNode(root.getRight());
-            root.setValue(successor.getValue());
-            root.setRight(delete(root.getRight(), successor.getValue()));
-
-        }
-        return afterDelete(root);
-    }
 
     /**
      * Compares the values of two nodes.
@@ -125,46 +102,74 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         return value.compareTo(curr.getValue());
     }
 
-    /**
-     * Search the entire tree for the given value
-     *
-     * @param value the value to be searched
-     * @return true if element exist otherwise false
-     */
-    protected boolean contain(T value){
-        return contain(root,value);
+    record SearchResult<T>(boolean contains, T floor, T ceil) {
     }
 
-    private boolean contain(N root, T value) {
-        if(root == null) return false;
-        int cp = value.compareTo(root.getValue());
-        if(cp ==0)return true;
-        if(cp >0){
-            return contain(root.getRight(), value);
-        }
-        else{
-            return contain(root.getLeft(), value);
-        }
+    private SearchResult<T> search(T value) {
+        return search(root, value, null, null);
+    }
+    private SearchResult<T> search(N node, T value, T floor, T ceil) {
+        if (node == null) return new SearchResult<>(false, floor, ceil);
+        int cp = value.compareTo(node.getValue());
+        if (cp == 0) return new SearchResult<>(true, node.getValue(), node.getValue());
+        if (cp > 0) return search(node.getRight(), value, node.getValue(), ceil);
+        else return search(node.getLeft(), value, floor, node.getValue());
     }
 
     @Override
-    public void insert(T value) {
-        root = insert(root, value);
-        size++;
-    }
-
-    @Override
-    public boolean search(T value){
-        return contain(value);
+    public boolean contains(T value){
+        checkValue(value);
+        return search(value).contains;
     }
 
     @Override
     public void delete(T value){
-        if(!contain(value)){
-            return;
+        checkValue(value);
+        final boolean[] isDeleted = new boolean[1];
+        root = delete(root,value, isDeleted);
+        if(isDeleted[0])size--;
+    }
+
+    /**
+     * Deletes a value from the subtree rooted at the specified node.
+     *
+     * @param node the node from where the tree propagates for deletion
+     * @param value the value to delete
+     * @param isDeleted true when the node is found and deleted else false
+     * @return the updated subtree
+     */
+
+    protected N delete(N node, T value, boolean[] isDeleted) {
+        if(node == null) return null;
+
+        int compare = compare(value, node);
+
+        if(compare >0){
+            node.setRight(delete(node.getRight(), value, isDeleted));
         }
-        root = delete(root,value);
-        size--;
+        else if(compare <0){
+            node.setLeft(delete(node.getLeft(), value, isDeleted));
+        }
+        else{
+            isDeleted[0]=true;
+
+            if (node.getLeft() == null) return node.getRight();
+            if (node.getRight() == null) return node.getLeft();
+
+            N successor = getMinNode(node.getRight());
+            node.setValue(successor.getValue());
+            node.setRight(delete(node.getRight(), successor.getValue(), isDeleted));
+            isDeleted[0] = true;
+
+        }
+        return afterDelete(node);
+    }
+    /**
+     * Does the update of metadata of respective tree after delete
+     * @param node the node associated to tree
+     */
+    protected N afterDelete(N node) {
+        return node;
     }
 
     @Override
@@ -194,15 +199,19 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         root=null;
         size=0;
     }
+    protected void treeIsEmpty(){
+        if(isEmpty()){
+            throw new EmptyTreeException("Tree is empty");
+        }
+    }
 
     /**
      * Return the minimum value present in the tree.
      * @return the minimum value
      */
-    public T getMin(){
-        if(isEmpty()){
-            throw new EmptyTreeException("Tree is empty");
-        }
+    @Override
+    public T min(){
+        treeIsEmpty();
         return getMinNode(root).getValue();
     }
 
@@ -210,10 +219,9 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
      * Return the maximum value present in the tree.
      * @return the maximum value
      */
-    public T getMax(){
-        if(isEmpty()){
-            throw new EmptyTreeException("Tree is empty");
-        }
+    @Override
+    public T max(){
+        treeIsEmpty();
         return getMaxNode(root).getValue();
     }
     @Override
@@ -306,6 +314,22 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         }
         return node;
     }
+
+    /**
+     * Return the node with the same value
+     * @param node the source of subtree node to search
+     * @param value the value of the node to be searched
+     * @return node with the same value otherwise null
+     */
+    protected N findNode(N node, T value) {
+        while (node != null) {
+            int cmp = compare(value, node);
+            if (cmp == 0) return node;
+            node = cmp > 0 ? node.getRight() : node.getLeft();
+        }
+        return null;
+    }
+
     private static final String BRANCH = "+-- ";
     private static final String LAST_BRANCH = "\\-- ";
     private static final String VERTICAL = "|   ";
@@ -344,5 +368,100 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
         } else {
             buildString(node.getRight(), childPrefix, true, sb);
         }
+    }
+    @Override
+    public T floor(T value){
+        treeIsEmpty();
+        checkValue(value);
+        return search(value).floor;
+    }
+    @Override
+    public T ceil(T value) {
+        treeIsEmpty();
+        checkValue(value);
+        return search(value).ceil;
+    }
+
+    @Override
+    public T successor(T value) {
+        treeIsEmpty();
+        checkValue(value);
+        N node = root;
+        N successor = null;
+        while (node != null) {
+            int cmp = compare(value, node);
+            if (cmp < 0) {
+                successor = node;
+                node = node.getLeft();
+            } else if (cmp > 0) {
+                node = node.getRight();
+            } else {
+                if (node.getRight() != null)
+                    return getMinNode(node.getRight()).getValue();
+                break;
+            }
+        }
+        return successor == null ? null : successor.getValue();
+    }
+
+    @Override
+    public T predecessor(T value) {
+        treeIsEmpty();
+        checkValue(value);
+        N node = root;
+        N predecessor = null;
+        while (node!=null){
+            int cmp = compare(value,node);
+            if(cmp>0){
+                predecessor=node;
+                node = node.getRight();
+            }
+            else if(cmp<0){
+                node=node.getLeft();
+            }
+            else {
+                if(node.getLeft()!=null) predecessor= getMaxNode(node.getLeft());
+                break;
+            }
+        }
+        return predecessor==null? null: predecessor.getValue();
+    }
+
+    @Override
+    public T lca(T a, T b) {
+        treeIsEmpty();
+        checkValue(a);
+        checkValue(b);
+        if(!contains(a) || !contains(b)){
+            throw new NodeNotFoundException("Node not Found");
+        }
+        return lca(root,a,b).getValue();
+    }
+
+    private N lca(N node, T a, T b) {
+        if (node == null) return null;
+        int cmpA = compare(a, node);
+        int cmpB = compare(b, node);
+        if (cmpA > 0 && cmpB > 0) return lca(node.getRight(), a, b);
+        if (cmpA < 0 && cmpB < 0) return lca(node.getLeft(), a, b);
+        return node;
+    }
+
+    @Override
+    public T kthSmallest(int k) {
+        if(k<1 || k>size){
+            throw new IllegalArgumentException("Out of Bound");
+        }
+        final int[] count = new int[]{k};
+        N result = kthSmallest(root, count);
+        return result.getValue();
+    }
+    private N kthSmallest(N node, int[] count){
+        if(node==null)return null;
+        N left = kthSmallest(node.getLeft(), count);
+        if (left != null) return left;
+        count[0]--;
+        if (count[0] == 0) return node;
+        return kthSmallest(node.getRight(), count);
     }
 }
