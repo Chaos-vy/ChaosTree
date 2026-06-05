@@ -1,12 +1,18 @@
 package chaos.tree.binary.rbt;
-
+import static chaos.tree.binary.rbt.Color.*;
 import chaos.tree.core.binary.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 
+/**
+ * Standard Red-Black Tree implementation.
+ * Guarantees O(log n) insert, delete, search.
+ * Duplicate values throw {@link DuplicateNodeException}.
+ * null values insertion and deletion throw {@link NullPointerException}.
+ *
+ */
 public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
 
-    private static final boolean RED = false;
-    private static final boolean BLACK = true;
+
 
     @Override
     protected RBTNode<T> createNode(T value) {
@@ -15,19 +21,20 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
 
     @Override
     protected String nodeText(RBTNode<T> node) {
-        return node.getValue() + (node.getColor() ? "(B)" : "(R)");
+        return node.getValue() + (node.getColor()==BLACK ? "(B)" : "(R)");
     }
 
     private boolean isRed(RBTNode<T> node) {
         return node != null && node.getColor() == RED;
     }
 
-    private void setColor(RBTNode<T> node, boolean color) {
+    private void setColor(RBTNode<T> node, Color color) {
         if (node != null) node.setColor(color);
     }
 
     @Override
     public void insert(T value) {
+        checkValue(value);
         root = insert(root, value);
         setColor(root, BLACK);
         size++;
@@ -106,6 +113,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
 
     @Override
     public void delete(T value) {
+        checkValue(value);
         RBTNode<T> target = findNode(root, value);
         if (target == null) {
             return;
@@ -140,23 +148,38 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         rewireParent(node.getParent(), node, null);
     }
 
-    private void rewireParent(RBTNode<T> parent, RBTNode<T> node, RBTNode<T> child) {
+    /**
+     * Replaces {@code node} with {@code replacement} in the tree structure,
+     * updating all parent references accordingly.
+     *
+     * @param parent      the parent of {@code node}; {@code null} if {@code node} is root
+     * @param node        the node being removed
+     * @param replacement the node taking {@code node}'s position; {@code null} for leaf removal
+     */
+    private void rewireParent(RBTNode<T> parent, RBTNode<T> node, RBTNode<T> replacement) {
         if (parent == null){
-            root = child;
-            if (child != null) child.setParent(null);
+            root = replacement;
+            if (replacement != null) replacement.setParent(null);
             return;
         }
         boolean isLeftNode = parent.getLeft()==node;
-        if(child != null){
-            child.setParent(parent);
+        if(replacement != null){
+            replacement.setParent(parent);
         }
         if(isLeftNode){
-            parent.setLeft(child);
+            parent.setLeft(replacement);
         }
         else {
-            parent.setRight(child);
+            parent.setRight(replacement);
         }
     }
+
+    /**
+     * Restores Red-Black properties after removal of a black node
+     * by propagating the double-black condition up toward the root.
+     *
+     * @param node the node holding the double-black condition
+     */
     private void fixDoubleBlack(RBTNode<T> node) {
 
         if (node == null) return;
