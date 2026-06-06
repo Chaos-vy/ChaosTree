@@ -2,39 +2,52 @@ package chaos.tree.core.binary.rotation;
 
 import chaos.tree.core.binary.AbstractBiTree;
 import chaos.tree.core.binary.node.BiNode;
-
+/**
+ * Core structural extension providing foundational tree rotation mechanics.
+ * <p>This abstract class introduces pure 2-pointer tree rotations (Left and Right),
+ * serving as the base architectural layer for self-balancing binary search trees
+ * that resolve height or priority variations strictly on the recursive unwinding path
+ * (such as {@code AVL} and {@code Treap}).</p>
+ * <p>Because this layer assumes standard child references without parent tracking,
+ * rotations are highly lightweight, only modifying two local pointers before
+ * returning the new subtree root back to the caller.</p>
+ * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
+ * @param <N> the specific type of {@link BiNode} managed by this tree implementation
+ * @see AbstractBiTree
+ * @see BiNode
+ */
 public abstract class AbstractRotateTree<T extends Comparable<T>, N extends BiNode<T,N>> extends AbstractBiTree<T,N> {
     /**
-     * Update the root after the rotation
-     * @param root the node to be rotated
+     * Update the node after the rotation
+     * @param node the node to be rotated
      */
-    protected void updateMetadata(N root){}
+    protected void updateMetadata(N node){}
 
     /**
      * Does left Rotation
-     * @param root the node where the operation starts
-     * @return updated root
+     * @param node the node where the operation starts
+     * @return updated node
      */
-    protected N leftRotate(N root){
-        N x = root.getRight();
+    protected N leftRotate(N node){
+        N x = node.getRight();
         N transferChild = x.getLeft();
-        x.setLeft(root);
-        root.setRight(transferChild);
-        updateMetadata(root);
+        x.setLeft(node);
+        node.setRight(transferChild);
+        updateMetadata(node);
         updateMetadata(x);
         return x;
     }
     /**
      * Does right Rotation
-     * @param root the node where the operation starts
-     * @return updated root
+     * @param node the node where the operation starts
+     * @return updated node
      */
-    protected N rightRotate(N root){
-        N x = root.getLeft();
+    protected N rightRotate(N node){
+        N x = node.getLeft();
         N transferChild = x.getRight();
-        x.setRight(root);
-        root.setLeft(transferChild);
-        updateMetadata(root);
+        x.setRight(node);
+        node.setLeft(transferChild);
+        updateMetadata(node);
         updateMetadata(x);
         return x;
     }
