@@ -9,9 +9,9 @@ public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<
     }
 
     @Override
-    protected AVLNode<T> afterInsert(AVLNode<T> root){
-        updateMetadata(root);
-        return rebalanced(root);
+    protected AVLNode<T> afterInsert(AVLNode<T> node){
+        updateMetadata(node);
+        return rebalanced(node);
     }
 
     @Override
@@ -29,27 +29,27 @@ public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<
     private int nodeHeight(AVLNode<T> node){
         return node == null ? -1 : node.getHeight();
     }
-    private int getBalance(AVLNode<T> root){
-        return root==null? 0: nodeHeight(root.getLeft())- nodeHeight(root.getRight());
+    private int getBalance(AVLNode<T> node){
+        return node==null? 0: nodeHeight(node.getLeft())- nodeHeight(node.getRight());
     }
-    private AVLNode<T> rebalanced(AVLNode<T> root) {
-        if(getBalance(root)>1){
-            if(getBalance(root.getLeft())<0) {
-                root.setLeft(leftRotate(root.getLeft()));
+    private AVLNode<T> rebalanced(AVLNode<T> node) {
+        if(getBalance(node)>1){
+            if(getBalance(node.getLeft())<0) {
+                node.setLeft(leftRotate(node.getLeft()));
             }
-            return rightRotate(root);
+            return rightRotate(node);
         }
-        if(getBalance(root)<-1){
-            if(getBalance(root.getRight())>0){
-                root.setRight(rightRotate(root.getRight()));
+        if(getBalance(node)<-1){
+            if(getBalance(node.getRight())>0){
+                node.setRight(rightRotate(node.getRight()));
             }
-            return leftRotate(root);
+            return leftRotate(node);
         }
-        return root;
+        return node;
     }
     @Override
-    protected AVLNode<T> afterDelete(AVLNode<T> root){
-        updateMetadata(root);
-        return rebalanced(root);
+    protected AVLNode<T> afterDelete(AVLNode<T> node){
+        updateMetadata(node);
+        return rebalanced(node);
     }
 }
