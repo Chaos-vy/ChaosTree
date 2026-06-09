@@ -1,6 +1,9 @@
 package chaos.tree.binary.treap;
 
-import chaos.tree.core.binary.rotation.AbstractRotateTree;
+import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
+
+import java.util.Random;
+
 /**
  * Randomized Binary Search Tree implementation known as a Treap.
  * * <p>A Treap combines the structural characteristics of a Binary Search Tree (BST)
@@ -16,9 +19,51 @@ import chaos.tree.core.binary.rotation.AbstractRotateTree;
  */
 public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapNode<T>> {
 
+    private static final Random RANDOM = new Random();
+    private final Integer priorityBound;
+
+    /**
+     * Constructs a treap whose priorities use the full {@code int} range.
+     */
+    public Treap() {
+        this.priorityBound = null;
+    }
+
+    /**
+     * Constructs a treap whose priorities range from {@code 0} inclusive to the
+     * specified bound exclusive.
+     *
+     * @param priorityBound the exclusive upper bound for generated priorities
+     * @throws IllegalArgumentException if {@code priorityBound} is not positive
+     */
+    public Treap(int priorityBound) {
+        if (priorityBound <= 0) {
+            throw new IllegalArgumentException("Priority bound must be positive");
+        }
+        this.priorityBound = priorityBound;
+    }
+
+    /**
+     * Sets the seed of the shared random-priority generator.
+     *
+     * <p>This affects priorities generated for subsequently inserted values in
+     * every treap instance.</p>
+     *
+     * @param seed the new random seed
+     */
+    public static void setSeed(long seed) {
+        RANDOM.setSeed(seed);
+    }
+
     @Override
     protected TreapNode<T> createNode(T key) {
-        return new TreapNode<>(key);
+        int priority = priorityBound == null ? RANDOM.nextInt() : RANDOM.nextInt(priorityBound);
+        return new TreapNode<>(key, priority);
+    }
+
+    @Override
+    protected String nodeText(TreapNode<T> node) {
+        return node.getValue() + "(p=" + node.getPriority() + ")";
     }
 
     @Override
@@ -33,29 +78,32 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
     }
 
     @Override
-    protected TreapNode<T> delete(TreapNode<T> node, T value, boolean[] isDeleted) {
-        if(node == null)return null;
+    protected DeleteResult<TreapNode<T>> delete(TreapNode<T> node, T value) {
+        if(node == null) return deleteResult(null, false);
         int cmp = compare(value, node);
 
         if(cmp>0){
-            node.setRight(delete(node.getRight(),value,isDeleted));
+            DeleteResult<TreapNode<T>> result = delete(node.getRight(), value);
+            if (!result.deleted()) return deleteResult(node, false);
+            node.setRight(result.root());
         }
         else if(cmp<0){
-            node.setLeft(delete(node.getLeft(),value,isDeleted));
+            DeleteResult<TreapNode<T>> result = delete(node.getLeft(), value);
+            if (!result.deleted()) return deleteResult(node, false);
+            node.setLeft(result.root());
         }
         else {
-            isDeleted[0]=true;
-            if(node.getRight()==null)return node.getLeft();
-            if(node.getLeft()==null)return node.getRight();
+            if(node.getRight()==null) return deleteResult(node.getLeft(), true);
+            if(node.getLeft()==null) return deleteResult(node.getRight(), true);
             if(node.getRight().getPriority()>node.getLeft().getPriority()){
                 node = leftRotate(node);
-                node.setLeft(delete(node.getLeft(), value, isDeleted));
+                node.setLeft(delete(node.getLeft(), value).root());
             }
             else{
                 node = rightRotate(node);
-                node.setRight(delete(node.getRight(), value, isDeleted));
+                node.setRight(delete(node.getRight(), value).root());
             }
         }
-        return node;
+        return deleteResult(node, true);
     }
 }

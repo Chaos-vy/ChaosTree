@@ -24,16 +24,14 @@ public class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
      * @param value the value to be stored in current node
      */
 
-    public TreapNode(T value){
+    public TreapNode(T value, int priority){
         super(value);
-        this.priority = RANDOM.nextInt();
+        this.priority = priority;
     }
     private final int priority;
 
     protected int getPriority(){
         return priority;
     }
-    public static void setSeed(long seed) {
-        RANDOM.setSeed(seed);
-    }
+
 }
