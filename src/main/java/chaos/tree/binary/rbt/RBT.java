@@ -1,6 +1,6 @@
 package chaos.tree.binary.rbt;
 import static chaos.tree.binary.rbt.Color.*;
-import chaos.tree.core.binary.rotation.AbstractParentRotateTree;
+import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 
 /**
@@ -38,6 +38,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         root = insert(root, value);
         setColor(root, BLACK);
         size++;
+        modCount++;
     }
 
     @Override
@@ -120,6 +121,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         }
         deleteNode(target);
         size--;
+        modCount++;
     }
     private void deleteNode(RBTNode<T> node) {
         if (node.getLeft() != null && node.getRight() != null) {
