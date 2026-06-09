@@ -1,17 +1,25 @@
-package chaos.tree.core;
+package chaos.tree.core.searchtree;
 
-public interface INode<T> {
+/**
+ * Defines the value-access operations shared by nodes in search-tree
+ * implementations.
+ *
+ * @param <T> the type of value stored in the node
+ * @since 1.0.0
+ */
+public interface ISearchNode<T> {
 
     /**
-     * Return the value of current node
+     * Returns the value stored in this node.
      *
-     * @return value of current node
+     * @return the stored value
      */
     T getValue();
 
     /**
-     * Set the value for the current node
-     * @param value value to be set
+     * Replaces the value stored in this node.
+     *
+     * @param value the new value
      */
     void setValue(T value);
 }

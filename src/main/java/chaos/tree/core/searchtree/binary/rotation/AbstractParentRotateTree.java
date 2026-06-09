@@ -1,7 +1,7 @@
-package chaos.tree.core.binary.rotation;
+package chaos.tree.core.searchtree.binary.rotation;
 
-import chaos.tree.core.binary.AbstractBiTree;
-import chaos.tree.core.binary.node.ParentBiNode;
+import chaos.tree.core.searchtree.binary.AbstractBiTree;
+import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 
 public abstract class AbstractParentRotateTree<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends AbstractBiTree<T,N> {
 

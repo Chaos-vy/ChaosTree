@@ -1,7 +1,7 @@
-package chaos.tree.core.binary.rotation;
+package chaos.tree.core.searchtree.binary.rotation;
 
-import chaos.tree.core.binary.AbstractBiTree;
-import chaos.tree.core.binary.node.BiNode;
+import chaos.tree.core.searchtree.binary.AbstractBiTree;
+import chaos.tree.core.searchtree.binary.node.BiNode;
 /**
  * Core structural extension providing foundational tree rotation mechanics.
  * <p>This abstract class introduces pure 2-pointer tree rotations (Left and Right),

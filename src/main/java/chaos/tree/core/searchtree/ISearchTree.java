@@ -1,5 +1,6 @@
-package chaos.tree.core;
+package chaos.tree.core.searchtree;
 
+import chaos.tree.core.ITree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.traversal.Traversal;
 /**
@@ -16,11 +17,9 @@ import chaos.tree.traversal.Traversal;
  * @param <T> the type of elements held in this tree;
  *            must implement {@link Comparable}
  *
- * @author Chaos
- * @version 1.0
- * @since 1.0
+ * @since 1.0.0
  */
-public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITree {
+public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITree, Iterable<T>{
     /**
      * Inserts the specified value into this tree.
      * The tree will not be modified if the value already exists.
@@ -33,25 +32,37 @@ public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITre
     void insert(T value);
     /**
      * Inserts all values from the provided iterable into this tree.
+     * This tree will insert all elements before encountering a duplicate.
      *
      * @param values the values to insert
-     * @throws DuplicateNodeException if a duplicate value is encountered
+     * @throws DuplicateNodeException if a duplicate value is encountered during insertion
      * @throws NullPointerException if {@code value} is {@code null}
      */
     void insertAll(Iterable<? extends T> values);
     /**
      * Check the value is present in the tree.
-     * This operation does not modify tree.
+     * This operation does not modify the tree.
      *
      * @param value the value to search
      * @return {@code true} the value exist in the tree;
      *         {@code false} otherwise
-     * @throws NullPointerException if value is {@code null};
+     * @throws NullPointerException if the value is {@code null};
     */
     boolean contains(T value);
 
     /**
-     * Delete the node contains {@code value} in the tree.
+     * Check the value is present in the tree from the provided iterable.
+     * This operation does not modify the tree.
+     *
+     * @param values the value to search
+     * @return {@code true} the value exist in the tree;
+     *         {@code false} otherwise
+     * @throws NullPointerException if the value is {@code null};
+    */
+    boolean containsAll(Iterable<? extends T> values);
+
+    /**
+     * Delete the node containing {@code value} in the tree.
      * The tree will not modify if the element does not exist.
      *
      * @param value the value to be deleted; must not be {@code null}
@@ -59,9 +70,23 @@ public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITre
      */
     void delete(T value);
 
+    /**
+     * Deletes all values produced by the supplied iterable from this tree.
+     *
+     * <p>This method is best-effort and performs deletions in iteration order by
+     * delegating to {@code delete(T)} for each element. Missing values are
+     * ignored; the method does not attempt an all-or-nothing transaction.
+     * The iterable reference and each element produced by it must be non-null.</p>
+     *
+     * @param values the values to delete; must not be {@code null}
+     * @throws NullPointerException if {@code values} is {@code null} or if any
+     *         element produced by {@code values} is {@code null}
+     */
+    void deleteAll(Iterable<? extends T> values);
+
 
     /**
-     * Return no of element in this tree
+     * Return the number of elements in this tree
      *
      * @return the number of element; {@code 0} if tree is empty
     */
@@ -71,8 +96,8 @@ public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITre
      * Return the height of this tree.
      *
      * @return the height of this tree;
-     * {@code -1} if tree is empty,
-     * {@code 0} tree having only root element
+     * {@code -1} if the tree is empty,
+     * {@code 0} if the tree has only a root element
      */
     int height();
 

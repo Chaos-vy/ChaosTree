@@ -1,8 +1,20 @@
 package chaos.tree.core.searchtree.binary.node;
 
-import chaos.tree.core.INode;
+import chaos.tree.core.searchtree.ISearchNode;
 
-public abstract class ParentBiNode<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends BiNode<T,N> implements INode<T> {
+/**
+ * Base node implementation for binary search tree structures that maintain
+ * a permanent reference to their parent node.
+ *
+ * <p>Extends {@link BiNode} to add bidirectional relationship capabilities,
+ * which are heavily used in self-adjusting trees like Red-Black Trees or Splay Trees.</p>
+ *
+ * @param <T> the type of value stored in the node, must implement {@link Comparable}
+ * @param <N> the concrete parent-tracking node type
+ * @since 1.0.0
+ *
+ */
+public abstract class ParentBiNode<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends BiNode<T,N> implements ISearchNode<T> {
 
     private N parent;
 
@@ -15,6 +27,11 @@ public abstract class ParentBiNode<T extends Comparable<T>, N extends ParentBiNo
         super(value);
     }
 
+    /**
+     * Updates the parent reference of this node.
+     *
+     * @param parent the new parent node
+     */
     public void setParent(N parent){
         this.parent=parent;
     }
