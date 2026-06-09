@@ -1,9 +1,49 @@
-package chaos.tree.core.binary;
+package chaos.tree.core.searchtree.binary;
 
-import chaos.tree.core.ISearchTree;
+import chaos.tree.core.searchtree.ISearchTree;
 import chaos.tree.exception.*;
+import chaos.tree.traversal.TraversalType;
 
-public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T> {
+import java.util.Iterator;
+import java.util.stream.Stream;
+
+/**
+ * Represents a binary search tree interface that supports custom traversals,
+ * streaming, and advanced position queries like floor, ceil, and k-th smallest.
+ *
+ * <p>Extends {@link ISearchTree} and adds specialized operations that leverage
+ * the binary and sorted nature of the tree structure.</p>
+ *
+ * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
+ * @since 1.0.0
+ */
+public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T>, Iterable<T>{
+
+    /**
+     * Returns a sequential {@code Stream} with this tree as its source
+     * using the default INORDER (sorted) traversal type.
+     *
+     * @return a sequential {@code Stream} over the elements in this tree
+     */
+    default Stream<T> stream() {
+        return stream(TraversalType.INORDER);
+    }
+
+    /**
+     * Returns a sequential {@code Stream} with this tree as its source
+     * based on the specified traversal type.
+     *
+     * @param type the type of tree traversal
+     * @return a sequential {@code Stream} over the elements in this tree
+     */
+    Stream<T> stream(TraversalType type);
+    /**
+     * Returns an iterator over the elements in this tree based on the specified traversal type.
+     *
+     * @param type the type of tree traversal
+     * @return an iterator
+     */
+    Iterator<T> iterator(TraversalType type);
 
     /**
      * Return the minimum value in this tree.
@@ -107,4 +147,60 @@ public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T> {
      *         {@code k > size()}
      */
     T kthSmallest(int k);
+
+    /**
+     * Retains only the values in this tree that are contained in the specified iterable,
+     * removing all other values.
+     *
+     * <p>After this operation completes, the tree will contain only values that appear
+     * in both the tree and the iterable. Values present in the iterable but absent from
+     * the tree are silently ignored. The iterable may contain duplicates; each unique
+     * value is treated as a single retention candidate.</p>
+     *
+     * <p><b>Note:</b> This method snapshots the current tree state before deletion begins.
+     * Modifications made to the iterable after this method is called have no effect on
+     * the outcome.</p>
+     *
+     * <p><b>Complexity:</b> O(n log n) where n is the number of elements in this tree,
+     * as each non-retained value requires a deletion costing O(log n).</p>
+     *
+     * @param values the values to retain; the iterable and each contained value must
+     *               not be {@code null}
+     * @throws NullPointerException if {@code values} is {@code null}, or if any element
+     *                              produced by {@code values} is {@code null}
+     * @throws EmptyTreeException   if this tree is empty
+     * @see #deleteAll(Iterable)
+     * @see #insertAll(Iterable)
+     * @see #containsAll(Iterable)
+     * @see #mergeAll(Iterable)
+     */
+    void retainAll(Iterable<? extends T> values);
+
+    /**
+     * Merges all values from the specified iterable into this tree,
+     * silently ignoring values that already exist.
+     *
+     * <p>This operation is equivalent to a set union — after completion,
+     * this tree will contain all values it previously held plus any new
+     * values from the iterable that were not already present. Duplicate
+     * values are silently skipped rather than throwing
+     * {@link DuplicateNodeException}, distinguishing this method from
+     * {@link #insertAll(Iterable)} which enforces strict uniqueness.</p>
+     *
+     * <p>If a null element appears in {@code values} after earlier elements
+     * were merged, those earlier merges remain applied because this method
+     * does not perform a pre-validation pass.</p>
+     *
+     * @param values the values to merge; the iterable and each contained
+     *               value must not be {@code null}
+     * @throws NullPointerException if {@code values} is {@code null}, or
+     *                              if any element produced by {@code values}
+     *                              is {@code null}
+     * @see #insertAll(Iterable)
+     * @see #retainAll(Iterable)
+     * @see #containsAll(Iterable)
+     * @see #retainAll(Iterable)
+     */
+    void mergeAll(Iterable<? extends T> values);
+
 }
