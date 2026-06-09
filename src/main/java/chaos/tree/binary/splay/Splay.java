@@ -1,6 +1,6 @@
 package chaos.tree.binary.splay;
 
-import chaos.tree.core.binary.rotation.AbstractParentRotateTree;
+import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 /**
  * Standard Splay Tree implementation.
@@ -22,11 +22,13 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
         if (root == null) {
             root = createNode(value);
             size++;
+            modCount++;
             return;
         }
         SplayNode<T> newNode = bstInsert(root, value);
         splay(newNode);
         size++;
+        modCount++;
     }
 
     private SplayNode<T> bstInsert(SplayNode<T> node, T value) {
@@ -102,13 +104,11 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
     }
 
     @Override
-    protected SplayNode<T> delete(SplayNode<T> node, T value, boolean[] isDeleted) {
-        if (node == null) return null;
+    protected DeleteResult<SplayNode<T>> delete(SplayNode<T> node, T value) {
+        if (node == null) return deleteResult(null, false);
         if (!this.contains(value)) {
-            isDeleted[0] = false;
-            return root;
+            return deleteResult(root, false);
         }
-        isDeleted[0] = true;
         SplayNode<T> target = root;
         SplayNode<T> leftSubtree = target.getLeft();
         SplayNode<T> rightSubtree = target.getRight();
@@ -130,9 +130,7 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
             root.setRight(rightSubtree);
             rightSubtree.setParent(root);
         }
-        return root;
+        return deleteResult(root, true);
     }
 }
-
-
 
