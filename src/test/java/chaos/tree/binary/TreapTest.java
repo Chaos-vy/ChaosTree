@@ -1,12 +1,13 @@
 package chaos.tree.binary;
 import chaos.tree.binary.treap.Treap;
-import chaos.tree.binary.treap.TreapNode;
-import chaos.tree.core.binary.BinaryTree;
+import chaos.tree.core.searchtree.binary.BinaryTree;
 import chaos.tree.exception.*;
+import chaos.tree.traversal.TraversalType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,8 +16,8 @@ class TreapTest{
 
     @BeforeEach
     void setUp() {
-        TreapNode.setSeed(42L);
-        tree = new Treap<>();
+        Treap.setSeed(42L);
+        tree = new Treap<>(50000);
     }
     @Test
     void insertSingleNode(){
@@ -312,5 +313,159 @@ class TreapTest{
 
             assertEquals(truth.size(), tree.size());
         }
+    }
+    @Test
+    void inorderIteratorShouldReturnSortedValues() {
+        tree.insertAll(List.of(20, 10, 30));
+
+        Iterator<Integer> it = tree.iterator(TraversalType.INORDER);
+
+        List<Integer> result = new ArrayList<>();
+
+        while (it.hasNext()) {
+            result.add(it.next());
+        }
+
+        assertEquals(List.of(10, 20, 30), result);
+    }
+
+    @Test
+    void iteratorShouldFailFastAfterInsert() {
+        tree.insertAll(List.of(10, 20, 30));
+
+        Iterator<Integer> it = tree.iterator();
+
+        tree.insert(40);
+
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+
+    @Test
+    void iteratorShouldFailFastAfterDelete() {
+        tree.insertAll(List.of(10, 20, 30));
+
+        Iterator<Integer> it = tree.iterator();
+
+        tree.delete(20);
+
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+
+    @Test
+    void hasNextShouldFailFastAfterModification() {
+        tree.insertAll(List.of(10, 20, 30));
+
+        Iterator<Integer> it = tree.iterator();
+
+        tree.insert(40);
+
+        assertThrows(ConcurrentModificationException.class, it::hasNext);
+    }
+
+    @Test
+    void multipleIteratorsShouldWorkIndependently() {
+        tree.insertAll(List.of(10, 20, 30));
+
+        Iterator<Integer> it1 = tree.iterator();
+        Iterator<Integer> it2 = tree.iterator();
+
+        assertEquals(10, it1.next());
+        assertEquals(10, it2.next());
+
+        assertEquals(20, it1.next());
+        assertEquals(20, it2.next());
+    }
+
+    @Test
+    void exhaustedIteratorShouldThrow() {
+        tree.insert(10);
+
+        Iterator<Integer> it = tree.iterator();
+
+        assertEquals(10, it.next());
+
+        assertFalse(it.hasNext());
+
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    void inorderStreamShouldBeSorted() {
+        tree.insertAll(List.of(50, 10, 70, 20, 30));
+
+        List<Integer> values = tree.stream(TraversalType.INORDER).toList();
+
+        assertEquals(List.of(10, 20, 30, 50, 70), values);
+    }
+
+    @Test
+    void streamShouldContainEveryElement() {
+        tree.insertAll(List.of(10, 20, 30, 40));
+
+        Set<Integer> values = tree.stream(TraversalType.INORDER).collect(java.util.stream.Collectors.toSet());
+
+        assertEquals(Set.of(10, 20, 30, 40), values);
+    }
+
+    @Test
+    void streamIteratorShouldFailFastAfterModification() {
+
+        tree.insertAll(List.of(10, 20, 30));
+
+        Stream<Integer> stream = tree.stream(TraversalType.INORDER);
+
+        tree.insert(40);
+
+        assertThrows(ConcurrentModificationException.class, () -> stream.forEach(x -> {
+        }));
+    }
+
+    @Test
+    void iteratorShouldVisitEveryElementExactlyOnce() {
+
+        for (int i = 1; i <= 100_000; i++) {
+            tree.insert(i);
+        }
+
+        Iterator<Integer> it = tree.iterator();
+
+        int count = 0;
+
+        while (it.hasNext()) {
+            it.next();
+            count++;
+        }
+
+        assertEquals(100_000, count);
+    }
+
+    @Test
+    void deletionOfTreeUsingSameTreeAsIterable() {
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(30);
+        tree.deleteAll(tree);
+        assertTrue(tree.isEmpty());
+        assertEquals(0, tree.size());
+    }
+
+    @Test
+    void retainAllOfTreeUsingSameTreeAsIterable() {
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(30);
+        tree.retainAll(tree);
+        assertFalse(tree.isEmpty());
+        assertEquals(3, tree.size());
+    }
+
+    @Test
+    void MergeAllOfTreeUsingSameTreeAsIterable() {
+        tree.insert(10);
+        tree.insert(20);
+        tree.insert(30);
+        tree.mergeAll(tree);
+        assertFalse(tree.isEmpty());
+        assertEquals(3, tree.size());
     }
 }
