@@ -5,22 +5,30 @@ import chaos.tree.exception.EmptyTreeException;
 import java.util.*;
 
 /**
- * This implementation is not thread safe.
- * For concurrent access, external synchronization is required.
+ * Foundation abstract base class implementing the core operations of a Binary Search Tree.
+ * <p>This base class coordinates the underlying data-invariant tracking and structural
+ * mechanics shared among all specialized variations (e.g., standard BST, AVL, RBT, Splay, Treap).
+ * It manages fundamental logic flows including recursive searching, tree metadata inquiries,
+ * tree-structure string builders, boundaries, and element replacements.</p>
+ * * <p><b>Concurrency Note:</b> This implementation is not thread-safe. If multiple threads
+ * access an instance concurrently, and at least one thread modifies the tree structurally,
+ * external synchronization must be provided.</p>
+ *
+ * @param <T> the type of elements maintained by this tree, must implement {@link Comparable}
+ * @param <N> the specific type of {@link BiNode} handled by this tree implementation
+ * @see BinaryTree
+ * @see BiNode
+ * @since 1.0
  */
 public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,N>> implements BinaryTree<T> {
 
     /**
-     * Root of the tree
+     * Root of the Binary Search tree
      */
     protected N root;
-    @Override
-    public T root(){
-        treeIsEmpty();
-        return root.getValue();
-    }
+
     /**
-     * Total element in tree
+     * Total element present in this tree
      */
     protected int size;
 
@@ -43,11 +51,11 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
 
     /**
      * Does the update of metadata of respective tree after insert
-     * @param root the root associated to tree
+     * @param node the node associated to tree
      * @return the root of tree
      */
-    protected N afterInsert(N root){
-        return root;
+    protected N afterInsert(N node){
+        return node;
     }
 
     @Override
@@ -68,26 +76,26 @@ public abstract class AbstractBiTree<T extends Comparable<T>,N extends BiNode<T,
     /**
      * Inserts a value into the subtree rooted at the specified node.
      *
-     * @param root the root of the current subtree
+     * @param node the node of the current subtree
      * @param value the value to insert
-     * @return the updated subtree root
+     * @return the updated subtree node
      */
-    protected N insert(N root, T value){
-        if (root == null) {
+    protected N insert(N node, T value){
+        if (node == null) {
             return createNode(value);
         }
-        if (compare(value, root) == 0) {
+        int cmp = compare(value, node);
+        if (cmp == 0) {
             throw new DuplicateNodeException("Value already present in tree");
         }
 
-        if (compare(value, root) > 0) {
-            root.setRight(insert(root.getRight(), value));
+        if (cmp > 0) {
+            node.setRight(insert(node.getRight(), value));
         } else {
-            root.setLeft(insert(root.getLeft(), value));
+            node.setLeft(insert(node.getLeft(), value));
         }
-        return afterInsert(root);
+        return afterInsert(node);
     }
-
 
     /**
      * Compares the values of two nodes.

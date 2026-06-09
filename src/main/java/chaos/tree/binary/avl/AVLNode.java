@@ -2,7 +2,7 @@
 
 package chaos.tree.binary.avl;
 
-import chaos.tree.core.binary.node.BiNode;
+import chaos.tree.core.searchtree.binary.node.BiNode;
 
 /**
  * Adelson-Velsky and Landis(AVL) tree  node structure

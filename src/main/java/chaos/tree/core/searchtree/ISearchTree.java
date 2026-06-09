@@ -20,7 +20,7 @@ import chaos.tree.traversal.Traversal;
  * @version 1.0
  * @since 1.0
  */
-public interface ITree<T extends Comparable<T>> extends Traversal<T> {
+public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITree {
     /**
      * Inserts the specified value into this tree.
      * The tree will not be modified if the value already exists.

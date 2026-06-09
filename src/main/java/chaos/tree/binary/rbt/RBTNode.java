@@ -1,6 +1,6 @@
 package chaos.tree.binary.rbt;
 
-import chaos.tree.core.binary.node.ParentBiNode;
+import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 import static chaos.tree.binary.rbt.Color.*;
 /**
  * Red Black tree  node structure

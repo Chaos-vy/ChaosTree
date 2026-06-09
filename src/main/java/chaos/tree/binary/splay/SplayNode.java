@@ -1,6 +1,6 @@
 package chaos.tree.binary.splay;
 
-import chaos.tree.core.binary.node.ParentBiNode;
+import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 
 /**
  * Splay tree  node structure

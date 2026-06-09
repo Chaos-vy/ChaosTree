@@ -1,6 +1,6 @@
 package chaos.tree.binary.treap;
 
-import chaos.tree.core.binary.node.BiNode;
+import chaos.tree.core.searchtree.binary.node.BiNode;
 import java.util.Random;
 
 /**

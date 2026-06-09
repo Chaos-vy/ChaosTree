@@ -1,12 +1,9 @@
 package chaos.tree.core.binary;
 
-import chaos.tree.core.ITree;
+import chaos.tree.core.ISearchTree;
 import chaos.tree.exception.*;
 
-public interface BinaryTree<T extends Comparable<T>> extends ITree<T> {
-
-    /** For internal testing only. Will be removed in a stable release. */
-    T root();
+public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T> {
 
     /**
      * Return the minimum value in this tree.
@@ -40,7 +37,7 @@ public interface BinaryTree<T extends Comparable<T>> extends ITree<T> {
      * Returns the smallest value greater than or equal to the specified value.
      *
      * <p>If the specified value exists in the tree, that value is returned.
-     * Otherwise, the next greater value in the tree is returned.
+     * Otherwise, the next smaller value in the tree is returned.
      *
      * @param value the value whose ceiling is to be found
      * @return the ceiling value;
@@ -94,7 +91,6 @@ public interface BinaryTree<T extends Comparable<T>> extends ITree<T> {
      * @param b the second value
      * @return the value of the least common ancestor;
      *         {@code null} if either value does not exist in this tree
-     * @throws NullPointerException if {@code a} or {@code b} is {@code null}
      * @throws EmptyTreeException if this tree is empty
      */
     T lca(T a, T b);

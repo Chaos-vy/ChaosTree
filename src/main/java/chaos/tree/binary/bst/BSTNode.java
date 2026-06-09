@@ -1,6 +1,6 @@
 package chaos.tree.binary.bst;
 
-import chaos.tree.core.binary.node.BiNode; /**
+import chaos.tree.core.searchtree.binary.node.BiNode; /**
  * Binary Search Tree Node structure
  * @param <T> The Type of value stored in the node
  */
