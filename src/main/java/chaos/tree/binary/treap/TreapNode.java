@@ -19,8 +19,6 @@ import java.util.Random;
 public class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
 
 
-    private static final Random RANDOM = new Random();
-
     /** The priority of this node used to maintain the heap invariant. */
     private final int priority;
 

@@ -16,8 +16,8 @@ class TreapTest{
 
     @BeforeEach
     void setUp() {
-        Treap.setSeed(42L);
-        tree = new Treap<>(50000);
+
+        tree = new Treap<>(42L, 5000);
     }
     @Test
     void insertSingleNode(){

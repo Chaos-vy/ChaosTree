@@ -23,45 +23,64 @@ import java.util.Random;
  */
 public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapNode<T>> {
 
-    private static final Random RANDOM = new Random();
-    private final Integer priorityBound;
+    private final Random random;
+    private final int priorityBound;
 
     /**
-     * Constructs a treap whose priorities use the full {@code int} range.
+     * Constructs an empty Treap initializing a new {@link Random} instance
+     * with an upper priority bound of {@link Integer#MAX_VALUE}.
      */
     public Treap() {
-        this.priorityBound = null;
+        this(new Random().nextInt(), Integer.MAX_VALUE);
     }
 
     /**
-     * Constructs a treap whose priorities range from {@code 0} inclusive to the
-     * specified bound exclusive.
+     * Constructs an empty Treap initializing a new {@link Random} instance
+     * with the specified seed and an upper priority bound of {@link Integer#MAX_VALUE}.
      *
-     * @param priorityBound the exclusive upper bound for generated priorities
-     * @throws IllegalArgumentException if {@code priorityBound} is not positive
+     * @param seed the initial seed value for the internal random number generator
      */
-    public Treap(int priorityBound) {
+    public Treap(long seed) {
+        this(seed, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Constructs an empty Treap initializing a new {@link Random} instance
+     * with the specified seed and exclusive upper priority bound.
+     *
+     * @param seed          the initial seed value for the internal random number generator
+     * @param priorityBound the exclusive upper bound for generated node priorities
+     * @throws IllegalArgumentException if {@code priorityBound <= 1}
+     */
+    public Treap(long seed, int priorityBound) {
         if (priorityBound <= 0) {
+            throw new IllegalArgumentException("Priority bound must be greater than 1 to prevent tree degradation.");
+        }
+        this.random = new Random(seed);
+        this.priorityBound = priorityBound;
+    }
+
+    /**
+     * Constructs an empty Treap utilizing the provided {@link Random} engine
+     * and exclusive upper priority bound.
+     *
+     * @param random        the {@link Random} instance utilized for priority generation
+     * @param priorityBound the exclusive upper bound for generated node priorities
+     * @throws IllegalArgumentException if {@code priorityBound <= 1}
+     * @throws NullPointerException     if {@code random} is {@code null}
+     */
+    public Treap(Random random, int priorityBound) {
+        if (random == null) throw new NullPointerException();
+        this.random = random;
+        if (priorityBound <= 1) {
             throw new IllegalArgumentException("Priority bound must be positive");
         }
         this.priorityBound = priorityBound;
     }
 
-    /**
-     * Sets the seed of the shared random-priority generator.
-     *
-     * <p>This affects priorities generated for subsequently inserted values in
-     * every treap instance.</p>
-     *
-     * @param seed the new random seed
-     */
-    public static void setSeed(long seed) {
-        RANDOM.setSeed(seed);
-    }
-
     @Override
     protected TreapNode<T> createNode(T key) {
-        int priority = priorityBound == null ? RANDOM.nextInt() : RANDOM.nextInt(priorityBound);
+        int priority = random.nextInt(priorityBound);
         return new TreapNode<>(key, priority);
     }
 
