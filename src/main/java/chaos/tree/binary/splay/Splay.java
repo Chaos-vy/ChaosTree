@@ -3,12 +3,21 @@ package chaos.tree.binary.splay;
 import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 /**
- * Standard Splay Tree implementation.
- * * <p>This structure is a self-adjusting binary search tree that provides
- * amortized O(log n) time complexity for search, insert, and delete operations.
- * It automatically optimizes itself based on data recency (locality of reference).</p>
+ * Self-adjusting Binary Search Tree implementation utilizing the splaying algorithm.
  *
- * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
+ * <p>A Splay Tree is a self-balancing binary search tree where recently accessed elements
+ * are quick to access again. Upon performing operations like search, insertion, or deletion,
+ * the target node (or the last accessed node) is moved to the root of the tree using a
+ * sequence of tree rotations called splaying. This property provides excellent support
+ * for datasets with highly localized access patterns (locality of reference).</p>
+ *
+ * <p>By dynamically reshaping the tree structure, Splay Trees guarantee amortized
+ * <b>O(log n)</b> time complexity for all basic search, insertion, and deletion operations.</p>
+ *
+ * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
+ * @see AbstractParentRotateTree
+ * @see SplayNode
+ * @since 1.0.0
  */
 public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, SplayNode<T>> {
     @Override
@@ -21,13 +30,13 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
         checkValue(value);
         if (root == null) {
             root = createNode(value);
-            size++;
+            size = Math.addExact(size, 1);
             modCount++;
             return;
         }
         SplayNode<T> newNode = bstInsert(root, value);
         splay(newNode);
-        size++;
+        size = Math.addExact(size, 1);
         modCount++;
     }
 
@@ -84,6 +93,7 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
 
     @Override
     public boolean contains(T value) {
+        checkValue(value);
         SplayNode<T> current = root;
         SplayNode<T> lastNonNull = null;
 
@@ -107,6 +117,7 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
     protected DeleteResult<SplayNode<T>> delete(SplayNode<T> node, T value) {
         if (node == null) return deleteResult(null, false);
         if (!this.contains(value)) {
+            modCount++;
             return deleteResult(root, false);
         }
         SplayNode<T> target = root;
