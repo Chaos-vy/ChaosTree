@@ -103,10 +103,8 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @return a negative integer, zero, or a positive integer
      * if the first node value is less than, equal to,
      * or greater than the second node value
-     * @throws NullPointerException if {@code value} is {@code null}, {@code curr}
-     *                              is {@code null}, or {@code curr.getValue()} is {@code null}; callers
-     *                              should normally use {@link #checkValue(Comparable)} before invoking
-     *                              comparison-based helpers
+     * @throws NullPointerException if {@code value} is {@code null}, or if
+     *                              {@code curr} is {@code null}
      */
     protected int compare(T value, N curr) {
         return value.compareTo(curr.getValue());
@@ -208,12 +206,13 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @param value the value to insert; must not be {@code null}
      * @throws NullPointerException   if {@code value} is {@code null}
      * @throws DuplicateNodeException if {@code value} already exists in this tree
+     * @throws ArithmeticException    if the tree has reached {@link Integer#MAX_VALUE} elements
      */
     @Override
     public void insert(T value) {
         checkValue(value);
         root = insert(root, value);
-        size++;
+        size = Math.addExact(size, 1);
         modCount++;
     }
 
@@ -231,6 +230,11 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @throws NullPointerException   if {@code values} is {@code null}, or if any
      *                                element produced by {@code values} is {@code null}
      * @throws DuplicateNodeException if an inserted value already exists in this tree
+     * @see #insertAll(Iterable)
+     * @see #deleteAll(Iterable)
+     * @see #mergeAll(Iterable)
+     * @see #retainAll(Iterable)
+     * @see #containsAll(Iterable)
      */
     @Override
     public void insertAll(Iterable<? extends T> values) {
@@ -298,7 +302,13 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *
      * @param values the value to search for; must not be {@code null}
      * @return {@code true} if the all values exists in this tree; {@code false} otherwise
-     * @throws NullPointerException if {@code value} is {@code null}
+     * @throws NullPointerException if {@code values} is {@code null}, or if any
+     *                              element produced by {@code values} is {@code null}
+     * @see #insertAll(Iterable)
+     * @see #deleteAll(Iterable)
+     * @see #mergeAll(Iterable)
+     * @see #retainAll(Iterable)
+     * @see #containsAll(Iterable)
      */
     @Override
     public boolean containsAll(Iterable<? extends T> values) {
@@ -345,25 +355,34 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *         as well as the floor and ceiling candidates
      */
     private @NotNull SearchResult<T> search(T value) {
-        return search(root, value, null, null);
+        return searchHelper(value);
     }
 
     /**
      * Recursively searches for the specified value while tracking the floor
      * and ceiling candidates.
      *
-     * @param node  the current node in the traversal
      * @param value the target value being searched
-     * @param floor the greatest value less than the target encountered so far
-     * @param ceil  the smallest value greater than the target encountered so far
      * @return the definitive {@link SearchResult}
      */
-    private SearchResult<T> search(N node, T value, T floor, T ceil) {
-        if (node == null) return new SearchResult<>(false, floor, ceil);
-        int cp = value.compareTo(node.getValue());
-        if (cp == 0) return new SearchResult<>(true, node.getValue(), node.getValue());
-        if (cp > 0) return search(node.getRight(), value, node.getValue(), ceil);
-        else return search(node.getLeft(), value, floor, node.getValue());
+    private @NotNull SearchResult<T> searchHelper(T value) {
+        N node = root;
+        T floor = null;
+        T ceil = null;
+        while (node != null) {
+            int cp = value.compareTo(node.getValue());
+            if (cp == 0) {
+                return new SearchResult<>(true, node.getValue(), node.getValue());
+            }
+            if (cp > 0) {
+                floor = node.getValue();
+                node = node.getRight();
+            } else {
+                ceil = node.getValue();
+                node = node.getLeft();
+            }
+        }
+        return new SearchResult<>(false, floor, ceil);
     }
 
     /**
@@ -430,16 +449,20 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     /**
      * Deletes every value produced by the supplied iterable from this tree.
      *
-     * <p>The iterable reference itself must be non-null. Each element is passed
-     * to {@link #delete(Comparable)} in iteration order; therefore the iterable
-     * and every element it produces must be non-null. This method is best-effort:
-     * missing values are ignored and earlier successful deletions remain if a
-     * later element causes a {@link NullPointerException}.</p>
+     * <p>The iterable reference itself must be non-null. Each element is validated
+     * for null before any deletion begins, ensuring that no partial deletions occur
+     * if a null element is present. Missing values (not present in the tree) are
+     * silently ignored.</p>
      *
      * @param values the values to delete; the iterable and each contained value must
      *               not be {@code null}
      * @throws NullPointerException   if {@code values} is {@code null}, or if any
      *                                element produced by {@code values} is {@code null}
+     * @see #insertAll(Iterable)
+     * @see #deleteAll(Iterable)
+     * @see #mergeAll(Iterable)
+     * @see #retainAll(Iterable)
+     * @see #containsAll(Iterable)
      */
     @Override
     public void deleteAll(Iterable<? extends T> values) {
@@ -447,6 +470,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
 
         List<T> snapshot = new ArrayList<>();
         for (T value : values) {
+            Objects.requireNonNull(value, "Value cannot be null");
             snapshot.add(value);
         }
         for (T value : snapshot) {
@@ -481,7 +505,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
 
             N successor = getMinNode(node.getRight());
             node.setValue(successor.getValue());
-            node.setRight(delete(node.getRight(), successor.getValue()).root());
+            DeleteResult<N> successorResult = delete(node.getRight(), successor.getValue());
+            if (!successorResult.deleted()) {
+                throw new IllegalStateException(
+                        "BST invariant violated: in-order successor not found in right subtree");
+            }
+            node.setRight(successorResult.root());
         }
         return new DeleteResult<>(afterDelete(node), true);
     }
@@ -508,9 +537,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *
      * <p>Values present in the iterable but absent from the tree are silently ignored,
      * consistent with the behavior of {@link #delete(Comparable)}. If a null element
-     * appears in {@code values} after earlier retention candidates were processed,
-     * those candidates remain in the retention set because this method does not
-     * perform a pre-validation pass on the iterable.</p>
+     * appears anywhere in {@code values}, no modifications
+     * are made to this tree because full validation occurs and throws {@link NullPointerException}.</p>
+     *
+     * @implNote If a subclass overrides {@link #delete(Comparable)} and that override
+     * throws an exception mid-iteration, the tree will be left in a partially-retained
+     * state. Callers that require atomicity should snapshot the tree beforehand.
      *
      * <p><b>Complexity:</b> O(n log n) time, O(n + k) space, where n is the number
      * of elements currently in the tree and k is the number of elements in the
@@ -521,8 +553,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @throws NullPointerException if {@code values} is {@code null}, or if any element
      *                              produced by {@code values} is {@code null}
      * @throws EmptyTreeException   if this tree is empty
+     * @see #insertAll(Iterable)
      * @see #deleteAll(Iterable)
-     * @see #toList(TraversalType)
+     * @see #mergeAll(Iterable)
+     * @see #retainAll(Iterable)
      * @see #containsAll(Iterable)
      */
     @Override
@@ -553,8 +587,9 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * preserves the existing tree structure for duplicate values while
      * inserting genuinely new ones.</p>
      *
-     * * <p>If a null element appears anywhere in {@code values}, no modifications
-     * * are made to this tree because full validation occurs before insertion begins.</p>
+     * <p>If a null element appears anywhere in {@code values}, no modifications
+     *  are made to this tree because full validation occurs before insertion begins and throws
+     *  {@link NullPointerException}</p>
      *
      * <p><b>Complexity:</b> O(k log n) where k is the number of unique elements
      * in the iterable and n is the number of elements in this tree after
@@ -566,9 +601,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *                              if any element produced by {@code values}
      *                              is {@code null}
      * @see #insertAll(Iterable)
+     * @see #deleteAll(Iterable)
+     * @see #mergeAll(Iterable)
      * @see #retainAll(Iterable)
      * @see #containsAll(Iterable)
-     * @see #retainAll(Iterable)
      */
     @Override
     public void mergeAll(Iterable<? extends T> values) {
@@ -579,10 +615,9 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
             unique.add(value);
         }
         for (T value : unique) {
-            try {
+            if (!contains(value)) {
                 insert(value);
             }
-            catch (DuplicateNodeException ignored) {}
         }
     }
 
@@ -790,12 +825,17 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     }
 
     /**
-     * Callers must synchronize on the tree during iteration:
+     * Returns an iterator over the elements in this tree in-order.
+     * <p>
+     * <strong>Thread Safety Warning:</strong> Callers must synchronize on
+     * the tree during iteration to prevent structural interference:
      * <pre>
-     *   synchronized(tree) {
-     *       for (T val : tree) { ... }
-     *   }
+     * synchronized(tree) {
+     * for (T val : tree) { ... }
+     * }
      * </pre>
+     * Failure to do so when the tree is concurrently modified will result
+     * in a {@link java.util.ConcurrentModificationException}.
      */
     @Override
     public @NotNull Iterator<T> iterator() {
@@ -941,35 +981,50 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
 
     /**
      * Post-Order Iterator (Left -> Right -> Root)
+     *
+     * <p>Uses a lazy single-stack approach with a previous-node pointer to avoid
+     * the O(n) eager memory allocation of the two-stack method. Only O(h) stack
+     * space is used, where h is the height of the tree.</p>
      */
     private final class PostOrderIterator implements Iterator<T> {
-        private final Deque<N> stack2 = new ArrayDeque<>();
+        private final Deque<N> stack = new ArrayDeque<>();
         private final long expectedModCount = modCount;
+        private N prev = null;
 
         PostOrderIterator() {
-            if (root != null) {
-                Deque<N> stack1 = new ArrayDeque<>();
-                stack1.push(root);
-                while (!stack1.isEmpty()) {
-                    N node = stack1.pop();
-                    stack2.push(node);
-                    if (node.getLeft() != null) stack1.push(node.getLeft());
-                    if (node.getRight() != null) stack1.push(node.getRight());
-                }
+            pushLeftChain(root);
+        }
+
+        private void pushLeftChain(N node) {
+            while (node != null) {
+                stack.push(node);
+                node = node.getLeft();
             }
         }
 
         @Override
         public boolean hasNext() {
             concurrentModificationCheck(expectedModCount);
-            return !stack2.isEmpty();
+            return !stack.isEmpty();
         }
 
         @Override
         public T next() {
             concurrentModificationCheck(expectedModCount);
             if (!hasNext()) throw new NoSuchElementException();
-            return stack2.pop().getValue();
+
+            while (true) {
+                N curr = stack.peek();
+                // If right child exists and hasn't been visited yet, traverse right subtree
+                if (curr.getRight() != null && prev != curr.getRight()) {
+                    pushLeftChain(curr.getRight());
+                } else {
+                    // Visit this node
+                    stack.pop();
+                    prev = curr;
+                    return curr.getValue();
+                }
+            }
         }
     }
 
