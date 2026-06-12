@@ -6,16 +6,20 @@ import java.util.Random;
 
 /**
  * Randomized Binary Search Tree implementation known as a Treap.
- * * <p>A Treap combines the structural characteristics of a Binary Search Tree (BST)
- * and a Heap. Node keys maintain strict BST order, while node priorities
+ *
+ * <p>A Treap combines the structural characteristics of a Binary Search Tree (BST)
+ * and a Max-Heap. Node keys maintain strict BST order, while node priorities
  * (randomly generated upon insertion) satisfy max-heap properties.</p>
- * * <p>This probabilistic balancing strategy guarantees expected <b>O(log n)</b>
- * time complexity for search, insert, and delete operations, completely eliminating
- * the worst-case degradation associated with un-balanced trees without the strict
+ *
+ * <p>This probabilistic balancing strategy guarantees expected <b>O(log n)</b>
+ * time complexity for search, insertion, and deletion operations, completely eliminating
+ * the worst-case degradation associated with unbalanced trees without the strict
  * rebalancing overhead of AVL or Red-Black trees.</p>
  *
- * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
+ * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @see AbstractRotateTree
+ * @see TreapNode
+ * @since 1.0.0
  */
 public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapNode<T>> {
 

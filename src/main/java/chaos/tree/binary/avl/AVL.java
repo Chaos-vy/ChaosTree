@@ -1,6 +1,7 @@
 package chaos.tree.binary.avl;
 
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
+import chaos.tree.core.searchtree.binary.AbstractBiTree;
 /**
  * Height-balanced Binary Search Tree implementation utilizing the AVL invariant.
  *  <p>An AVL tree is a strictly self-balancing structure where the height difference
@@ -14,6 +15,8 @@ import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
  * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
  * @see AbstractRotateTree
  * @see AVLNode
+ * @see AbstractBiTree
+ * @since 1.0.0
  */
 public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<T>> {
     @Override

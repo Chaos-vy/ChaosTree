@@ -1,9 +1,5 @@
 package chaos.tree.benchmark.binary;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import chaos.tree.binary.bst.BST;
@@ -13,15 +9,23 @@ import chaos.tree.binary.treap.Treap;
 import chaos.tree.binary.avl.AVL;
 import org.openjdk.jmh.annotations.*;
 
+/**
+ * JMH benchmark to measure the worst-case performance of binary search tree operations.
+ *
+ * <p>By inserting sorted elements sequentially during the {@link Level#Iteration} setup,
+ * we construct a degenerate right-skewed linear structure for the unbalanced BST tree,
+ * while balanced trees (AVL, RBT, Splay, Treap) maintain their logarithmic height bounds.
+ * We measure both worst-case searches and mutating insert/delete sequences.</p>
+ */
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup(iterations = 3, time = 2)
 @Measurement(iterations = 5, time = 2)
-@Fork(3)
+@Fork(1)
 public class SearchState {
 
-    @Param({"100", "1000", "5000", "10000", "50000"})
+    @Param({"100", "500", "1000", "2000", "5000"})
     int size;
 
     BST<Integer> bst;
@@ -30,70 +34,87 @@ public class SearchState {
     Splay<Integer> splay;
     Treap<Integer> treap;
 
-    int[] searchValues;
-    int searchIndex;
+    int searchValue;
+    int insertValue;
 
-    private int nextSearch() {
-        int idx = searchIndex;
-        searchIndex = (searchIndex + 1) % size;
-        return searchValues[idx];
-    }
-
-    @Setup(Level.Trial)
+    @Setup(Level.Iteration)
     public void setup() {
-
         bst = new BST<>();
         avl = new AVL<>();
         rbt = new RBT<>();
         splay = new Splay<>();
-        treap = new Treap<>(50000);
+        treap = new Treap<>();
 
-
-
-        List<Integer> shuffled = new ArrayList<>();
+        // Worst-case setup: sequentially insert sorted elements to create a degenerate structure
         for (int i = 1; i <= size; i++) {
-            shuffled.add(i);
+            bst.insert(i);
+            avl.insert(i);
+            rbt.insert(i);
+            splay.insert(i);
+            treap.insert(i);
         }
-        Collections.shuffle(
-                shuffled,
-                new Random(42)
-        );
 
-        bst.insertAll(shuffled);
-        avl.insertAll(shuffled);
-        rbt.insertAll(shuffled);
-        splay.insertAll(shuffled);
-        treap.insertAll(shuffled);
-
-        searchValues = new int[size];
-        Random rng = new Random(42);
-        for (int i = 0; i < size; i++) {
-            searchValues[i] = rng.nextInt(size) + 1;
-        }
+        // Deepest leaf for worst-case lookup/insertion
+        searchValue = size;
+        insertValue = size + 1;
     }
+
+    // --- Search (Worst Case) ---
 
     @Benchmark
     public boolean bstSearch() {
-        return bst.contains(nextSearch());
+        return bst.contains(searchValue);
     }
 
     @Benchmark
     public boolean avlSearch() {
-        return avl.contains(nextSearch());
+        return avl.contains(searchValue);
     }
 
     @Benchmark
     public boolean rbtSearch() {
-        return rbt.contains(nextSearch());
+        return rbt.contains(searchValue);
     }
 
     @Benchmark
     public boolean splaySearch() {
-        return splay.contains(nextSearch());
+        return splay.contains(searchValue);
     }
 
     @Benchmark
     public boolean treapSearch() {
-        return treap.contains(nextSearch());
+        return treap.contains(searchValue);
+    }
+
+    // --- Insert / Delete (Worst Case) ---
+
+    @Benchmark
+    public void bstInsertDelete() {
+        bst.insert(insertValue);
+        bst.delete(insertValue);
+    }
+
+    @Benchmark
+    public void avlInsertDelete() {
+        avl.insert(insertValue);
+        avl.delete(insertValue);
+    }
+
+    @Benchmark
+    public void rbtInsertDelete() {
+        rbt.insert(insertValue);
+        rbt.delete(insertValue);
+    }
+
+    @Benchmark
+    public void splayInsertDelete() {
+        splay.insert(insertValue);
+        splay.delete(insertValue);
+    }
+
+    @Benchmark
+    public void treapInsertDelete() {
+        treap.insert(insertValue);
+        treap.delete(insertValue);
     }
 }

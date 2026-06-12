@@ -1,8 +1,7 @@
-
-
 package chaos.tree.binary.avl;
 
 import chaos.tree.core.searchtree.binary.node.BiNode;
+import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
 
 /**
  * Represents a node in an Adelson-Velsky and Landis ({@link AVL}) tree.
@@ -15,6 +14,7 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @param <T> the type of value stored in this node
  * @see AVL
  * @see BiNode
+ * @see AbstractRotateTree
  * @since 1.0.0
  */
 public class AVLNode<T> extends BiNode<T, AVLNode<T>> {

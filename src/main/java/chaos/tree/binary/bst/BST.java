@@ -12,6 +12,8 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  *
  * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @see AbstractBiTree
+ * @see BSTNode
+ * @since 1.0.0
  */
 public class BST<T extends Comparable<T>> extends AbstractBiTree<T, BSTNode<T>> {
     @Override

@@ -3,8 +3,18 @@ package chaos.tree.binary.rbt;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 import static chaos.tree.binary.rbt.Color.*;
 /**
- * Red Black tree  node structure
- * @param <T> value type to be stored in node
+ * Represents a node in a Red-Black Tree ({@link RBT}).
+ *
+ * <p>Alongside the value, parent, and child references inherited from {@link ParentBiNode}, this
+ * node stores a {@link Color} attribute (either {@link Color#RED} or {@link Color#BLACK}).
+ * The Red-Black Tree uses this color state to maintain structural balance after insertions
+ * and deletions. Newly constructed nodes are initialized with {@link Color#RED} by default.</p>
+ *
+ * @param <T> the type of value stored in this node; must be {@link Comparable}
+ * @see RBT
+ * @see ParentBiNode
+ * @see Color
+ * @since 1.0.0
  */
 public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
 
@@ -15,11 +25,10 @@ public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>>
     /**
      * Constructs a Red-Black Tree node with the specified value.
      *
-     * <p>Newly created nodes are initialized with
-     * {@link Color#RED} as required by the Red-Black Tree
-     * insertion algorithm.</p>
+     * <p>Newly created nodes are initialized with {@link Color#RED} by default,
+     * as required by the Red-Black Tree insertion algorithm.</p>
      *
-     * @param value the value to be stored in this node
+     * @param value the value to store in this node
      */
     public RBTNode(T value) {
         super(value);
@@ -28,7 +37,8 @@ public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>>
 
 
     /**
-     * Returns the current color of the node.
+     * Returns the current color of this node.
+     *
      * @return the node color
      */
     public Color getColor(){
@@ -36,7 +46,8 @@ public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>>
     }
 
     /**
-     * Set the current color of the node.
+     * Sets the current color of this node.
+     *
      * @param color the new color
      */
     public void setColor(Color color){

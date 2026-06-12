@@ -2,13 +2,27 @@ package chaos.tree.binary.rbt;
 import static chaos.tree.binary.rbt.Color.*;
 import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
+import chaos.tree.core.searchtree.binary.AbstractBiTree;
 
 /**
- * Standard Red-Black Tree implementation.
- * Guarantees O(log n) insert, delete, search.
- * Duplicate values throw {@link DuplicateNodeException}.
- * null values insertion and deletion throw {@link NullPointerException}.
+ * Self-balancing Binary Search Tree implementation utilizing the Red-Black Tree invariant.
  *
+ * <p>A Red-Black Tree is a balanced binary search tree where each node is colored either
+ * {@link Color#RED} or {@link Color#BLACK}. By enforcing strict properties regarding node
+ * coloring (e.g., the root is black, red nodes cannot have red children, and every path
+ * from a node to any of its descendant leaves contains the same number of black nodes), the
+ * tree guarantees that no path is more than twice as long as any other path.</p>
+ *
+ * <p>By maintaining these invariants through color flips and rotations on insertion and
+ * deletion, the tree guarantees <b>O(log n)</b> search, insertion, and deletion times. This makes
+ * it highly efficient and suitable for general-purpose applications with frequent inserts and deletes.</p>
+ *
+ * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
+ * @see RBTNode
+ * @see Color
+ * @see AbstractParentRotateTree
+ * @see AbstractBiTree
+ * @since 1.0.0
  */
 public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
 
@@ -37,7 +51,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         checkValue(value);
         root = insert(root, value);
         setColor(root, BLACK);
-        size++;
+        size = Math.addExact(size, 1);
         modCount++;
     }
 

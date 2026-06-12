@@ -3,15 +3,30 @@ package chaos.tree.core.searchtree.binary.rotation;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 
+/**
+ * Core structural extension providing foundational tree rotation mechanics for parent aware nodes.
+ * <p>This abstract class introduces pure 3-pointer tree rotations (Left, Right and parent),
+ * serving as the base architectural layer for self-balancing binary search trees
+ * that resolve color or recency variations strictly on the recursive unwinding path
+ * (such as {@code RBT} and {@code Splay}).</p>
+ * <p>Because this layer assumes standard parent references ,
+ * rotations are moderate lightweight, only modifying three local pointers before
+ * returning the new subtree root back to the caller.</p>
+ * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
+ * @param <N> the specific type of {@link ParentBiNode} managed by this tree implementation
+ * @see AbstractBiTree
+ * @see ParentBiNode
+ * @since 1.0.0
+ */
 public abstract class AbstractParentRotateTree<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends AbstractBiTree<T,N> {
 
     /**
      * Rewires parent references after a rotation.
      *
      * @param transferChild the child being transferred to {@code node}; may be {@code null}
-     * @param parent        the original parent of {@code node}; {@code null} if {@code node} was root
-     * @param newNode       the node taking {@code node}'s original position
-     * @param node          the node being rotated down
+     * @param parent the original parent of {@code node}; {@code null} if {@code node} was root
+     * @param newNode the node taking {@code node}'s original position
+     * @param node the node being rotated down
      */
     private void refactorParents(N transferChild, N parent, N newNode,N node){
         node.setParent(newNode);

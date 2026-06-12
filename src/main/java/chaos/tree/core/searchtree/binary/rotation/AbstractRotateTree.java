@@ -15,6 +15,7 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @param <N> the specific type of {@link BiNode} managed by this tree implementation
  * @see AbstractBiTree
  * @see BiNode
+ * @since 1.0.0
  */
 public abstract class AbstractRotateTree<T extends Comparable<T>, N extends BiNode<T,N>> extends AbstractBiTree<T,N> {
     /**
