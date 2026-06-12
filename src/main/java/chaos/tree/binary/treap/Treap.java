@@ -3,6 +3,7 @@ package chaos.tree.binary.treap;
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Randomized Binary Search Tree implementation known as a Treap.
@@ -31,7 +32,7 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
      * with an upper priority bound of {@link Integer#MAX_VALUE}.
      */
     public Treap() {
-        this(new Random().nextInt(), Integer.MAX_VALUE);
+        this(ThreadLocalRandom.current().nextInt(), Integer.MAX_VALUE);
     }
 
     /**
@@ -53,7 +54,7 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
      * @throws IllegalArgumentException if {@code priorityBound <= 1}
      */
     public Treap(long seed, int priorityBound) {
-        if (priorityBound <= 0) {
+        if (priorityBound <= 1) {
             throw new IllegalArgumentException("Priority bound must be greater than 1 to prevent tree degradation.");
         }
         this.random = new Random(seed);
@@ -70,10 +71,10 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
      * @throws NullPointerException     if {@code random} is {@code null}
      */
     public Treap(Random random, int priorityBound) {
-        if (random == null) throw new NullPointerException();
+        if (random == null) throw new NullPointerException("random must not be null");
         this.random = random;
         if (priorityBound <= 1) {
-            throw new IllegalArgumentException("Priority bound must be positive");
+            throw new IllegalArgumentException("Priority bound must be greater than 1 to prevent tree degradation.");
         }
         this.priorityBound = priorityBound;
     }
@@ -91,10 +92,10 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
 
     @Override
     protected TreapNode<T> afterInsert(TreapNode<T> node) {
-        if(node.getLeft()!=null && node.getLeft().getPriority()>node.getPriority()){
+        if (node.getLeft() != null && node.getLeft().getPriority() > node.getPriority()) {
             return rightRotate(node);
         }
-        if(node.getRight()!=null && node.getRight().getPriority()>node.getPriority()){
+        if (node.getRight() != null && node.getRight().getPriority() > node.getPriority()) {
             return leftRotate(node);
         }
         return node;
@@ -102,27 +103,24 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
 
     @Override
     protected DeleteResult<TreapNode<T>> delete(TreapNode<T> node, T value) {
-        if(node == null) return deleteResult(null, false);
+        if (node == null) return deleteResult(null, false);
         int cmp = compare(value, node);
 
-        if(cmp>0){
+        if (cmp > 0) {
             DeleteResult<TreapNode<T>> result = delete(node.getRight(), value);
             if (!result.deleted()) return deleteResult(node, false);
             node.setRight(result.root());
-        }
-        else if(cmp<0){
+        } else if (cmp < 0) {
             DeleteResult<TreapNode<T>> result = delete(node.getLeft(), value);
             if (!result.deleted()) return deleteResult(node, false);
             node.setLeft(result.root());
-        }
-        else {
-            if(node.getRight()==null) return deleteResult(node.getLeft(), true);
-            if(node.getLeft()==null) return deleteResult(node.getRight(), true);
-            if(node.getRight().getPriority()>node.getLeft().getPriority()){
+        } else {
+            if (node.getRight() == null) return deleteResult(node.getLeft(), true);
+            if (node.getLeft() == null) return deleteResult(node.getRight(), true);
+            if (node.getRight().getPriority() > node.getLeft().getPriority()) {
                 node = leftRotate(node);
                 node.setLeft(delete(node.getLeft(), value).root());
-            }
-            else{
+            } else {
                 node = rightRotate(node);
                 node.setRight(delete(node.getRight(), value).root());
             }
