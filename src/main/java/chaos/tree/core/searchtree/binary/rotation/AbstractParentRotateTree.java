@@ -21,6 +21,23 @@ import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 public abstract class AbstractParentRotateTree<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends AbstractBiTree<T,N> {
 
     /**
+     * Overrides the base clone to additionally wire parent references
+     * for each cloned child node.
+     */
+    @Override
+    protected N cloneStructure(N node) {
+        if (node == null) return null;
+        N clone = copyNode(node);
+        N left = cloneStructure(node.getLeft());
+        N right = cloneStructure(node.getRight());
+        clone.setLeft(left);
+        clone.setRight(right);
+        if (left != null) left.setParent(clone);
+        if (right != null) right.setParent(clone);
+        return clone;
+    }
+
+    /**
      * Rewires parent references after a rotation.
      *
      * @param transferChild the child being transferred to {@code node}; may be {@code null}

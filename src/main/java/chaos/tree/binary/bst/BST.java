@@ -20,4 +20,52 @@ public class BST<T extends Comparable<T>> extends AbstractBiTree<T, BSTNode<T>> 
     protected BSTNode<T> createNode(T value) {
         return new BSTNode<>(value);
     }
+
+    /**
+     * Constructs an empty BST.
+     */
+    public BST() {}
+
+    @Override
+    protected BSTNode<T> copyNode(BSTNode<T> source) {
+        return new BSTNode<>(source.getValue());
+    }
+
+    /**
+     * Constructs a new BST by inserting all elements from the specified iterable.
+     *
+     * <p>Elements are inserted in iteration order. Already-sorted input will
+     * degrade the tree to O(n) height.</p>
+     *
+     * @param source the iterable collection containing elements to insert
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @see #insertAll(Iterable)
+     */
+    public BST(Iterable<T> source) {
+        super();
+        if (source == null) {
+            throw new NullPointerException("Source collection cannot be null.");
+        }
+        insertAll(source);
+    }
+
+    /**
+     * Constructs a deep structural copy of the specified source tree.
+     *
+     * <p>Clones nodes via pre-order traversal in <b>O(n)</b> time and <b>O(h)</b>
+     * stack space, bypassing the insertion pipeline entirely.</p>
+     *
+     * @param source the BST instance to deep copy
+     * @throws NullPointerException if {@code source} is {@code null}
+     */
+    public BST(BST<T> source) {
+        if (source == null) {
+            throw new NullPointerException("Source tree cannot be null.");
+        }
+        if (!source.isEmpty()) {
+            this.root = cloneStructure(source.root);
+            this.size = source.size();
+        }
+    }
+
 }

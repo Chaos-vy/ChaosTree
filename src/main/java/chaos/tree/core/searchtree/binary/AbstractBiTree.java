@@ -66,6 +66,33 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     protected abstract N createNode(T value);
 
     /**
+     * Creates a shallow copy of the specified node, replicating its value
+     * and any subclass-specific metadata (e.g., height, priority, color).
+     *
+     * <p>Child and parent references are not copied — those are wired
+     * by {@link #cloneStructure}.</p>
+     *
+     * @param source the node to copy
+     * @return a new node with the same value and metadata
+     */
+    protected abstract N copyNode(N source);
+
+    /**
+     * Recursively deep-copies the subtree rooted at the specified node
+     * in O(n) time and O(h) stack space.
+     *
+     * @param node the subtree root to clone; may be {@code null}
+     * @return the cloned subtree root, or {@code null}
+     */
+    protected N cloneStructure(N node) {
+        if (node == null) return null;
+        N clone = copyNode(node);
+        clone.setLeft(cloneStructure(node.getLeft()));
+        clone.setRight(cloneStructure(node.getRight()));
+        return clone;
+    }
+
+    /**
      * Verifies that a tree element value is non-null before a value-based operation
      * starts comparing or traversing nodes.
      *
@@ -542,7 +569,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *
      * @implNote If a subclass overrides {@link #delete(Comparable)} and that override
      * throws an exception mid-iteration, the tree will be left in a partially-retained
-     * state. Callers that require atomicity should snapshot the tree beforehand.
+     * state. Callers that require atomicity must snapshots the tree beforehand.
      *
      * <p><b>Complexity:</b> O(n log n) time, O(n + k) space, where n is the number
      * of elements currently in the tree and k is the number of elements in the
@@ -1015,11 +1042,9 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
 
             while (true) {
                 N curr = stack.peek();
-                // If right child exists and hasn't been visited yet, traverse right subtree
                 if (curr.getRight() != null && prev != curr.getRight()) {
                     pushLeftChain(curr.getRight());
                 } else {
-                    // Visit this node
                     stack.pop();
                     prev = curr;
                     return curr.getValue();

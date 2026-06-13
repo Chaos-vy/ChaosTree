@@ -26,11 +26,50 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  */
 public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
 
+    /**
+     * Constructs an empty Red-Black Tree.
+     */
+    public RBT() {}
 
+    /**
+     * Constructs a new Red-Black Tree by inserting all elements from the specified iterable.
+     *
+     * @param source the iterable collection containing elements to insert
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @see #insertAll(Iterable)
+     */
+    public RBT(Iterable<T> source) {
+        if (source == null) throw new NullPointerException("Source collection cannot be null.");
+        insertAll(source);
+    }
+
+    /**
+     * Constructs a deep structural copy of the specified source tree.
+     *
+     * <p>Clones nodes via pre-order traversal in <b>O(n)</b> time and <b>O(h)</b>
+     * stack space, bypassing the insertion pipeline entirely.</p>
+     *
+     * @param source the RBT instance to deep copy
+     * @throws NullPointerException if {@code source} is {@code null}
+     */
+    public RBT(RBT<T> source) {
+        if (source == null) throw new NullPointerException("Source tree cannot be null.");
+        if (!source.isEmpty()) {
+            this.root = cloneStructure(source.root);
+            this.size = source.size();
+        }
+    }
 
     @Override
     protected RBTNode<T> createNode(T value) {
         return new RBTNode<>(value);
+    }
+
+    @Override
+    protected RBTNode<T> copyNode(RBTNode<T> source) {
+        RBTNode<T> copy = new RBTNode<>(source.getValue());
+        copy.setColor(source.getColor());
+        return copy;
     }
 
     @Override

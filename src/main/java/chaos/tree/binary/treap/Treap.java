@@ -1,7 +1,6 @@
 package chaos.tree.binary.treap;
 
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
-
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -79,10 +78,50 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
         this.priorityBound = priorityBound;
     }
 
+    /**
+     * Constructs a new Treap by inserting all elements from the specified iterable
+     * using a default random engine and priority bound of {@link Integer#MAX_VALUE}.
+     *
+     * @param source the iterable collection containing elements to insert
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @see #insertAll(Iterable)
+     */
+    public Treap(Iterable<T> source) {
+        this();
+        if (source == null) throw new NullPointerException("Source collection cannot be null.");
+        insertAll(source);
+    }
+
+    /**
+     * Constructs a deep structural copy of the specified source tree.
+     *
+     * <p>Clones nodes via pre-order traversal in <b>O(n)</b> time and <b>O(h)</b>
+     * stack space, bypassing the insertion pipeline entirely. The cloned tree
+     * receives a new independent {@link Random} engine while preserving the
+     * original priority bound.</p>
+     *
+     * @param source the Treap instance to deep copy
+     * @throws NullPointerException if {@code source} is {@code null}
+     */
+    public Treap(Treap<T> source) {
+        if (source == null) throw new NullPointerException("Source tree cannot be null.");
+        this.random = new Random(ThreadLocalRandom.current().nextLong());
+        this.priorityBound = source.priorityBound;
+        if (!source.isEmpty()) {
+            this.root = cloneStructure(source.root);
+            this.size = source.size();
+        }
+    }
+
     @Override
     protected TreapNode<T> createNode(T key) {
         int priority = random.nextInt(priorityBound);
         return new TreapNode<>(key, priority);
+    }
+
+    @Override
+    protected TreapNode<T> copyNode(TreapNode<T> source) {
+        return new TreapNode<>(source.getValue(), source.getPriority());
     }
 
     @Override

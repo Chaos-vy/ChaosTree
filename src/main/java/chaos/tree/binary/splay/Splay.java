@@ -20,9 +20,49 @@ import chaos.tree.exception.DuplicateNodeException;
  * @since 1.0.0
  */
 public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, SplayNode<T>> {
+
+    /**
+     * Constructs an empty Splay Tree.
+     */
+    public Splay() {}
+
+    /**
+     * Constructs a new Splay Tree by inserting all elements from the specified iterable.
+     *
+     * @param source the iterable collection containing elements to insert
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @see #insertAll(Iterable)
+     */
+    public Splay(Iterable<T> source) {
+        if (source == null) throw new NullPointerException("Source collection cannot be null.");
+        insertAll(source);
+    }
+
+    /**
+     * Constructs a deep structural copy of the specified source tree.
+     *
+     * <p>Clones nodes via pre-order traversal in <b>O(n)</b> time and <b>O(h)</b>
+     * stack space, bypassing the insertion pipeline entirely.</p>
+     *
+     * @param source the Splay instance to deep copy
+     * @throws NullPointerException if {@code source} is {@code null}
+     */
+    public Splay(Splay<T> source) {
+        if (source == null) throw new NullPointerException("Source tree cannot be null.");
+        if (!source.isEmpty()) {
+            this.root = cloneStructure(source.root);
+            this.size = source.size();
+        }
+    }
+
     @Override
     protected SplayNode<T> createNode(T value) {
         return new SplayNode<>(value);
+    }
+
+    @Override
+    protected SplayNode<T> copyNode(SplayNode<T> source) {
+        return new SplayNode<>(source.getValue());
     }
 
     @Override

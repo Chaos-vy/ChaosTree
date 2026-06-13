@@ -19,9 +19,51 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * @since 1.0.0
  */
 public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<T>> {
+
+    /**
+     * Constructs an empty AVL tree.
+     */
+    public AVL() {}
+
+    /**
+     * Constructs a new AVL tree by inserting all elements from the specified iterable.
+     *
+     * @param source the iterable collection containing elements to insert
+     * @throws NullPointerException if {@code source} is {@code null}
+     * @see #insertAll(Iterable)
+     */
+    public AVL(Iterable<T> source) {
+        if (source == null) throw new NullPointerException("Source collection cannot be null.");
+        insertAll(source);
+    }
+
+    /**
+     * Constructs a deep structural copy of the specified source tree.
+     *
+     * <p>Clones nodes via pre-order traversal in <b>O(n)</b> time and <b>O(h)</b>
+     * stack space, bypassing the insertion pipeline entirely.</p>
+     *
+     * @param source the AVL instance to deep copy
+     * @throws NullPointerException if {@code source} is {@code null}
+     */
+    public AVL(AVL<T> source) {
+        if (source == null) throw new NullPointerException("Source tree cannot be null.");
+        if (!source.isEmpty()) {
+            this.root = cloneStructure(source.root);
+            this.size = source.size();
+        }
+    }
+
     @Override
     protected AVLNode<T> createNode(T value) {
         return new AVLNode<>(value);
+    }
+
+    @Override
+    protected AVLNode<T> copyNode(AVLNode<T> source) {
+        AVLNode<T> copy = new AVLNode<>(source.getValue());
+        copy.setHeight(source.getHeight());
+        return copy;
     }
 
     @Override
