@@ -115,7 +115,17 @@ public class TreeUsageExample {
         // Visualization
         String asciiTree = rbt.toString();
         // Returns a multi-line ASCII string showing tree topology and
-        // algorithm metadata (e.g., "50 (BLACK)" for RBT, height for AVL, etc.)
-    }
+        // algorithm metadata (e.g., "50 (B)" for RBT, height for AVL, etc.
+        /**      4(B)
+        *        +-- 2(R)
+        *        |   +-- 1(B)
+        *        |   \-- 3(B)
+        *        \-- 6(R)
+        *            +-- 5(B)
+        *            \-- 8(B)
+        *                +-- 7(R)
+        *                \-- 9(R)
+        */                 
+    }   
 }
 ```

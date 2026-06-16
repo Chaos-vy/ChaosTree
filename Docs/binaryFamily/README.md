@@ -104,7 +104,7 @@ original.contains(99);  // false — fully independent
 
 ---
 
-> For full API → [treasure.md](API.md)
+> For full API → [API.md](API.md)
 
 ---
 
