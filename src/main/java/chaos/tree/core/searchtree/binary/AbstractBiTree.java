@@ -39,17 +39,17 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     /**
      * Root of the Binary Search tree
      */
-    protected N root;
+    protected volatile N root;
 
     /**
      * Total element present in this tree
      */
-    protected int size;
+    protected volatile int size;
 
     /**
      * Stores the current modification of this tree
      */
-    protected long modCount = 0;
+    protected volatile long modCount = 0;
 
     /**
      * Construct an empty Binary tree
@@ -1082,9 +1082,9 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         }
     }
 
-    private static final String BRANCH = "├── ";
-    private static final String LAST_BRANCH = "└── ";
-    private static final String VERTICAL = "│   ";
+    private static final String BRANCH = "+-- ";
+    private static final String LAST_BRANCH = "\\-- ";
+    private static final String VERTICAL = "|   ";
     private static final String SPACE = "    ";
 
     /**
