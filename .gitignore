@@ -4,3 +4,7 @@
 *.class
 target/
 out/
+Converter.py
+get_markdown.py
+update_svgs.py
+jmh.txt
