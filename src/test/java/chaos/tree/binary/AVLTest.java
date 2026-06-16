@@ -5,13 +5,26 @@ import chaos.tree.traversal.TraversalType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AVLTest extends StableStructureContractTest<AVL<Integer>> {
 
-    @Override protected AVL<Integer> createTree() { return new AVL<>(); }
-    @Override protected AVL<Integer> createFromIterable(Iterable<Integer> it) { return new AVL<>(it); }
-    @Override protected AVL<Integer> createCopy(AVL<Integer> src) { return new AVL<>(src); }
+    @Override
+    protected AVL<Integer> createTree() {
+        return new AVL<>();
+    }
+
+    @Override
+    protected AVL<Integer> createFromIterable(Iterable<Integer> it) {
+        return new AVL<>(it);
+    }
+
+    @Override
+    protected AVL<Integer> createCopy(AVL<Integer> src) {
+        return new AVL<>(src);
+    }
 
     @Test
     void heightMustStrictlyObeyAVLMathematicalBounds() {
