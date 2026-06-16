@@ -14,6 +14,15 @@ import chaos.tree.exception.DuplicateNodeException;
  * <p>By dynamically reshaping the tree structure, Splay Trees guarantee amortized
  * <b>O(log n)</b> time complexity for all basic search, insertion, and deletion operations.</p>
  *
+ * <p><b>Thread-safety:</b> Concurrent use of this class is architecturally impossible
+ * without sacrificing its core guarantee. {@link #contains(Comparable)} is a structural
+ * write — it splays the accessed node to root — meaning there are no read-only operations
+ * in this tree. Every call, including search, requires exclusive access. A
+ * {@link java.util.concurrent.locks.ReadWriteLock} provides zero benefit; all operations
+ * must contend on a single write lock, making concurrent throughput strictly worse than
+ * sequential access with no gain. For concurrent workloads, the recommended pattern is
+ * <b>clone-per-thread</b> — each thread owns an independent {@code Splay} instance.</p>
+ *
  * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @see AbstractParentRotateTree
  * @see SplayNode
@@ -74,31 +83,44 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
             modCount++;
             return;
         }
-        SplayNode<T> newNode = bstInsert(root, value);
+        SplayNode<T> newNode = bstInsert(value);
         splay(newNode);
         size = Math.addExact(size, 1);
         modCount++;
     }
 
-    private SplayNode<T> bstInsert(SplayNode<T> node, T value) {
-        int cmp = compare(value, node);
-        if (cmp == 0) throw new DuplicateNodeException("Value already present in tree");
-        if (cmp > 0) {
-            if (node.getRight() == null) {
-                SplayNode<T> n = createNode(value);
-                node.setRight(n);
-                n.setParent(node);
-                return n;
+    /**
+     * Iterative BST insertion. Descends to the correct leaf position
+     * without recursive stack frames — safe under adversarial sorted input.
+     *
+     * @param value the value to insert
+     * @return the newly created node, ready to be splayed to root
+     * @throws DuplicateNodeException if value already exists in the tree
+     */
+    private SplayNode<T> bstInsert(T value) {
+        SplayNode<T> current = root;
+
+        while (true) {
+            int cmp = value.compareTo(current.getValue());
+            if (cmp == 0) throw new DuplicateNodeException("Value already present in tree");
+
+            if (cmp > 0) {
+                if (current.getRight() == null) {
+                    SplayNode<T> n = createNode(value);
+                    current.setRight(n);
+                    n.setParent(current);
+                    return n;
+                }
+                current = current.getRight();
+            } else {
+                if (current.getLeft() == null) {
+                    SplayNode<T> n = createNode(value);
+                    current.setLeft(n);
+                    n.setParent(current);
+                    return n;
+                }
+                current = current.getLeft();
             }
-            return bstInsert(node.getRight(), value);
-        } else {
-            if (node.getLeft() == null) {
-                SplayNode<T> n = createNode(value);
-                node.setLeft(n);
-                n.setParent(node);
-                return n;
-            }
-            return bstInsert(node.getLeft(), value);
         }
     }
 
@@ -147,26 +169,51 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
                 return true;
             }
         }
-        if (lastNonNull != null) {
-            splay(lastNonNull);
-        }
+        if (lastNonNull != null) splay(lastNonNull);
         return false;
     }
 
+    /**
+     * Deletes the specified value from the tree using an iterative search.
+     *
+     * <p>Descends iteratively to locate the target node, splays it to root,
+     * then merges the left and right subtrees by splaying the in-order
+     * predecessor of the right subtree to its root.</p>
+     *
+     * <p>A single traversal locates and removes the node — no implicit
+     * dependency on {@code contains()} and no double-splay on hit.</p>
+     *
+     * @param node  unused — Splay delete is root-anchored after splay
+     * @param value the value to remove
+     * @return a {@link DeleteResult} carrying the new root and deletion status
+     */
     @Override
     protected DeleteResult<SplayNode<T>> delete(SplayNode<T> node, T value) {
-        if (node == null) return deleteResult(null, false);
-        if (!this.contains(value)) {
-            modCount++;
+        if (root == null) return deleteResult(null, false);
+
+        SplayNode<T> current = root;
+        SplayNode<T> lastNonNull = null;
+
+        while (current != null) {
+            int cmp = value.compareTo(current.getValue());
+            if (cmp == 0) break;
+            lastNonNull = current;
+            current = cmp < 0 ? current.getLeft() : current.getRight();
+        }
+        if (current == null) {
+            if (lastNonNull != null) splay(lastNonNull);
             return deleteResult(root, false);
         }
+        splay(current);
+
         SplayNode<T> target = root;
-        SplayNode<T> leftSubtree = target.getLeft();
+        SplayNode<T> leftSubtree  = target.getLeft();
         SplayNode<T> rightSubtree = target.getRight();
         target.setLeft(null);
         target.setRight(null);
-        if (leftSubtree != null) leftSubtree.setParent(null);
+        if (leftSubtree  != null) leftSubtree.setParent(null);
         if (rightSubtree != null) rightSubtree.setParent(null);
+
         if (leftSubtree == null) {
             root = rightSubtree;
         } else if (rightSubtree == null) {
@@ -174,13 +221,12 @@ public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, 
         } else {
             root = leftSubtree;
             SplayNode<T> maxLeft = leftSubtree;
-            while (maxLeft.getRight() != null) {
-                maxLeft = maxLeft.getRight();
-            }
+            while (maxLeft.getRight() != null) maxLeft = maxLeft.getRight();
             splay(maxLeft);
             root.setRight(rightSubtree);
             rightSubtree.setParent(root);
         }
+
         return deleteResult(root, true);
     }
 }
