@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520">
+  <rect width="980" height="520" fill="#0d1117" rx="0"/>
+  <text x="420" y="36" text-anchor="middle" font-family="monospace" font-size="16" font-weight="bold" fill="#e6edf3">ChaosTree — Write-Heavy (8 Thr) Latency</text>
+  <text x="22" y="250" text-anchor="middle" font-family="monospace" font-size="12" fill="#e6edf3" transform="rotate(-90, 22, 250)">Latency (ns/op)</text>
+  <line x1="80" y1="440.00" x2="760" y2="440.00" stroke="#30363d" stroke-width="1" opacity="1"/>
+  <text x="72" y="444.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">0</text>
+  <line x1="80" y1="345.00" x2="760" y2="345.00" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="349.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">10000</text>
+  <line x1="80" y1="250.00" x2="760" y2="250.00" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="254.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">20000</text>
+  <line x1="80" y1="155.00" x2="760" y2="155.00" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="159.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">30000</text>
+  <line x1="80" y1="60.00" x2="760" y2="60.00" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="64.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">40000</text>
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1"/>
+  <text x="193.33" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">AVL</text>
+  <rect x="164.33" y="262.94" width="18" height="177.06" fill="#4C9BE8" opacity="0.5" rx="2"/>
+  <text x="173.33" y="257.94" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">18638.17</text>
+  <rect x="184.33" y="223.80" width="18" height="216.20" fill="#4C9BE8" opacity="0.75" rx="2"/>
+  <text x="193.33" y="218.80" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">22757.66</text>
+  <rect x="204.33" y="217.82" width="18" height="222.18" fill="#4C9BE8" opacity="1.0" rx="2"/>
+  <text x="213.33" y="212.82" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">23387.42</text>
+  <text x="420.00" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">RBT</text>
+  <rect x="391.00" y="242.64" width="18" height="197.36" fill="#4CAF50" opacity="0.5" rx="2"/>
+  <text x="400.00" y="237.64" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">20774.62</text>
+  <rect x="411.00" y="124.36" width="18" height="315.64" fill="#4CAF50" opacity="0.75" rx="2"/>
+  <text x="420.00" y="119.36" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">33225.23</text>
+  <rect x="431.00" y="94.43" width="18" height="345.57" fill="#4CAF50" opacity="1.0" rx="2"/>
+  <text x="440.00" y="89.43" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">36375.80</text>
+  <text x="646.67" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">Treap</text>
+  <rect x="617.67" y="107.72" width="18" height="332.28" fill="#FFA726" opacity="0.5" rx="2"/>
+  <text x="626.67" y="102.72" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">34976.88</text>
+  <rect x="637.67" y="200.68" width="18" height="239.32" fill="#FFA726" opacity="0.75" rx="2"/>
+  <text x="646.67" y="195.68" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">25191.43</text>
+  <rect x="657.67" y="86.11" width="18" height="353.89" fill="#FFA726" opacity="1.0" rx="2"/>
+  <text x="666.67" y="81.11" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">37251.18</text>
+  <text x="800" y="78" font-family="monospace" font-size="10" font-weight="bold" fill="#e6edf3">Trees</text>
+  <rect x="800" y="90" width="10" height="10" fill="#4C9BE8" rx="1"/>
+  <text x="816" y="99" font-family="monospace" font-size="10" fill="#e6edf3">AVL</text>
+  <rect x="800" y="108" width="10" height="10" fill="#4CAF50" rx="1"/>
+  <text x="816" y="117" font-family="monospace" font-size="10" fill="#e6edf3">RBT</text>
+  <rect x="800" y="126" width="10" height="10" fill="#FFA726" rx="1"/>
+  <text x="816" y="135" font-family="monospace" font-size="10" fill="#e6edf3">Treap</text>
+  <text x="800" y="210" font-family="monospace" font-size="10" font-weight="bold" fill="#e6edf3">Scale</text>
+  <rect x="800" y="222" width="10" height="10" fill="#C0C0C0" opacity="0.5" rx="1"/>
+  <text x="816" y="231" font-family="monospace" font-size="10" fill="#e6edf3">1k</text>
+  <rect x="800" y="240" width="10" height="10" fill="#C0C0C0" opacity="0.75" rx="1"/>
+  <text x="816" y="249" font-family="monospace" font-size="10" fill="#e6edf3">10k</text>
+  <rect x="800" y="258" width="10" height="10" fill="#C0C0C0" opacity="1.0" rx="1"/>
+  <text x="816" y="267" font-family="monospace" font-size="10" fill="#e6edf3">100k</text>
+</svg>

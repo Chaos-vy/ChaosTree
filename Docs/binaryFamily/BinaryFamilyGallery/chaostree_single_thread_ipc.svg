@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520">
+  <rect width="980" height="520" fill="#0d1117" rx="0"/>
+  <text x="420" y="36" text-anchor="middle" font-family="monospace" font-size="16" font-weight="bold" fill="#e6edf3">ChaosTree — Single-Thread IPC</text>
+  <text x="22" y="250" text-anchor="middle" font-family="monospace" font-size="12" fill="#e6edf3" transform="rotate(-90, 22, 250)">Instructions / Cycle</text>
+  <line x1="80" y1="440.00" x2="760" y2="440.00" stroke="#30363d" stroke-width="1" opacity="1"/>
+  <text x="72" y="444.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">0</text>
+  <line x1="80" y1="376.67" x2="760" y2="376.67" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="380.67" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">1</text>
+  <line x1="80" y1="313.33" x2="760" y2="313.33" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="317.33" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">2</text>
+  <line x1="80" y1="250.00" x2="760" y2="250.00" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="254.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">3</text>
+  <line x1="80" y1="186.67" x2="760" y2="186.67" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="190.67" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">4</text>
+  <line x1="80" y1="123.33" x2="760" y2="123.33" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="127.33" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">5</text>
+  <line x1="80" y1="60.00" x2="760" y2="60.00" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <text x="72" y="64.00" text-anchor="end" font-family="monospace" font-size="10" fill="#e6edf3">6</text>
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1"/>
+  <text x="148.00" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">AVL</text>
+  <rect x="119.00" y="106.40" width="18" height="333.60" fill="#4C9BE8" opacity="0.5" rx="2"/>
+  <text x="128.00" y="101.40" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">5.27</text>
+  <rect x="139.00" y="97.08" width="18" height="342.92" fill="#4C9BE8" opacity="0.75" rx="2"/>
+  <text x="148.00" y="92.08" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">5.41</text>
+  <rect x="159.00" y="70.65" width="18" height="369.35" fill="#4C9BE8" opacity="1.0" rx="2"/>
+  <text x="168.00" y="65.65" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">5.83</text>
+  <text x="284.00" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">BST</text>
+  <rect x="255.00" y="194.86" width="18" height="245.14" fill="#EF5350" opacity="0.5" rx="2"/>
+  <text x="264.00" y="189.86" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">3.87</text>
+  <rect x="275.00" y="172.29" width="18" height="267.71" fill="#EF5350" opacity="0.75" rx="2"/>
+  <text x="284.00" y="167.29" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.23</text>
+  <rect x="295.00" y="184.06" width="18" height="255.94" fill="#EF5350" opacity="1.0" rx="2"/>
+  <text x="304.00" y="179.06" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.04</text>
+  <text x="420.00" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">RBT</text>
+  <rect x="391.00" y="142.17" width="18" height="297.83" fill="#4CAF50" opacity="0.5" rx="2"/>
+  <text x="400.00" y="137.17" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.70</text>
+  <rect x="411.00" y="141.96" width="18" height="298.04" fill="#4CAF50" opacity="0.75" rx="2"/>
+  <text x="420.00" y="136.96" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.71</text>
+  <rect x="431.00" y="138.22" width="18" height="301.78" fill="#4CAF50" opacity="1.0" rx="2"/>
+  <text x="440.00" y="133.22" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.76</text>
+  <text x="556.00" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">Splay</text>
+  <rect x="527.00" y="323.48" width="18" height="116.52" fill="#CE93D8" opacity="0.5" rx="2"/>
+  <text x="536.00" y="318.48" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">1.84</text>
+  <rect x="547.00" y="332.64" width="18" height="107.36" fill="#CE93D8" opacity="0.75" rx="2"/>
+  <text x="556.00" y="327.64" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">1.70</text>
+  <rect x="567.00" y="359.12" width="18" height="80.88" fill="#CE93D8" opacity="1.0" rx="2"/>
+  <text x="576.00" y="354.12" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">1.28</text>
+  <text x="692.00" y="460" text-anchor="middle" font-family="monospace" font-size="11" fill="#e6edf3">Treap</text>
+  <rect x="663.00" y="181.41" width="18" height="258.59" fill="#FFA726" opacity="0.5" rx="2"/>
+  <text x="672.00" y="176.41" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.08</text>
+  <rect x="683.00" y="177.72" width="18" height="262.28" fill="#FFA726" opacity="0.75" rx="2"/>
+  <text x="692.00" y="172.72" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">4.14</text>
+  <rect x="703.00" y="193.30" width="18" height="246.70" fill="#FFA726" opacity="1.0" rx="2"/>
+  <text x="712.00" y="188.30" text-anchor="middle" font-family="monospace" font-size="8" fill="#e6edf3">3.90</text>
+  <text x="800" y="78" font-family="monospace" font-size="10" font-weight="bold" fill="#e6edf3">Trees</text>
+  <rect x="800" y="90" width="10" height="10" fill="#4C9BE8" rx="1"/>
+  <text x="816" y="99" font-family="monospace" font-size="10" fill="#e6edf3">AVL</text>
+  <rect x="800" y="108" width="10" height="10" fill="#EF5350" rx="1"/>
+  <text x="816" y="117" font-family="monospace" font-size="10" fill="#e6edf3">BST</text>
+  <rect x="800" y="126" width="10" height="10" fill="#4CAF50" rx="1"/>
+  <text x="816" y="135" font-family="monospace" font-size="10" fill="#e6edf3">RBT</text>
+  <rect x="800" y="144" width="10" height="10" fill="#CE93D8" rx="1"/>
+  <text x="816" y="153" font-family="monospace" font-size="10" fill="#e6edf3">Splay</text>
+  <rect x="800" y="162" width="10" height="10" fill="#FFA726" rx="1"/>
+  <text x="816" y="171" font-family="monospace" font-size="10" fill="#e6edf3">Treap</text>
+  <text x="800" y="210" font-family="monospace" font-size="10" font-weight="bold" fill="#e6edf3">Scale</text>
+  <rect x="800" y="222" width="10" height="10" fill="#C0C0C0" opacity="0.5" rx="1"/>
+  <text x="816" y="231" font-family="monospace" font-size="10" fill="#e6edf3">1k</text>
+  <rect x="800" y="240" width="10" height="10" fill="#C0C0C0" opacity="0.75" rx="1"/>
+  <text x="816" y="249" font-family="monospace" font-size="10" fill="#e6edf3">10k</text>
+  <rect x="800" y="258" width="10" height="10" fill="#C0C0C0" opacity="1.0" rx="1"/>
+  <text x="816" y="267" font-family="monospace" font-size="10" fill="#e6edf3">100k</text>
+</svg>
