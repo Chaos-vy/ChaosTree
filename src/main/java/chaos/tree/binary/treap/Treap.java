@@ -27,11 +27,14 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
     private final int priorityBound;
 
     /**
-     * Constructs an empty Treap initializing a new {@link Random} instance
-     * with an upper priority bound of {@link Integer#MAX_VALUE}.
+     * Constructs an empty Treap using {@link ThreadLocalRandom} for priority
+     * generation with an upper bound of {@link Integer#MAX_VALUE}.
+     *
+     * <p>This constructor is thread-safe for concurrent {@code insert()} calls.</p>
      */
     public Treap() {
-        this(ThreadLocalRandom.current().nextInt(), Integer.MAX_VALUE);
+        this.random = null;
+        this.priorityBound = Integer.MAX_VALUE;
     }
 
     /**
@@ -97,15 +100,15 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
      *
      * <p>Clones nodes via pre-order traversal in <b>O(n)</b> time and <b>O(h)</b>
      * stack space, bypassing the insertion pipeline entirely. The cloned tree
-     * receives a new independent {@link Random} engine while preserving the
-     * original priority bound.</p>
+     * uses {@link ThreadLocalRandom} for future inserts while preserving
+     * the original priority bound.</p>
      *
      * @param source the Treap instance to deep copy
      * @throws NullPointerException if {@code source} is {@code null}
      */
     public Treap(Treap<T> source) {
         if (source == null) throw new NullPointerException("Source tree cannot be null.");
-        this.random = new Random(ThreadLocalRandom.current().nextLong());
+        this.random = null;
         this.priorityBound = source.priorityBound;
         if (!source.isEmpty()) {
             this.root = cloneStructure(source.root);
@@ -115,7 +118,7 @@ public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapN
 
     @Override
     protected TreapNode<T> createNode(T key) {
-        int priority = random.nextInt(priorityBound);
+        int priority = (random != null) ? random.nextInt(priorityBound) : ThreadLocalRandom.current().nextInt(priorityBound);
         return new TreapNode<>(key, priority);
     }
 

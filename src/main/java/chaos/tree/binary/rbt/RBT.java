@@ -1,5 +1,7 @@
 package chaos.tree.binary.rbt;
+
 import static chaos.tree.binary.rbt.Color.*;
+
 import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
@@ -29,7 +31,8 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
     /**
      * Constructs an empty Red-Black Tree.
      */
-    public RBT() {}
+    public RBT() {
+    }
 
     /**
      * Constructs a new Red-Black Tree by inserting all elements from the specified iterable.
@@ -74,7 +77,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
 
     @Override
     protected String nodeText(RBTNode<T> node) {
-        return node.getValue() + (node.getColor()==BLACK ? "(B)" : "(R)");
+        return node.getValue() + (node.getColor() == BLACK ? "(B)" : "(R)");
     }
 
     private boolean isRed(RBTNode<T> node) {
@@ -176,6 +179,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         size--;
         modCount++;
     }
+
     private void deleteNode(RBTNode<T> node) {
         if (node.getLeft() != null && node.getRight() != null) {
             RBTNode<T> successor = getMinNode(node.getRight());
@@ -197,7 +201,10 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
             return;
         }
 
-        if (node == root) { root = null; return; }
+        if (node == root) {
+            root = null;
+            return;
+        }
 
         fixDoubleBlack(node);
         rewireParent(node.getParent(), node, null);
@@ -212,19 +219,18 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
      * @param replacement the node taking {@code node}'s position; {@code null} for leaf removal
      */
     private void rewireParent(RBTNode<T> parent, RBTNode<T> node, RBTNode<T> replacement) {
-        if (parent == null){
+        if (parent == null) {
             root = replacement;
             if (replacement != null) replacement.setParent(null);
             return;
         }
-        boolean isLeftNode = parent.getLeft()==node;
-        if(replacement != null){
+        boolean isLeftNode = parent.getLeft() == node;
+        if (replacement != null) {
             replacement.setParent(parent);
         }
-        if(isLeftNode){
+        if (isLeftNode) {
             parent.setLeft(replacement);
-        }
-        else {
+        } else {
             parent.setRight(replacement);
         }
     }
@@ -258,7 +264,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
             fixDoubleBlack(node);
             return;
         }
-        boolean siblingHasRedChild = isRed(sibling.getLeft()) ||isRed(sibling.getRight());
+        boolean siblingHasRedChild = isRed(sibling.getLeft()) || isRed(sibling.getRight());
         if (!siblingHasRedChild) {
             sibling.setColor(RED);
             if (isRed(parent)) {
@@ -274,8 +280,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
                 parent.setColor(BLACK);
                 sibling.getRight().setColor(BLACK);
                 leftRotate(parent);
-            }
-            else {
+            } else {
                 sibling.getLeft().setColor(BLACK);
 
                 rightRotate(sibling);
@@ -291,8 +296,7 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
                 parent.setColor(BLACK);
                 sibling.getLeft().setColor(BLACK);
                 rightRotate(parent);
-            }
-            else {
+            } else {
                 sibling.getRight().setColor(BLACK);
                 leftRotate(sibling);
                 sibling = parent.getLeft();
@@ -303,28 +307,33 @@ public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RB
         }
     }
 
-    /** For internal testing only. Will be removed in a stable release. */
+    /**
+     * For internal testing only. Will be removed in a stable release.
+     */
     public boolean validateRBT() {
         return validateRootBlack() && validateNoRedRed(root) && validateBlackHeight(root) != -1;
     }
+
     private boolean validateRootBlack() {
-        return root == null || root.getColor()==BLACK;
+        return root == null || root.getColor() == BLACK;
     }
+
     private boolean validateNoRedRed(RBTNode<T> node) {
         if (node == null) return true;
-        if (node.getColor()==RED) {
-            if ((node.getLeft() != null && node.getLeft().getColor()==RED) || (node.getRight() != null && node.getRight().getColor()==RED)) {
+        if (node.getColor() == RED) {
+            if ((node.getLeft() != null && node.getLeft().getColor() == RED) || (node.getRight() != null && node.getRight().getColor() == RED)) {
                 return false;
             }
         }
         return validateNoRedRed(node.getLeft()) && validateNoRedRed(node.getRight());
     }
-    private int validateBlackHeight(RBTNode<T> node){
+
+    private int validateBlackHeight(RBTNode<T> node) {
         if (node == null) return 1;
         int left = validateBlackHeight(node.getLeft());
         int right = validateBlackHeight(node.getRight());
         if (left == -1 || right == -1) return -1;
         if (left != right) return -1;
-        return left + (node.getColor()==BLACK ? 1 : 0);
+        return left + (node.getColor() == BLACK ? 1 : 0);
     }
 }

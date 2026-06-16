@@ -89,7 +89,7 @@ public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITre
      * Return the number of elements in this tree
      *
      * @return the number of element; {@code 0} if tree is empty
-    */
+     */
     int size();
 
     /**

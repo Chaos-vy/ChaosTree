@@ -18,7 +18,9 @@ import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
  * @since 1.0.0
  */
 public class AVLNode<T> extends BiNode<T, AVLNode<T>> {
-    /** The cached height of the subtree rooted at this node. */
+    /**
+     * The cached height of the subtree rooted at this node.
+     */
     private int height;
 
     /**
@@ -27,9 +29,9 @@ public class AVLNode<T> extends BiNode<T, AVLNode<T>> {
      *
      * @param value the value to store in this node
      */
-    public AVLNode(T value){
+    public AVLNode(T value) {
         super(value);
-        this.height=0;
+        this.height = 0;
     }
 
     /**
@@ -37,7 +39,7 @@ public class AVLNode<T> extends BiNode<T, AVLNode<T>> {
      *
      * @return the cached subtree height
      */
-    public int getHeight(){
+    public int getHeight() {
         return height;
     }
 
@@ -46,7 +48,7 @@ public class AVLNode<T> extends BiNode<T, AVLNode<T>> {
      *
      * @param height the new subtree height
      */
-    public void setHeight(int height){
+    public void setHeight(int height) {
         this.height = height;
     }
 
