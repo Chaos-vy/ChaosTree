@@ -1,7 +1,5 @@
 package chaos.tree.core.searchtree.binary.node;
 
-import chaos.tree.core.searchtree.ISearchNode;
-
 /**
  * Base node implementation for binary search tree structures.
  *
@@ -13,7 +11,7 @@ import chaos.tree.core.searchtree.ISearchNode;
  * @param <N> the concrete node type
  * @since 1.0.0
  */
-public abstract class BiNode<T,N extends BiNode<T,N>> implements ISearchNode<T> {
+public abstract class BiNode<T,N extends BiNode<T,N>> {
 
     /**
      * Value stored in the current node.
