@@ -113,4 +113,17 @@ public interface ISearchTree<T extends Comparable<T>> extends Traversal<T>, ITre
      * The tree will be empty after this call returns.
      */
     void clear();
+
+    /**
+     * Returns the order of this tree.
+     *
+     * <p>The order defines the maximum number of children a node can have.
+     * For the binary tree family, order is fixed at {@code 2}.
+     * For the N-ary tree family, order is parameterized at construction:
+     * a BTree of order {@code m} allows each node to have at most {@code m} children
+     * and at most {@code m - 1} keys.
+     *
+     * @return the order of this tree; always {@code 2} for binary trees
+     */
+    int order();
 }

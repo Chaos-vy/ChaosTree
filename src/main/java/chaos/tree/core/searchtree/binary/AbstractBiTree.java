@@ -111,6 +111,11 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         Objects.requireNonNull(value, "Value cannot be null");
     }
 
+    @Override
+    public final int order() {
+        return 2;
+    }
+
     /**
      * Verifies that this tree contains at least one value.
      *
