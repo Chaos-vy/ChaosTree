@@ -2,6 +2,10 @@
 
 The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Traversal<T>`. It provides a comprehensive set of operations for binary search trees.
 
+← Back to [README](README.md)
+
+---
+
 ## API Summary
 
 ### Core Operations
