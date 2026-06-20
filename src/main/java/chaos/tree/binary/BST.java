@@ -1,4 +1,5 @@
 package chaos.tree.binary.bst;
+import chaos.tree.binary.node.BSTNode;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
 
 /**
@@ -15,7 +16,7 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * @see BSTNode
  * @since 1.0.0
  */
-public class BST<T extends Comparable<T>> extends AbstractBiTree<T, BSTNode<T>> {
+public final class BST<T extends Comparable<T>> extends AbstractBiTree<T, BSTNode<T>> {
     @Override
     protected BSTNode<T> createNode(T value) {
         return new BSTNode<>(value);

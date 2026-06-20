@@ -1,5 +1,6 @@
 package chaos.tree.binary.avl;
 
+import chaos.tree.binary.node.AVLNode;
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
 
@@ -19,7 +20,7 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * @see AbstractBiTree
  * @since 1.0.0
  */
-public class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<T>> {
+public final class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<T>> {
 
     /**
      * Constructs an empty AVL tree.

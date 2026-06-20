@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @see TreapNode
  * @since 1.0.0
  */
-public class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapNode<T>> {
+public final class Treap<T extends Comparable<T>> extends AbstractRotateTree<T, TreapNode<T>> {
 
     private final Random random;
     private final int priorityBound;

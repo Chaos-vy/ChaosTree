@@ -26,7 +26,7 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * @see AbstractBiTree
  * @since 1.0.0
  */
-public class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
+public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
 
     /**
      * Constructs an empty Red-Black Tree.

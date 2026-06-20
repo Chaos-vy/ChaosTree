@@ -62,8 +62,8 @@ The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Trav
 Below is a practical example demonstrating how to initialize a tree via the `BinaryTree` interface and utilize the query and traversal APIs.
 
 ```java
-import chaos.tree.binary.rbt.RBT;
-import chaos.tree.core.searchtree.binary.BinaryTree;
+import chaos.tree.binary.RBT;
+import chaos.tree.binary.BinaryTree;
 import chaos.tree.traversal.TraversalType;
 
 import java.util.Iterator;
@@ -82,7 +82,7 @@ public class TreeUsageExample {
         rbt.insert(70);
         rbt.insert(20);
         rbt.insert(40);
-        
+
         boolean hasThirty = rbt.contains(30);
         rbt.delete(20);
 
@@ -110,9 +110,9 @@ public class TreeUsageExample {
         // Java Streams Integration
         Stream<Integer> postOrderStream = rbt.stream(TraversalType.POSTORDER);
         List<Integer> filtered = postOrderStream
-            .filter(v -> v > 35)
-            .collect(Collectors.toList());
-            
+                .filter(v -> v > 35)
+                .collect(Collectors.toList());
+
         // Bulk Operations
         rbt.mergeAll(List.of(80, 90, 100)); // Ignores duplicates if any
 
@@ -121,15 +121,15 @@ public class TreeUsageExample {
         // Returns a multi-line ASCII string showing tree topology and
         // algorithm metadata (e.g., "50 (B)" for RBT, height for AVL, etc.
         /**      4(B)
-        *        +-- 2(R)
-        *        |   +-- 1(B)
-        *        |   \-- 3(B)
-        *        \-- 6(R)
-        *            +-- 5(B)
-        *            \-- 8(B)
-        *                +-- 7(R)
-        *                \-- 9(R)
-        */                 
-    }   
+         *        +-- 2(R)
+         *        |   +-- 1(B)
+         *        |   \-- 3(B)
+         *        \-- 6(R)
+         *            +-- 5(B)
+         *            \-- 8(B)
+         *                +-- 7(R)
+         *                \-- 9(R)
+         */
+    }
 }
 ```

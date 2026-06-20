@@ -1,7 +1,7 @@
 package chaos.tree.binary.treap;
 
+import chaos.tree.binary.Treap;
 import chaos.tree.core.searchtree.binary.node.BiNode;
-import java.util.Random;
 
 /**
  * Represents a node in a Treap ({@link Treap}).
@@ -16,7 +16,7 @@ import java.util.Random;
  * @see Treap
  * @since 1.0.0
  */
-public class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
+class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
 
 
     /** The priority of this node used to maintain the heap invariant. */

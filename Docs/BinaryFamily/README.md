@@ -36,29 +36,46 @@ The Binary Family is the core module of ChaosTree — five production-grade bina
 ### Insert, Search, Delete
 
 ```java
-import chaos.tree.binary.avl.AVL;
+import chaos.tree.binary.AVL;
 
 AVL<Integer> tree = new AVL<>();
 
-tree.insert(30);
-tree.insert(10);
-tree.insert(50);
+tree.
 
-tree.contains(30);  // true
-tree.contains(99);  // false
+insert(30);
+tree.
 
-tree.delete(10);
-tree.size();         // 2
+insert(10);
+tree.
+
+insert(50);
+
+tree.
+
+contains(30);  // true
+tree.
+
+contains(99);  // false
+
+tree.
+
+delete(10);
+tree.
+
+size();         // 2
 ```
 
 ### Bulk Insert from a Collection
 
 ```java
-import chaos.tree.binary.rbt.RBT;
+import chaos.tree.binary.RBT;
+
 import java.util.List;
 
 RBT<String> tree = new RBT<>(List.of("delta", "alpha", "charlie", "bravo"));
-tree.size();  // 4
+tree.
+
+size();  // 4
 ```
 
 ### Positional Queries
@@ -93,13 +110,17 @@ long count = tree.stream(TraversalType.POSTORDER)
 ### Deep Clone
 
 ```java
-import chaos.tree.binary.avl.AVL;
+import chaos.tree.binary.AVL;
 
 AVL<Integer> original = new AVL<>(List.of(30, 10, 50, 20, 40));
-AVL<Integer> clone    = new AVL<>(original);  // O(n) structural copy
+AVL<Integer> clone = new AVL<>(original);  // O(n) structural copy
 
-clone.insert(99);
-original.contains(99);  // false — fully independent
+clone.
+
+insert(99);
+original.
+
+contains(99);  // false — fully independent
 ```
 
 ---

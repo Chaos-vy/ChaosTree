@@ -8,5 +8,5 @@ package chaos.tree.binary.rbt;
  */
 public enum Color {
     BLACK,
-    RED;
+    RED
 }

@@ -28,7 +28,7 @@ import chaos.tree.exception.DuplicateNodeException;
  * @see SplayNode
  * @since 1.0.0
  */
-public class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, SplayNode<T>> {
+public final class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, SplayNode<T>> {
 
     /**
      * Constructs an empty Splay Tree.
