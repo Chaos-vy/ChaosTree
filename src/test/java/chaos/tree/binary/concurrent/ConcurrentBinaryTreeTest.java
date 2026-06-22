@@ -1,6 +1,6 @@
 package chaos.tree.binary.concurrent;
 
-import chaos.tree.core.searchtree.binary.BinaryTree;
+import chaos.tree.binary.BinaryTree;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

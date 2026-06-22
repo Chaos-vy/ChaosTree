@@ -1,6 +1,6 @@
 package chaos.tree.binary.concurrent;
 
-import chaos.tree.binary.avl.AVL;
+import chaos.tree.binary.AVL;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

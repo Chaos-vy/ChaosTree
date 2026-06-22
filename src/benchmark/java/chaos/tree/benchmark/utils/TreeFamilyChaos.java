@@ -1,12 +1,12 @@
 package chaos.tree.benchmark.utils;
 
 import chaos.tree.benchmark.annotations.Chaos;
-import chaos.tree.binary.avl.AVL;
-import chaos.tree.binary.bst.BST;
-import chaos.tree.binary.rbt.RBT;
-import chaos.tree.binary.splay.Splay;
-import chaos.tree.binary.treap.Treap;
-import chaos.tree.core.searchtree.binary.BinaryTree;
+import chaos.tree.binary.AVL;
+import chaos.tree.binary.BST;
+import chaos.tree.binary.RBT;
+import chaos.tree.binary.Splay;
+import chaos.tree.binary.Treap;
+import chaos.tree.binary.BinaryTree;
 
 import java.util.TreeMap;
 
