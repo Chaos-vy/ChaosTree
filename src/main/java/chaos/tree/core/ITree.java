@@ -11,7 +11,6 @@ package chaos.tree.core;
  * <p>Implementations are not required to be thread-safe.</p>
  *
  * @author Vinay Singh
- * @version 1.0.0
  * @since 1.0.0
  */
 public interface ITree {
