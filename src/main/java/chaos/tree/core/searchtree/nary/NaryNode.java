@@ -20,10 +20,12 @@ public abstract class NaryNode<T extends Comparable<T>, N extends NaryNode<T, N>
     private final boolean isLeaf;
 
     /**
-     * Constructs an N-ary node with the specified maximum capacities.
+     * Internal constructor for initializing an N-ary node with exact capacities.
      *
-     * @param maxKeys     the maximum number of keys this node can hold
-     * @param maxChildren the maximum number of children this node can hold
+     * @param maxKeys     the exact maximum number of keys this node can hold
+     * @param maxChildren the exact maximum number of children this node can hold
+     * @param isLeaf      {@code true} if this node is a leaf (allocates no children array);
+     *                    {@code false} if it is an internal routing node
      */
     @SuppressWarnings("unchecked")
     private NaryNode(int maxKeys, int maxChildren, boolean isLeaf) {
@@ -36,8 +38,18 @@ public abstract class NaryNode<T extends Comparable<T>, N extends NaryNode<T, N>
         this.isLeaf = isLeaf;
     }
 
-    public NaryNode(int degree,boolean isLeaf){
-        this(2*degree-1, 2*degree, isLeaf);
+    /**
+     * Constructs a standard B-Tree or B+Tree node using the CLRS minimum degree arithmetic.
+     *
+     * <p>This automatically calculates the maximum keys ({@code 2t - 1}) and maximum children
+     * ({@code 2t}) required for symmetrical splitting. If the node is marked as a leaf,
+     * the children array is entirely omitted to save memory.</p>
+     *
+     * @param minDegree the CLRS minimum degree (t) of the tree; must be &ge; 2
+     * @param isLeaf    {@code true} if this node is a data leaf; {@code false} if it is an internal node
+     */
+    public NaryNode(int minDegree, boolean isLeaf){
+        this((minDegree << 1) -1, (minDegree << 1), isLeaf);
     }
 
     /**
