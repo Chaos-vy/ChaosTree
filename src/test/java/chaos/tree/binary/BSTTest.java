@@ -1,6 +1,5 @@
 package chaos.tree.binary;
 
-import chaos.tree.binary.bst.BST;
 import chaos.tree.traversal.TraversalType;
 import org.junit.jupiter.api.Test;
 

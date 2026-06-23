@@ -1,6 +1,5 @@
 package chaos.tree.binary;
 
-import chaos.tree.core.searchtree.binary.BinaryTree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
 import chaos.tree.traversal.TraversalType;
@@ -143,6 +142,72 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     void maxReturnsLargestValue() {
         tree.insertAll(List.of(50, 20, 80, 10, 30));
         assertEquals(80, tree.max());
+    }
+
+    @Test
+    void pollMinRetrievesAndRemovesSmallest() {
+        tree.insertAll(List.of(50, 20, 80, 10, 30));
+        assertEquals(10, tree.pollMin());
+        assertEquals(4, tree.size());
+        assertFalse(tree.contains(10));
+        assertEquals(20, tree.min());
+    }
+
+    @Test
+    void pollMaxRetrievesAndRemovesLargest() {
+        tree.insertAll(List.of(50, 20, 80, 10, 30));
+        assertEquals(80, tree.pollMax());
+        assertEquals(4, tree.size());
+        assertFalse(tree.contains(80));
+        assertEquals(50, tree.max());
+    }
+
+    @Test
+    void pollMinOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.pollMin());
+    }
+
+    @Test
+    void pollMaxOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.pollMax());
+    }
+
+    @Test
+    void rangeReturnsCorrectHalfOpenInterval() {
+        tree.insertAll(List.of(50, 20, 80, 10, 30, 70, 90, 25, 35));
+        assertEquals(List.of(25, 30, 35, 50), tree.range(25, 70));
+    }
+
+    @Test
+    void rangeWithBoundsOutsideTreeElements() {
+        tree.insertAll(List.of(20, 40, 60));
+        assertEquals(List.of(20, 40, 60), tree.range(10, 70));
+        assertEquals(List.of(), tree.range(70, 80));
+    }
+
+    @Test
+    void rangeInvalidBoundsThrows() {
+        assertThrows(IllegalArgumentException.class, () -> tree.range(50, 20));
+        assertThrows(NullPointerException.class, () -> tree.range(null, 50));
+    }
+
+    @Test
+    void rangeStreamReturnsCorrectHalfOpenInterval() {
+        tree.insertAll(List.of(50, 20, 80, 10, 30, 70, 90, 25, 35));
+        assertEquals(List.of(25, 30, 35, 50), tree.rangeStream(25, 70).toList());
+    }
+
+    @Test
+    void rangeStreamWithBoundsOutsideTreeElements() {
+        tree.insertAll(List.of(20, 40, 60));
+        assertEquals(List.of(20, 40, 60), tree.rangeStream(10, 70).toList());
+        assertEquals(List.of(), tree.rangeStream(70, 80).toList());
+    }
+
+    @Test
+    void rangeStreamInvalidBoundsThrows() {
+        assertThrows(IllegalArgumentException.class, () -> tree.rangeStream(50, 20));
+        assertThrows(NullPointerException.class, () -> tree.rangeStream(null, 50));
     }
 
     @Test
