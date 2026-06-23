@@ -6,13 +6,15 @@ import chaos.tree.binary.BST;
 import chaos.tree.binary.RBT;
 import chaos.tree.binary.Splay;
 import chaos.tree.binary.Treap;
-import chaos.tree.binary.BinaryTree;
+import chaos.tree.core.searchtree.ISearchTree;
+import chaos.tree.nary.BPlusTree;
+import chaos.tree.nary.BTree;
 
 import java.util.TreeMap;
 
-public class BinaryFamilyChaos {
+public class TreeFamilyChaos {
 
-    BinaryTree<Integer> tree;
+    ISearchTree<Integer> tree;
 
     @Chaos(
             description = "Probing Stack Depth via Sequential BST and Heap Sizing via AVL"
@@ -97,6 +99,36 @@ public class BinaryFamilyChaos {
             }
         } catch (OutOfMemoryError oom) {
             truth.clear();
+            System.gc();
+            System.err.println(">> SUCCESS: OutOfMemoryError caught at allocation count: " + String.format("%,d", nodeCount));
+        }
+
+        System.out.println("=".repeat(50));
+        System.out.println("\n[Chaos Engine] Initiating Heap Saturation via Btree...");
+        tree = new BTree<>(100);
+        nodeCount = 0;
+        try {
+            while (true) {
+                tree.insert((int) nodeCount);
+                nodeCount++;
+            }
+        } catch (OutOfMemoryError oom) {
+            tree = null;
+            System.gc();
+            System.err.println(">> SUCCESS: OutOfMemoryError caught at allocation count: " + String.format("%,d", nodeCount));
+        }
+
+        System.out.println("=".repeat(50));
+        System.out.println("\n[Chaos Engine] Initiating Heap Saturation via BPlusTree...");
+        tree = new BPlusTree<>(100);
+        nodeCount = 0;
+        try {
+            while (true) {
+                tree.insert((int) nodeCount);
+                nodeCount++;
+            }
+        } catch (OutOfMemoryError oom) {
+            tree = null;
             System.gc();
             System.err.println(">> SUCCESS: OutOfMemoryError caught at allocation count: " + String.format("%,d", nodeCount));
         }
