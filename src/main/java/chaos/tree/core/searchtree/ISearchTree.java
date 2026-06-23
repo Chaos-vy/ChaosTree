@@ -3,6 +3,7 @@ package chaos.tree.core.searchtree;
 import chaos.tree.core.ITree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
@@ -130,11 +131,11 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
     Stream<T> stream();
 
     /**
-     * Returns an iterator over the elements in this tree based on the specified traversal type.
+     * Returns an iterator over the elements in this tree based on the default traversal type.
      *
      * @return an iterator in {@code  TraversalType.INORDER}
      */
-    Iterator<T> iterator();
+    @NotNull Iterator<T> iterator();
 
     /**
      * Return the minimum value in this tree.
@@ -272,10 +273,6 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      * @throws NullPointerException if {@code values} is {@code null}, or if any element
      *                              produced by {@code values} is {@code null}
      * @throws EmptyTreeException   if this tree is empty
-     * @see #deleteAll(Iterable)
-     * @see #insertAll(Iterable)
-     * @see #containsAll(Iterable)
-     * @see #mergeAll(Iterable)
      */
     void retainAll(Iterable<? extends T> values);
 
@@ -299,13 +296,17 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      * @throws NullPointerException if {@code values} is {@code null}, or
      *                              if any element produced by {@code values}
      *                              is {@code null}
-     * @see #insertAll(Iterable)
-     * @see #retainAll(Iterable)
-     * @see #containsAll(Iterable)
-     * @see #retainAll(Iterable)
      */
     void mergeAll(Iterable<? extends T> values);
 
+    /**
+     * Returns a materialized list of all elements in the tree in their natural sorted order.
+     * <p>This method forces full evaluation of the entire tree structure into memory. It should
+     * be used with caution on massive datasets. For scalable, memory-efficient data retrieval,
+     * use {@link #stream()} or {@link #iterator()} instead.</p>
+     *
+     * @return a new list containing all elements of this tree in ascending order
+     */
     List<T> toList();
 
     /**
@@ -320,5 +321,13 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      * @return a lazy stream of values within the given range
      */
     Stream<T> rangeStream(T fromInclusive, T toExclusive);
+
+    /**
+     * Returns a string representation of this tree using the specified visual style.
+     *
+     * @param style the visual styling to apply (e.g., ASCII or UNICODE box-drawing)
+     * @return a multi-line formatted string detailing the exact tree topology
+     */
+    String toString(PrintStyle style);
 
 }
