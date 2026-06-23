@@ -1,7 +1,7 @@
-package chaos.tree.benchmark.binary;
+package chaos.tree.benchmark;
 
 import chaos.tree.benchmark.annotations.Chaos;
-import chaos.tree.benchmark.utils.BinaryFamilyChaos;
+import chaos.tree.benchmark.utils.TreeFamilyChaos;
 
 import java.lang.reflect.Method;
 
@@ -17,7 +17,7 @@ public class ChaosTestRunner {
         System.out.println("=".repeat(50));
 
         try {
-            Class<?> targetClass = BinaryFamilyChaos.class;
+            Class<?> targetClass = TreeFamilyChaos.class;
             Object instance = targetClass.getDeclaredConstructor().newInstance();
 
             boolean testExecuted = false;
