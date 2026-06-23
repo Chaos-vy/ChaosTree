@@ -1,4 +1,4 @@
-package chaos.tree.binary.splay;
+package chaos.tree.binary.node;
 
 import chaos.tree.binary.Splay;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
@@ -16,7 +16,7 @@ import chaos.tree.core.searchtree.binary.node.ParentBiNode;
  * @see ParentBiNode
  * @since 1.0.0
  */
-class SplayNode<T extends Comparable<T>> extends ParentBiNode<T, SplayNode<T>> {
+public class SplayNode<T extends Comparable<T>> extends ParentBiNode<T, SplayNode<T>> {
     /**
      * Constructs a Splay Tree node with the specified value.
      *

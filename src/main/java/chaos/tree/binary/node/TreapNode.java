@@ -1,4 +1,4 @@
-package chaos.tree.binary.treap;
+package chaos.tree.binary.node;
 
 import chaos.tree.binary.Treap;
 import chaos.tree.core.searchtree.binary.node.BiNode;
@@ -16,7 +16,7 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @see Treap
  * @since 1.0.0
  */
-class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
+public class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
 
 
     /** The priority of this node used to maintain the heap invariant. */
@@ -38,7 +38,7 @@ class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
      *
      * @return the node priority
      */
-    protected int getPriority(){
+    public int getPriority(){
         return priority;
     }
 

@@ -1,5 +1,6 @@
-package chaos.tree.binary.treap;
+package chaos.tree.binary;
 
+import chaos.tree.binary.node.TreapNode;
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

@@ -1,5 +1,6 @@
-package chaos.tree.binary.splay;
+package chaos.tree.binary;
 
+import chaos.tree.binary.node.SplayNode;
 import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 /**

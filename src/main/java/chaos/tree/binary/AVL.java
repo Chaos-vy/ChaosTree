@@ -1,4 +1,4 @@
-package chaos.tree.binary.avl;
+package chaos.tree.binary;
 
 import chaos.tree.binary.node.AVLNode;
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
