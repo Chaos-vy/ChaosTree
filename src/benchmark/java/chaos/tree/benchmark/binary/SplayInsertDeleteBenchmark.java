@@ -1,6 +1,6 @@
 package chaos.tree.benchmark.binary;
 
-import chaos.tree.binary.splay.Splay;
+import chaos.tree.binary.Splay;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;

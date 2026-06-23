@@ -1,8 +1,8 @@
 package chaos.tree.benchmark.binary;
 
-import chaos.tree.binary.avl.AVL;
-import chaos.tree.binary.rbt.RBT;
-import chaos.tree.binary.treap.Treap;
+import chaos.tree.binary.AVL;
+import chaos.tree.binary.RBT;
+import chaos.tree.binary.Treap;
 import chaos.tree.exception.DuplicateNodeException;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;

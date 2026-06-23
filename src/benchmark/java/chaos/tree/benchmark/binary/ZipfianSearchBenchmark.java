@@ -1,10 +1,10 @@
 package chaos.tree.benchmark.binary;
 
-import chaos.tree.binary.avl.AVL;
-import chaos.tree.binary.bst.BST;
-import chaos.tree.binary.rbt.RBT;
-import chaos.tree.binary.splay.Splay;
-import chaos.tree.binary.treap.Treap;
+import chaos.tree.binary.AVL;
+import chaos.tree.binary.BST;
+import chaos.tree.binary.RBT;
+import chaos.tree.binary.Splay;
+import chaos.tree.binary.Treap;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Param;
