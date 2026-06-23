@@ -1,6 +1,5 @@
 package chaos.tree.nary;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 class BPlusTreeTest extends NaryTreeContractTest<BPlusTree<Integer>>{
 

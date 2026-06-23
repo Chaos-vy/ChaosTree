@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Chaos {
     String description() default "Systemic Boundary Collapse Test";
-    long initialNodeCap() default 500_000_000L;
+    long initialNodeCap() default 1_000_000_000L;
 }
