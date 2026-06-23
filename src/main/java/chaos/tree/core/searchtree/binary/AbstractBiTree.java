@@ -1,5 +1,7 @@
 package chaos.tree.core.searchtree.binary;
 
+import chaos.tree.binary.BinaryTree;
+import chaos.tree.core.searchtree.PrintStyle;
 import chaos.tree.core.searchtree.binary.node.BiNode;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 import chaos.tree.exception.*;
@@ -111,11 +113,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         Objects.requireNonNull(value, "Value cannot be null");
     }
 
-    @Override
-    public final int order() {
-        return 2;
-    }
-
     /**
      * Verifies that this tree contains at least one value.
      *
@@ -190,6 +187,20 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     }
 
     /**
+     * Retrieves and removes the minimum value from this tree.
+     *
+     * @return the minimum value
+     * @throws EmptyTreeException if the tree is empty
+     */
+    @Override
+    public T pollMin() {
+        treeIsEmpty();
+        T minValue = getMinNode(root).getValue();
+        delete(minValue);
+        return minValue;
+    }
+
+    /**
      * Returns the min node from the current node.
      *
      * @param node the node which determines the source
@@ -212,6 +223,20 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     public T max() {
         treeIsEmpty();
         return getMaxNode(root).getValue();
+    }
+
+    /**
+     * Retrieves and removes the maximum value from this tree.
+     *
+     * @return the maximum value
+     * @throws EmptyTreeException if the tree is empty
+     */
+    @Override
+    public T pollMax() {
+        treeIsEmpty();
+        T maxValue = getMaxNode(root).getValue();
+        delete(maxValue);
+        return maxValue;
     }
 
     /**
@@ -262,11 +287,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @throws NullPointerException   if {@code values} is {@code null}, or if any
      *                                element produced by {@code values} is {@code null}
      * @throws DuplicateNodeException if an inserted value already exists in this tree
-     * @see #insertAll(Iterable)
-     * @see #deleteAll(Iterable)
-     * @see #mergeAll(Iterable)
-     * @see #retainAll(Iterable)
-     * @see #containsAll(Iterable)
      */
     @Override
     public void insertAll(Iterable<? extends T> values) {
@@ -336,11 +356,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @return {@code true} if the all values exists in this tree; {@code false} otherwise
      * @throws NullPointerException if {@code values} is {@code null}, or if any
      *                              element produced by {@code values} is {@code null}
-     * @see #insertAll(Iterable)
-     * @see #deleteAll(Iterable)
-     * @see #mergeAll(Iterable)
-     * @see #retainAll(Iterable)
-     * @see #containsAll(Iterable)
      */
     @Override
     public boolean containsAll(Iterable<? extends T> values) {
@@ -490,11 +505,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *               not be {@code null}
      * @throws NullPointerException   if {@code values} is {@code null}, or if any
      *                                element produced by {@code values} is {@code null}
-     * @see #insertAll(Iterable)
-     * @see #deleteAll(Iterable)
-     * @see #mergeAll(Iterable)
-     * @see #retainAll(Iterable)
-     * @see #containsAll(Iterable)
      */
     @Override
     public void deleteAll(Iterable<? extends T> values) {
@@ -585,11 +595,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @throws NullPointerException if {@code values} is {@code null}, or if any element
      *                              produced by {@code values} is {@code null}
      * @throws EmptyTreeException   if this tree is empty
-     * @see #insertAll(Iterable)
-     * @see #deleteAll(Iterable)
-     * @see #mergeAll(Iterable)
-     * @see #retainAll(Iterable)
-     * @see #containsAll(Iterable)
      */
     @Override
     public void retainAll(Iterable<? extends T> values) {
@@ -612,12 +617,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * Merges all values from the specified iterable into this tree,
      * silently ignoring values that already exist.
      *
-     * <p>This implementation iterates over {@code values} and attempts
-     * {@link #insert(Comparable)} for each element. If the element already
-     * exists, the resulting {@link DuplicateNodeException} is caught and
-     * suppressed — the value is skipped and iteration continues. This
-     * preserves the existing tree structure for duplicate values while
-     * inserting genuinely new ones.</p>
+     * <p>This implementation iterates over the unique set of {@code values}
+     * and performs a {@link #contains(Comparable)} check for each element.
+     * If the element does not already exist in the tree, it invokes
+     * {@link #insert(Comparable)}. This preemptive checking completely avoids
+     * throwing and catching {@link DuplicateNodeException}, resulting in a
+     * cleaner control flow while preserving existing elements.</p>
      *
      * <p>If a null element appears anywhere in {@code values}, no modifications
      *  are made to this tree because full validation occurs before insertion begins and throws
@@ -632,11 +637,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @throws NullPointerException if {@code values} is {@code null}, or
      *                              if any element produced by {@code values}
      *                              is {@code null}
-     * @see #insertAll(Iterable)
-     * @see #deleteAll(Iterable)
-     * @see #mergeAll(Iterable)
-     * @see #retainAll(Iterable)
-     * @see #containsAll(Iterable)
      */
     @Override
     public void mergeAll(Iterable<? extends T> values) {
@@ -725,6 +725,67 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
             }
         }
         return successor == null ? null : successor.getValue();
+    }
+
+
+    /**
+     * Returns a list of values in the tree that fall within the specified range.
+     * The bounds are half-open: includes {@code fromInclusive} and excludes {@code toExclusive}.
+     *
+     * @param fromInclusive the lower bound (inclusive)
+     * @param toExclusive   the upper bound (exclusive)
+     * @return a list of values within the given range
+     * @throws IllegalArgumentException if {@code fromInclusive > toExclusive}
+     * @throws NullPointerException if either bound is {@code null}
+     */
+    @Override
+    public List<T> range(T fromInclusive, T toExclusive) {
+        if (fromInclusive == null || toExclusive == null) {
+            throw new NullPointerException("Bounds cannot be null");
+        }
+        if (fromInclusive.compareTo(toExclusive) > 0) {
+            throw new IllegalArgumentException("fromInclusive must be <= toExclusive");
+        }
+        List<T> result = new ArrayList<>();
+        rangeHelper(root, fromInclusive, toExclusive, result);
+        return result;
+    }
+
+    /**
+     * Returns a lazy, sequential Stream of values within the specified half-open range.
+     * <p>Unlike {@code range()}, which materializes all elements into memory as a List,
+     * this stream acts as a lazy cursor. This is the industrial standard for retrieving
+     * massive blocks of sequential data from an N-ary index without triggering an
+     * OutOfMemoryError.</p>
+     *
+     * @param fromInclusive the lower bound (inclusive)
+     * @param toExclusive   the upper bound (exclusive)
+     * @return a lazy stream of values within the given range
+     */
+    public java.util.stream.Stream<T> rangeStream(T fromInclusive, T toExclusive) {
+        if (fromInclusive == null || toExclusive == null) {
+            throw new NullPointerException("Bounds cannot be null");
+        }
+        if (fromInclusive.compareTo(toExclusive) > 0) {
+            throw new IllegalArgumentException("fromInclusive must be <= toExclusive");
+        }
+        return stream().filter(e -> e.compareTo(fromInclusive) >= 0 && e.compareTo(toExclusive) < 0);
+    }
+
+    private void rangeHelper(N node, T from, T to, java.util.List<T> result) {
+        if (node == null) return;
+        int cmpFrom = from.compareTo(node.getValue());
+        int cmpTo = to.compareTo(node.getValue());
+
+        if (cmpFrom < 0) {
+            rangeHelper(node.getLeft(), from, to, result);
+        }
+        if (cmpFrom <= 0 && cmpTo > 0) {
+            result.add(node.getValue());
+        }
+        if (cmpTo > 0) {
+            rangeHelper(node.getRight(), from, to, result);
+        }
     }
 
     /**
@@ -838,6 +899,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     public List<T> inorder() {
         return copyToList(iterator(TraversalType.INORDER));
     }
+
+    @Override
+    public List<T> toList() {
+        return toList(TraversalType.INORDER);
+    }
+
     @Override
     public List<T> toList(TraversalType type) {
         return copyToList(iterator(type));
@@ -903,7 +970,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *                              spliterator characteristics and backing iterator depend on the traversal type
      */
     @Override
-    public Stream<T> stream(TraversalType type) {
+    public java.util.stream.Stream<T> stream() {
+        return stream(TraversalType.INORDER);
+    }
+
+    @Override
+    public java.util.stream.Stream<T> stream(TraversalType type) {
         if (type == null) throw new NullPointerException("Traversal type cannot be null");
         return java.util.stream.StreamSupport.stream(
                 java.util.Spliterators.spliterator(
@@ -1087,16 +1159,13 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         }
     }
 
-    private static final String BRANCH = "+-- ";
-    private static final String LAST_BRANCH = "\\-- ";
-    private static final String VERTICAL = "|   ";
-    private static final String SPACE = "    ";
+
 
     /**
      * Returns a visual representation of this tree's node hierarchy.
      *
      * <p>Each node is rendered on its own line using {@link #nodeText(BiNode)}.
-     * The root is rendered without a branch marker, while Unicode connectors and
+     * The root is rendered without a branch marker, while ASCII connectors and
      * indentation indicate parent-child relationships for all descendants. Left
      * children are rendered before right children. An empty tree is represented by
      * an empty string.</p>
@@ -1105,8 +1174,16 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      */
     @Override
     public String toString() {
+        return toString(PrintStyle.ASCII);
+    }
+
+    @Override
+    public String toString(PrintStyle style) {
+        if (root == null) {
+            return "Tree is empty.";
+        }
         StringBuilder sb = new StringBuilder();
-        buildString(root, "", true, true, sb);
+        buildString(root, "", true, true, sb, style);
         return sb.toString();
     }
 
@@ -1122,13 +1199,19 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         return String.valueOf(node.getValue());
     }
 
-    private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb) {
+    private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, PrintStyle style) {
         if (node == null) {
             return;
         }
+
+        String branch = (style == PrintStyle.UNICODE) ? "├── " : "+-- ";
+        String lastBranch = (style == PrintStyle.UNICODE) ? "└── " : "\\-- ";
+        String vertical = (style == PrintStyle.UNICODE) ? "│   " : "|   ";
+        String space = "    ";
+
         sb.append(prefix);
         if (!isRoot) {
-            sb.append(isTail ? LAST_BRANCH : BRANCH);
+            sb.append(isTail ? lastBranch : branch);
         }
         sb.append(nodeText(node)).append('\n');
 
@@ -1139,18 +1222,17 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
             return;
         }
 
-        String childPrefix = prefix + (isRoot ? "" : isTail ? SPACE : VERTICAL);
+        String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
 
         if (hasLeft && hasRight) {
-            buildString(node.getLeft(), childPrefix, false, false, sb);
-            buildString(node.getRight(), childPrefix, true, false, sb);
+            buildString(node.getLeft(), childPrefix, false, false, sb, style);
+            buildString(node.getRight(), childPrefix, true, false, sb, style);
 
         } else if (hasLeft) {
-            buildString(node.getLeft(), childPrefix, true, false, sb);
+            buildString(node.getLeft(), childPrefix, true, false, sb, style);
 
         } else {
-            buildString(node.getRight(), childPrefix, true, false, sb);
+            buildString(node.getRight(), childPrefix, true, false, sb, style);
         }
     }
-
 }
