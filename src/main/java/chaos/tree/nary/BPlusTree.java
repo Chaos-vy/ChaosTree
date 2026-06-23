@@ -26,6 +26,7 @@ import java.util.stream.StreamSupport;
  *
  * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @see BPlusTreeNode
+ * @since 1.0.0
  */
 public class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T, BPlusTreeNode<T>> implements NaryTree<T> {
 

@@ -762,7 +762,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      * @param toExclusive   the upper bound (exclusive)
      * @return a lazy stream of values within the given range
      */
-    public java.util.stream.Stream<T> rangeStream(T fromInclusive, T toExclusive) {
+    public Stream<T> rangeStream(T fromInclusive, T toExclusive) {
         if (fromInclusive == null || toExclusive == null) {
             throw new NullPointerException("Bounds cannot be null");
         }
@@ -772,7 +772,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         return stream().filter(e -> e.compareTo(fromInclusive) >= 0 && e.compareTo(toExclusive) < 0);
     }
 
-    private void rangeHelper(N node, T from, T to, java.util.List<T> result) {
+    private void rangeHelper(N node, T from, T to, List<T> result) {
         if (node == null) return;
         int cmpFrom = from.compareTo(node.getValue());
         int cmpTo = to.compareTo(node.getValue());

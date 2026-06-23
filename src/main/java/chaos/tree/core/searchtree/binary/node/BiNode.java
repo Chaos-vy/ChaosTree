@@ -42,7 +42,7 @@ public abstract class BiNode<T,N extends BiNode<T,N>> {
      *
      * @return the node value
      */
-    @Override
+
     public T getValue() {
         return value;
     }
@@ -52,7 +52,7 @@ public abstract class BiNode<T,N extends BiNode<T,N>> {
      *
      * @param value the new value
      */
-    @Override
+
     public void setValue(T value) {
         this.value = value;
     }

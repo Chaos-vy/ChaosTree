@@ -18,6 +18,7 @@ import chaos.tree.nary.node.BTreeNode;
  *
  * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @see BTreeNode
+ * @since 1.0.0
  */
 public final class BTree<T extends Comparable<T>> extends AbstractNaryTree<T, BTreeNode<T>> implements NaryTree<T> {
 
