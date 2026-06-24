@@ -172,7 +172,7 @@ BST node (value + left + right = 3 refs × 8B = 24B) has no parent pointer. AVL/
 
 ## 7. Raw Telemetry: Micro-Architectural Profile (Zipfian Search, 100k nodes)
 
-> All telemetry captured via Linux perf counters under Zipfian search distribution at 100,000 nodes. `cpu_core` = Performance cores. `cpu_atom` = Efficient cores (Intel hybrid architecture).
+> All telemetry captured via Linux perf counters under Zipfian search distribution at 100,000 nodes running on JDK 21. `cpu_core` = Performance cores. `cpu_atom` = Efficient cores (Intel hybrid architecture).
 
 ### Execution Throughput & Clock Cycles
 
