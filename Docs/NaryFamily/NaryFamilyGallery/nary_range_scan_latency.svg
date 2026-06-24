@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520">
+  <rect width="980" height="520" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="490" y="36" font-family="monospace" font-size="15" font-weight="bold" fill="#e6edf3" text-anchor="middle">ChaosTree — N-ary Range Scan Latency (degree=32)</text>
+
+  <!-- Y-axis label -->
+  <text x="18" y="250" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle" transform="rotate(-90,18,250)">Latency (ns/op)</text>
+
+  <!-- Grid lines (log scale: min=100, max=10000000, log10 range = 5, chart height=380, y1=60, y2=440) -->
+  <!-- y = 440 - ((log10(tick) - 2) / 5) * 380 -->
+  <!-- 100    -> log10=2 -> 440 - 0     = 440 -->
+  <!-- 1K     -> log10=3 -> 440 - 76    = 364 -->
+  <!-- 10K    -> log10=4 -> 440 - 152   = 288 -->
+  <!-- 100K   -> log10=5 -> 440 - 228   = 212 -->
+  <!-- 1M     -> log10=6 -> 440 - 304   = 136 -->
+  <!-- 10M    -> log10=7 -> 440 - 380   = 60  -->
+
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="364" x2="760" y2="364" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="288" x2="760" y2="288" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="212" x2="760" y2="212" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="136" x2="760" y2="136" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="60"  x2="760" y2="60"  stroke="#30363d" stroke-width="1"/>
+
+  <!-- Y-axis tick labels -->
+  <text x="72" y="444" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">100</text>
+  <text x="72" y="368" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">1K</text>
+  <text x="72" y="292" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">10K</text>
+  <text x="72" y="216" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">100K</text>
+  <text x="72" y="140" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">1M</text>
+  <text x="72" y="64"  font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">10M</text>
+
+  <!-- Axes -->
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1.5"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1.5"/>
+
+  <!-- ===== GROUP 1: size=1K, center=180 =====
+       BTree=470.9   -> log10=2.6730 -> y = 440 - ((2.6730-2)/5)*380 = 440 - 51.15 = 388.85 -> ~389
+       BPlusTree=388.4 -> log10=2.5893 -> y = 440 - ((2.5893-2)/5)*380 = 440 - 44.79 = 395.21 -> ~395
+  -->
+  <!-- BTree bar: x=180-22=158, y=389, width=20, height=440-389=51 -->
+  <rect x="158" y="389" width="20" height="51" fill="#EF5350"/>
+  <!-- BPlusTree bar: x=180+2=182, y=395, width=20, height=440-395=45 -->
+  <rect x="182" y="395" width="20" height="45" fill="#4C9BE8"/>
+  <!-- Value labels -->
+  <text x="168" y="385" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">471ns</text>
+  <text x="192" y="391" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">388ns</text>
+  <!-- X label -->
+  <text x="180" y="460" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">1K</text>
+
+  <!-- ===== GROUP 2: size=50K, center=340 =====
+       BTree=21317.9  -> log10=4.3288 -> y = 440 - ((4.3288-2)/5)*380 = 440 - 177.0 = 263.0 -> ~263
+       BPlusTree=16861.7 -> log10=4.2269 -> y = 440 - ((4.2269-2)/5)*380 = 440 - 169.2 = 270.8 -> ~271
+  -->
+  <rect x="318" y="263" width="20" height="177" fill="#EF5350"/>
+  <rect x="342" y="271" width="20" height="169" fill="#4C9BE8"/>
+  <text x="328" y="259" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">21µs</text>
+  <text x="352" y="267" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">17µs</text>
+  <text x="340" y="460" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">50K</text>
+
+  <!-- ===== GROUP 3: size=1M, center=500 =====
+       BTree=471851.3  -> log10=5.6739 -> y = 440 - ((5.6739-2)/5)*380 = 440 - 279.2 = 160.8 -> ~161
+       BPlusTree=339226.5 -> log10=5.5304 -> y = 440 - ((5.5304-2)/5)*380 = 440 - 268.3 = 171.7 -> ~172
+  -->
+  <rect x="478" y="161" width="20" height="279" fill="#EF5350"/>
+  <rect x="502" y="172" width="20" height="268" fill="#4C9BE8"/>
+  <text x="488" y="157" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">472µs</text>
+  <text x="512" y="168" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">339µs</text>
+  <text x="500" y="460" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">1M</text>
+
+  <!-- ===== GROUP 4: size=5M, center=660 =====
+       BTree=3447626.4  -> log10=6.5375 -> y = 440 - ((6.5375-2)/5)*380 = 440 - 344.9 = 95.1 -> ~95
+       BPlusTree=3169903.8 -> log10=6.5011 -> y = 440 - ((6.5011-2)/5)*380 = 440 - 342.1 = 97.9 -> ~98
+  -->
+  <rect x="638" y="95" width="20" height="345" fill="#EF5350"/>
+  <rect x="662" y="98" width="20" height="342" fill="#4C9BE8"/>
+  <text x="648" y="91" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">3.4ms</text>
+  <text x="672" y="94" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">3.2ms</text>
+  <text x="660" y="460" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">5M</text>
+
+  <!-- Legend -->
+  <rect x="800" y="80" width="14" height="14" fill="#EF5350"/>
+  <text x="820" y="92" font-family="monospace" font-size="12" fill="#e6edf3">BTree</text>
+  <rect x="800" y="104" width="14" height="14" fill="#4C9BE8"/>
+  <text x="820" y="116" font-family="monospace" font-size="12" fill="#e6edf3">BPlusTree</text>
+
+  <!-- X-axis label -->
+  <text x="420" y="490" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">Collection Size</text>
+</svg>

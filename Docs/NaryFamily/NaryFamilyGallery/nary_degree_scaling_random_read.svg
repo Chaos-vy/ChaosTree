@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520">
+  <rect width="980" height="520" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="490" y="36" font-family="monospace" font-size="15" font-weight="bold" fill="#e6edf3" text-anchor="middle">ChaosTree — Degree Scaling: Random Read (1M elements)</text>
+
+  <!-- Y-axis label -->
+  <text x="18" y="250" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle" transform="rotate(-90,18,250)">Latency (ns/op)</text>
+
+  <!-- Grid lines: 0 to 800, step 200
+       pixel_y = 440 - (value/800)*380
+       0   -> 440
+       200 -> 440 - 95  = 345
+       400 -> 440 - 190 = 250
+       600 -> 440 - 285 = 155
+       800 -> 440 - 380 = 60
+  -->
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="345" x2="760" y2="345" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="250" x2="760" y2="250" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="155" x2="760" y2="155" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="60"  x2="760" y2="60"  stroke="#30363d" stroke-width="1"/>
+
+  <!-- Y-axis tick labels -->
+  <text x="72" y="444" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">0</text>
+  <text x="72" y="349" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">200</text>
+  <text x="72" y="254" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">400</text>
+  <text x="72" y="159" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">600</text>
+  <text x="72" y="64"  font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">800</text>
+
+  <!-- Axes -->
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1.5"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1.5"/>
+
+  <!-- 9 groups: group_width=75.6, center_i = 80 + 37.8 + i*75.6
+       i=0: ~118
+       i=1: ~193
+       i=2: ~269
+       i=3: ~345
+       i=4: ~420
+       i=5: ~496
+       i=6: ~571
+       i=7: ~647
+       i=8: ~723
+  -->
+  <!-- pixel_y = 440 - (value/800)*380 -->
+
+  <!-- ===== GROUP 0: degree=4 =====
+       BTree=616.9   -> py = 440 - (616.9/800)*380 = 440 - 292.9 = 147.1 -> 147, h=293
+       BPlusTree=653.8 -> py = 440 - (653.8/800)*380 = 440 - 310.4 = 129.6 -> 130, h=310
+  -->
+  <rect x="101" y="147" width="15" height="293" fill="#EF5350"/>
+  <rect x="120" y="130" width="15" height="310" fill="#4C9BE8"/>
+  <text x="109" y="143" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">617</text>
+  <text x="128" y="126" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">654</text>
+  <text x="118" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">4</text>
+
+  <!-- ===== GROUP 1: degree=8 =====
+       BTree=533.7   -> py = 440 - (533.7/800)*380 = 440 - 253.5 = 186.5 -> 187, h=253
+       BPlusTree=565.0 -> py = 440 - (565.0/800)*380 = 440 - 268.4 = 171.6 -> 172, h=268
+  -->
+  <rect x="177" y="187" width="15" height="253" fill="#EF5350"/>
+  <rect x="196" y="172" width="15" height="268" fill="#4C9BE8"/>
+  <text x="185" y="183" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">534</text>
+  <text x="204" y="168" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">565</text>
+  <text x="193" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">8</text>
+
+  <!-- ===== GROUP 2: degree=16 =====
+       BTree=515.0   -> py = 440 - (515.0/800)*380 = 440 - 244.6 = 195.4 -> 195, h=245
+       BPlusTree=532.1 -> py = 440 - (532.1/800)*380 = 440 - 252.7 = 187.3 -> 187, h=253
+  -->
+  <rect x="252" y="195" width="15" height="245" fill="#EF5350"/>
+  <rect x="271" y="187" width="15" height="253" fill="#4C9BE8"/>
+  <text x="260" y="191" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">515</text>
+  <text x="279" y="183" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">532</text>
+  <text x="268" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">16</text>
+
+  <!-- ===== GROUP 3: degree=32 =====
+       BTree=500.1   -> py = 440 - (500.1/800)*380 = 440 - 237.5 = 202.5 -> 203, h=237
+       BPlusTree=519.0 -> py = 440 - (519.0/800)*380 = 440 - 246.5 = 193.5 -> 194, h=246
+  -->
+  <rect x="328" y="203" width="15" height="237" fill="#EF5350"/>
+  <rect x="347" y="194" width="15" height="246" fill="#4C9BE8"/>
+  <text x="336" y="199" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">500</text>
+  <text x="355" y="190" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">519</text>
+  <text x="344" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">32</text>
+
+  <!-- ===== GROUP 4: degree=64 =====
+       BTree=509.4   -> py = 440 - (509.4/800)*380 = 440 - 241.9 = 198.1 -> 198, h=242
+       BPlusTree=528.5 -> py = 440 - (528.5/800)*380 = 440 - 250.9 = 189.1 -> 189, h=251
+  -->
+  <rect x="403" y="198" width="15" height="242" fill="#EF5350"/>
+  <rect x="422" y="189" width="15" height="251" fill="#4C9BE8"/>
+  <text x="411" y="194" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">509</text>
+  <text x="430" y="185" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">529</text>
+  <text x="420" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">64</text>
+
+  <!-- ===== GROUP 5: degree=100 =====
+       BTree=513.0   -> py = 440 - (513.0/800)*380 = 440 - 243.7 = 196.3 -> 196, h=244
+       BPlusTree=507.5 -> py = 440 - (507.5/800)*380 = 440 - 241.1 = 198.9 -> 199, h=241
+  -->
+  <rect x="479" y="196" width="15" height="244" fill="#EF5350"/>
+  <rect x="498" y="199" width="15" height="241" fill="#4C9BE8"/>
+  <text x="487" y="192" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">513</text>
+  <text x="506" y="195" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">508</text>
+  <text x="495" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">100</text>
+
+  <!-- ===== GROUP 6: degree=128 =====
+       BTree=508.7   -> py = 440 - (508.7/800)*380 = 440 - 241.6 = 198.4 -> 198, h=242
+       BPlusTree=522.0 -> py = 440 - (522.0/800)*380 = 440 - 247.9 = 192.1 -> 192, h=248
+  -->
+  <rect x="554" y="198" width="15" height="242" fill="#EF5350"/>
+  <rect x="573" y="192" width="15" height="248" fill="#4C9BE8"/>
+  <text x="562" y="194" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">509</text>
+  <text x="581" y="188" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">522</text>
+  <text x="571" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">128</text>
+
+  <!-- ===== GROUP 7: degree=200 =====
+       BTree=513.5   -> py = 440 - (513.5/800)*380 = 440 - 243.9 = 196.1 -> 196, h=244
+       BPlusTree=515.5 -> py = 440 - (515.5/800)*380 = 440 - 244.9 = 195.1 -> 195, h=245
+  -->
+  <rect x="630" y="196" width="15" height="244" fill="#EF5350"/>
+  <rect x="649" y="195" width="15" height="245" fill="#4C9BE8"/>
+  <text x="638" y="192" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">514</text>
+  <text x="657" y="191" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">516</text>
+  <text x="647" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">200</text>
+
+  <!-- ===== GROUP 8: degree=512 =====
+       BTree=516.8   -> py = 440 - (516.8/800)*380 = 440 - 245.5 = 194.5 -> 195, h=245
+       BPlusTree=511.8 -> py = 440 - (511.8/800)*380 = 440 - 243.1 = 196.9 -> 197, h=243
+  -->
+  <rect x="706" y="195" width="15" height="245" fill="#EF5350"/>
+  <rect x="725" y="197" width="15" height="243" fill="#4C9BE8"/>
+  <text x="714" y="191" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">517</text>
+  <text x="733" y="193" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">512</text>
+  <text x="722" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">512</text>
+
+  <!-- Legend -->
+  <rect x="800" y="80" width="14" height="14" fill="#EF5350"/>
+  <text x="820" y="92" font-family="monospace" font-size="12" fill="#e6edf3">BTree</text>
+  <rect x="800" y="104" width="14" height="14" fill="#4C9BE8"/>
+  <text x="820" y="116" font-family="monospace" font-size="12" fill="#e6edf3">BPlusTree</text>
+
+  <!-- X-axis label -->
+  <text x="420" y="490" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">Tree Degree</text>
+</svg>

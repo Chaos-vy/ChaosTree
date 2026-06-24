@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520">
+  <rect width="980" height="520" fill="#0d1117"/>
+
+
+  <text x="490" y="36" font-family="monospace" font-size="15" font-weight="bold" fill="#e6edf3" text-anchor="middle">ChaosTree — Concurrent Search Latency (degree=32)</text>
+
+  <text x="22" y="250" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle" transform="rotate(-90,22,250)">Latency (ns/op)</text>
+
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="345" x2="760" y2="345" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="250" x2="760" y2="250" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="155" x2="760" y2="155" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="60"  x2="760" y2="60"  stroke="#30363d" stroke-width="1" opacity="0.4"/>
+
+  <text x="72" y="444" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">0</text>
+  <text x="72" y="349" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">3000</text>
+  <text x="72" y="254" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">6000</text>
+  <text x="72" y="159" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">9000</text>
+  <text x="72" y="64"  font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">12000</text>
+
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1"/>
+
+
+  <rect x="153" y="404" width="25" height="36" fill="#EF5350" rx="2"/>
+  <rect x="182" y="397" width="25" height="43" fill="#4C9BE8" rx="2"/>
+  <text x="165" y="400" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">1153</text>
+  <text x="194" y="393" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">1361</text>
+  <text x="180" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">1K</text>
+
+
+  <rect x="313" y="387" width="25" height="53" fill="#EF5350" rx="2"/>
+  <rect x="342" y="384" width="25" height="56" fill="#4C9BE8" rx="2"/>
+  <text x="325" y="383" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">1685</text>
+  <text x="354" y="380" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">1769</text>
+  <text x="340" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">50K</text>
+
+
+  <rect x="473" y="275" width="25" height="165" fill="#EF5350" rx="2"/>
+  <rect x="502" y="279" width="25" height="161" fill="#4C9BE8" rx="2"/>
+  <text x="485" y="271" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">5197</text>
+  <text x="514" y="275" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">5082</text>
+  <text x="500" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">1M</text>
+
+
+  <rect x="633" y="250" width="25" height="190" fill="#EF5350" rx="2"/>
+  <rect x="662" y="190" width="25" height="250" fill="#4C9BE8" rx="2"/>
+  <text x="645" y="246" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">6005</text>
+  <text x="674" y="186" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">7891</text>
+  <text x="660" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">5M</text>
+
+
+  <text x="420" y="490" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">Dataset Size</text>
+
+  <rect x="800" y="90" width="14" height="14" fill="#EF5350" rx="2"/>
+  <text x="820" y="101" font-family="monospace" font-size="12" fill="#e6edf3">BTree</text>
+  <rect x="800" y="114" width="14" height="14" fill="#4C9BE8" rx="2"/>
+  <text x="820" y="125" font-family="monospace" font-size="12" fill="#e6edf3">BPlusTree</text>
+</svg>

@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520">
+  <rect width="980" height="520" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="490" y="36" font-family="monospace" font-size="15" font-weight="bold" fill="#e6edf3" text-anchor="middle">ChaosTree — Degree Scaling: Range Scan (1M elements)</text>
+
+  <!-- Y-axis label -->
+  <text x="18" y="250" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle" transform="rotate(-90,18,250)">Latency (ns/op)</text>
+
+  <!-- Grid lines: 0 to 800000, step 200000
+       pixel_y = 440 - (value/800000)*380
+       0      -> 440
+       200K   -> 440 - 95  = 345
+       400K   -> 440 - 190 = 250
+       600K   -> 440 - 285 = 155
+       800K   -> 440 - 380 = 60
+  -->
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="345" x2="760" y2="345" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="250" x2="760" y2="250" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="155" x2="760" y2="155" stroke="#30363d" stroke-width="1"/>
+  <line x1="80" y1="60"  x2="760" y2="60"  stroke="#30363d" stroke-width="1"/>
+
+  <!-- Y-axis tick labels -->
+  <text x="72" y="444" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">0</text>
+  <text x="72" y="349" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">200K</text>
+  <text x="72" y="254" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">400K</text>
+  <text x="72" y="159" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">600K</text>
+  <text x="72" y="64"  font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">800K</text>
+
+  <!-- Axes -->
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1.5"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1.5"/>
+
+  <!-- 9 groups: group_width=75.6, center_i = 80 + 37.8 + i*75.6
+       i=0: center=117.8
+       i=1: center=193.4
+       i=2: center=269.0
+       i=3: center=344.6
+       i=4: center=420.2
+       i=5: center=495.8
+       i=6: center=571.4
+       i=7: center=647.0
+       i=8: center=722.6
+  -->
+  <!-- pixel_y = 440 - (value/800000)*380 -->
+
+  <!-- ===== GROUP 0: degree=4 =====
+       BTree=739352   -> py = 440 - (739352/800000)*380 = 440 - 351.2 = 88.8 -> 89, h=351
+       BPlusTree=508106 -> py = 440 - (508106/800000)*380 = 440 - 241.3 = 198.7 -> 199, h=241
+  -->
+  <rect x="101" y="89" width="15" height="351" fill="#EF5350"/>
+  <rect x="120" y="199" width="15" height="241" fill="#4C9BE8"/>
+  <text x="109" y="85" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">739K</text>
+  <text x="128" y="195" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">508K</text>
+  <text x="118" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">4</text>
+
+  <!-- ===== GROUP 1: degree=8 =====
+       BTree=548989   -> py = 440 - (548989/800000)*380 = 440 - 260.8 = 179.2 -> 179, h=261
+       BPlusTree=412818 -> py = 440 - (412818/800000)*380 = 440 - 196.1 = 243.9 -> 244, h=196
+  -->
+  <rect x="177" y="179" width="15" height="261" fill="#EF5350"/>
+  <rect x="196" y="244" width="15" height="196" fill="#4C9BE8"/>
+  <text x="185" y="175" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">549K</text>
+  <text x="204" y="240" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">413K</text>
+  <text x="193" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">8</text>
+
+  <!-- ===== GROUP 2: degree=16 =====
+       BTree=521763   -> py = 440 - (521763/800000)*380 = 440 - 247.8 = 192.2 -> 192, h=248
+       BPlusTree=376098 -> py = 440 - (376098/800000)*380 = 440 - 178.6 = 261.4 -> 261, h=179
+  -->
+  <rect x="252" y="192" width="15" height="248" fill="#EF5350"/>
+  <rect x="271" y="261" width="15" height="179" fill="#4C9BE8"/>
+  <text x="260" y="188" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">522K</text>
+  <text x="279" y="257" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">376K</text>
+  <text x="268" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">16</text>
+
+  <!-- ===== GROUP 3: degree=32 =====
+       BTree=474222   -> py = 440 - (474222/800000)*380 = 440 - 225.2 = 214.8 -> 215, h=225
+       BPlusTree=334197 -> py = 440 - (334197/800000)*380 = 440 - 158.7 = 281.3 -> 281, h=159
+  -->
+  <rect x="328" y="215" width="15" height="225" fill="#EF5350"/>
+  <rect x="347" y="281" width="15" height="159" fill="#4C9BE8"/>
+  <text x="336" y="211" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">474K</text>
+  <text x="355" y="277" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">334K</text>
+  <text x="344" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">32</text>
+
+  <!-- ===== GROUP 4: degree=64 =====
+       BTree=368055   -> py = 440 - (368055/800000)*380 = 440 - 174.8 = 265.2 -> 265, h=175
+       BPlusTree=329611 -> py = 440 - (329611/800000)*380 = 440 - 156.6 = 283.4 -> 283, h=157
+  -->
+  <rect x="403" y="265" width="15" height="175" fill="#EF5350"/>
+  <rect x="422" y="283" width="15" height="157" fill="#4C9BE8"/>
+  <text x="411" y="261" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">368K</text>
+  <text x="430" y="279" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">330K</text>
+  <text x="420" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">64</text>
+
+  <!-- ===== GROUP 5: degree=100 =====
+       BTree=397852   -> py = 440 - (397852/800000)*380 = 440 - 188.9 = 251.1 -> 251, h=189
+       BPlusTree=324136 -> py = 440 - (324136/800000)*380 = 440 - 154.0 = 286.0 -> 286, h=154
+  -->
+  <rect x="479" y="251" width="15" height="189" fill="#EF5350"/>
+  <rect x="498" y="286" width="15" height="154" fill="#4C9BE8"/>
+  <text x="487" y="247" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">398K</text>
+  <text x="506" y="282" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">324K</text>
+  <text x="495" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">100</text>
+
+  <!-- ===== GROUP 6: degree=128 =====
+       BTree=363765   -> py = 440 - (363765/800000)*380 = 440 - 172.8 = 267.2 -> 267, h=173
+       BPlusTree=325116 -> py = 440 - (325116/800000)*380 = 440 - 154.4 = 285.6 -> 286, h=154
+  -->
+  <rect x="554" y="267" width="15" height="173" fill="#EF5350"/>
+  <rect x="573" y="286" width="15" height="154" fill="#4C9BE8"/>
+  <text x="562" y="263" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">364K</text>
+  <text x="581" y="282" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">325K</text>
+  <text x="571" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">128</text>
+
+  <!-- ===== GROUP 7: degree=200 =====
+       BTree=698127   -> py = 440 - (698127/800000)*380 = 440 - 331.6 = 108.4 -> 108, h=332
+       BPlusTree=316370 -> py = 440 - (316370/800000)*380 = 440 - 150.3 = 289.7 -> 290, h=150
+  -->
+  <rect x="630" y="108" width="15" height="332" fill="#EF5350"/>
+  <rect x="649" y="290" width="15" height="150" fill="#4C9BE8"/>
+  <text x="638" y="104" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">698K</text>
+  <text x="657" y="286" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">316K</text>
+  <text x="647" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">200</text>
+
+  <!-- ===== GROUP 8: degree=512 =====
+       BTree=599736   -> py = 440 - (599736/800000)*380 = 440 - 284.9 = 155.1 -> 155, h=285
+       BPlusTree=312585 -> py = 440 - (312585/800000)*380 = 440 - 148.5 = 291.5 -> 292, h=148
+  -->
+  <rect x="706" y="155" width="15" height="285" fill="#EF5350"/>
+  <rect x="725" y="292" width="15" height="148" fill="#4C9BE8"/>
+  <text x="714" y="151" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">600K</text>
+  <text x="733" y="288" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">313K</text>
+  <text x="722" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">512</text>
+
+  <!-- Legend -->
+  <rect x="800" y="80" width="14" height="14" fill="#EF5350"/>
+  <text x="820" y="92" font-family="monospace" font-size="12" fill="#e6edf3">BTree</text>
+  <rect x="800" y="104" width="14" height="14" fill="#4C9BE8"/>
+  <text x="820" y="116" font-family="monospace" font-size="12" fill="#e6edf3">BPlusTree</text>
+
+  <!-- X-axis label -->
+  <text x="420" y="490" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">Tree Degree</text>
+</svg>

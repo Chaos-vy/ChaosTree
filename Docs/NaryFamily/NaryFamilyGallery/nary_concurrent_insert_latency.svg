@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520">
+  <rect width="980" height="520" fill="#0d1117"/>
+
+  <text x="490" y="36" font-family="monospace" font-size="15" font-weight="bold" fill="#e6edf3" text-anchor="middle">ChaosTree — Concurrent Insert Latency (degree=32)</text>
+
+  <text x="22" y="250" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle" transform="rotate(-90,22,250)">Latency (ns/op)</text>
+
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="364" x2="760" y2="364" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="288" x2="760" y2="288" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="212" x2="760" y2="212" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="136" x2="760" y2="136" stroke="#30363d" stroke-width="1" opacity="0.4"/>
+  <line x1="80" y1="60"  x2="760" y2="60"  stroke="#30363d" stroke-width="1" opacity="0.4"/>
+
+  <text x="72" y="444" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">0</text>
+  <text x="72" y="368" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">5000</text>
+  <text x="72" y="292" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">10000</text>
+  <text x="72" y="216" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">15000</text>
+  <text x="72" y="140" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">20000</text>
+  <text x="72" y="64"  font-family="monospace" font-size="11" fill="#8b949e" text-anchor="end">25000</text>
+
+  <line x1="80" y1="60" x2="80" y2="440" stroke="#484f58" stroke-width="1"/>
+  <line x1="80" y1="440" x2="760" y2="440" stroke="#484f58" stroke-width="1"/>
+
+
+  <rect x="153" y="279" width="25" height="161" fill="#EF5350" rx="2"/>
+  <rect x="182" y="258" width="25" height="182" fill="#4C9BE8" rx="2"/>
+  <text x="165" y="275" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">10612</text>
+  <text x="194" y="254" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">11974</text>
+  <text x="180" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">1K</text>
+
+
+  <rect x="313" y="231" width="25" height="209" fill="#EF5350" rx="2"/>
+  <rect x="342" y="169" width="25" height="271" fill="#4C9BE8" rx="2"/>
+  <text x="325" y="227" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">13776</text>
+  <text x="354" y="165" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">17846</text>
+  <text x="340" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">50K</text>
+
+
+  <rect x="473" y="217" width="25" height="223" fill="#EF5350" rx="2"/>
+  <rect x="502" y="191" width="25" height="249" fill="#4C9BE8" rx="2"/>
+  <text x="485" y="213" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">14668</text>
+  <text x="514" y="187" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">16384</text>
+  <text x="500" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">1M</text>
+
+
+  <rect x="633" y="166" width="25" height="274" fill="#EF5350" rx="2"/>
+  <rect x="662" y="148" width="25" height="292" fill="#4C9BE8" rx="2"/>
+  <text x="645" y="162" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">18054</text>
+  <text x="674" y="144" font-family="monospace" font-size="8" fill="#e6edf3" text-anchor="middle">19182</text>
+  <text x="660" y="460" font-family="monospace" font-size="11" fill="#8b949e" text-anchor="middle">5M</text>
+
+  <text x="420" y="490" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">Dataset Size</text>
+
+  <rect x="800" y="90" width="14" height="14" fill="#EF5350" rx="2"/>
+  <text x="820" y="101" font-family="monospace" font-size="12" fill="#e6edf3">BTree</text>
+  <rect x="800" y="114" width="14" height="14" fill="#4C9BE8" rx="2"/>
+  <text x="820" y="125" font-family="monospace" font-size="12" fill="#e6edf3">BPlusTree</text>
+</svg>
