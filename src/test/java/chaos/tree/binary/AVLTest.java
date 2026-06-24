@@ -35,7 +35,7 @@ class AVLTest extends StableStructureContractTest<AVL<Integer>> {
     @Test
     void leftRightHeavyShouldTriggerDoubleRotation() {
         tree.insertAll(List.of(30, 10, 20)); // LR Imbalance
-        assertEquals(20, tree.toList(TraversalType.LEVEL_ORDER).getFirst());
+        assertEquals(20, tree.toList(TraversalType.LEVEL_ORDER).get(0));
         assertEquals(List.of(10, 20, 30), tree.inorder());
     }
 }

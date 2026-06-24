@@ -28,14 +28,14 @@ class SplayTest extends BinaryTreeContractTest<Splay<Integer>> {
     void accessedElementBecomesRoot() {
         tree.insertAll(List.of(10, 20, 30, 40, 50));
         tree.contains(30);
-        assertEquals(30, tree.toList(TraversalType.LEVEL_ORDER).getFirst());
+        assertEquals(30, tree.toList(TraversalType.LEVEL_ORDER).get(0));
     }
 
     @Test
     void insertedElementBecomesRoot() {
         tree.insertAll(List.of(10, 20, 30));
         tree.insert(5);
-        assertEquals(5, tree.toList(TraversalType.LEVEL_ORDER).getFirst());
+        assertEquals(5, tree.toList(TraversalType.LEVEL_ORDER).get(0));
     }
 
     @Test

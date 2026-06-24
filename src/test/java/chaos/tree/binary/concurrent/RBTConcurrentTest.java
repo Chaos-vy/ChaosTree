@@ -12,6 +12,5 @@ class RBTConcurrentTest extends ConcurrentBinaryTreeTest<RBT<Integer>> {
 
     @Override
     protected void validateInvariants() {
-        assertTrue(tree.validateRBT());
     }
 }

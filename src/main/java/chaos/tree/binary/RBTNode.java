@@ -1,8 +1,8 @@
-package chaos.tree.binary.node;
+package chaos.tree.binary;
 
 import chaos.tree.binary.RBT;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
-import static chaos.tree.binary.node.Color.*;
+import static chaos.tree.binary.Color.*;
 /**
  * Represents a node in a Red-Black Tree ({@link RBT}).
  *
@@ -17,7 +17,7 @@ import static chaos.tree.binary.node.Color.*;
  * @see Color
  * @since 1.0.0
  */
-public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
+class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
 
     /** Color of this node; newly created nodes are RED by default. */
     private Color color;
@@ -31,7 +31,7 @@ public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>>
      *
      * @param value the value to store in this node
      */
-    public RBTNode(T value) {
+    RBTNode(T value) {
         super(value);
         this.color=RED;
     }

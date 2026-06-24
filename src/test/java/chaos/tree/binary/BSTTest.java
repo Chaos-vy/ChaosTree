@@ -35,10 +35,10 @@ class BSTTest extends StableStructureContractTest<BST<Integer>> {
     @Test
     void deleteRootMustRestructureAndPreserveInorder() {
         tree.insertAll(List.of(20, 10, 30, 5, 15, 25, 35));
-        assertEquals(20, tree.toList(TraversalType.LEVEL_ORDER).getFirst());
+        assertEquals(20, tree.toList(TraversalType.LEVEL_ORDER).get(0));
         tree.delete(20);
         assertEquals(6, tree.size());
         assertEquals(List.of(5, 10, 15, 25, 30, 35), tree.inorder());
-        assertNotEquals(20, tree.toList(TraversalType.LEVEL_ORDER).getFirst());
+        assertNotEquals(20, tree.toList(TraversalType.LEVEL_ORDER).get(0));
     }
 }

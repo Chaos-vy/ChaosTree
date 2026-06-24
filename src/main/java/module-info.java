@@ -25,6 +25,5 @@ module chaos.tree {
      * - chaos.tree.core.searchtree.binary.node
      * - chaos.tree.core.searchtree.binary.rotation
      * - chaos.tree.core.searchtree.nary (Hides AbstractNaryTree)
-     * - chaos.tree.nary.node
      */
 }

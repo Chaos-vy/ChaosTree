@@ -1,9 +1,7 @@
 package chaos.tree.binary;
 
-import static chaos.tree.binary.node.Color.*;
+import static chaos.tree.binary.Color.*;
 
-import chaos.tree.binary.node.Color;
-import chaos.tree.binary.node.RBTNode;
 import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;

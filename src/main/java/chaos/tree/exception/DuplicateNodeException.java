@@ -9,7 +9,7 @@ package chaos.tree.exception;
  * @author Chaos
  * @since 1.0.0
  */
-public class DuplicateNodeException extends RuntimeException {
+public class DuplicateNodeException extends IllegalArgumentException {
     /**
      * Constructs a duplicate node exception with the specified detail message.
      *

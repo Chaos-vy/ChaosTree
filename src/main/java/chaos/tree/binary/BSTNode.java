@@ -1,4 +1,4 @@
-package chaos.tree.binary.node;
+package chaos.tree.binary;
 
 import chaos.tree.binary.BST;
 import chaos.tree.core.searchtree.binary.node.BiNode;
@@ -15,13 +15,13 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @see BiNode
  * @since 1.0.0
  */
-public class BSTNode<T> extends BiNode<T,BSTNode<T>> {
+class BSTNode<T> extends BiNode<T,BSTNode<T>> {
     /**
      * Constructs a new BST node with the specified value.
      *
      * @param value the value to be stored in the node, which will be managed by {@link BST}
      */
-    public BSTNode(T value) {
+    BSTNode(T value) {
         super(value);
     }
 }

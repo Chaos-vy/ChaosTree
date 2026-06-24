@@ -1,5 +1,4 @@
 package chaos.tree.binary;
-import chaos.tree.binary.node.BSTNode;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
 
 /**

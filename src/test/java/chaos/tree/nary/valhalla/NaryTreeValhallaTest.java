@@ -10,11 +10,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Proof of JEP 401 (Project Valhalla) Compatibility.
- * * This test guarantees that the ChaosTree engine strictly uses .compareTo()
- * and never relies on `==` (object identity/memory addresses). If the engine
- * ever uses `==`, these tests will fail because we intentionally allocate
- * mathematically equal objects at completely different memory addresses.
+ * Valhalla Compatibility Verification
+ * Tests that ChaosTree's API contract holds for value-class-like types —
+ * immutable, identity-free, Comparable-only semantics.
+ * Target: JEP 401 (JDK 28+). These tests verify design intent, not runtime
+ * value class behavior.
  */
 public abstract class NaryTreeValhallaTest<NARY extends NaryTree<NaryTreeValhallaTest.ValueObject>> {
 

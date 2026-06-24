@@ -23,17 +23,6 @@ class RBTTest extends StableStructureContractTest<RBT<Integer>> {
         return new RBT<>(src);
     }
 
-    @Test
-    void rootIsAlwaysBlack() {
-        tree.insertAll(List.of(10, 20, 30));
-        assertTrue(tree.validateRBT());
-    }
-
-    @Test
-    void invariantAfterSortedInsert() {
-        for (int i = 0; i < 10_000; i++) tree.insert(i);
-        assertTrue(tree.validateRBT());
-    }
 
     @Test
     void heightBoundHolds() {

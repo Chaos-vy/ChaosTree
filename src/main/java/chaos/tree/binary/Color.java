@@ -1,4 +1,4 @@
-package chaos.tree.binary.node;
+package chaos.tree.binary;
 
 /**
  * Represents the color of a Red-Black Tree node.

@@ -6,7 +6,9 @@ package chaos.tree.exception;
  * @author Chaos
  * @since 1.0.0
  */
-public class EmptyTreeException extends RuntimeException {
+import java.util.NoSuchElementException;
+
+public class EmptyTreeException extends NoSuchElementException {
     /**
      * Constructs an empty tree exception with the specified detail message.
      *

@@ -1,4 +1,4 @@
-package chaos.tree.nary.node;
+package chaos.tree.nary;
 
 import chaos.tree.core.searchtree.nary.NaryNode;
 import chaos.tree.nary.BPlusTree;
@@ -16,20 +16,20 @@ import chaos.tree.nary.BPlusTree;
  * @see NaryNode
  * @since 1.0.0
  */
-public class BPlusTreeNode<T extends Comparable<T>> extends NaryNode<T, BPlusTreeNode<T>> {
+class BPlusTreeNode<T extends Comparable<T>> extends NaryNode<T, BPlusTreeNode<T>> {
     /**
      * Constructs an N-ary node with the specified maximum capacities.
      *
      * @param degree the degree of this tree.
      * @param isLeaf determine leaf node of this tree.
      */
-    public BPlusTreeNode(int degree, boolean isLeaf) {
+    BPlusTreeNode(int degree, boolean isLeaf) {
         super(degree, isLeaf);
     }
 
     private BPlusTreeNode<T> next;
 
-    public BPlusTreeNode<T> getNext(){
+    BPlusTreeNode<T> getNext(){
         return next;
     }
     public void setNext(BPlusTreeNode<T> next){

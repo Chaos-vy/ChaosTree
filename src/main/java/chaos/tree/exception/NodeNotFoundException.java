@@ -6,7 +6,9 @@ package chaos.tree.exception;
  * @author Chaos
  * @since 1.0.0
  */
-public class NodeNotFoundException extends RuntimeException {
+import java.util.NoSuchElementException;
+
+public class NodeNotFoundException extends NoSuchElementException {
     /**
      * Constructs a node not found exception with the specified detail message.
      *

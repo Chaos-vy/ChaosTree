@@ -1,4 +1,4 @@
-package chaos.tree.nary.node;
+package chaos.tree.nary;
 
 import chaos.tree.core.searchtree.nary.NaryNode;
 import chaos.tree.nary.BTree;
@@ -16,14 +16,14 @@ import chaos.tree.nary.BTree;
  * @see NaryNode
  * @since 1.0.0
  */
-public class BTreeNode<T extends Comparable<T>> extends NaryNode<T, BTreeNode<T>> {
+class BTreeNode<T extends Comparable<T>> extends NaryNode<T, BTreeNode<T>> {
     /**
      * Constructs an N-ary node with the specified maximum capacities.
      *
      * @param degree the degree of the tree.
      * @param isLeaf the type of structure.
      */
-    public BTreeNode(int degree, boolean isLeaf) {
+    BTreeNode(int degree, boolean isLeaf) {
         super(degree, isLeaf);
     }
 }
