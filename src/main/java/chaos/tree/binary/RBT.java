@@ -309,33 +309,4 @@ public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree
         }
     }
 
-    /**
-     * For internal testing only. Will be removed in a stable release.
-     */
-    public boolean validateRBT() {
-        return validateRootBlack() && validateNoRedRed(root) && validateBlackHeight(root) != -1;
-    }
-
-    private boolean validateRootBlack() {
-        return root == null || root.getColor() == BLACK;
-    }
-
-    private boolean validateNoRedRed(RBTNode<T> node) {
-        if (node == null) return true;
-        if (node.getColor() == RED) {
-            if ((node.getLeft() != null && node.getLeft().getColor() == RED) || (node.getRight() != null && node.getRight().getColor() == RED)) {
-                return false;
-            }
-        }
-        return validateNoRedRed(node.getLeft()) && validateNoRedRed(node.getRight());
-    }
-
-    private int validateBlackHeight(RBTNode<T> node) {
-        if (node == null) return 1;
-        int left = validateBlackHeight(node.getLeft());
-        int right = validateBlackHeight(node.getRight());
-        if (left == -1 || right == -1) return -1;
-        if (left != right) return -1;
-        return left + (node.getColor() == BLACK ? 1 : 0);
-    }
 }

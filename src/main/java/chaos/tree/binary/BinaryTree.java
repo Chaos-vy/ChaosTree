@@ -35,7 +35,7 @@ public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T>, Tra
      * @param a the first value
      * @param b the second value
      * @return the value of the least common ancestor;
-     *         {@code null} if either value does not exist in this tree
+     * {@code null} if either value does not exist in this tree
      * @throws EmptyTreeException if this tree is empty
      */
     T lca(T a, T b);
@@ -57,5 +57,16 @@ public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T>, Tra
      */
     Iterator<T> iterator(TraversalType type);
 
-
+    /**
+     * Returns all elements using the specified traversal strategy.
+     * <p>
+     * This operation traverses the entire tree and materializes the
+     * traversal result into a new list.
+     * </p>
+     *
+     * @param type the traversal order to perform
+     * @return a new list containing all elements in the specified traversal order
+     * @throws NullPointerException if {@code type} is null
+     */
+    List<T> toList(TraversalType type);
 }

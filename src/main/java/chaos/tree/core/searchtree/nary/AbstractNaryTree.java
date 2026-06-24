@@ -77,6 +77,13 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         return minKeys + 1;
     }
 
+    /**
+     * Creates a new node of the specific N-ary tree type.
+     *
+     * @param degree the degree of the node
+     * @param isLeaf whether the node is a leaf
+     * @return the newly created node
+     */
     protected abstract N createNode(int degree, boolean isLeaf);
 
 
@@ -154,6 +161,12 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         }
     }
 
+    /**
+     * Inserts a value into a node that is known to be non-full.
+     *
+     * @param node the node to insert into
+     * @param value the value to insert
+     */
     protected void insertNonFull(N node, T value) {
         while (true) {
             int index = findIndex(node, value);
@@ -260,6 +273,13 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         }
     }
 
+    /**
+     * Deletes the specified key from the subtree rooted at the given node.
+     *
+     * @param node the root of the subtree to delete from
+     * @param key the key to delete
+     * @return a DeleteResult indicating whether the deletion was successful
+     */
     protected DeleteResult delete(N node, T key) {
         if (node == null) return new DeleteResult(false);
 

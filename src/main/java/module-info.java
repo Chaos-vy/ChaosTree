@@ -1,3 +1,7 @@
+/**
+ * Defines the ChaosTree framework, providing robust and strictly encapsulated
+ * implementations of binary and N-ary search trees.
+ */
 module chaos.tree {
     requires static org.jetbrains.annotations;
 

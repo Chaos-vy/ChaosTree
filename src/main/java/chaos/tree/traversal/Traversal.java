@@ -48,7 +48,8 @@ public interface Traversal<T extends Comparable<T>> {
      * <p><b>LEVEL_ORDER: </b> visits nodes breadth-first, from the root level down
      * to deeper levels.</p>
      *
-     * @return a list containing the tree values in postorder; an empty list if the
+     * @param type the traversal type to execute
+     * @return a list containing the tree values in the specified order; an empty list if the
      *         tree has no values
      * @see TraversalType#POSTORDER
      * @see TraversalType#INORDER

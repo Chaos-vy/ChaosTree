@@ -35,6 +35,7 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      * @throws NullPointerException   if {@code value} is {@code null}
      */
     void insert(T value);
+
     /**
      * Inserts all values from the provided iterable into this tree.
      * This tree will insert all elements before encountering a duplicate.
@@ -248,7 +249,7 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      * @param toExclusive   the upper bound (exclusive)
      * @return a list of values within the given range
      * @throws IllegalArgumentException if {@code fromInclusive > toExclusive}
-     * @throws NullPointerException if either bound is {@code null}
+     * @throws NullPointerException     if either bound is {@code null}
      */
     List<T> range(T fromInclusive, T toExclusive);
 
@@ -300,12 +301,14 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
     void mergeAll(Iterable<? extends T> values);
 
     /**
-     * Returns a materialized list of all elements in the tree in their natural sorted order.
-     * <p>This method forces full evaluation of the entire tree structure into memory. It should
-     * be used with caution on massive datasets. For scalable, memory-efficient data retrieval,
-     * use {@link #stream()} or {@link #iterator()} instead.</p>
+     * Returns all elements in inorder (natural sorted) order as a new list.
+     * <p>
+     * This operation traverses the entire tree and materializes all elements
+     * into memory. For lazy traversal, prefer {@link #stream()} or
+     * {@link #iterator()}.
+     * </p>
      *
-     * @return a new list containing all elements of this tree in ascending order
+     * @return a new list containing all elements in inorder
      */
     List<T> toList();
 
