@@ -1,6 +1,6 @@
 ## Extreme Memory Limits & Saturation Profiling
 
-To determine the absolute physical limits of the ChaosTree framework, the data structures were subjected to a bare-metal heap saturation test ("Chaos Engine") against a strictly capped JVM.
+To find out exactly where the ChaosTree framework breaks, we threw our data structures into a bare-metal heap saturation test (we call it the "Chaos Engine") against a strictly capped JVM.
 
 ← Back to [README](README.md)
 
@@ -16,10 +16,10 @@ To determine the absolute physical limits of the ChaosTree framework, the data s
 
 The `ChaosTree` collections utilize a standard 32-bit signed `volatile int` for internal `size` tracking, establishing a hard structural capacity ceiling of **$2,147,483,647$ elements** ($2^{31}-1$).
 
-**Why `int` instead of `long`?**
-This limitation is an intentional, micro-architectural design choice driven by the limitations of the Java Virtual Machine (JVM).
+**Why do we use an `int` instead of a `long`?**
+This limitation is a highly intentional, intentional JVM interoperability design choice driven entirely by the limitations of the Java Virtual Machine (JVM).
 
-1. **JVM Array Boundaries:** The entire standard `java.util.Collection` and `java.util.stream` framework is deeply coupled to 32-bit array buffers. While a `long` could theoretically track larger capacities, transitioning the internal node graph to external consumers via methods like `toList()`, `toArray()`, or `stream().collect()` mandates the creation of contiguous backing arrays. The JVM natively restricts all array indices to 32-bit integers; any allocation request exceeding `Integer.MAX_VALUE - 8` instantly triggers an `OutOfMemoryError: Requested array size exceeds VM limit`.
+1. **JVM Array Boundaries:** The entire standard `java.util.Collection` and `java.util.stream` framework is deeply hardcoded to use 32-bit array buffers. Sure, we could use a `long` to theoretically track larger capacities inside the tree. But the second a user tries to export that data using `toList()`, `toArray()`, or `stream().collect()`, the JVM has to allocate a contiguous backing array. The JVM natively restricts all array indices to 32-bit integers. If we ask it to allocate an array larger than `Integer.MAX_VALUE - 8`, it will instantly crash with an `OutOfMemoryError: Requested array size exceeds VM limit`.
 2. **The Memory Reality:** Based on the validated node footprint of ≈48 bytes (via compressed OOPs), reaching the 32-bit integer ceiling would require approximately 103 GB of heap memory. In practice, heap exhaustion occurs long before the theoretical size limit is approached.
 3. **Collection Framework Compatibility:** Maintaining a 32-bit `volatile int` aligns with the capacity model used throughout the Java Collections Framework. Since interoperability ultimately depends on JVM-backed arrays and collection APIs, tracking capacities beyond `Integer.MAX_VALUE` provides little practical value.
 ---
@@ -43,10 +43,10 @@ Binary trees rely on vertical traversal paths. The depth of these paths dictates
 
 ## 3. Thread Safety Limits
 
-The Binary Family is **not natively thread-safe**. While external synchronization (`synchronized` blocks or `ReadWriteLock`) can be applied, severe micro-architectural limitations exist under heavy contention:
+We deliberately built the Binary Family to be **not natively thread-safe** (except for our dedicated Concurrent RBT). You can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but you will hit severe micro-architectural bottlenecks under heavy contention:
 
 * **The Splay Exclusion Zone:** `Splay` trees are poorly suited to `ReadWriteLock-style` concurrency because `contains()` performs structural modification rather than acting as a read-only operation.
-* **The Monitor Lock Tax (Write Contention):** Under an 8-thread write-heavy benchmark, external monitor locks caused execution latency to spike to **~34,000 ns/op**. This is an Operating System constraint; coarse-grained locking forces the OS to park and context-switch threads continuously, starving the CPU pipeline. For massive concurrent write throughput, wait for the lock-free B-Tree paging implementations.
+* **The Monitor Lock Tax:** When we ran an 8-thread write-heavy benchmark, applying external monitor locks caused our execution latency to spike to an awful **~34,000 ns/op**. This is an Operating System constraint—coarse-grained locking forces the OS to continuously park and context-switch threads, completely starving the CPU pipeline. For massive concurrent write throughput, wait for the lock-free B-Tree paging implementations.
 * **Treap Seed Contention:** Instantiating a `Treap` with a shared `java.util.Random` seed under concurrent writes will cause severe atomic contention. Always use the default constructor, which utilizes independent `ThreadLocalRandom` pipelines to bypass seed locking.
 
 ---
@@ -91,9 +91,9 @@ The ChaosTree architecture was tested directly against Java's native `java.util.
 | TreeSet | ~40 B                                   |
 
 ### Engineering Takeaways
-1. **Memory Dominance:** The ChaosTree base nodes pack into 48-byte cache-line friendly footprints. Compared to the heavy `Map.Entry` objects utilized by the standard Java library, ChaosTree successfully houses **50% more nodes in the exact same memory footprint**.
+1. **Memory Efficiency:** The ChaosTree base nodes pack into 48-byte cache-line friendly footprints. Compared to the heavy `Map.Entry` objects utilized by the standard Java library, ChaosTree successfully houses **50% more nodes in the exact same memory footprint**.
 2. **Uniform Object Padding:** The balanced variants (AVL, RBT, Treap, Splay) all trigger heap exhaustion within a 0.04% margin. This indicates the JVM perfectly pads their distinct tracking variables (`color`, `height`, `priority`) into uniform byte boundaries with zero memory waste.
-3. **The Unbalanced Danger:** The standard BST failed via `StackOverflowError` at $\approx 19,654$ nodes. Without rotational balancing, sequential insertions degraded the tree into a linked list, destroying the thread execution stack long before the heap was threatened. All balanced family variants are immune to this flaw.
+3. **The Unbalanced Danger:** The standard BST failed via `StackOverflowError` at $\approx 19,654$ nodes. Without rotational balancing, sequential insertions degraded the tree into a linked list, destroying the thread execution stack long before the heap was threatened. All balanced family variants avoid this failure mode under the tested conditions.
 
 ---
 <details>
