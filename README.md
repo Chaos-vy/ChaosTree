@@ -5,13 +5,28 @@
 We built ChaosTree because we wanted to see what happens when you take textbook data structures and optimize them for real-world JVM memory and CPU caches. It includes both classic Binary Trees (AVL, RBT, etc.) and cache-friendly N-ary Trees (B-Tree, B+ Tree).
 
 ---
-## 📦 Installation
-Add **ChaosTree** to your project by building it from source:
+## Installation
 
-```bash
-git clone https://github.com/Chaos-vy/ChaosTree.git
-cd ChaosTree
-mvn clean install
+### Maven
+
+```xml
+<dependency>
+    <groupId>io.github.chaos-vy</groupId>
+    <artifactId>chaos-tree</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### Gradle (Kotlin)
+
+```kotlin
+implementation("io.github.chaos-vy:chaos-tree:1.0.0")
+```
+
+### Gradle (Groovy)
+
+```groovy
+implementation 'io.github.chaos-vy:chaos-tree:1.0.0'
 ```
 ## ☕ Requirements
 
