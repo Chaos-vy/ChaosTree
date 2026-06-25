@@ -46,6 +46,8 @@ public final class BTree<T extends Comparable<T>> extends AbstractNaryTree<T, BT
      * The default degree is {@value #DEFAULT_DEGREE}, providing a balanced
      * trade-off between memory density, cache locality, and mutation cost
      * for general-purpose workloads.
+     *
+     * @param collection the collection of elements to insert
      */
     public BTree(Iterable<? extends T> collection) {
         this(DEFAULT_DEGREE, collection);

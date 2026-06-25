@@ -7,6 +7,8 @@ package chaos.tree.binary;
  * insertion and deletion operations.</p>
  */
 public enum Color {
+    /** The black color property. */
     BLACK,
+    /** The red color property. */
     RED
 }

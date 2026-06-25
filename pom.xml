@@ -11,8 +11,7 @@
 
     <name>ChaosTree</name>
     <description>
-        A high-performance in-memory search tree library for Java featuring Binary Search Trees, B-Trees, B+ Trees,
-        range queries, and collection-style APIs.
+        Zero-dependency Java search tree library featuring binary and N-ary search trees with collection-style APIs.
     </description>
     <url>https://github.com/Chaos-vy/ChaosTree</url>
 
@@ -35,7 +34,7 @@
         <connection>scm:git:git://github.com/Chaos-vy/ChaosTree.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/Chaos-vy/ChaosTree.git</developerConnection>
         <url>https://github.com/Chaos-vy/ChaosTree</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.0</tag>
     </scm>
 
     <properties>

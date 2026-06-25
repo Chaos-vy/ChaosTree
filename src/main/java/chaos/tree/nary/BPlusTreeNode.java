@@ -32,6 +32,11 @@ public class BPlusTreeNode<T extends Comparable<T>> extends NaryNode<T, BPlusTre
     BPlusTreeNode<T> getNext(){
         return next;
     }
+    /**
+     * Sets the next node in the horizontal leaf chain.
+     *
+     * @param next the next BPlusTreeNode
+     */
     public void setNext(BPlusTreeNode<T> next){
         this.next = next;
     }
