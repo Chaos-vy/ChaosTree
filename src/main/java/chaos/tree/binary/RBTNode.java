@@ -1,6 +1,5 @@
 package chaos.tree.binary;
 
-import chaos.tree.binary.RBT;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
 import static chaos.tree.binary.Color.*;
 /**
@@ -17,7 +16,7 @@ import static chaos.tree.binary.Color.*;
  * @see Color
  * @since 1.0.0
  */
-class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
+public class RBTNode<T extends Comparable<T>> extends ParentBiNode<T,RBTNode<T>> {
 
     /** Color of this node; newly created nodes are RED by default. */
     private Color color;

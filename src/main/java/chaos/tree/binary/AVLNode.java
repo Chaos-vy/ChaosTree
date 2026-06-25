@@ -18,7 +18,7 @@ import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
  * @see AbstractRotateTree
  * @since 1.0.0
  */
-class AVLNode<T> extends BiNode<T, AVLNode<T>> {
+public class AVLNode<T> extends BiNode<T, AVLNode<T>> {
     /**
      * The cached height of the subtree rooted at this node.
      */

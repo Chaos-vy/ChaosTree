@@ -1,7 +1,6 @@
 package chaos.tree.nary;
 
 import chaos.tree.core.searchtree.nary.NaryNode;
-import chaos.tree.nary.BTree;
 
 /**
  * Represents a node in a standard B-Tree ({@link BTree}).
@@ -16,7 +15,7 @@ import chaos.tree.nary.BTree;
  * @see NaryNode
  * @since 1.0.0
  */
-class BTreeNode<T extends Comparable<T>> extends NaryNode<T, BTreeNode<T>> {
+public class BTreeNode<T extends Comparable<T>> extends NaryNode<T, BTreeNode<T>> {
     /**
      * Constructs an N-ary node with the specified maximum capacities.
      *

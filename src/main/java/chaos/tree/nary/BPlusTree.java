@@ -31,6 +31,16 @@ public class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T, BPlu
 
     private BPlusTreeNode<T> head;
 
+    private static final int DEFAULT_DEGREE = 32;
+    /**
+     * Creates a B+Tree using the default degree (32),
+     * selected as the general-purpose balance between
+     * memory density, cache locality, and mutation cost.
+     */
+    public BPlusTree(){
+        super(DEFAULT_DEGREE);
+        this.head = null;
+    }
     /**
      * Constructs an empty B+ Tree with the specified maximum degree.
      *

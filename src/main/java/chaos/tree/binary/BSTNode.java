@@ -15,7 +15,7 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @see BiNode
  * @since 1.0.0
  */
-class BSTNode<T> extends BiNode<T,BSTNode<T>> {
+public class BSTNode<T> extends BiNode<T,BSTNode<T>> {
     /**
      * Constructs a new BST node with the specified value.
      *

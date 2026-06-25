@@ -21,6 +21,15 @@ import chaos.tree.core.searchtree.nary.AbstractNaryTree;
  */
 public final class BTree<T extends Comparable<T>> extends AbstractNaryTree<T, BTreeNode<T>> implements NaryTree<T> {
 
+    private static final int DEFAULT_DEGREE = 32;
+    /**
+     * Creates a B-Tree using the default degree (32),
+     * selected as the general-purpose balance between
+     * memory density, cache locality, and mutation cost.
+     */
+    public BTree(){
+        super(DEFAULT_DEGREE);
+    }
     /**
      * Constructs an empty B-Tree with the specified maximum degree.
      *

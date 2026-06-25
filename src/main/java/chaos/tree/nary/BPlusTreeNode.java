@@ -16,7 +16,7 @@ import chaos.tree.nary.BPlusTree;
  * @see NaryNode
  * @since 1.0.0
  */
-class BPlusTreeNode<T extends Comparable<T>> extends NaryNode<T, BPlusTreeNode<T>> {
+public class BPlusTreeNode<T extends Comparable<T>> extends NaryNode<T, BPlusTreeNode<T>> {
     /**
      * Constructs an N-ary node with the specified maximum capacities.
      *
