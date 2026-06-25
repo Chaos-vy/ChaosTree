@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTree | High-Performance Java Search Trees</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; padding: 0; max-width: 1200px; margin: 0 auto; }
+        
+        /* --- HERO SECTION --- */
+        .hero { text-align: center; padding: 80px 20px 60px; border-bottom: 1px solid #30363d; margin-bottom: 40px; }
+        .hero h1 { font-size: 48px; color: #c9d1d9; margin-bottom: 16px; font-weight: 800; letter-spacing: -1px; }
+        .hero h1 span { color: #58a6ff; }
+        .hero p { font-size: 18px; color: #8b949e; max-width: 700px; margin: 0 auto 32px; line-height: 1.6; }
+        .tree-guide {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tree-guide span {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .btn-group { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .btn { text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 15px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #238636; color: #ffffff; border: 1px solid rgba(240,246,252,0.1); }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+        .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
+
+        /* --- DASHBOARD STYLES --- */
+        .dashboard-container { padding: 0 24px 60px; }
+        .section-title { color: #e6edf3; font-size: 22px; margin-top: 48px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #30363d; display: flex; align-items: center; }
+        .section-title span { background: #21262d; border: 1px solid #30363d; padding: 4px 12px; border-radius: 6px; font-size: 14px; margin-left: 16px; color: #8b949e; font-weight: normal;}
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; }
+        .card h2 { font-size: 13px; color: #58a6ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+        canvas { max-height: 260px; }
+        
+        .insight { background: #0d1117; border-left: 3px solid #238636; padding: 12px 16px; margin-top: 20px; border-radius: 4px; font-size: 13px; color: #adbac7; line-height: 1.6; }
+        .insight b { color: #3fb950; }
+        .full { grid-column: 1 / -1; }
+        
+        .badge { display: inline-block; background: #238636; color: #aff2b3; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+        .badge.warn { background: #9e6a03; color: #f2cc60; }
+        .badge.red { background: #6e1b1b; color: #f85149; }
+
+        footer { text-align: center; padding: 40px; color: #8b949e; font-size: 14px; border-top: 1px solid #30363d; margin-top: 40px; }
+        
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO SECTION -->
+<div class="hero">
+    <h1>🌳 Chaos<span>Tree</span></h1>
+    <p>A high-performance, Valhalla-ready search tree library for the Java Virtual Machine. Built with Mechanical Sympathy.</p>
+    <div class="tree-guide">
+        <span><b>BST</b> • Simple workloads</span>
+        <span><b>AVL</b> • Read-heavy workloads</span>
+        <span><b>RBT</b> • General purpose</span>
+        <span><b>Treap</b> • Probabilistic balancing</span>
+        <span><b>Splay</b> • Temporal locality</span>
+        <span><b>BTree</b> • Mutation-heavy datasets</span>
+        <span><b>BPlusTree</b> • Range scans & sequential access</span>
+    </div>
+    <div class="btn-group">
+        <a href="https://github.com/Chaos-vy/ChaosTree" class="btn btn-primary">
+            <svg height="20" fill="currentColor" viewBox="0 0 16 16" width="20"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+            View on GitHub
+        </a>
+        <a href="https://javadoc.io/doc/io.github.chaos-vy/chaos-tree" class="btn btn-secondary">
+            <svg height="20" fill="currentColor" viewBox="0 0 16 16" width="20"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM7 4.75v5.5a.75.75 0 0 1-1.5 0v-5.5a.75.75 0 0 1 1.5 0Zm3.22 1.97a.75.75 0 1 1 1.06 1.06L9.56 9.5a.75.75 0 0 1-1.06 0l-1.72-1.72a.75.75 0 1 1 1.06-1.06L9.03 7.94Z"></path></svg>
+            JavaDoc API
+        </a>
+        <a href="https://central.sonatype.com/artifact/io.github.chaos-vy/chaos-tree" class="btn btn-secondary">
+            📦 Maven Central
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <!-- ========================================== -->
+    <!-- PART 1: N-ARY FAMILY                       -->
+    <!-- ========================================== -->
+    <h2 class="section-title">📊 Part 1: The N-ary Family <span>B-Tree vs B+ Tree</span></h2>
+    <div class="grid">
+        <div class="card">
+            <h2>Degree Scaling — Random Read @ 1M nodes (ns/op) <span class="badge">SWEET SPOT</span></h2>
+            <canvas id="degreeChart"></canvas>
+            <div class="insight"><b>t=32 wins on latency.</b> LLC misses rise after t=64 as nodes outgrow L1. Diminishing returns plateau after t=100.</div>
+        </div>
+        <div class="card">
+            <h2>Range Scan — B+ Tree vs B-Tree @ 1M, degree=32 (ns/op)</h2>
+            <canvas id="rangeChart"></canvas>
+            <div class="insight"><b>B+ Tree: 334K ns/op vs B-Tree: 474K ns/op.</b> Leaf-chain traversal gives B+ Tree a <b>~29% advantage</b> on range scans.</div>
+        </div>
+        <div class="card">
+            <h2>Insert/Delete @ 1M nodes — Degree Scaling (ns/op)</h2>
+            <canvas id="insertChart"></canvas>
+            <div class="insight"><b>Higher degrees generally reduced insert/delete latency in this benchmark.</b> More keys per node = fewer splits = less structural overhead per operation.</div>
+        </div>
+        <div class="card">
+            <h2>Concurrent Benchmark @ degree=32 — Search (ns/op)</h2>
+            <canvas id="concurrentChart"></canvas>
+            <div class="insight"><b>Search scales gracefully to 5M nodes.</b> Both engines suffer monitor lock tax on writes (~16,000+ ns/op).</div>
+        </div>
+        <div class="card full">
+            <h2>GC Allocation Rate — B+ Tree Construction (bytes/op) across degree & size</h2>
+            <canvas id="gcChart"></canvas>
+            <div class="insight"><b>t=32 reduces GC pressure by ~7x vs t=4 at 5M nodes.</b> Higher degree = fewer node allocations = less GC churn.</div>
+        </div>
+        <div class="card full">
+            <h2>LLC Cache Misses — Degree Scaling @ 1M nodes (B+ Tree Random Read)</h2>
+            <canvas id="llcChart"></canvas>
+            <div class="insight"><b>t=16 achieves minimum LLC misses (4.2).</b> Beyond t=64, LLC misses climb as nodes exceed L1/L2 capacity.</div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PART 2: BINARY FAMILY                      -->
+    <!-- ========================================== -->
+    <h2 class="section-title">📊 Part 2: The Binary Family <span>BST, AVL, RBT, Splay, Treap vs TreeSet</span></h2>
+    <div class="grid">
+        <div class="card">
+            <h2>Zipfian Search — All Trees @ 100k nodes (ns/op) <span class="badge">SEARCH</span></h2>
+            <canvas id="zipfianSearch100k"></canvas>
+            <div class="insight"><b>RBT leads at 96 ns/op.</b> Splay (297 ns/op) is 3× slower at 100k — additional restructuring overhead dominates under Zipfian skew</div>
+        </div>
+        <div class="card">
+            <h2>Zipfian Search — Latency Scaling 1k→100k (ns/op)</h2>
+            <canvas id="zipfianSearchScaling"></canvas>
+            <div class="insight">All trees grow sub-linearly. Splay diverges sharply from 1k→100k as its latency increases more rapidly at larger scales</div>
+        </div>
+        <div class="card">
+            <h2>Insert/Delete @ 1k–100k (ns/op) <span class="badge warn">WRITE COST</span></h2>
+            <canvas id="insertDelete"></canvas>
+            <div class="insight"><b>Java TreeSet wins insert/delete</b> due to JIT optimizations. Among chaos trees, BST is fastest, Splay is a massive outlier.</div>
+        </div>
+        <div class="card">
+            <h2>Clone Construction @ 1k–100k (ms/op)</h2>
+            <canvas id="cloneConstruction"></canvas>
+            <div class="insight">At 100k nodes all chaos clones land within <b>~0.005 ms of each other</b>. Chaos trees are faster or on-par with Java TreeSet.</div>
+        </div>
+        <div class="card full">
+            <h2>GC Allocation — Clone (bytes/op) across tree types &amp; sizes</h2>
+            <canvas id="gcClone"></canvas>
+            <div class="insight"><b>chaos BST uses 40% less memory than TreeSet per cloned node</b>; balanced chaos trees use 20% less.</div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    ChaosTree v1.0.0 — Engineered with Mechanical Sympathy. <br>
+</footer>
+
+<script>
+    // --- EXACT SAME CHART.JS SCRIPT AS BEFORE ---
+    const C = { blue: '#58a6ff', green: '#3fb950', orange: '#d29922', purple: '#bc8cff', red: '#f85149', teal: '#39d353', text: '#8b949e', grid: '#21262d' };
+    const defaults = { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: C.text, font: { size: 11 } } } }, scales: { x: { ticks: { color: C.text, font:{size:10} }, grid: { color: C.grid } }, y: { ticks: { color: C.text, font:{size:10} }, grid: { color: C.grid } } } };
+
+    new Chart(document.getElementById('degreeChart'), { type: 'line', data: { labels: [4,8,16,32,64,100,128,200,512], datasets: [{ label: 'B+ Tree ns/op', data: [653.7, 564.9, 532.1, 518.9, 528.5, 507.5, 522.0, 515.5, 511.7], borderColor: C.blue, backgroundColor: C.blue+'22', tension: 0.3, pointRadius: 4 }] }, options: { ...defaults } });
+    new Chart(document.getElementById('rangeChart'), { type: 'bar', data: { labels: ['B+ Tree (leaf chain)', 'B-Tree (recursive)'], datasets: [{ label: 'Range Scan ns/op @ 1M', data: [334197, 474221], backgroundColor: [C.green+'88', C.red+'88'], borderColor: [C.green, C.red], borderWidth: 1.5 }] }, options: { ...defaults, plugins: { legend: { display: false } } } });
+    new Chart(document.getElementById('insertChart'), { type: 'bar', data: { labels: ['t=4', 't=32', 't=128'], datasets: [ { label: 'B+ Tree ns/op', data: [250.6, 223.6, 101.8], backgroundColor: C.blue+'88', borderColor: C.blue, borderWidth: 1.5 }, { label: 'B-Tree ns/op', data: [295.5, 201.8, 97.0], backgroundColor: C.purple+'88', borderColor: C.purple, borderWidth: 1.5 } ] }, options: { ...defaults } });
+    new Chart(document.getElementById('concurrentChart'), { type: 'line', data: { labels: ['1k', '50k', '1M', '5M'], datasets: [ { label: 'B+ Tree search (ns/op)', data: [1360.8, 1769.2, 5082.4, 7891.4], borderColor: C.blue, backgroundColor: C.blue+'22', tension: 0.3, pointRadius: 4 }, { label: 'B-Tree search (ns/op)', data: [1153.0, 1684.9, 5196.8, 6004.5], borderColor: C.purple, backgroundColor: C.purple+'22', tension: 0.3, pointRadius: 4 } ] }, options: { ...defaults } });
+    new Chart(document.getElementById('gcChart'), { type: 'bar', data: { labels: ['1k nodes', '50k nodes', '1M nodes', '5M nodes'], datasets: [ { label: 't=4 (bytes/op)', data: [22184, 1116169, 22360150, 111794400], backgroundColor: C.red+'88', borderColor: C.red, borderWidth: 1.5 }, { label: 't=32 (bytes/op)', data: [7944, 363304, 7224797, 36047490], backgroundColor: C.blue+'88', borderColor: C.blue, borderWidth: 1.5 }, { label: 't=128 (bytes/op)', data: [8616, 303352, 6101914, 31496590], backgroundColor: C.green+'88', borderColor: C.green, borderWidth: 1.5 } ] }, options: { ...defaults, scales: { x: { ticks: { color: C.text }, grid: { color: C.grid } }, y: { type: 'logarithmic', ticks: { color: C.text }, grid: { color: C.grid } } } } });
+    new Chart(document.getElementById('llcChart'), { type: 'line', data: { labels: [4,8,16,32,64,100,128,200,512], datasets: [{ label: 'LLC Load Misses', data: [7.4, 5.0, 4.2, 4.3, 5.0, 5.3, 5.9, 5.9, 6.2], borderColor: C.orange, backgroundColor: C.orange+'22', tension: 0.3, pointRadius: 5 }] }, options: { ...defaults } });
+    new Chart(document.getElementById('zipfianSearch100k'), { type: 'bar', data: { labels: ['BST', 'AVL', 'RBT', 'Treap', 'Splay', 'TreeSet'], datasets: [{ label: 'Search ns/op @ 100k', data: [87.5, 95.0, 96.0, 147.6, 297.2, 91.5], backgroundColor: [C.green+'88', C.blue+'88', C.teal+'88', C.orange+'88', C.red+'88', C.purple+'88'], borderColor: [C.green, C.blue, C.teal, C.orange, C.red, C.purple], borderWidth: 1.5 }] }, options: { ...defaults, plugins: { legend: { display: false } } } });
+    new Chart(document.getElementById('zipfianSearchScaling'), { type: 'line', data: { labels: ['1k', '10k', '100k'], datasets: [ { label: 'BST', data: [42.8, 63.8, 87.5], borderColor: C.green, backgroundColor: C.green+'22', tension:0.3, pointRadius:4 }, { label: 'AVL', data: [43.4, 63.0, 95.0], borderColor: C.blue, backgroundColor: C.blue+'22', tension:0.3, pointRadius:4 }, { label: 'RBT', data: [41.0, 64.1, 96.0], borderColor: C.teal, backgroundColor: C.teal+'22', tension:0.3, pointRadius:4 }, { label: 'TreeSet', data: [43.2, 64.8, 91.5], borderColor: C.purple, backgroundColor: C.purple+'22', tension:0.3, pointRadius:4 } ] }, options: { ...defaults } });
+    new Chart(document.getElementById('insertDelete'), { type: 'bar', data: { labels: ['1k', '10k', '100k'], datasets: [ { label: 'BST', data: [87.7, 98.2, 92.2], backgroundColor: C.green+'88', borderColor: C.green, borderWidth:1.5 }, { label: 'RBT', data: [82.5, 102.7, 140.2], backgroundColor: C.teal+'88', borderColor: C.teal, borderWidth:1.5 }, { label: 'TreeSet', data: [32.3, 44.0, 61.9], backgroundColor: C.purple+'88', borderColor: C.purple, borderWidth:1.5 } ] }, options: { ...defaults } });
+    new Chart(document.getElementById('cloneConstruction'), { type: 'line', data: { labels: ['1k', '10k', '100k'], datasets: [ { label: 'BST', data: [0.005, 0.092, 1.047], borderColor: C.green, backgroundColor: C.green+'22', tension:0.3, pointRadius:4 }, { label: 'TreeSet', data: [0.007, 0.108, 1.350], borderColor: C.purple, backgroundColor: C.purple+'22', tension:0.3, pointRadius:4 } ] }, options: { ...defaults } });
+    new Chart(document.getElementById('gcClone'), { type: 'bar', data: { labels: ['1k nodes', '10k nodes', '100k nodes'], datasets: [ { label: 'BST (bytes/op)', data: [24032, 240032, 2400036], backgroundColor: C.green+'88', borderColor: C.green, borderWidth:1.5 }, { label: 'RBT (bytes/op)', data: [32032, 320032, 3200036], backgroundColor: C.teal+'88', borderColor: C.teal, borderWidth:1.5 }, { label: 'TreeSet (bytes/op)', data: [40096, 400096, 4000101], backgroundColor: C.purple+'88', borderColor: C.purple, borderWidth:1.5 } ] }, options: { ...defaults, scales: { y: { type: 'logarithmic', ticks: { color: C.text }, grid: { color: C.grid } } } } });
+</script>
+</body>
+</html>

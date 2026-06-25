@@ -1,4 +1,4 @@
-# ADR-008: flatTree Retired
+# ADR-007: flatTree Retired
 
 Very early in our research phase, we tried building a 'Flat Tree'. Instead of nodes holding actual memory pointers (`left`, `right`) to their children, the entire binary tree was mapped perfectly onto a single, contiguous 1D array (where the root is at index 0, the left child at $2i+1$, and the right child at $2i+2$).
 

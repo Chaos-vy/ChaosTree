@@ -1,4 +1,4 @@
-# ADR-009: Stream & Traversal API Segregation
+# ADR-008: Stream & Traversal API Segregation
 
 In the early days of ChaosTree, our root interface `ISearchTree` forced every single tree to support every kind of traversal (Pre-order, Post-order, Level-order) via `Stream<T> stream(TraversalType type)`. 
 

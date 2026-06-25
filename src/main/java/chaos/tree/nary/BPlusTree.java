@@ -51,6 +51,17 @@ public class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T, BPlu
         super(degree);
         this.head = null;
     }
+
+    /**
+     * Constructs an empty B+Tree using the default minimum degree.
+     * <p>
+     * The default degree is {@value #DEFAULT_DEGREE}, providing a balanced
+     * trade-off between memory density, cache locality, and mutation cost
+     * for general-purpose workloads.
+     */
+    public BPlusTree(Iterable<? extends T> collection){
+        this(DEFAULT_DEGREE, collection);
+    }
     /**
      * Constructs a B+ Tree with the specified degree and populates it with elements
      * from the provided iterable collection.

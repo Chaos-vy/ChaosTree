@@ -23,10 +23,10 @@ This limitation is driven by JVM array boundaries. The standard Java Collection 
 
 ## 2. Stack Depth vs. Heap Limits
 
-Unlike Binary Search Trees (BST), which can suffer catastrophic `StackOverflowError` crashes if they get too deep, our N-ary family is mathematically immune to stack overflow.
+Unlike Binary Search Trees (BST), which can suffer `StackOverflowError` crashes if they get too deep, our N-ary family maintains extremely shallow recursion depths, making StackOverflowError practically unreachable under realistic JVM heap limits.
 
 * **Stack Depth Immunity:** A B-Tree of order 100 containing 1 billion elements will have a maximum tree height of just 5! All our traversal and mutation logic stays incredibly shallow.
-* **Heap Bounds Only:** Because the tree height is so shallow, these trees are solely limited by your available JVM Heap memory. You will never see a `StackOverflowError` from them.
+* **Heap Bounds Only:** Because the tree height is so shallow, these trees are solely limited by your available JVM Heap memory. Under realistic JVM heap limits, heap exhaustion occurs long before recursion depth becomes a concern.
 
 ---
 
@@ -35,7 +35,7 @@ Unlike Binary Search Trees (BST), which can suffer catastrophic `StackOverflowEr
 We designed the N-ary Family to be **not natively thread-safe**, but they are structurally built to support incredibly high-throughput concurrency if you wrap them in an external `ReadWriteLock`.
 
 * **No Structural Read-Mutation:** Unlike the Binary `Splay` tree, neither `BTree` nor `BPlusTree` restructure during read queries (`contains()`, `rangeStream()`).
-* **High Read Concurrency:** Multiple threads holding a read-lock can simultaneously traverse the internal `Object[]` arrays without contention, achieving near-linear read scaling on multi-core systems.
+* **High Read Concurrency:** Multiple threads holding a read-lock can simultaneously traverse the internal `Object[]` arrays without contention, allowing high levels of concurrent read parallelism when protected by an external ReadWriteLock.
 * **Write Contention:** Because we have to do $O(t)$ array shifting during insertions (via `System.arraycopy`), write locks hold the monitor slightly longer than they do for simple binary pointer rewires. If you have an extreme, hyper-aggressive write-heavy workload, our Binary `RBT` might actually slightly outperform our N-ary writes just because it doesn't have to shift arrays.
 
 ---
@@ -62,4 +62,4 @@ Through micro-architectural CPU testing (`perf`) and heap saturation testing, th
 ### Engineering Takeaways
 1. **B+Tree vs ArrayList:** `ArrayList` reaches 798M elements because it is a flat, single contiguous array with zero per-entry object overhead. The B+Tree packs 696M elements in the exact same heap — only ~13% fewer — despite carrying full tree structure, internal routing nodes, and leaf-chain linked-list pointers. This proves the N-ary engine is architecturally comparable to Java's most memory-efficient core collection.
 2. **B+Tree vs RBT:** The B+Tree stores nearly **double** the elements of an RBT (696M vs 357M) in the same heap. An order-100 B-Tree stores up to 99 elements sequentially with only 100 pointers, whereas an RBT requires a separate JVM object (with a 16-byte object header) plus pointer fields for every single element.
-3. **Zero ArrayList Waste:** By explicitly rejecting `java.util.ArrayList` (which grows by 1.5x and wastes spare capacity), the ChaosTree N-ary nodes maintain absolute, deterministic heap boundaries, culminating in industrial-grade 696-million element saturation limits.
+3. **Zero ArrayList Waste:** By explicitly rejecting `java.util.ArrayList` (which grows by 1.5x and wastes spare capacity), the ChaosTree N-ary nodes maintain absolute, deterministic heap boundaries, culminating in a measured saturation limit of approximately 696 million elements on the benchmark hardware.

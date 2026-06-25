@@ -76,11 +76,11 @@ The ChaosTree architecture was tested directly against Java's native `java.util.
 
 | Data Structure       | Max Elements Retained | Total Footprint per Element | Failure Mode                 |
 |----------------------|-----------------------|-----------------------------|------------------------------|
-| **ChaosTree RBT**    | **126,790,102**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
-| **ChaosTree Treap**  | **126,716,759**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
-| **ChaosTree AVL**    | **126,742,182**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
-| **ChaosTree Splay**  | **126,758,548**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
-| **Native `TreeSet`** | 84,497,244            | $\approx 72$ bytes          | `OutOfMemoryError` (Heap)    |
+| **ChaosTree RBT**    | **126,777,335**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
+| **ChaosTree Treap**  | **126,775,226**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
+| **ChaosTree AVL**    | **126,752,322**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
+| **ChaosTree Splay**  | **126,727,081**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
+| **Native `TreeSet`** | 84,523,757            | $\approx 72$ bytes          | `OutOfMemoryError` (Heap)    |
 | **ChaosTree BST**    | 19,654                | $\approx 40$ bytes          | `StackOverflowError` (Stack) |
 
 | Tree    | Structural Overhead (Excluding Payload) |

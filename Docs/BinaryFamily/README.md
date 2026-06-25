@@ -25,7 +25,7 @@ The Binary Family is the core module of ChaosTree — five production-grade bina
 | **[API](API.md)**                             | Every method signature, parameters, return type, and usage example                          |
 | **[Benchmark](Benchmark.md)**                 | JMH results with L1 cache, branch miss, and instructions-per-op profiling                   |
 | **[Complexity](Complexity.md)**               | Time and space complexity per operation across all 5 trees                                  |
-| **[Design-decision](../ADR/Design-decision.md)**     | Architecture decisions — why CRTP, DeleteResult, Color enum, SearchResult, afterDelete hook |
+| **[Design-decision](../ADR/README.md)**     | Architecture decisions — why CRTP, DeleteResult, Color enum, SearchResult, afterDelete hook |
 | **[Limits](Limits.md)**                       | OOM and SOF boundaries from Chaos Engine stress tests per tree                              |
 | **[Test](Test.md)**                           | 387 binary tests — all passed.                                                          |
 

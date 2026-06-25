@@ -347,11 +347,15 @@ In our classic `BTree`, user data lives everywhere. Internal nodes act as both r
 Our `BPlusTree` takes a completely different approach: internal nodes are strictly for routing, and 100% of the actual user data is packed tightly into the leaf layer. 
 
 ```text
-Root
- ├── Internal Routing Nodes
- │
- ▼
-Leaf ⇄ Leaf ⇄ Leaf ⇄ Leaf
+             Root
+              │
+      ┌───────┴───────┐
+      │               │
+   Internal       Internal
+      │               │
+      └───────┬───────┘
+              │
+Leaf → Leaf → Leaf → Leaf
 ```
 
 Why do this? Because it makes sequential operations blindingly fast.

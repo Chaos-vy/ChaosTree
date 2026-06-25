@@ -1,10 +1,66 @@
+# Maven & Build Output
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+release.properties
+*.versionsBackup
+
+
+# IDEs & Editor Artifacts
+# IntelliJ IDEA
 .idea/
 *.iml
+*.iws
 *.lnk
-*.class
-target/
 out/
-Converter.py
-get_markdown.py
-update_svgs.py
-jmh.txt
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+# VS Code
+.vscode/
+
+# Java & JVM
+*.class
+*.log
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# JVM Crash Logs
+hs_err_pid*
+replay_pid*
+
+*.gpg
+*.asc
+*.sig
+
+*.jks
+*.keystore
+*.truststore
+*.p12
+*.pfx
+*.pem
+*.key
+*.csr
+*.crt
+*.der
+
+# Environment Variables
+.env
+.env.*
+.env.local
+secrets/
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

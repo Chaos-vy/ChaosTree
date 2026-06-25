@@ -23,7 +23,7 @@ The N-ary Family is the high-density contiguous-memory module of ChaosTree — f
 | **[Complexity](Complexity.md)**                  | Time and space complexity per operation, detailing core algorithmic divergences                 |
 | **[Limits](Limits.md)**                          | Extreme heap saturation limits, stack depth immunity, and density comparisons                   |
 | **[DegreeOptimization](DegreeOptimization.md)**  | L1/L2 cache physics, degree selection guide, and GC allocation tradeoffs                        |
-| **[Design-decision](../ADR/Design-decision.md)** | Architecture decisions — N-ary node paradox, `Object[]` usage, and API segregation              |
+| **[Design-decision](../ADR/README.md)** | Architecture decisions — N-ary node paradox, `Object[]` usage, and API segregation              |
 
 ## Quick Start
 
@@ -34,6 +34,7 @@ import chaos.tree.nary.BPlusTree;
 
 // Degree (t) = 4 (Max 7 elements per node, Min 3)
 BPlusTree<Integer> tree = new BPlusTree<>(4);
+BPlusTree<Integer> tree0 = new BPlusTree<>(); //Default degree(t) = 32
 
 tree.insert(30);
 tree.insert(10);
@@ -52,8 +53,12 @@ tree.size();         // 2
 import chaos.tree.nary.BTree;
 import java.util.List;
 
-BTree<String> tree = new BTree<>(32, List.of("delta", "alpha", "charlie", "bravo"));
+BTree<String> tree0 = new BTree<>(List.of("delta", "alpha", "charlie", "bravo"));// Default degree(t) = 32
 tree.size();  // 4
+
+BTree<String> tree = new BTree<>(128, List.of("delta", "alpha", "charlie", "bravo"));
+tree.size();  // 4
+
 ```
 
 ### Positional Queries

@@ -8,6 +8,15 @@ The `NaryTree<T>` interface inherits from `ISearchTree<T>` and `ITree`. We desig
 
 ## API Summary
 
+### Constructors
+| Constructor                                                            | Description                                                                                                                | Exceptions Thrown                                  |
+|------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| `BTree()` , `BPlusTree()`                                              | Constructs an empty tree with the default optimal degree of 32 (e.g. `new BTree<>()` or `new BPlusTree<>()`).              | *None*                                             |
+| `BTree(int degree)` , `BPlusTree(int degree)`                          | Constructs an empty tree with the specified maximum degree.                                                                | `IllegalArgumentException` (if degree < 2)         |
+| `Tree(Iterable<T>)`                                                    | Constructs and populates the tree using the default optimal degree of 32.                                                  | `NullPointerException`                             |
+| `BTree(int degree, Iterable<T>)` ,`BPlusTree(int degree, Iterable<T>)` | Constructs and populates the tree. If an identical tree is passed, performs a blazingly fast $O(N)$ structural deep clone. | `IllegalArgumentException`, `NullPointerException` |
+| `BTree(Tree<T> other)` ,`BPlusTree(Tree<T> other)`                     | Directly creates a physical deep clone of another N-ary tree.                                                              | `NullPointerException`                             |
+
 ### Core Operations
 | Method                      | Description                                                      | Exceptions Thrown                                          |
 |-----------------------------|------------------------------------------------------------------|------------------------------------------------------------|

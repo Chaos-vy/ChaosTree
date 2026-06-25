@@ -41,6 +41,16 @@ public final class BTree<T extends Comparable<T>> extends AbstractNaryTree<T, BT
     }
 
     /**
+     * Constructs an empty B-Tree using the default minimum degree.
+     * <p>
+     * The default degree is {@value #DEFAULT_DEGREE}, providing a balanced
+     * trade-off between memory density, cache locality, and mutation cost
+     * for general-purpose workloads.
+     */
+    public BTree(Iterable<? extends T> collection) {
+        this(DEFAULT_DEGREE, collection);
+    }
+    /**
      * Constructs a B-Tree with the specified degree and populates it with elements
      * from the provided iterable collection.
      * <p>If the provided collection is another {@code BTree} instance with the exact
