@@ -6,18 +6,13 @@ We built ChaosTree because we wanted to see what happens when you take textbook 
 
 ---
 ## 📦 Installation
+Add **ChaosTree** to your project by building it from source:
 
-Add `ChaosTree` to your project via **Maven Central**:
-
-````
-git clone https://github.com/Chaos-vy/ChaosTree.git 
+```bash
+git clone https://github.com/Chaos-vy/ChaosTree.git
 cd ChaosTree
 mvn clean install
-
-ChaosTree is currently under development.
-
-Installation instructions will be added once the project is publicly released and published to Maven Central.
-````
+```
 ## ☕ Requirements
 
 - Minimum JDK: 17
