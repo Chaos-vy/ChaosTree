@@ -70,10 +70,9 @@ The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Trav
 
 ## Practical Usage Example
 
-Below is a practical example demonstrating how to initialize a tree via the `BinaryTree` interface and utilize the query and traversal APIs.
+Below is a practical example demonstrating how to initialize a tree via the `BinaryTree` interface and utilize the query and traversal APIs. **You can copy and run**
 
 ```java
-package chaos.tree;
 import chaos.tree.binary.RBT;
 import chaos.tree.binary.BinaryTree;
 import chaos.tree.core.searchtree.PrintStyle;

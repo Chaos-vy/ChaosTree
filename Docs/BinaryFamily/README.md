@@ -25,9 +25,9 @@ The Binary Family is the core module of ChaosTree — five production-grade bina
 | **[API](API.md)**                             | Every method signature, parameters, return type, and usage example                          |
 | **[Benchmark](Benchmark.md)**                 | JMH results with L1 cache, branch miss, and instructions-per-op profiling                   |
 | **[Complexity](Complexity.md)**               | Time and space complexity per operation across all 5 trees                                  |
-| **[Design-decision](Design-decision.md)**     | Architecture decisions — why CRTP, DeleteResult, Color enum, SearchResult, afterDelete hook |
+| **[Design-decision](../ADR/Design-decision.md)**     | Architecture decisions — why CRTP, DeleteResult, Color enum, SearchResult, afterDelete hook |
 | **[Limits](Limits.md)**                       | OOM and SOF boundaries from Chaos Engine stress tests per tree                              |
-| **[Test](Test.md)**                           | 254 test all passed.                                                                        |
+| **[Test](Test.md)**                           | 387 binary tests — all passed.                                                          |
 
 
 
@@ -40,42 +40,25 @@ import chaos.tree.binary.AVL;
 
 AVL<Integer> tree = new AVL<>();
 
-tree.
+tree.insert(30);
+tree.insert(10);
+tree.insert(50);
 
-insert(30);
-tree.
+tree.contains(30);  // true
+tree.contains(99);  // false
 
-insert(10);
-tree.
-
-insert(50);
-
-tree.
-
-contains(30);  // true
-tree.
-
-contains(99);  // false
-
-tree.
-
-delete(10);
-tree.
-
-size();         // 2
+tree.delete(10);
+tree.size();         // 2
 ```
 
 ### Bulk Insert from a Collection
 
 ```java
 import chaos.tree.binary.RBT;
-
 import java.util.List;
 
 RBT<String> tree = new RBT<>(List.of("delta", "alpha", "charlie", "bravo"));
-tree.
-
-size();  // 4
+tree.size();  // 4
 ```
 
 ### Positional Queries
@@ -83,8 +66,8 @@ size();  // 4
 ```java
 tree.min();              // "alpha"
 tree.max();              // "delta"
-tree.floor("cat");       // "charlie"
-tree.ceil("cat");        // "charlie"
+tree.floor("cat");       // "bravo"   — greatest key less than "cat"
+tree.ceil("cat");        // "charlie" — smallest key greater than "cat"
 tree.successor("bravo"); // "charlie"
 tree.kthSmallest(2);     // "bravo"
 tree.lca("alpha", "charlie"); // "bravo" (or the actual LCA node value)
@@ -115,12 +98,8 @@ import chaos.tree.binary.AVL;
 AVL<Integer> original = new AVL<>(List.of(30, 10, 50, 20, 40));
 AVL<Integer> clone = new AVL<>(original);  // O(n) structural copy
 
-clone.
-
-insert(99);
-original.
-
-contains(99);  // false — fully independent
+clone.insert(99);
+original.contains(99);  // false — fully independent
 ```
 
 ---
@@ -223,7 +202,7 @@ BinaryFamily is not thread-safe by default. BST, AVL, RBT, and Treap can be made
 **Splay cannot use `ReadWriteLock`.** `contains()` is a structural write by design. Removing splay-on-search breaks the amortized O(log n) guarantee which is Splay's entire value proposition. A read-only `contains()` gives you O(n) worst-case on adversarial access patterns with no amortized recovery. The `ReadWriteLock` benefit doesn't justify breaking the core guarantee.
 **Concurrent Splay = clone-per-thread.**
 
-Concurrent RBT and AVL are planned for 1.1.0 on a separate hierarchy.
+We are currently planning to build a true, fully lock-free Concurrent RBT for v1.1.0 on a completely separate hierarchy. (We explicitly decided *not* to build a concurrent AVL or Splay—see our ADRs for the full breakdown on why).
 
 > Full thread-safety analysis, external sync patterns, and verified stress
 > test results → [Benchmark.md](Benchmark.md)

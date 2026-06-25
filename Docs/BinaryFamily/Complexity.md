@@ -135,14 +135,13 @@ All positional queries perform a standard vertical traversal from the root down 
 | **Splay** | `SplayNode` |      value, left, right, **parent**       |     +1 ref      |
 
 ### Total Tree Space
-
-| Tree  | Space | Notes            |
-|-------|:-----:|------------------|
-| BST   | O(n)  | 3 fields/node    |
-| AVL   | O(n)  | 4 fields/node    |
-| Treap | O(n)  | 4 fields/node    |
-| RBT   | O(n)  | 5 fields/(4)node |
-| Splay | O(n)  | 4 fields/node    |
+| Tree  | Space | Notes                              |
+| ----- | :---: | ---------------------------------- |
+| BST   |  O(n) | 3 fields/node                      |
+| AVL   |  O(n) | 4 fields/node (`height`)           |
+| Treap |  O(n) | 4 fields/node (`priority`)         |
+| RBT   |  O(n) | 5 fields/node (`parent` + `color`) |
+| Splay |  O(n) | 4 fields/node (`parent`)           |
 
 > **The Cost of Metadata at Scale:** 
 > When you're managing 100 million nodes, the extra parent pointer required by Red-Black and Splay trees instantly consumes an additional ~800 MB of heap space (assuming an 8-byte reference on a standard 64-bit JVM). This is exactly why we decoupled our node hierarchy and didn't force parent pointers onto the BST, AVL, or Treap.
