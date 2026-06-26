@@ -829,7 +829,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
      */
     @Override
     public T kthSmallest(int k) {
-        if (k <= 0 || k > size) throw new IllegalArgumentException("k is out of bounds");
+        if (k <= 0 || k > size) throw new IllegalArgumentException("k=" + k + " is out of bounds [1, " + size + "]");
         Iterator<T> it = iterator();
         T result = null;
         for (int i = 0; i < k; i++) {
@@ -841,7 +841,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     @Override
     public int height() {
         if (root == null) return 0;
-        int h = 1;
+        int h = 0;
         N node = root;
         while (!node.isLeaf()) {
             node = node.getChild(0);
@@ -851,6 +851,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     }
     @Override
     public void retainAll(Iterable<? extends T> values) {
+        if (isEmpty()) return;
         Objects.requireNonNull(values);
 
         Set<T> retainSet = new HashSet<>();

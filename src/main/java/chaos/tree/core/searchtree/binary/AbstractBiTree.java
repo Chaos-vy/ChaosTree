@@ -594,11 +594,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *               not be {@code null}
      * @throws NullPointerException if {@code values} is {@code null}, or if any element
      *                              produced by {@code values} is {@code null}
-     * @throws EmptyTreeException   if this tree is empty
      */
     @Override
     public void retainAll(Iterable<? extends T> values) {
-        treeIsEmpty();
+        if (isEmpty()) return;
         Objects.requireNonNull(values);
         Set<T> retain = new HashSet<>();
         for (T value : values) {
@@ -870,9 +869,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
 
     @Override
     public T kthSmallest(int k) {
-        if (k < 1 || k > size) {
-            throw new IllegalArgumentException("Out of Bound");
-        }
+        if (k <= 0 || k > size) throw new IllegalArgumentException("k=" + k + " is out of bounds [1, " + size + "]");
         final int[] count = new int[]{k};
         N result = kthSmallest(root, count);
         return result.getValue();

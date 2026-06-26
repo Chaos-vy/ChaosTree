@@ -82,17 +82,17 @@ The `Docs/ADR/` directory contains the architectural history of the project. The
 
 |                              ADR                              | Title                                                                    |
 |:-------------------------------------------------------------:|:-------------------------------------------------------------------------|
-|         **[ADR-001](Docs/ADR/ADR-001-DeleteResult-Record.md)**         | `DeleteResult` Record over `boolean[]`                                   |
-|          **[ADR-002](Docs/ADR/ADR-002-modCount-as-long.md)**           | Modification Count (`modCount`) as `long`                                |
-|            **[ADR-003](Docs/ADR/ADR-003-CRTP-Pattern.md)**             | CRTP Pattern (`BiNode<T, N extends BiNode<T,N>>`)                        |
-|          **[ADR-004](Docs/ADR/ADR-004-volatile-Retained.md)**          | `volatile` Retained in `AbstractBiTree` (Rejected in `AbstractNaryTree`) |
-|         **[ADR-005](Docs/ADR/ADR-005-Leaf-children-null.md)**          | Leaf `children = null` (N-ary Node Memory Paradox)                       |
-|     **[ADR-006](Docs/ADR/ADR-006-Object-Array-over-ArrayList.md)**     | `Object[]` over `ArrayList` in N-ary Engine                              |
-| **[ADR-007](Docs/ADR/ADR-007-Rejecting-the-FlatTree-Architecture.md)** | `flatTree` Retired                                                       |
-|  **[ADR-008](Docs/ADR/ADR-008-Stream-Traversal-API-Segregation.md)**   | Stream & Traversal API Segregation                                       |
-|    **[ADR-009](Docs/ADR/ADR-009-BiNode-vs-ParentBiNode-Split.md)**     | `BiNode` vs `ParentBiNode` Split (Parent Pointer Separation)             |
-|    **[ADR-010](Docs/ADR/ADR-010-SearchResult-NodeSearchResult.md)**    | `SearchResult` & `NodeSearchResult` — Single-Pass Traversal Records      |
-|        **[ADR-011](Docs/ADR/ADR-011-Value-Store-over-Map.md)**         | Value-Store vs Key-Value Map API                                         |
+|         **[ADR-001](docs/ADR/ADR-001-DeleteResult-Record.md)**         | `DeleteResult` Record over `boolean[]`                                   |
+|          **[ADR-002](docs/ADR/ADR-002-modCount-as-long.md)**           | Modification Count (`modCount`) as `long`                                |
+|            **[ADR-003](docs/ADR/ADR-003-CRTP-Pattern.md)**             | CRTP Pattern (`BiNode<T, N extends BiNode<T,N>>`)                        |
+|          **[ADR-004](docs/ADR/ADR-004-volatile-Retained.md)**          | `volatile` Retained in `AbstractBiTree` (Rejected in `AbstractNaryTree`) |
+|         **[ADR-005](docs/ADR/ADR-005-Leaf-children-null.md)**          | Leaf `children = null` (N-ary Node Memory Paradox)                       |
+|     **[ADR-006](docs/ADR/ADR-006-Object-Array-over-ArrayList.md)**     | `Object[]` over `ArrayList` in N-ary Engine                              |
+| **[ADR-007](docs/ADR/ADR-007-Rejecting-the-FlatTree-Architecture.md)** | `flatTree` Retired                                                       |
+|  **[ADR-008](docs/ADR/ADR-008-Stream-Traversal-API-Segregation.md)**   | Stream & Traversal API Segregation                                       |
+|    **[ADR-009](docs/ADR/ADR-009-BiNode-vs-ParentBiNode-Split.md)**     | `BiNode` vs `ParentBiNode` Split (Parent Pointer Separation)             |
+|    **[ADR-010](docs/ADR/ADR-010-SearchResult-NodeSearchResult.md)**    | `SearchResult` & `NodeSearchResult` — Single-Pass Traversal Records      |
+|        **[ADR-011](docs/ADR/ADR-011-Value-Store-over-Map.md)**         | Value-Store vs Key-Value Map API                                         |
 
 ---
 

@@ -27,7 +27,7 @@ import java.util.stream.StreamSupport;
  * @see BPlusTreeNode
  * @since 1.0.0
  */
-public class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T, BPlusTreeNode<T>> implements NaryTree<T> {
+public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T, BPlusTreeNode<T>> implements NaryTree<T> {
 
     private BPlusTreeNode<T> head;
 
@@ -590,11 +590,28 @@ public class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T, BPlu
     @Override
     public T floor(T key) {
         treeIsEmpty();
-        BPlusTreeNode<T> current = ceil_floorHelper(root, key);
-        if (current == null) return null;
+        if (root == null || key == null) return null;
+        BPlusTreeNode<T> current = root;
+        BPlusTreeNode<T> lastLeftNode = null;
+        int lastLeftIdx = -1;
+        while (!current.isLeaf()) {
+            int idx = routeIndex(current, key);
+            if (idx > 0) {
+                lastLeftNode = current;
+                lastLeftIdx = idx - 1;
+            }
+            current = current.getChild(idx);
+        }
+
         NodeSearchResult result = searchNode(current, key);
-        if (result.found()) return current.getKey(result.index());
-        if (result.index() > 0) return current.getKey(result.index() - 1);
+        int idx = result.index();
+        if (result.found()) return current.getKey(idx);
+        if (idx > 0) return current.getKey(idx - 1);
+        
+        if (lastLeftNode != null) {
+            BPlusTreeNode<T> siblingLeaf = getRightmostLeaf(lastLeftNode.getChild(lastLeftIdx));
+            return siblingLeaf.getKey(siblingLeaf.getKeyCount() - 1);
+        }
         return null;
     }
 

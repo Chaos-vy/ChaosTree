@@ -218,13 +218,13 @@ Detailed design documents and architectural decisions are available in the `Docs
 
 | Document                                       | Description                                                                                   |
 |------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| [`Docs/Architecture.md`](Docs/Architecture.md) | High-level overview of ChaosTree's architecture, package organization, and design philosophy. |
+| [`Docs/Architecture.md`](docs/Architecture.md) | High-level overview of ChaosTree's architecture, package organization, and design philosophy. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md)           | For open source contribution and respective guidelines.                                       |
 | [`CHANGELOG.md`](CHANGELOG.md)                 | Release history and notable changes across versions.                                          |
 
 ### Architecture Decision Records (ADR)
 
-The [`Docs/ADR/`](Docs/ADR) directory contains records explaining significant architectural and API decisions.
+The [`Docs/ADR/`](docs/ADR) directory contains records explaining significant architectural and API decisions.
 
 Examples include:
 
@@ -235,7 +235,7 @@ Examples include:
 
 ### Binary Family Documentation
 
-The [`Docs/BinaryFamily/`](Docs/BinaryFamily/README.md) directory contains implementation and usage details for:
+The [`Docs/BinaryFamily/`](docs/BinaryFamily/README.md) directory contains implementation and usage details for:
 
 * BST
 * AVL
@@ -247,7 +247,7 @@ Topics include balancing strategies, invariants, complexity guarantees, and impl
 
 ### N-ary Family Documentation
 
-The [`Docs/NaryFamily/`](Docs/NaryFamily/README.md) directory contains implementation and usage details for:
+The [`Docs/NaryFamily/`](docs/NaryFamily/README.md) directory contains implementation and usage details for:
 
 * BTree
 * BPlusTree

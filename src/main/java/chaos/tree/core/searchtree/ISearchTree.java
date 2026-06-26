@@ -273,7 +273,6 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      *               not be {@code null}
      * @throws NullPointerException if {@code values} is {@code null}, or if any element
      *                              produced by {@code values} is {@code null}
-     * @throws EmptyTreeException   if this tree is empty
      */
     void retainAll(Iterable<? extends T> values);
 
