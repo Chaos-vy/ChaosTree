@@ -7,6 +7,9 @@ We built ChaosTree because we wanted to see what happens when you take textbook 
 ---
 ## Installation
 
+> **Note:** ChaosTree is actively maintained. For upcoming patch releases, known fixes, and the current release status, see [STATUS.md](STATUS.md).
+
+#### Latest Stable Release: v1.0.0
 ### Maven
 
 ```xml
@@ -34,7 +37,7 @@ implementation 'io.github.chaos-vy:chaos-tree:1.0.0'
 - Recommended JDK: 17+
 - Build Tool: Maven 3.8+
 
-* ChaosTree is compiled using `--release 21`.
+* ChaosTree is compiled using `--release 17`.
 * Compatibility testing is performed on JDK 17, JDK 21, and JDK 26 to verify consistent behavior across modern Java runtimes.
 * Performance benchmarks are executed on JDK 21.
 
