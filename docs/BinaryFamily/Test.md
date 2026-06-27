@@ -16,7 +16,7 @@ The ChaosTree test suite validates five distinct binary tree algorithms (BST, AV
 ### Repository-Wide Test Coverage
 The following metrics represent the entire ChaosTree project, including both the Binary and N-ary families:
 
-* **Total Project Unit Tests:** 579 (387 Binary + 182 N-ary + 10 Fuzz Tests)
+* **Total Project Unit Tests:** 585 (387 Binary + 183 N-ary + 10 Fuzz Tests + 5 Release Verification Tests)
 
 Collectively, the suite confirms that regardless of the underlying balancing algorithm, every tree in the `BinaryFamily` adheres to the contract of a generic search tree. It verifies structural integrity, traversal correctness, mathematical invariants, fail-fast mechanics, and bulk-mutation stability under both isolated and concurrent workloads.
 
@@ -118,7 +118,7 @@ For scale testing, the suite employs `java.util.TreeSet` as a correctness oracle
 To maintain suite speed and conceptual focus, several domains are explicitly excluded from unit tests.
 
 ### Splay Locality Testing
-We do not test temporal locality or Zipfian distribution speeds in unit tests. Validating the amortized $O(1)$ Splay advantage requires a dedicated distribution-aware hardware benchmarking suite, which belongs in the benchmark suite, not the unit tests.
+I do not test temporal locality or Zipfian distribution speeds in unit tests. Validating the amortized $O(1)$ Splay advantage requires a dedicated distribution-aware hardware benchmarking suite, which belongs in the benchmark suite, not the unit tests.
 
 ### Garbage Collection Pressure
 Testing allocation rates, node header sizes, and L1/L2 cache evictions is deferred to JMH performance testing with GC profilers. 

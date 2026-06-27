@@ -1,6 +1,6 @@
 # Complexity
 
-Here is the time and space complexity for every single operation in our N-ary Family (`BTree`, `BPlusTree`).
+Here is the time and space complexity for every single operation in my N-ary Family (`BTree`, `BPlusTree`).
 
 ← Back to [README](README.md)
 
@@ -36,8 +36,8 @@ In an N-ary tree, every node contains an array of elements.
 
 ### Core Algorithmic Divergences
 Even though they share the same Big-O notation, the way these two trees actually execute algorithms is fundamentally different:
-* **Early Termination (`contains`)**: Our **B-Tree** can find a value in an internal routing node and return `true` immediately without ever reaching a leaf. Our **B+ Tree**, however, MUST traverse all the way down to the leaf layer every single time, because its internal nodes only hold routing copies of the keys.
-* **Deletion Logic (`delete`)**: If our **B-Tree** deletes a key from an internal node, it has to execute a complex algo to find the predecessor in the left subtree, swap the keys, and then delete the leaf. The **B+ Tree** is much simpler: it always deletes directly from the leaf layer.
+* **Early Termination (`contains`)**: My **B-Tree** can find a value in an internal routing node and return `true` immediately without ever reaching a leaf. My **B+ Tree**, however, MUST traverse all the way down to the leaf layer every single time, because its internal nodes only hold routing copies of the keys.
+* **Deletion Logic (`delete`)**: If my **B-Tree** deletes a key from an internal node, it has to execute a complex algo to find the predecessor in the left subtree, swap the keys, and then delete the leaf. The **B+ Tree** is much simpler: it always deletes directly from the leaf layer.
 
 > **Why $O(t \log_t n)$ for mutation?** While finding the insertion index is fast via binary search, inserting into an array of size $2t$ requires shifting elements memory-right via `System.arraycopy`, taking $O(t)$ time per modified node block.
 
@@ -60,7 +60,7 @@ Even though they share the same Big-O notation, the way these two trees actually
 | `kthSmallest(k)` | $O(n)$ | $O(n)$ |
 | `height()`       | $O(\log_t n)$ | $O(\log_t n)$ |
 
-> **Note on `height()`**: Multi-way trees grow strictly bottom-up, meaning all leaves are at the exact same depth. Therefore, computing the height only requires traversing down the leftmost spine of the tree, giving us a fast $O(\log_t n)$ time complexity rather than the $O(n)$ full-traversal required by the Binary family.
+> **Note on `height()`**: Multi-way trees grow strictly bottom-up, meaning all leaves are at the exact same depth. Therefore, computing the height only requires traversing down the leftmost spine of the tree, giving me a fast $O(\log_t n)$ time complexity rather than the $O(n)$ full-traversal required by the Binary family.
 
 ---
 

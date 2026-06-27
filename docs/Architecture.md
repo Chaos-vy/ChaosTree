@@ -1,8 +1,8 @@
 # ChaosTree Architecture
 
-ChaosTree is built on a deeply object-oriented, strongly encapsulated hierarchy. Our goal was to maximize code reuse behind the scenes while keeping the public API as clean and approachable as possible.
+ChaosTree is built on a deeply object-oriented, strongly encapsulated hierarchy. My goal was to maximize code reuse behind the scenes while keeping the public API as clean and approachable as possible.
 
-At its core, our architecture is driven by a mindset of **Mechanical Sympathy**. We didn't just organize these structures based on theoretical algorithms—we built them around how they physically interact with memory, CPU caches, and the JVM runtime. This led us to create two completely distinct engine families that are optimized for completely different workloads, while still sharing the same underlying search-tree contract.
+At its core, my architecture is driven by a mindset of **Mechanical Sympathy**. I didn't just organize these structures based on theoretical algorithms—I built them around how they physically interact with memory, CPU caches, and the JVM runtime. This led me to create two completely distinct engine families that are optimized for completely different workloads, while still sharing the same underlying search-tree contract.
 
 ## High-Level UML Class Diagram
 
@@ -48,11 +48,11 @@ classDiagram
 
 ### 1. API Contract Segregation (`ITree` → `ISearchTree`)
 
-We wanted to clearly separate fundamental container operations from search-tree-specific behavior.
+I wanted to clearly separate fundamental container operations from search-tree-specific behavior.
 
-We created `ITree` to define the absolute minimal container contract, exposing things like size management and lifecycle control. We then built `ISearchTree` to extend that foundation with ordering-aware capabilities—things like insertion, deletion, range queries, and predecessor/successor navigation.
+I created `ITree` to define the absolute minimal container contract, exposing things like size management and lifecycle control. I then built `ISearchTree` to extend that foundation with ordering-aware capabilities—things like insertion, deletion, range queries, and predecessor/successor navigation.
 
-This clean separation means all of our search-tree implementations can share a perfectly consistent API, and we never have to force Binary and N-ary trees into unrelated, messy abstractions.
+This clean separation means all of my search-tree implementations can share a perfectly consistent API, and I never have to force Binary and N-ary trees into unrelated, messy abstractions.
 
 ---
 
@@ -85,15 +85,15 @@ These operations reflect the structural characteristics of B-Tree and B+ Tree im
 
 ### 3. Shared Engine Layers
 
-One of our primary design goals was to completely eliminate duplicated balancing and structural logic.
+One of my primary design goals was to completely eliminate duplicated balancing and structural logic.
 
-Instead of writing the same rotation logic over and over again for different self-balancing trees, we extracted that common behavior into dedicated engine layers.
+Instead of writing the same rotation logic over and over again for different self-balancing trees, I extracted that common behavior into dedicated engine layers.
 
-We built `AbstractRotateTree` to centralize all the core rotation mechanics used by our AVL, Red-Black, Treap, and Splay trees. 
+I built `AbstractRotateTree` to centralize all the core rotation mechanics used by my AVL, Red-Black, Treap, and Splay trees. 
 
-Then, we created `AbstractParentRotateTree` to extend that foundation with parent-aware operations, like parent rewiring and node transplants. This lets trees that need parent references share all their infrastructure without duplicating code.
+Then, I created `AbstractParentRotateTree` to extend that foundation with parent-aware operations, like parent rewiring and node transplants. This lets trees that need parent references share all their infrastructure without duplicating code.
 
-Because of this layered design, our balancing algorithms can focus strictly on maintaining their mathematical invariants, rather than getting bogged down in low-level pointer manipulation.
+Because of this layered design, my balancing algorithms can focus strictly on maintaining their mathematical invariants, rather than getting bogged down in low-level pointer manipulation.
 
 ---
 
@@ -253,12 +253,12 @@ Think of `AbstractBiTree` as the backbone of the entire binary family. It handle
 Writing raw pointer-manipulation code for tree rotations is notoriously error-prone. By centralizing left and right rotations into `AbstractRotateTree`, AVL and Treap can execute their distinct mathematical balancing strategies while relying on shared, battle-tested rotation mechanics.
 
 #### `AbstractParentRotateTree`
-Some trees need to know who their parents are to balance correctly. `AbstractParentRotateTree` extends our basic rotation layer with parent-aware rewiring and node transplants. This lets our Red-Black and Splay trees execute incredibly complex structural mutations while keeping their core balancing algorithms clean and focused.
+Some trees need to know who their parents are to balance correctly. `AbstractParentRotateTree` extends my basic rotation layer with parent-aware rewiring and node transplants. This lets my Red-Black and Splay trees execute incredibly complex structural mutations while keeping their core balancing algorithms clean and focused.
 
 #### The `BiNode` vs `ParentBiNode` Split
-We intentionally split our node hierarchy into `BiNode` and `ParentBiNode`. Why? Because not all binary trees require parent references. 
+I intentionally split my node hierarchy into `BiNode` and `ParentBiNode`. Why? Because not all binary trees require parent references. 
 
-By completely avoiding parent pointers in structures that don't need them (like BST, AVL, and Treap), we instantly save 8 bytes of heap overhead per node. When managing millions of elements, this architectural split can save significant heap memory by ensuring nodes only carry metadata they actually require. 
+By completely avoiding parent pointers in structures that don't need them (like BST, AVL, and Treap), I instantly save 8 bytes of heap overhead per node. When managing millions of elements, this architectural split can save significant heap memory by ensuring nodes only carry metadata they actually require. 
 
 
 ---
@@ -333,18 +333,18 @@ classDiagram
 ### Design Notes
 
 #### `AbstractNaryTree`
-`AbstractNaryTree` is the workhorse. It centralizes all the terrifyingly complex logic shared by multi-way trees: node splitting, sibling merging, key borrowing, and occupancy validation. By keeping this at the abstract layer, our B-Tree and B+ Tree implementations can focus strictly on routing and layout instead of array manipulation.
+`AbstractNaryTree` is the workhorse. It centralizes all the terrifyingly complex logic shared by multi-way trees: node splitting, sibling merging, key borrowing, and occupancy validation. By keeping this at the abstract layer, my B-Tree and B+ Tree implementations can focus strictly on routing and layout instead of array manipulation.
 
 #### Degree-Driven Design
-Unlike binary trees where a node strictly has left and right children, our N-ary trees use a configurable `degree` (`t`). This parameter completely dictates the tree's physical shape: the maximum capacity of a node, its minimum occupancy, and ultimately the tree's height. 
+Unlike binary trees where a node strictly has left and right children, my N-ary trees use a configurable `degree` (`t`). This parameter completely dictates the tree's physical shape: the maximum capacity of a node, its minimum occupancy, and ultimately the tree's height. 
 
-Tuning the degree lets you trade slightly larger node arrays for dramatically shallower trees. As we prove in our benchmark documentation, degree selection can materially impact latency, cache behavior, and memory efficiency
+Tuning the degree lets you trade slightly larger node arrays for dramatically shallower trees. As I prove in my benchmark documentation, degree selection can materially impact latency, cache behavior, and memory efficiency
 
 #### The B-Tree Architecture
-In our classic `BTree`, user data lives everywhere. Internal nodes act as both routing guards and data storage. If a search query hits an exact match high up in the tree, it terminates immediately without having to chase pointers all the way down to a leaf. It's an elegant, highly balanced approach for general-purpose CRUD workloads.
+In my classic `BTree`, user data lives everywhere. Internal nodes act as both routing guards and data storage. If a search query hits an exact match high up in the tree, it terminates immediately without having to chase pointers all the way down to a leaf. It's an elegant, highly balanced approach for general-purpose CRUD workloads.
 
 #### The B+ Tree Architecture
-Our `BPlusTree` takes a completely different approach: internal nodes are strictly for routing, and 100% of the actual user data is packed tightly into the leaf layer. 
+My `BPlusTree` takes a completely different approach: internal nodes are strictly for routing, and 100% of the actual user data is packed tightly into the leaf layer. 
 
 ```text
              Root

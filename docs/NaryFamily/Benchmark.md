@@ -199,7 +199,7 @@ BTree executes ~2.7 billion more P-Core instructions and generates ~1.2 billion 
 
 > Full JMH GC perflog CSV → [NaryFamilyGallery/narygc.csv](NaryFamilyGallery/narygc.csv)
 
-The `narygc.csv` dataset validates the core mathematical advantage of the N-ary contiguous memory architecture. By tracking the `gc.alloc.rate.norm` (normalized bytes allocated per operation) during bulk tree construction (`bPlusTreeFromIterable`), we can explicitly measure the object-header and pointer bloat across varying degrees.
+The `narygc.csv` dataset validates the core mathematical advantage of the N-ary contiguous memory architecture. By tracking the `gc.alloc.rate.norm` (normalized bytes allocated per operation) during bulk tree construction (`bPlusTreeFromIterable`), I can explicitly measure the object-header and pointer bloat across varying degrees.
 
 ### Construction Allocation (5 Million Elements)
 

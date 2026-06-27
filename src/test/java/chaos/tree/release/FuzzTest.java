@@ -1,4 +1,4 @@
-package chaos.tree;
+package chaos.tree.release;
 
 import chaos.tree.binary.*;
 import chaos.tree.nary.*;
@@ -46,7 +46,6 @@ class FuzzTest {
         TreeSet<DataPacket> truth = new TreeSet<>();
 
         for (int i = 0; i < 50_000; i++) {
-            // Constrained ID range forces compareTo() == 0 duplicates!
             int id = r.nextInt(500);
             DataPacket packet = new DataPacket(id, "Payload-" + id);
 
@@ -55,7 +54,6 @@ class FuzzTest {
                     tree.insert(packet);
                     truth.add(packet);
                 } catch (IllegalArgumentException ignored) {
-                    // Duplicate values should throw IllegalArgumentException
                 }
             } else {
                 tree.delete(packet);
@@ -118,7 +116,6 @@ class FuzzTest {
     @DisplayName("Deep Sequential: Treap (100k)")
     void sequentialTreap() { runSequentialStressTest(new Treap<>(), 100_000); }
 
-    // N-ary trees handle sequence beautifully because of array mechanics and node saturation
     @Test
     @DisplayName("Deep Sequential: BTree (1 Million)")
     void sequentialBTree() { runSequentialStressTest(new BTree<>(32), 1_000_000); }

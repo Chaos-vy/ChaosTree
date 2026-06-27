@@ -218,6 +218,11 @@ public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T>
      *
      * <p>The first smallest element corresponds to {@code k = 1}.</p>
      *
+     * <p><b>Implementation Note:</b> In this library, this operation is executed in 
+     * O(k) time across all tree implementations (both Binary and N-ary). This is an intentional 
+     * architectural decision to avoid augmenting tree nodes with subtree size tracking, 
+     * which would incur significant memory overhead and break contiguous memory density.</p>
+     *
      * @param k the 1-based position of the element to retrieve
      * @return the k-th smallest value
      * @throws IllegalArgumentException if {@code k < 1} or

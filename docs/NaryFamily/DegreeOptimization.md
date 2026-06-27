@@ -1,6 +1,6 @@
 # Degree Optimization & Cache Locality
 
-This document explains how to choose the optimal degree (`t`) parameter for your workload. We'll look at how this maps to real CPU hardware caches (L1/L2) and back it up with actual benchmark data.
+This document explains how to choose the optimal degree (`t`) parameter for your workload. I'll look at how this maps to real CPU hardware caches (L1/L2) and back it up with actual benchmark data.
 
 ← Back to [README](README.md)
 

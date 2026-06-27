@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADRs)
 
-This directory contains our formalized Architecture Decision Records (ADRs). Think of these as our engineering diary—they document all the non-obvious choices we made while building ChaosTree, covering what we built, what we rejected, and exactly why we made those calls.
+This directory contains my formalized Architecture Decision Records (ADRs). Think of these as my engineering diary—they document all the non-obvious choices I made while building ChaosTree, covering what I built, what I rejected, and exactly why I made those calls.
 
 ← Back to [BinaryFamily README](../BinaryFamily/README.md) | [NaryFamily README](../NaryFamily/README.md)
 
@@ -25,10 +25,10 @@ This directory contains our formalized Architecture Decision Records (ADRs). Thi
 
 ## Long-Term Architectural Philosophy
 
-We built ChaosTree entirely around a strict set of guiding principles:
+I built ChaosTree entirely around a strict set of guiding principles:
 
-1. **Encapsulation over Convenience:** We absolutely refuse to leak internal layout (`root()`, `Node` classes) just to make it easier for people to hack custom extensions. The API contract is paramount.
-2. **Performance Through Measurement, Not Assumptions:** We rely heavily on JMH and hardware profiling. Algorithmic theory is great, but we validate it against actual L1 cache geometry, not just textbook Big-O notation.
-3. **Immutability Where Possible:** Our algorithms aim to be structurally pure unless they are explicitly mutating the tree.
-4. **Mechanical Sympathy:** Our design choices always favor how the CPU actually *wants* to execute code. We obsess over minimizing branch mispredictions and pointer-chasing cache misses.
-5. **Explicit Tradeoff Documentation:** Every single tree in this library has a breaking point. We document those limits explicitly, rather than relying on one-size-fits-all marketing hype.
+1. **Encapsulation over Convenience:** I absolutely refuse to leak internal layout (`root()`, `Node` classes) just to make it easier for people to hack custom extensions. The API contract is paramount.
+2. **Performance Through Measurement, Not Assumptions:** I rely heavily on JMH and hardware profiling. Algorithmic theory is great, but I validate it against actual L1 cache geometry, not just textbook Big-O notation.
+3. **Immutability Where Possible:** My algorithms aim to be structurally pure unless they are explicitly mutating the tree.
+4. **Mechanical Sympathy:** My design choices always favor how the CPU actually *wants* to execute code. I obsess over minimizing branch mispredictions and pointer-chasing cache misses.
+5. **Explicit Tradeoff Documentation:** Every single tree in this library has a breaking point. I document those limits explicitly, rather than relying on one-size-fits-all marketing hype.

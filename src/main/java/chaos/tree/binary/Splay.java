@@ -81,12 +81,14 @@ public final class Splay<T extends Comparable<T>> extends AbstractParentRotateTr
             root = createNode(value);
             size = Math.addExact(size, 1);
             modCount++;
+            cachedHashedCode += value.hashCode();
             return;
         }
         SplayNode<T> newNode = bstInsert(value);
         splay(newNode);
         size = Math.addExact(size, 1);
         modCount++;
+        cachedHashedCode += value.hashCode();
     }
 
     /**

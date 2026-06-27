@@ -173,11 +173,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
     @Override
     public boolean contains(T key) {
         if (root == null) return false;
-
         BPlusTreeNode<T> current = root;
-
         while (!current.isLeaf()) {
-
             current = current.getChild(routeIndex(current, key));
         }
         return binarySearch(current, key);
@@ -196,7 +193,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         while (true) {
             if (node.isLeaf()) {
                 NodeSearchResult result = searchNode(node, value);
-                if (result.found()) throw new DuplicateNodeException("Duplicate value: " + value);
+                if (result.found()) throw new DuplicateNodeException("Value already present in tree");
 
                 int insertPos = result.index();
                 System.arraycopy(node.getKeys(), insertPos, node.getKeys(), insertPos + 1, node.getKeyCount() - insertPos);
@@ -204,6 +201,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
                 node.setKeyCount(node.getKeyCount() + 1);
                 size++;
                 modCount++;
+                cachedHashedCode += value.hashCode();
                 return;
             } else {
                 int idx = routeIndex(node, value);
@@ -426,6 +424,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
 
             @Override
             public boolean hasNext() {
+                if (modCount != expectedModCount) throw new ConcurrentModificationException();
                 return currentLeaf != null && keyIndex < currentLeaf.getKeyCount();
             }
 
@@ -588,6 +587,20 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         return current;
     }
     @Override
+    public T ceil(T key) {
+        treeIsEmpty();
+        BPlusTreeNode<T> current = ceil_floorHelper(root, key);
+        if (current == null) return null;
+        NodeSearchResult result = searchNode(current, key);
+        if (result.found()) return current.getKey(result.index());
+
+        if (result.index() < current.getKeyCount()) return current.getKey(result.index());
+
+        if (current.getNext() != null) return current.getNext().getKey(0);
+        return null;
+    }
+
+    @Override
     public T floor(T key) {
         treeIsEmpty();
         if (root == null || key == null) return null;
@@ -607,7 +620,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         int idx = result.index();
         if (result.found()) return current.getKey(idx);
         if (idx > 0) return current.getKey(idx - 1);
-        
+
         if (lastLeftNode != null) {
             BPlusTreeNode<T> siblingLeaf = getRightmostLeaf(lastLeftNode.getChild(lastLeftIdx));
             return siblingLeaf.getKey(siblingLeaf.getKeyCount() - 1);
@@ -615,20 +628,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         return null;
     }
 
-    @Override
-    public T ceil(T key) {
-        treeIsEmpty();
-        BPlusTreeNode<T> current = ceil_floorHelper(root, key);
-        if (current == null) return null;
-        NodeSearchResult result = searchNode(current, key);
-        if (result.found()) return current.getKey(result.index());
-
-        if (result.index() < current.getKeyCount()) return current.getKey(result.index());
-
-        if (current.getNext() != null) return current.getNext().getKey(0);
-        return null;
-    }
-
+    
     @Override
     public T predecessor(T key) {
         treeIsEmpty();

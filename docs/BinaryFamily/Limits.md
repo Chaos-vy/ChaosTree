@@ -1,6 +1,6 @@
 ## Extreme Memory Limits & Saturation Profiling
 
-To find out exactly where the ChaosTree framework breaks, we threw our data structures into a bare-metal heap saturation test (we call it the "Chaos Engine") against a strictly capped JVM.
+To find out exactly where the ChaosTree framework breaks, I threw my data structures into a bare-metal heap saturation test (I call it the "Chaos Engine") against a strictly capped JVM.
 
 ← Back to [README](README.md)
 
@@ -16,7 +16,7 @@ To find out exactly where the ChaosTree framework breaks, we threw our data stru
 
 The `ChaosTree` collections utilize a standard 32-bit signed `volatile int` for internal `size` tracking, establishing a hard structural capacity ceiling of **$2,147,483,647$ elements** ($2^{31}-1$).
 
-**Why do we use an `int` instead of a `long`?**
+**Why do I use an `int` instead of a `long`?**
 This limitation is a highly intentional, intentional JVM interoperability design choice driven entirely by the limitations of the Java Virtual Machine (JVM).
 
 1. **JVM Array Boundaries:** The entire java.util.Collection and java.util.stream ecosystem ultimately relies on Java arrays, whose indices are limited to 32-bit signed integers. While a tree implementation could theoretically track its logical size using a long, any operation that materializes the contents into a contiguous array—such as toArray(), Stream.toArray(), Collectors.toList() (internally backed by arrays), or similar APIs—must allocate a Java array. Because the JVM restricts array lengths to approximately Integer.MAX_VALUE (with an implementation-dependent safety margin, typically around Integer.MAX_VALUE - 8 on HotSpot), attempting to allocate a larger array immediately fails with:
@@ -45,10 +45,10 @@ Binary trees rely on vertical traversal paths. The depth of these paths dictates
 
 ## 3. Thread Safety Limits
 
-We deliberately built the Binary Family to be **not natively thread-safe** (except for our dedicated Concurrent RBT). You can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but you will hit severe micro-architectural bottlenecks under heavy contention:
+I deliberately built the Binary Family to be **not natively thread-safe** (except for my dedicated Concurrent RBT). You can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but you will hit severe micro-architectural bottlenecks under heavy contention:
 
 * **The Splay Exclusion Zone:** `Splay` trees are poorly suited to `ReadWriteLock-style` concurrency because `contains()` performs structural modification rather than acting as a read-only operation.
-* **The Monitor Lock Tax:** When we ran an 8-thread write-heavy benchmark, applying external monitor locks caused our execution latency to spike to an awful **~34,000 ns/op**. This is an Operating System constraint—coarse-grained locking forces the OS to continuously park and context-switch threads, completely starving the CPU pipeline. For massive concurrent write throughput, wait for the lock-free B-Tree paging implementations.
+* **The Monitor Lock Tax:** When I ran an 8-thread write-heavy benchmark, applying external monitor locks caused my execution latency to spike to an awful **~34,000 ns/op**. This is an Operating System constraint—coarse-grained locking forces the OS to continuously park and context-switch threads, completely starving the CPU pipeline. For massive concurrent write throughput, wait for the lock-free B-Tree paging implementations.
 * **Treap Seed Contention:** Instantiating a `Treap` with a shared `java.util.Random` seed under concurrent writes will cause severe atomic contention. Always use the default constructor, which utilizes independent `ThreadLocalRandom` pipelines to bypass seed locking.
 
 ---

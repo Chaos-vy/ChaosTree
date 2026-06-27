@@ -1,6 +1,6 @@
 _# Changelog
 
-All notable changes to ChaosTree will be documented in this file. We believe in being transparent about what we add, change, and fix.
+All notable changes to ChaosTree will be documented in this file. I believe in being transparent about what I add, change, and fix.
 
 ---
 
@@ -56,4 +56,4 @@ All notable changes to ChaosTree will be documented in this file. We believe in 
 
 ### Notes
 
-This is the first public release of ChaosTree. We are incredibly proud of the architecture and the rigorous testing that went into this release._
+This is the first public release of ChaosTree. I am incredibly proud of the architecture and the rigorous testing that went into this release._

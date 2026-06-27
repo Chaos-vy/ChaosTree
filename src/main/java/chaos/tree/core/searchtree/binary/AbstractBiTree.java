@@ -1,6 +1,7 @@
 package chaos.tree.core.searchtree.binary;
 
 import chaos.tree.binary.BinaryTree;
+import chaos.tree.core.searchtree.ISearchTree;
 import chaos.tree.core.searchtree.PrintStyle;
 import chaos.tree.core.searchtree.binary.node.BiNode;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
  */
 public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T, N>> implements BinaryTree<T> {
 
+    protected int cachedHashedCode = 0;
     /**
      * Root of the Binary Search tree
      */
@@ -271,6 +273,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         root = insert(root, value);
         size = Math.addExact(size, 1);
         modCount++;
+        cachedHashedCode += value.hashCode();
     }
 
     /**
@@ -491,6 +494,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         if (result.deleted()) {
             size--;
             modCount++;
+            cachedHashedCode -= value.hashCode();
         }
     }
     /**
@@ -751,9 +755,9 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     }
 
     /**
-     * Returns a lazy, sequential Stream of values within the specified half-open range.
+     * Returns a sequential Stream of values within the specified half-open range.
      * <p>Unlike {@code range()}, which materializes all elements into memory as a List,
-     * this stream acts as a lazy cursor. This is the industrial standard for retrieving
+     * this stream acts as a fake lazy cursor. This method was used to retrieving
      * massive blocks of sequential data from an N-ary index without triggering an
      * OutOfMemoryError.</p>
      *
@@ -768,7 +772,11 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         if (fromInclusive.compareTo(toExclusive) > 0) {
             throw new IllegalArgumentException("fromInclusive must be <= toExclusive");
         }
-        return stream().filter(e -> e.compareTo(fromInclusive) >= 0 && e.compareTo(toExclusive) < 0);
+        Iterator<T> iterator = new BoundedInOrderIterator(fromInclusive, toExclusive);
+        return java.util.stream.StreamSupport.stream(
+                java.util.Spliterators.spliteratorUnknownSize(iterator,
+                        java.util.Spliterator.ORDERED | java.util.Spliterator.SORTED | java.util.Spliterator.NONNULL),
+                false);
     }
 
     private void rangeHelper(N node, T from, T to, List<T> result) {
@@ -790,7 +798,10 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     /**
      * Returns the greatest value strictly less than the specified value.
      *
-     * <p>A null value is rejected before traversal because predecessor lookup must compare
+     * <p>A null value is rejected before traversal because predecessor lookup
+
+
+ must compare
      * the requested value with node values to decide which branch can contain the previous
      * smaller value.</p>
      *
@@ -821,52 +832,37 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     }
 
     /**
-     * Returns the least common ancestor of two existing non-null values.
-     *
-     * <p>Both arguments are checked independently. If either argument is {@code null},
-     * this method throws before calling {@link #contains(Comparable)} or descending
-     * through the tree, because neither operation can compare a null value with node
-     * values.</p>
-     *
-     * @param a the first value; must not be {@code null}
-     * @param b the second value; must not be {@code null}
-     * @return the least common ancestor value
-     * @throws EmptyTreeException    if this tree is empty
-     * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
-     * @throws NodeNotFoundException if either value does not exist in this tree
+     * {@inheritDoc}
      */
     @Override
     public T lca(T a, T b) {
-        treeIsEmpty();
         checkValue(a);
         checkValue(b);
-        N result = lca(root, a, b);
-        if (result == null) {
-            throw new NodeNotFoundException("Node not Found");
+        treeIsEmpty();
+        if (!contains(a) || !contains(b)) {
+            throw new NodeNotFoundException("Node not found");
         }
-        return result.getValue();
+        return lcaHelper(root, a, b);
+    }
+
+    private T lcaHelper(N node, T a, T b) {
+        if (node == null) return null;
+        T val = node.getValue();
+        if (a.compareTo(val) < 0 && b.compareTo(val) < 0) {
+            return lcaHelper(node.getLeft(), a, b);
+        }
+        if (a.compareTo(val) > 0 && b.compareTo(val) > 0) {
+            return lcaHelper(node.getRight(), a, b);
+        }
+        return val;
     }
 
     /**
-     * Finds the lowest common ancestor node for two known values in a given subtree.
-     *
-     * @param node the root of the subtree to analyze
-     * @param a the first value
-     * @param b the second value
-     * @return the node representing the least common ancestor of {@code a} and {@code b}
+     * Recursively computes the k-th smallest node using an inorder traversal.
+     * @param k the 1-based position of the element to retrieve
+     * @return the k-th smallest node, or {@code null} if not found in this subtree
+     * @throws IllegalArgumentException on k is out of bound {@code [1, this.size()]}
      */
-    private N lca(N node, T a, T b) {
-        if (node == null) return null;
-        int cmpA = compare(a, node);
-        int cmpB = compare(b, node);
-        if (cmpA > 0 && cmpB > 0) return lca(node.getRight(), a, b);
-        if (cmpA < 0 && cmpB < 0) return lca(node.getLeft(), a, b);
-        boolean foundA = (cmpA == 0) || findNode(cmpA > 0 ? node.getRight() : node.getLeft(), a) != null;
-        boolean foundB = (cmpB == 0) || findNode(cmpB > 0 ? node.getRight() : node.getLeft(), b) != null;
-        if (!foundA || !foundB) return null;
-        return node;
-    }
-
     @Override
     public T kthSmallest(int k) {
         if (k <= 0 || k > size) throw new IllegalArgumentException("k=" + k + " is out of bounds [1, " + size + "]");
@@ -875,13 +871,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         return result.getValue();
     }
 
-    /**
-     * Recursively computes the k-th smallest node using an inorder traversal.
-     *
-     * @param node the current subtree root
-     * @param count an array of size 1 holding the countdown of elements left to traverse
-     * @return the k-th smallest node, or {@code null} if not found in this subtree
-     */
+
     private N kthSmallest(N node, int[] count) {
         if (node == null) return null;
         N left = kthSmallest(node.getLeft(), count);
@@ -907,11 +897,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         return copyToList(iterator(type));
     }
 
-    /**
-     * Helper function to return as new {@link List} containing the element in the order produced by the supplied iterator.
-     * @param iterator the Iterator to copy from.
-     * @return new {@link List} containing the element in the iteration order.
-     */
     private List<T> copyToList(Iterator<T> iterator) {
         List<T> list = new ArrayList<>(this.size);
         while (iterator.hasNext()) {
@@ -959,6 +944,17 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     }
 
     /**
+     * Returns a sequential stream over this tree using the inorder traversal order.
+     *
+     * @return a sequential stream over this tree
+     * @throws NullPointerException if {@code type} is {@code null}, because the stream's
+     */
+    @Override
+    public java.util.stream.Stream<T> stream() {
+        return stream(TraversalType.INORDER);
+    }
+
+    /**
      * Returns a sequential stream over this tree using the specified traversal order.
      *
      * @param type the traversal order to use; must not be {@code null}
@@ -967,12 +963,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
      *                              spliterator characteristics and backing iterator depend on the traversal type
      */
     @Override
-    public java.util.stream.Stream<T> stream() {
-        return stream(TraversalType.INORDER);
-    }
-
-    @Override
-    public java.util.stream.Stream<T> stream(TraversalType type) {
+    public Stream<T> stream(TraversalType type) {
         if (type == null) throw new NullPointerException("Traversal type cannot be null");
         return java.util.stream.StreamSupport.stream(
                 java.util.Spliterators.spliterator(
@@ -997,9 +988,6 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         );
     }
 
-    /**
-     * Helper to assign semantic characteristics to the Spliterator based on the traversal type.
-     */
     private int getSpliteratorCharacteristics(TraversalType type) {
         int flags = Spliterator.SIZED | Spliterator.DISTINCT | Spliterator.ORDERED;
         if (type == TraversalType.INORDER) {
@@ -1008,21 +996,12 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         return flags;
     }
 
-    /**
-     * Checks if the tree was structurally modified since the iterator was created.
-     *
-     * @param expectedModCount the modCount recorded when iterating began
-     * @throws ConcurrentModificationException if the tree was modified
-     */
     private void concurrentModificationCheck(long expectedModCount) {
         if (modCount != expectedModCount) {
             throw new ConcurrentModificationException();
         }
     }
 
-    /**
-     * Pre-Order Iterator (Root -> Left -> Right)
-     */
     private class PreOrderIterator implements Iterator<T> {
         private final Deque<N> stack = new ArrayDeque<>();
         private final long expectedModCount = modCount;
@@ -1049,9 +1028,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         }
     }
 
-    /**
-     * In-Order Iterator (Left -> Root -> Right)
-     */
+
     private class InOrderIterator implements Iterator<T> {
         private final Deque<N> stack = new ArrayDeque<>();
         private final long expectedModCount = modCount;
@@ -1080,13 +1057,62 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         }
     }
 
-    /**
-     * Post-Order Iterator (Left -> Right -> Root)
-     *
-     * <p>Uses a lazy single-stack approach with a previous-node pointer to avoid
-     * the O(n) eager memory allocation of the two-stack method. Only O(h) stack
-     * space is used, where h is the height of the tree.</p>
-     */
+    private class BoundedInOrderIterator implements Iterator<T> {
+        private final Deque<N> stack = new ArrayDeque<>();
+        private final long expectedModCount = modCount;
+        private final T fromInclusive;
+        private final T toExclusive;
+        private T nextValue;
+
+        BoundedInOrderIterator(T fromInclusive, T toExclusive) {
+            this.fromInclusive = fromInclusive;
+            this.toExclusive = toExclusive;
+            pushLeftHelper(root);
+            advance();
+        }
+
+        private void pushLeftHelper(N node) {
+            while (node != null) {
+                if (compare(fromInclusive, node) <= 0) {
+                    stack.push(node);
+                    node = node.getLeft();
+                } else {
+                    node = node.getRight();
+                }
+            }
+        }
+
+        private void advance() {
+            if (stack.isEmpty()) {
+                nextValue = null;
+                return;
+            }
+            N node = stack.pop();
+            nextValue = node.getValue();
+            if (nextValue.compareTo(toExclusive) >= 0) {
+                nextValue = null;
+                stack.clear();
+            } else {
+                pushLeftHelper(node.getRight());
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            concurrentModificationCheck(expectedModCount);
+            return nextValue != null;
+        }
+
+        @Override
+        public T next() {
+            concurrentModificationCheck(expectedModCount);
+            if (!hasNext()) throw new NoSuchElementException();
+            T val = nextValue;
+            advance();
+            return val;
+        }
+    }
+
     private final class PostOrderIterator implements Iterator<T> {
         private final Deque<N> stack = new ArrayDeque<>();
         private final long expectedModCount = modCount;
@@ -1127,9 +1153,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         }
     }
 
-    /**
-     * Level-Order Iterator (Breadth-First Search)
-     */
+
     private final class LevelOrderIterator implements Iterator<T> {
         private final Queue<N> queue = new ArrayDeque<>();
         private final long expectedModCount = modCount;
@@ -1156,7 +1180,27 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ISearchTree<?> other)) return false;
+        if (this.size() != other.size()) return false;
+        Iterator<T> it1 = this.iterator();
+        Iterator<?> it2 = other.iterator();
 
+        while (it1.hasNext() && it2.hasNext()) {
+            T val1 = it1.next();
+            Object val2 = it2.next();
+            if (!val1.equals(val2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    @Override
+    public int hashCode() {
+        return cachedHashedCode;
+    }
 
     /**
      * Returns a visual representation of this tree's node hierarchy.

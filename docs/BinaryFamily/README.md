@@ -202,7 +202,7 @@ BinaryFamily is not thread-safe by default. BST, AVL, RBT, and Treap can be made
 **Splay cannot use `ReadWriteLock`.** `contains()` is a structural write by design. Removing splay-on-search breaks the amortized O(log n) guarantee which is Splay's entire value proposition. A read-only `contains()` gives you O(n) worst-case on adversarial access patterns with no amortized recovery. The `ReadWriteLock` benefit doesn't justify breaking the core guarantee.
 **Concurrent Splay = clone-per-thread.**
 
-We are currently planning to build a true, fully lock-free Concurrent RBT for v1.1.0 on a completely separate hierarchy. (We explicitly decided *not* to build a concurrent AVL or Splay—see our ADRs for the full breakdown on why).
+I am currently planning to build a true, fully lock-free Concurrent RBT for v1.1.0 on a completely separate hierarchy. (I explicitly decided *not* to build a concurrent AVL or Splay—see my ADRs for the full breakdown on why).
 
 > Full thread-safety analysis, external sync patterns, and verified stress
 > test results → [Benchmark.md](Benchmark.md)

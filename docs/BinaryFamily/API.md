@@ -1,6 +1,6 @@
 # BinaryTree API Reference
 
-The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Traversal<T>`. We built it to provide a massive, comprehensive set of operations for our binary search trees.
+The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Traversal<T>`. I built it to provide a massive, comprehensive set of operations for my binary search trees.
 
 ← Back to [README](README.md)
 

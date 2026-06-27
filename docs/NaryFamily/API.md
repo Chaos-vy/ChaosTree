@@ -1,6 +1,6 @@
 # NaryTree API Reference
 
-The `NaryTree<T>` interface inherits from `ISearchTree<T>` and `ITree`. We designed it to give you a comprehensive set of operations specifically optimized for multi-way search trees like B-Trees and B+ Trees.
+The `NaryTree<T>` interface inherits from `ISearchTree<T>` and `ITree`. I designed it to give you a comprehensive set of operations specifically optimized for multi-way search trees like B-Trees and B+ Trees.
 
 ← Back to [README](README.md)
 

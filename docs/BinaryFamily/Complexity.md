@@ -1,6 +1,6 @@
 # Complexity Guarantees
 
-We hate hidden performance traps. This document breaks down the exact time and space complexities for every single operation supported by the Binary Family, so you know exactly what you're paying for when you call our APIs.
+I hate hidden performance traps. This document breaks down the exact time and space complexities for every single operation supported by the Binary Family, so you know exactly what you're paying for when you call my APIs.
 
 ← Back to [README](README.md)
 
@@ -60,7 +60,7 @@ All positional queries perform a standard vertical traversal from the root down 
 | `height()`       | O(n) |   O(1)   |   O(n)   |        O(n)        |       O(n)        |
 
 > **Why is `kthSmallest` O(n)?** 
-> We intentionally perform a brute-force in-order traversal that stops at the k-th element. The alternative would be storing augmented rank data (subtree sizes) on every single node, which would massively bloat our memory footprint. We chose memory density over O(log n) rank queries.
+> I intentionally perform a brute-force in-order traversal that stops at the k-th element. The alternative would be storing augmented rank data (subtree sizes) on every single node, which would massively bloat my memory footprint. I chose memory density over O(log n) rank queries.
 >
 > **Why is `height()` O(n)?** 
 > The public `height()` method recursively computes the depth across the entire structure. 
@@ -99,7 +99,7 @@ All positional queries perform a standard vertical traversal from the root down 
 | `new Tree<>(Tree)`     |   **O(n)**    | **O(n)** | Pre-order structural clone — bypasses insert pipeline |
 
 > **Why is the copy constructor drastically faster?** 
-> When you construct a new tree by passing in an existing `Tree`, we bypass the insertion pipeline entirely. We execute a single pre-order traversal and physically clone the nodes, blindly copying their values, colors, and balance factors. Zero comparisons, zero rotations, and zero rebalancing. It is the fastest possible way to duplicate a tree.
+> When you construct a new tree by passing in an existing `Tree`, I bypass the insertion pipeline entirely. I execute a single pre-order traversal and physically clone the nodes, blindly copying their values, colors, and balance factors. Zero comparisons, zero rotations, and zero rebalancing. It is the fastest possible way to duplicate a tree.
 
 ---
 
@@ -144,7 +144,7 @@ All positional queries perform a standard vertical traversal from the root down 
 | Splay |  O(n) | 4 fields/node (`parent`)           |
 
 > **The Cost of Metadata at Scale:** 
-> When you're managing 100 million nodes, the extra parent pointer required by Red-Black and Splay trees instantly consumes an additional ~800 MB of heap space (assuming an 8-byte reference on a standard 64-bit JVM). This is exactly why we decoupled our node hierarchy and didn't force parent pointers onto the BST, AVL, or Treap.
+> When you're managing 100 million nodes, the extra parent pointer required by Red-Black and Splay trees instantly consumes an additional ~800 MB of heap space (assuming an 8-byte reference on a standard 64-bit JVM). This is exactly why I decoupled my node hierarchy and didn't force parent pointers onto the BST, AVL, or Treap.
 
 ---
 
@@ -161,7 +161,7 @@ Hidden constant factors behind the O(log n) — what each tree does after insert
 | **Treap** | Rotate up until heap property restored (expected O(1) rotations) | Rotate down to leaf, then remove      |
 
 > **The Real-World AVL vs RBT Tradeoff:**
-> Theoretically, both guarantee O(log n). But mechanically? AVL trees execute a maximum of 2 rotations on insert, but they are forced to walk back up the tree updating integer heights on every ancestor. Red-Black trees also max out at 2 rotations and do some bit-flipping for colors, but entirely avoid the height-updating overhead. Our JMH benchmarks prove that in practice, AVL is marginally faster for lookups, while RBT dominates in write-heavy workloads.
+> Theoretically, both guarantee O(log n). But mechanically? AVL trees execute a maximum of 2 rotations on insert, but they are forced to walk back up the tree updating integer heights on every ancestor. Red-Black trees also max out at 2 rotations and do some bit-flipping for colors, but entirely avoid the height-updating overhead. My JMH benchmarks prove that in practice, AVL is marginally faster for lookups, while RBT dominates in write-heavy workloads.
 
 ---
 

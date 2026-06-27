@@ -1,6 +1,6 @@
 ## Extreme Memory Limits & Saturation Profiling
 
-To figure out the absolute physical limits of our N-ary framework, we put our contiguous-memory data structures (`BTree`, `BPlusTree`) through bare-metal heap saturation tests against a strictly capped JVM.
+To figure out the absolute physical limits of my N-ary framework, I put my contiguous-memory data structures (`BTree`, `BPlusTree`) through bare-metal heap saturation tests against a strictly capped JVM.
 
 ← Back to [README](README.md)
 
@@ -16,27 +16,27 @@ To figure out the absolute physical limits of our N-ary framework, we put our co
 
 The N-ary collections utilize a standard 32-bit signed `int` for internal `size` tracking, establishing a hard structural capacity ceiling of **$2,147,483,647$ elements** ($2^{31}-1$).
 
-**Why do we use an `int` instead of a `long`?**
-This limitation is driven by JVM array boundaries. The standard Java Collection framework is hardcoded to use 32-bit array buffers. While we could technically use a `long` to track larger capacities internally, the moment a user calls `stream().collect()` or `toList()`, the JVM must allocate a contiguous backing array. And since the JVM strictly limits array indices to 32-bit integers, we would crash immediately. Maintaining a 32-bit `volatile int` ensures we stay fully interoperable with standard Java limits.
+**Why do I use an `int` instead of a `long`?**
+This limitation is driven by JVM array boundaries. The standard Java Collection framework is hardcoded to use 32-bit array buffers. While I could technically use a `long` to track larger capacities internally, the moment a user calls `stream().collect()` or `toList()`, the JVM must allocate a contiguous backing array. And since the JVM strictly limits array indices to 32-bit integers, I would crash immediately. Maintaining a 32-bit `volatile int` ensures I stay fully interoperable with standard Java limits.
 
 ---
 
 ## 2. Stack Depth vs. Heap Limits
 
-Unlike Binary Search Trees (BST), which can suffer `StackOverflowError` crashes if they get too deep, our N-ary family maintains extremely shallow recursion depths, making StackOverflowError practically unreachable under realistic JVM heap limits.
+Unlike Binary Search Trees (BST), which can suffer `StackOverflowError` crashes if they get too deep, my N-ary family maintains extremely shallow recursion depths, making StackOverflowError practically unreachable under realistic JVM heap limits.
 
-* **Stack Depth Immunity:** A B-Tree of order 100 containing 1 billion elements will have a maximum tree height of just 5! All our traversal and mutation logic stays incredibly shallow.
+* **Stack Depth Immunity:** A B-Tree of order 100 containing 1 billion elements will have a maximum tree height of just 5! All my traversal and mutation logic stays incredibly shallow.
 * **Heap Bounds Only:** Because the tree height is so shallow, these trees are solely limited by your available JVM Heap memory. Under realistic JVM heap limits, heap exhaustion occurs long before recursion depth becomes a concern.
 
 ---
 
 ## 3. Thread Safety Limits
 
-We designed the N-ary Family to be **not natively thread-safe**, but they are structurally built to support incredibly high-throughput concurrency if you wrap them in an external `ReadWriteLock`.
+I designed the N-ary Family to be **not natively thread-safe**, but they are structurally built to support incredibly high-throughput concurrency if you wrap them in an external `ReadWriteLock`.
 
 * **No Structural Read-Mutation:** Unlike the Binary `Splay` tree, neither `BTree` nor `BPlusTree` restructure during read queries (`contains()`, `rangeStream()`).
 * **High Read Concurrency:** Multiple threads holding a read-lock can simultaneously traverse the internal `Object[]` arrays without contention, allowing high levels of concurrent read parallelism when protected by an external ReadWriteLock.
-* **Write Contention:** Because we have to do $O(t)$ array shifting during insertions (via `System.arraycopy`), write locks hold the monitor slightly longer than they do for simple binary pointer rewires. If you have an extreme, hyper-aggressive write-heavy workload, our Binary `RBT` might actually slightly outperform our N-ary writes just because it doesn't have to shift arrays.
+* **Write Contention:** Because I have to do $O(t)$ array shifting during insertions (via `System.arraycopy`), write locks hold the monitor slightly longer than they do for simple binary pointer rewires. If you have an extreme, hyper-aggressive write-heavy workload, my Binary `RBT` might actually slightly outperform my N-ary writes just because it doesn't have to shift arrays.
 
 ---
 

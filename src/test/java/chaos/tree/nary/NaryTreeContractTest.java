@@ -279,7 +279,7 @@ public abstract class NaryTreeContractTest<NARY extends NaryTree<Integer>> {
         assertEquals(0, tree.size());
         assertTrue(tree.isEmpty());
         assertFalse(tree.contains(10));
-        assertDoesNotThrow(() -> tree.delete(99)); // Delete absent is No-Op
+        assertDoesNotThrow(() -> tree.delete(99));
     }
 
     @ParameterizedTest
@@ -358,12 +358,12 @@ public abstract class NaryTreeContractTest<NARY extends NaryTree<Integer>> {
 
         assertEquals(20, tree.successor(10));
         assertEquals(30, tree.successor(20));
-        assertEquals(30, tree.successor(25)); // Successor of absent value
+        assertEquals(30, tree.successor(25)); // absent value
         assertNull(tree.successor(50));
 
         assertEquals(10, tree.predecessor(20));
         assertEquals(30, tree.predecessor(40));
-        assertEquals(20, tree.predecessor(25)); // Predecessor of absent value
+        assertEquals(20, tree.predecessor(25)); // absent value
         assertNull(tree.predecessor(10));
     }
 

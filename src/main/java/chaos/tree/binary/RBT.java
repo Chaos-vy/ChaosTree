@@ -95,6 +95,7 @@ public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree
         setColor(root, BLACK);
         size = Math.addExact(size, 1);
         modCount++;
+        cachedHashedCode += value.hashCode();
     }
 
     @Override
@@ -178,6 +179,7 @@ public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree
         deleteNode(target);
         size--;
         modCount++;
+        cachedHashedCode -= value.hashCode();
     }
 
     private void deleteNode(RBTNode<T> node) {
@@ -210,14 +212,6 @@ public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree
         rewireParent(node.getParent(), node, null);
     }
 
-    /**
-     * Replaces {@code node} with {@code replacement} in the tree structure,
-     * updating all parent references accordingly.
-     *
-     * @param parent      the parent of {@code node}; {@code null} if {@code node} is root
-     * @param node        the node being removed
-     * @param replacement the node taking {@code node}'s position; {@code null} for leaf removal
-     */
     private void rewireParent(RBTNode<T> parent, RBTNode<T> node, RBTNode<T> replacement) {
         if (parent == null) {
             root = replacement;
@@ -235,12 +229,6 @@ public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree
         }
     }
 
-    /**
-     * Restores Red-Black properties after removal of a black node
-     * by propagating the double-black condition up toward the root.
-     *
-     * @param node the node holding the double-black condition
-     */
     private void fixDoubleBlack(RBTNode<T> node) {
 
         if (node == null) return;

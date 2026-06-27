@@ -7,7 +7,7 @@ In the standard Java ecosystem, search trees are overwhelmingly used as key-valu
 
 Every key-value entry requires an additional object (or equivalent wrapper) to hold both the key and value. On HotSpot, that object carries its own object header in addition to the key and value references.
 
-By enforcing a pure value-store API, we eliminate the need for wrapper objects. The tree operates directly on the user's `T` references, slashing the heap footprint and maximizing the amount of contiguous data we can pack into our arrays.
+By enforcing a pure value-store API, I eliminate the need for wrapper objects. The tree operates directly on the user's `T` references, slashing the heap footprint and maximizing the amount of contiguous data I can pack into my arrays.
 
 This keeps the core API focused on ordered search, traversal, and range queries rather than associative mapping.
 ## Tradeoffs

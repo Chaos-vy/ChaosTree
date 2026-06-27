@@ -2,7 +2,7 @@
 
 **ChaosTree** is a highly optimized in-memory search tree library for Java.
 
-We built ChaosTree because we wanted to see what happens when you take textbook data structures and optimize them for real-world JVM memory and CPU caches. It includes both classic Binary Trees (AVL, RBT, etc.) and cache-friendly N-ary Trees (B-Tree, B+ Tree).
+I built ChaosTree because I wanted to see what happens when you take textbook data structures and optimize them for real-world JVM memory and CPU caches. It includes both classic Binary Trees (AVL, RBT, etc.) and cache-friendly N-ary Trees (B-Tree, B+ Tree).
 
 ---
 ## Installation
@@ -138,8 +138,7 @@ The BPlusTree pushes all real data to a contiguous linked-list at the bottom lay
 
 ## 📊 Performance Benchmarks
 
-We've spent a lot of time profiling ChaosTree to see how it interacts with actual hardware caches.
-
+ChaosTree has been extensively profiled to understand how it interacts with modern CPU caches.
 ### Test Environment:
 
 * **CPU:** Intel Core i5 13450HX (24GB DDR5)
@@ -190,7 +189,7 @@ The binary trees in ChaosTree are tuned for fast lookups without sacrificing str
 
 ### ChaosTree vs java.util.TreeMap
 
-When compared against the JDK's standard `TreeMap` (which is a Red-Black tree), our `BPlusTree` range scan at 1M elements completes in 263K ns/op vs TreeMap's traversal-based approach — approximately 25% faster due to leaf-chain locality, but since it doesn't wrap everything in heavy `Map.Entry` objects, it uses significantly less memory when you just need a Set.
+When compared against the JDK's standard `TreeMap` (which is a Red-Black tree), my `BPlusTree` range scan at 1M elements completes in 263K ns/op vs TreeMap's traversal-based approach — approximately 25% faster due to leaf-chain locality, but since it doesn't wrap everything in heavy `Map.Entry` objects, it uses significantly less memory when you just need a Set.
 
 > Results are representative of the test environment described above and may vary across hardware, JVM versions, and workloads.
 
@@ -204,7 +203,7 @@ When compared against the JDK's standard `TreeMap` (which is a Red-Black tree), 
 
 ## 🛡️ Testing & Thread-Safety
 
-We wanted ChaosTree to be correct just as much as we wanted it to be fast. It is validated by a 579-test suite:
+I wanted ChaosTree to be correct just as much as I wanted it to be fast. It is validated by a 585-test suite:
 
 **The Fuzz Test:** Trees are subjected to hundreds of thousands of completely randomized insertions, deletions, and sequential bursts to verify structure against a source-of-truth (`java.util.TreeSet`).
 
@@ -267,25 +266,27 @@ Generated JavaDoc documentation is available with every release and provides com
 ChaosTree is actively evolving to support advanced  fine-grained, lock-free concurrency models.
 
 * **v1.0.0:** Foundational Binary and N-ary Search Trees. (Current)
-* **v1.1.0:** Concurrent B+ Tree
-* **v1.2.0:** Concurrent Red-Black Tree
+* **v1.1.0:** Concurrent Red-Black Tree
+* **v1.2.0:** Concurrent B+ Tre
 
 ---
 
 ## 📏 Codebase Metrics
 
-We believe in keeping the core engine clean, lean, and highly tested. Here is the exact breakdown of the ChaosTree v1.0.0 repository:
+I believe in keeping the core engine clean, lean, and highly tested. Here is the exact breakdown of the ChaosTree v1.0.0 repository:
 
-| Module        | Files | Blank | Comments | Code (LOC) |
-|---------------|-------|-------|----------|------------|
-| **Production**| 34    | 587   | 1,941    | **2,740**  |
-| **Tests**     | 27    | 410   | 93       | **1,610**  |
-| **Benchmarks**| 17    | 196   | 92       | **1,003**  |
-| **Total**     | 78    | 1,193 | 2,126    | **5,353**  |
+| Module         | Files | Blank | Comments | Code (LOC) |
+|----------------|-------|-------|----------|------------|
+| **Production** | 41    | 600   | 1,979    | **2,875**  |
+| **Tests**      | 28    | 431   | 98       | **1,698**  |
+| **Benchmarks** | 17    | 196   | 92       | **1,003**  |
+| **Total**      | 86    | 1,227 | 2,169    | **5,576**  |
 
-**Production Ratio (`(Tests + Benchmarks) : Production Code`):** `0.95 : 1`
+**Production Ratio (`(Tests + Benchmarks) : Production Code`):** `0.94 : 1`
 
-For every line of production logic we write, we maintain nearly a full line of test and micro-architectural benchmark code.
+**DRY (Don't Repeat Yourself) Integrity:** `0 Violations` (At a strict 50-token / 10-line threshold, PMD CPD confirms zero lazy algorithmic copy-pasting. The only identified duplicates are structurally forced by JVM inheritance rules or intentionally unrolled for maximum L1 Cache/Branch Predictor mechanical sympathy).
+
+For every line of production logic I write, I maintain nearly a full line of test and micro-architectural benchmark code.
 
 ---
 

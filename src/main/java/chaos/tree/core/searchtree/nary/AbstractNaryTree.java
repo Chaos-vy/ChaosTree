@@ -1,5 +1,6 @@
 package chaos.tree.core.searchtree.nary;
 
+import chaos.tree.core.searchtree.ISearchTree;
 import chaos.tree.core.searchtree.PrintStyle;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
@@ -39,6 +40,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     protected N root;
     protected int size;
     protected long modCount = 0;
+    protected int cachedHashedCode = 0;
 
     protected AbstractNaryTree(int degree) {
         if (degree < 2) {
@@ -140,6 +142,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
             root.setKeyCount(1);
             size++;
             modCount++;
+            cachedHashedCode += value.hashCode();
             return;
         }
 
@@ -181,6 +184,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
                 node.setKeyCount(node.getKeyCount() + 1);
                 size++;
                 modCount++;
+                cachedHashedCode += value.hashCode();
                 return;
             } else {
                 N child = node.getChild(index);
@@ -262,6 +266,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         if (deleted) {
             size--;
             modCount++;
+            cachedHashedCode -= value.hashCode();
         }
     }
 
@@ -437,10 +442,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         );
     }
 
-    /**
-    * O(log N) auxiliary-space inorder iterator backed by an explicit stack.
-    * Suitable for B-Trees and other search trees where values are stored in every node.
-    */
+
     private class InorderIterator implements Iterator<T> {
 
         private class NodeTracker {
@@ -885,11 +887,34 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
             }
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ISearchTree<?> other)) return false;
+        if (this.size() != other.size()) return false;
+        Iterator<T> it1 = this.iterator();
+        Iterator<?> it2 = other.iterator();
+
+        while (it1.hasNext() && it2.hasNext()) {
+            T val1 = it1.next();
+            Object val2 = it2.next();
+            if (!val1.equals(val2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    @Override
+    public int hashCode() {
+        return cachedHashedCode;
+    }
+
     /**
      * Returns a visual string representation of the tree's hierarchical structure.
      * <p>This visually represents both the standard {@code BTree} and the {@code BPlusTree}
      * topology. When called on a {@code BPlusTree}, the output explicitly renders the internal
-     * "Ghost Routing" nodes alongside the leaf-level linked data blocks.</p>
+     * "Ghost Routing" {@code "Ghost Routing: is the internal route node} nodes alongside the leaf-level linked data blocks.</p>
      *
      * @return a multi-line formatted string detailing the exact tree topology
      */

@@ -1,6 +1,6 @@
 # Contributing to ChaosTree
 
-Thanks for your interest in ChaosTree! We're excited to have you here. This document outlines how we build things, what kind of help we're looking for, and how you can get your code merged smoothly.
+Thanks for your interest in ChaosTree! I'm excited to have you here. This document outlines how I build things, what kind of help I'm looking for, and how you can get your code merged smoothly.
 
 ---
 
@@ -12,13 +12,13 @@ ChaosTree is built from first principles:
 - **Every decision is evidence-backed** — performance claims require benchmark data or hardware counter evidence
 - **Architecture is documented** — significant decisions have ADRs in `Docs/ADR/`
 
-We stick to these principles pretty strictly. If a pull request conflicts with them, we'll likely have to ask for changes or respectfully close it.
+I stick to these principles pretty strictly. If a pull request conflicts with them, I'll likely have to ask for changes or respectfully close it.
 
 ---
 
-## What We Need Help With
+## What I Need Help With
 
-Because the core mathematical architecture of ChaosTree is considered feature-complete and highly sensitive, we are strictly limiting outside contributions to the following areas:
+Because the core mathematical architecture of ChaosTree is considered feature-complete and highly sensitive, I am strictly limiting outside contributions to the following areas:
 
 - Bug reports with a clear reproduction case
 - Documentation corrections, expansions, or improvements
@@ -27,9 +27,9 @@ Because the core mathematical architecture of ChaosTree is considered feature-co
 
 ---
 
-## Things We Do Not Accept
+## Things I Do Not Accept
 
-Please save your valuable time! We will respectfully close PRs that attempt to introduce the following:
+Please save your valuable time! I will respectfully close PRs that attempt to introduce the following:
 
 - **Any core architectural changes** to the `binary/`, `nary/`, or `core/` packages
 - New tree algorithms or data structures
@@ -44,7 +44,7 @@ Please save your valuable time! We will respectfully close PRs that attempt to i
 
 For **bug fixes, documentation, or benchmark results**: feel free to open a PR directly.
 
-For **anything involving Java code changes**: please open an issue first. Be aware that unless it is a mathematically proven bug fix, PRs modifying the core tree engines will not be merged. We want to avoid you spending hours writing code that we cannot accept!
+For **anything involving Java code changes**: please open an issue first. Be aware that unless it is a mathematically proven bug fix, PRs modifying the core tree engines will not be merged. I want to avoid you spending hours writing code that I cannot accept!
 
 ---
 
@@ -59,13 +59,13 @@ For **anything involving Java code changes**: please open an issue first. Be awa
 mvn clean test
 ```
 
-Please make sure all tests pass on JDK 21 before opening a PR. We also verify the project against JDK 17, 21, 25, and 26. Regressions on any supported JDK are treated as bugs, so keeping the build green is important.
+Please make sure all tests pass on JDK 21 before opening a PR. I also verify the project against JDK 17, 21, 25, and 26. Regressions on any supported JDK are treated as bugs, so keeping the build green is important.
 
 Performance benchmarks are maintained separately. Because different subsystems use different JMH configurations and profiling methodologies (GC, Linux `perf`, allocation profiling, etc.), there is no single benchmark command contributors are expected to run. If your pull request makes a performance claim, please describe how it was measured and include the relevant benchmark output.
 
 ---
 
-## How We Write Code
+## How I Write Code
 
 - No `var` — explicit types only
 - Package structure: follow existing `binary/` and `nary/` organization
@@ -78,7 +78,7 @@ Performance benchmarks are maintained separately. Because different subsystems u
 
 ## ADR Reference
 
-The `Docs/ADR/` directory contains the architectural history of the project. These are for historical context and educational purposes. **We are not currently accepting PRs that attempt to rewrite or alter these established decisions.**
+The `Docs/ADR/` directory contains the architectural history of the project. These are for historical context and educational purposes. **I am not currently accepting PRs that attempt to rewrite or alter these established decisions.**
 
 |                              ADR                              | Title                                                                    |
 |:-------------------------------------------------------------:|:-------------------------------------------------------------------------|
@@ -117,7 +117,7 @@ If you run the benchmark suite on different hardware and want to contribute resu
 - Raw JMH output preferred over summarized numbers
 - LinuxPerfNormProfiler output is welcome if available
 
-These contributions are incredibly helpful to us because they validate that ChaosTree's performance characteristics hold up across different architectures!
+These contributions are incredibly helpful to me because they validate that ChaosTree's performance characteristics hold up across different architectures!
 
 ---
 

@@ -23,20 +23,19 @@ public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T>, Tra
 
 
     /**
-     * Returns the least common ancestor (LCA) of the two specified values.
+     * Returns the least common ancestor of two existing non-null values.
      *
-     * <p>The least common ancestor is the lowest node in the tree that has
-     * both values as descendants, where a node may be considered a descendant
-     * of itself.</p>
+     * <p>Both arguments are checked independently. If either argument is {@code null},
+     * this method throws before calling {@link #contains(Comparable)} or descending
+     * through the tree, because neither operation can compare a null value with node
+     * values.</p>
      *
-     * <p>If one of the values is an ancestor of the other, that value is
-     * returned as the LCA.</p>
-     *
-     * @param a the first value
-     * @param b the second value
-     * @return the value of the least common ancestor;
-     * {@code null} if either value does not exist in this tree
-     * @throws EmptyTreeException if this tree is empty
+     * @param a the first value; must not be {@code null}
+     * @param b the second value; must not be {@code null}
+     * @return the least common ancestor value
+     * @throws EmptyTreeException    if this tree is empty
+     * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+     * @throws NodeNotFoundException if either value does not exist in this tree
      */
     T lca(T a, T b);
 
