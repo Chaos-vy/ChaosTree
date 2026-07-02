@@ -1,6 +1,6 @@
 # 🌳 ChaosTree Library Status
 
-This document outlines the current development status and upcoming release schedule for ChaosTree.
+This document outlines the current development status, release history, and upcoming release schedule for ChaosTree.
 
 ## Current Stable Release: `v1.0.1`
 **Released:** **2 July 2026**
@@ -11,9 +11,9 @@ ChaosTree maintains a minimum **7-day interval** between Maven Central releases.
 
 **Exception:** Critical issues affecting correctness, data integrity, or security may be released immediately outside the normal schedule.
 
-### Confirmed Fixes & Improvements
+### Release Highlights
 
-The following changes have already been implemented, validated by the automated test suite, and are currently awaiting the next scheduled patch release.
+The following improvements were introduced in v1.0.1.
 
 #### Correctness
 * **`BPlusTree` Range Edge Cases:** Hardened `floor()` fallback logic. Leaf traversal now correctly evaluates the previous leaf boundary when the floor value resides strictly before the leftmost element of the currently routed leaf.
