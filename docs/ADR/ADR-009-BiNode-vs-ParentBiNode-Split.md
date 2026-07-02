@@ -6,7 +6,7 @@ My BST and AVL trees never needed this. They only ever descend, using the recurs
 
 But RBT can't do that. Its fixup routine needs to find the *sibling* of a node, and to find a sibling, you must know the parent. There's no clever call-stack trick that substitutes for having an explicit parent reference when you're jumping around during a non-recursive fixup. The exact same issue applied to my `Splay` tree—its zig-zig and zig-zag rotations require parent awareness.
 
-I split my node hierarchy into two completely separate branches:
+I split ChaosTree's node hierarchy into two completely separate branches:
 * `BiNode<T, N>` — No parent pointer. Used by `BST`, `AVL`, and `Treap`.
 * `ParentBiNode<T, N>` — Carries an explicit parent reference. Used by `RBT` and `Splay`.
 

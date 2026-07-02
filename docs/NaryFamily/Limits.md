@@ -1,6 +1,6 @@
 ## Extreme Memory Limits & Saturation Profiling
 
-To figure out the absolute physical limits of my N-ary framework, I put my contiguous-memory data structures (`BTree`, `BPlusTree`) through bare-metal heap saturation tests against a strictly capped JVM.
+To figure out the absolute physical limits of ChaosTree's N-ary framework, I put my contiguous-memory data structures (`BTree`, `BPlusTree`) through bare-metal heap saturation tests against a strictly capped JVM.
 
 ← Back to [README](README.md)
 
@@ -23,9 +23,9 @@ This limitation is driven by JVM array boundaries. The standard Java Collection 
 
 ## 2. Stack Depth vs. Heap Limits
 
-Unlike Binary Search Trees (BST), which can suffer `StackOverflowError` crashes if they get too deep, my N-ary family maintains extremely shallow recursion depths, making StackOverflowError practically unreachable under realistic JVM heap limits.
+Unlike Binary Search Trees (BST), which can suffer `StackOverflowError` crashes if they get too deep, ChaosTree's N-ary family maintains extremely shallow recursion depths, making StackOverflowError practically unreachable under realistic JVM heap limits.
 
-* **Stack Depth Immunity:** A B-Tree of order 100 containing 1 billion elements will have a maximum tree height of just 5! All my traversal and mutation logic stays incredibly shallow.
+* **Stack Depth Immunity:** A B-Tree of order 100 containing 1 billion elements will have a maximum tree height of just 5! All ChaosTree's traversal and mutation logic stays incredibly shallow.
 * **Heap Bounds Only:** Because the tree height is so shallow, these trees are solely limited by your available JVM Heap memory. Under realistic JVM heap limits, heap exhaustion occurs long before recursion depth becomes a concern.
 
 ---
@@ -36,7 +36,7 @@ I designed the N-ary Family to be **not natively thread-safe**, but they are str
 
 * **No Structural Read-Mutation:** Unlike the Binary `Splay` tree, neither `BTree` nor `BPlusTree` restructure during read queries (`contains()`, `rangeStream()`).
 * **High Read Concurrency:** Multiple threads holding a read-lock can simultaneously traverse the internal `Object[]` arrays without contention, allowing high levels of concurrent read parallelism when protected by an external ReadWriteLock.
-* **Write Contention:** Because I have to do $O(t)$ array shifting during insertions (via `System.arraycopy`), write locks hold the monitor slightly longer than they do for simple binary pointer rewires. If you have an extreme, hyper-aggressive write-heavy workload, my Binary `RBT` might actually slightly outperform my N-ary writes just because it doesn't have to shift arrays.
+* **Write Contention:** Because I have to do $O(t)$ array shifting during insertions (via `System.arraycopy`), write locks hold the monitor slightly longer than they do for simple binary pointer rewires. If you have an extreme, hyper-aggressive write-heavy workload, my Binary `RBT` might actually slightly outperform ChaosTree's N-ary writes just because it doesn't have to shift arrays.
 
 ---
 

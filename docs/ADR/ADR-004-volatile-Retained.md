@@ -1,6 +1,6 @@
 # ADR-004: volatile Retained in AbstractBiTree (Rejected in AbstractNaryTree)
 
-The state variables across my tree architectures (`root`, `size`, `modCount`) must be handled carefully regarding thread visibility. I evaluated whether to keep or remove the `volatile` keyword from these fields.
+The state variables across ChaosTree's tree architectures (`root`, `size`, `modCount`) must be handled carefully regarding thread visibility. I evaluated whether to keep or remove the `volatile` keyword from these fields.
 
 I ultimately decided to **retain** the `volatile` keyword on `root`, `size`, and `modCount` in the **Binary** implementation (`AbstractBiTree`), but **explicitly rejected** it in the **N-ary** implementation (`AbstractNaryTree`).
 
@@ -40,6 +40,6 @@ I rejected wrapping everything in `synchronized` blocks because it would destroy
 
 ### Atomic Wrappers
 
-I briefly considered `AtomicLong` and `AtomicReference`, but I rejected them. I don't actually need complex atomic compound operations like `compareAndSwap`—using atomic wrappers would just bloat my memory footprint with extra object headers for no reason.
+I briefly considered `AtomicLong` and `AtomicReference`, but I rejected them. I don't actually need complex atomic compound operations like `compareAndSwap`—using atomic wrappers would just bloat ChaosTree's memory footprint with extra object headers for no reason.
 
 

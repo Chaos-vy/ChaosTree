@@ -1,6 +1,6 @@
 # Complexity
 
-Here is the time and space complexity for every single operation in my N-ary Family (`BTree`, `BPlusTree`).
+Here is the time and space complexity for every single operation in ChaosTree's N-ary family (`BTree`, `BPlusTree`).
 
 ← Back to [README](README.md)
 

@@ -18,10 +18,10 @@ The alternative in both cases was the classic `boolean[]` hack—passing a mutab
 * It hides part of the method's contract behind mutable state.
 * It's just clunky and unidiomatic in modern Java.
 
-Using a `DeleteResult` record makes my contract clear, immutable, and strictly type-safe. The fact that the two families use differently shaped records isn't an inconsistency—it accurately reflects exactly what each algorithm needs to talk to its caller.
+Using a `DeleteResult` record makes ChaosTree's contract clear, immutable, and strictly type-safe. The fact that the two families use differently shaped records isn't an inconsistency—it accurately reflects exactly what each algorithm needs to talk to its caller.
 
 **Tradeoffs:**  
-* **Pros:** It keeps my recursive functions pure, eliminates hidden mutations, and each record tells me exactly what I need to know.
+* **Pros:** It keeps ChaosTree's recursive functions pure, eliminates hidden mutations, and each record tells me exactly what I need to know.
 * **Cons:** It technically allocates a new `DeleteResult` record on the heap for every recursive frame during a deletion.
 * **Resolution:** Modern HotSpot JVMs perform Escape Analysis and Scalar Replacement, allowing many short-lived record allocations to be optimized away. Thanks to Escape Analysis, they frequently eliminate the allocation cost of short-lived records entirely by flattening them into registers. Because of this, I chose to prioritize clean, readable code over manually dodging object creation.
 

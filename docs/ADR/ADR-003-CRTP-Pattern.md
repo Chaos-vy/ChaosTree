@@ -1,6 +1,6 @@
 # ADR-003: F-Bounded Polymorphism (CRTP) (BiNode<T, N extends BiNode<T,N>>)
 
-My Binary Family actually consists of five completely different tree architectures (AVL, RBT, Treap, Splay, BST). While they all share the same basic pointer mechanics (left and right children) and rotational logic (left-rotate, right-rotate), each tree needs its own specialized node class to hold algorithm-specific metadata. For instance, an `AVLNode` needs to track `height`, while an `RBTNode` needs to track `color`. 
+ChaosTree's Binary Family actually consists of five completely different tree architectures (AVL, RBT, Treap, Splay, BST). While they all share the same basic pointer mechanics (left and right children) and rotational logic (left-rotate, right-rotate), each tree needs its own specialized node class to hold algorithm-specific metadata. For instance, an `AVLNode` needs to track `height`, while an `RBTNode` needs to track `color`. 
 
 Without F-Bounded Polymorphism, shared algorithms would have to operate on the base node type, forcing concrete implementations to repeatedly downcast returned nodes, my shared abstract rotation methods would be forced to return a generic base `BiNode`. This would force all my concrete subclasses to constantly perform ugly runtime casting.
 

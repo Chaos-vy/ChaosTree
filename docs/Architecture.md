@@ -256,7 +256,7 @@ Writing raw pointer-manipulation code for tree rotations is notoriously error-pr
 Some trees need to know who their parents are to balance correctly. `AbstractParentRotateTree` extends my basic rotation layer with parent-aware rewiring and node transplants. This lets my Red-Black and Splay trees execute incredibly complex structural mutations while keeping their core balancing algorithms clean and focused.
 
 #### The `BiNode` vs `ParentBiNode` Split
-I intentionally split my node hierarchy into `BiNode` and `ParentBiNode`. Why? Because not all binary trees require parent references. 
+I intentionally split ChaosTree's node hierarchy into `BiNode` and `ParentBiNode`. Why? Because not all binary trees require parent references. 
 
 By completely avoiding parent pointers in structures that don't need them (like BST, AVL, and Treap), I instantly save 8 bytes of heap overhead per node. When managing millions of elements, this architectural split can save significant heap memory by ensuring nodes only carry metadata they actually require. 
 

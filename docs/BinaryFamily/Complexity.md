@@ -1,6 +1,6 @@
 # Complexity Guarantees
 
-I hate hidden performance traps. This document breaks down the exact time and space complexities for every single operation supported by the Binary Family, so you know exactly what you're paying for when you call my APIs.
+I hate hidden performance traps. This document breaks down the exact time and space complexities for every single operation supported by the Binary Family, so you know exactly what you're paying for when you call ChaosTree's APIs.
 
 ← Back to [README](README.md)
 
@@ -60,7 +60,7 @@ All positional queries perform a standard vertical traversal from the root down 
 | `height()`       | O(n) |   O(1)   |   O(n)   |        O(n)        |       O(n)        |
 
 > **Why is `kthSmallest` O(n)?** 
-> I intentionally perform a brute-force in-order traversal that stops at the k-th element. The alternative would be storing augmented rank data (subtree sizes) on every single node, which would massively bloat my memory footprint. I chose memory density over O(log n) rank queries.
+> I intentionally perform a brute-force in-order traversal that stops at the k-th element. The alternative would be storing augmented rank data (subtree sizes) on every single node, which would massively bloat ChaosTree's memory footprint. I chose memory density over O(log n) rank queries.
 >
 > **Why is `height()` O(n)?** 
 > The public `height()` method recursively computes the depth across the entire structure. 
@@ -144,7 +144,7 @@ All positional queries perform a standard vertical traversal from the root down 
 | Splay |  O(n) | 4 fields/node (`parent`)           |
 
 > **The Cost of Metadata at Scale:** 
-> When you're managing 100 million nodes, the extra parent pointer required by Red-Black and Splay trees instantly consumes an additional ~800 MB of heap space (assuming an 8-byte reference on a standard 64-bit JVM). This is exactly why I decoupled my node hierarchy and didn't force parent pointers onto the BST, AVL, or Treap.
+> When you're managing 100 million nodes, the extra parent pointer required by Red-Black and Splay trees instantly consumes an additional ~800 MB of heap space (assuming an 8-byte reference on a standard 64-bit JVM). This is exactly why I decoupled ChaosTree's node hierarchy and didn't force parent pointers onto the BST, AVL, or Treap.
 
 ---
 

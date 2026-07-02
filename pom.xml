@@ -6,7 +6,7 @@
 
     <groupId>io.github.chaos-vy</groupId>
     <artifactId>chaos-tree</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>ChaosTree</name>
@@ -34,7 +34,7 @@
         <connection>scm:git:git://github.com/Chaos-vy/ChaosTree.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/Chaos-vy/ChaosTree.git</developerConnection>
         <url>https://github.com/Chaos-vy/ChaosTree</url>
-        <tag>v1.0.0</tag>
+        <tag>v1.0.1</tag>
     </scm>
 
     <properties>

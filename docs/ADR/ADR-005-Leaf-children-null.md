@@ -31,7 +31,7 @@ My N-ary nodes are incredibly memory-dense. ChaosTree can pack millions of eleme
 
 ### Separate LeafNode and InternalNode Hierarchies
 
-As mentioned in Path A, I could have built separate classes for leaf and internal nodes. I rejected this because it just inflates my implementation complexity. I'd still have to write special logic to handle leaves anyway, so splitting the classes didn't actually buy me anything.
+As mentioned in Path A, I could have built separate classes for leaf and internal nodes. I rejected this because it just inflates ChaosTree's implementation complexity. I'd still have to write special logic to handle leaves anyway, so splitting the classes didn't actually buy me anything.
 
 ### Child Array Allocation
 

@@ -1,6 +1,6 @@
 ## Extreme Memory Limits & Saturation Profiling
 
-To find out exactly where the ChaosTree framework breaks, I threw my data structures into a bare-metal heap saturation test (I call it the "Chaos Engine") against a strictly capped JVM.
+To find out exactly where the ChaosTree framework breaks, I threw ChaosTree's data structures into a bare-metal heap saturation test (I call it the "Chaos Engine") against a strictly capped JVM.
 
 ← Back to [README](README.md)
 
@@ -45,7 +45,7 @@ Binary trees rely on vertical traversal paths. The depth of these paths dictates
 
 ## 3. Thread Safety Limits
 
-I deliberately built the Binary Family to be **not natively thread-safe** (except for my dedicated Concurrent RBT). You can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but you will hit severe micro-architectural bottlenecks under heavy contention:
+I deliberately built the Binary Family to be **not natively thread-safe** (except for ChaosTree's dedicated Concurrent RBT). You can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but you will hit severe micro-architectural bottlenecks under heavy contention:
 
 * **The Splay Exclusion Zone:** `Splay` trees are poorly suited to `ReadWriteLock-style` concurrency because `contains()` performs structural modification rather than acting as a read-only operation.
 * **The Monitor Lock Tax:** When I ran an 8-thread write-heavy benchmark, applying external monitor locks caused my execution latency to spike to an awful **~34,000 ns/op**. This is an Operating System constraint—coarse-grained locking forces the OS to continuously park and context-switch threads, completely starving the CPU pipeline. For massive concurrent write throughput, wait for the lock-free B-Tree paging implementations.

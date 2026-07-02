@@ -9,27 +9,27 @@ I built ChaosTree because I wanted to see what happens when you take textbook da
 
 > **Note:** ChaosTree is actively maintained. For upcoming patch releases, known fixes, and the current release status, see [STATUS.md](STATUS.md).
 
-#### Latest Stable Release: v1.0.0
+#### Latest Stable Release: v1.0.1
 ### Maven
 
 ```xml
 <dependency>
     <groupId>io.github.chaos-vy</groupId>
     <artifactId>chaos-tree</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin)
 
 ```kotlin
-implementation("io.github.chaos-vy:chaos-tree:1.0.0")
+implementation("io.github.chaos-vy:chaos-tree:1.0.1")
 ```
 
 ### Gradle (Groovy)
 
 ```groovy
-implementation 'io.github.chaos-vy:chaos-tree:1.0.0'
+implementation 'io.github.chaos-vy:chaos-tree:1.0.1'
 ```
 ## ☕ Requirements
 
@@ -100,7 +100,7 @@ first(B)
     \-- library(R)
 ```
 ---
-## 🌟 Available Data Structures (v1.0.0)
+## 🌟 Available Data Structures (v1.0.1)
 
 * **The Binary Family:** BST, AVL, RBT, Splay, Treap
 * **The N-ary Family:** BTree, BPlusTree
@@ -263,17 +263,17 @@ Generated JavaDoc documentation is available with every release and provides com
 ---
 ## 🗺️ Roadmap: The Future of ChaosTree
 
-ChaosTree is actively evolving to support advanced  fine-grained, lock-free concurrency models.
+ChaosTree is actively evolving to support advanced fine-grained, lock-free concurrency models.
 
-* **v1.0.0:** Foundational Binary and N-ary Search Trees. (Current)
+* **v1.0.1:** Foundational Binary and N-ary Search Trees. (Current)
 * **v1.1.0:** Concurrent Red-Black Tree
-* **v1.2.0:** Concurrent B+ Tre
+* **v1.2.0:** Concurrent B+ Tree
 
 ---
 
 ## 📏 Codebase Metrics
 
-I believe in keeping the core engine clean, lean, and highly tested. Here is the exact breakdown of the ChaosTree v1.0.0 repository:
+I believe in keeping the core engine clean, lean, and highly tested. Here is the exact breakdown of the ChaosTree v1.0.1 repository:
 
 | Module         | Files | Blank | Comments | Code (LOC) |
 |----------------|-------|-------|----------|------------|
@@ -286,7 +286,7 @@ I believe in keeping the core engine clean, lean, and highly tested. Here is the
 
 **DRY (Don't Repeat Yourself) Integrity:** `0 Violations` (At a strict 50-token / 10-line threshold, PMD CPD confirms zero lazy algorithmic copy-pasting. The only identified duplicates are structurally forced by JVM inheritance rules or intentionally unrolled for maximum L1 Cache/Branch Predictor mechanical sympathy).
 
-For every line of production logic I write, I maintain nearly a full line of test and micro-architectural benchmark code.
+For every line of production logic I write, ChaosTree maintains nearly a full line of test and micro-architectural benchmark code.
 
 ---
 

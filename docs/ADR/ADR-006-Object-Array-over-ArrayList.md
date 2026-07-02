@@ -2,11 +2,11 @@
 
 Every N-ary tree node (`BTree` and `BPlusTree`) stores its keys and child references in fixed-capacity contiguous arrays inside it to hold its data elements and child references. This collection has to be able to maintain sorted order by shifting contiguous elements during insertions and deletions.
 
-I completely avoided using Java's standard `java.util.ArrayList`. Instead, I dropped down to using raw `Object[]` arrays with exact bounds, relying heavily on `System.arraycopy` to move memory around.
+ChaosTree completely avoids using Java's standard `java.util.ArrayList`. Instead, I dropped down to using raw `Object[]` arrays with exact bounds, relying heavily on `System.arraycopy` to move memory around.
 
 Using `ArrayList` would have made my code much easier to write because it handles array shifting automatically. But `ArrayList` uses a dynamic growth strategy—when it gets full, it allocates an array 1.5x the size. 
 
-In an N-ary tree, nodes are already mathematically required to be up to 50% empty. If I wrapped my internal data in an `ArrayList`, I would be compounding the B-Tree's mathematically required empty space with `ArrayList`'s hidden spare capacity. At scale (like 500 million elements), that compounds into literally gigabytes of wasted RAM. Using a raw `Object[]` array sized perfectly to `2t` gives me rigid, predictable memory boundaries.
+In an N-ary tree, nodes are already mathematically required to be up to 50% empty. If I wrapped ChaosTree's internal data in an `ArrayList`, I would be compounding the B-Tree's mathematically required empty space with `ArrayList`'s hidden spare capacity. At scale (like 500 million elements), that compounds into literally gigabytes of wasted RAM. Using a raw `Object[]` array sized perfectly to `2t` gives me rigid, predictable memory boundaries.
 
 **Tradeoffs:**  
 * **Pros:** Unmatched heap density. I get complete control over memory alignment, and I get hardware-accelerated memory shifting thanks to `System.arraycopy`.

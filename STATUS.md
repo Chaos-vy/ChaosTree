@@ -1,9 +1,9 @@
-# 🗺️ ChaosTree Library Status
+# 🌳 ChaosTree Library Status
 
 This document outlines the current development status and upcoming release schedule for ChaosTree.
 
-## Upcoming Patch Release: `v1.0.1`
-**Status:** Scheduled on **2 July 2026**.
+## Current Stable Release: `v1.0.1`
+**Released:** **2 July 2026**
 
 ### Project Release Policy
 
