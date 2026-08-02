@@ -1,5 +1,6 @@
 package chaos.tree.binary;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
+import chaos.tree.exception.DuplicateNodeException;
 
 /**
  * Standard, unbalanced Binary Search Tree (BST) implementation.
@@ -19,6 +20,88 @@ public final class BST<T extends Comparable<T>> extends AbstractBiTree<T, BSTNod
     @Override
     protected BSTNode<T> createNode(T value) {
         return new BSTNode<>(value);
+    }
+
+    @Override
+    public void insert(T value) {
+        checkValue(value);
+        if(root == null){
+            root = new BSTNode<>(value);
+            size += 1;
+            modCount += 1;
+            return;
+        }
+        BSTNode<T> curr = root;
+        while (curr!=null){
+            int cmp = compare(value, curr);
+            if(cmp == 0) throw new DuplicateNodeException("Value already exist in tree");
+            if(cmp > 0) {
+                if(curr.getRight() == null){
+                    curr.setRight(new BSTNode<>(value));
+                    size += 1;
+                    modCount += 1;
+                    return;
+                }
+                curr = curr.getRight();
+            }
+            else {
+                if(curr.getLeft() == null){
+                    curr.setLeft(new BSTNode<>(value));
+                    size += 1;
+                    modCount += 1;
+                    return;
+                }
+                curr = curr.getLeft();
+            }
+        }
+    }
+
+    @Override
+    public void delete(T value) {
+        if (root == null) return;
+        checkValue(value);
+
+        BSTNode<T> curr = root;
+        BSTNode<T> prev = null;
+
+        while (curr != null && compare(value, curr) != 0) {
+            prev = curr;
+            if (compare(value, curr) > 0) {
+                curr = curr.getRight();
+            } else {
+                curr = curr.getLeft();
+            }
+        }
+
+        if (curr == null) return;
+        if (curr.getLeft() != null && curr.getRight() != null) {
+
+            BSTNode<T> succParent = curr;
+            BSTNode<T> succ = curr.getRight();
+
+            while (succ.getLeft() != null) {
+                succParent = succ;
+                succ = succ.getLeft();
+            }
+
+            curr.setValue(succ.getValue());
+
+            curr = succ;
+            prev = succParent;
+        }
+
+        BSTNode<T> child = (curr.getLeft() != null) ? curr.getLeft() : curr.getRight();
+
+        if (prev == null) {
+            root = child;
+        } else if (prev.getLeft() == curr) {
+            prev.setLeft(child);
+        } else {
+            prev.setRight(child);
+        }
+
+        size--;
+        modCount++;
     }
 
     /**
