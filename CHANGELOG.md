@@ -22,7 +22,7 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 - Renamed `retainAll()` to `retainAllElements()` to avoid ambiguity with the `NavigableSet` API.
 - `BinaryTree` `insert` and `delete` operation is now Iterative not limited to SOF.
 - ADR and JavaDocs improvement.
-- CI/CD now only tests on JDK17,21 and 25 respectively using latest setup-java@main jdk cache.
+- CI/CD now tests across a full OS matrix on JDK 17, 21, and 25 using the stable setup-java@v4 action.
 - Interface `ITree`-> `Tree` and `ISearchTree` -> `SearchTree` now renamed.
 
 ## [1.0.1] - 2026-07-02

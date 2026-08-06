@@ -13,6 +13,28 @@
     <description>Zero-dependency Java search tree library featuring binary and N-ary search trees.</description>
     <url>https://github.com/Chaos-vy/ChaosTree</url>
 
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>chaos-vy</id>
+            <name>Vinay Singh</name>
+            <url>https://github.com/Chaos-vy</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/Chaos-vy/ChaosTree.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Chaos-vy/ChaosTree.git</developerConnection>
+        <url>https://github.com/Chaos-vy/ChaosTree</url>
+        <tag>v1.1.0</tag>
+    </scm>
+
     <modules>
         <module>chaos-tree-core</module>
         <module>chaos-tree-benchmarks</module>
