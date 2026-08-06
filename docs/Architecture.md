@@ -1,6 +1,6 @@
 # ChaosTree Architecture
 
-ChaosTree is built on a deeply object-oriented, strongly encapsulated hierarchy. My goal was to maximize code reuse behind the scenes while keeping the public API as clean and approachable as possible.
+ChaosTree is built on a deeply object-oriented, and DOD strongly encapsulated hierarchy. My goal was to maximize code reuse behind the scenes while keeping the public API as clean and approachable as possible.
 
 At its core, my architecture is driven by a mindset of **Mechanical Sympathy**. I didn't just organize these structures based on theoretical algorithms—I built them around how they physically interact with memory, CPU caches, and the JVM runtime. This led me to create two completely distinct engine families that are optimized for completely different workloads, while still sharing the same underlying search-tree contract.
 
@@ -12,8 +12,8 @@ The following diagram illustrates the public API contracts and the implementatio
 classDiagram
     direction BT
 
-    class ITree
-    class ISearchTree
+    class Tree
+    class SearchTree
     class Traversal
     class BinaryTree
     class NaryTree
@@ -27,10 +27,10 @@ classDiagram
     class BTree
     class BPlusTree
 
-    ISearchTree --|> ITree
-    BinaryTree --|> ISearchTree
+    SearchTree --|> Tree
+    BinaryTree --|> SearchTree
     BinaryTree --|> Traversal
-    NaryTree --|> ISearchTree
+    NaryTree --|> SearchTree
 
     BST --|> BinaryTree
     AVL --|> BinaryTree
@@ -46,11 +46,11 @@ classDiagram
 
 ## Design Philosophy
 
-### 1. API Contract Segregation (`ITree` → `ISearchTree`)
+### 1. API Contract Segregation (`Tree` → `SearchTree`)
 
 I wanted to clearly separate fundamental container operations from search-tree-specific behavior.
 
-I created `ITree` to define the absolute minimal container contract, exposing things like size management and lifecycle control. I then built `ISearchTree` to extend that foundation with ordering-aware capabilities—things like insertion, deletion, range queries, and predecessor/successor navigation.
+I created `Tree` to define the absolute minimal container contract, exposing things like size management and lifecycle control. I then built `SearchTree` to extend that foundation with ordering-aware capabilities—things like insertion, deletion, range queries, and predecessor/successor navigation.
 
 This clean separation means all of my search-tree implementations can share a perfectly consistent API, and I never have to force Binary and N-ary trees into unrelated, messy abstractions.
 
@@ -130,8 +130,8 @@ This approach provides:
 
 Consumers work with stable contracts such as:
 
-* `ITree`
-* `ISearchTree`
+* `Tree`
+* `SearchTree`
 * `BinaryTree`
 * `NaryTree`
 
@@ -333,7 +333,7 @@ classDiagram
 ### Design Notes
 
 #### `AbstractNaryTree`
-`AbstractNaryTree` is the workhorse. It centralizes all the terrifyingly complex logic shared by multi-way trees: node splitting, sibling merging, key borrowing, and occupancy validation. By keeping this at the abstract layer, my B-Tree and B+ Tree implementations can focus strictly on routing and layout instead of array manipulation.
+`AbstractNaryTree` is the Engine. It centralizes all the massive complex logic shared by multi-way trees: node splitting, sibling merging, key borrowing, and occupancy validation. By keeping this at the abstract layer, my B-Tree and B+ Tree implementations can focus strictly on routing and layout instead of array manipulation.
 
 #### Degree-Driven Design
 Unlike binary trees where a node strictly has left and right children, my N-ary trees use a configurable `degree` (`t`). This parameter completely dictates the tree's physical shape: the maximum capacity of a node, its minimum occupancy, and ultimately the tree's height. 
@@ -344,7 +344,7 @@ Tuning the degree lets you trade slightly larger node arrays for dramatically sh
 In my classic `BTree`, user data lives everywhere. Internal nodes act as both routing guards and data storage. If a search query hits an exact match high up in the tree, it terminates immediately without having to chase pointers all the way down to a leaf. It's an elegant, highly balanced approach for general-purpose CRUD workloads.
 
 #### The B+ Tree Architecture
-My `BPlusTree` takes a completely different approach: internal nodes are strictly for routing, and 100% of the actual user data is packed tightly into the leaf layer. 
+The `BPlusTree` takes a completely different approach: internal nodes are strictly for routing, and 100% of the actual user data is packed tightly into the leaf layer. 
 
 ```text
              Root
@@ -357,8 +357,6 @@ My `BPlusTree` takes a completely different approach: internal nodes are strictl
               │
 Leaf → Leaf → Leaf → Leaf
 ```
-
-Why do this? Because it makes sequential operations blindingly fast.
 
 #### The Leaf-Link Optimization
 The true power of the `BPlusTree` is its linked-leaf layer. Every leaf node maintains a physical `next` pointer to its sibling. 

@@ -1,8 +1,11 @@
-_# Changelog
+# Changelog
 
 All notable changes to ChaosTree will be documented in this file. I believe in being transparent about what I add, change, and fix.
 
 ---
+## [1.0.1] - 2nd release
+
+
 
 ## [1.0.0] - Initial Release 
 26 June 2026
@@ -23,8 +26,8 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 
 #### Core API
 
-* ITree abstraction
-* ISearchTree contract
+* Tree contract
+* SearchTree contract
 * BinaryTree API
 * NaryTree API
 
@@ -41,12 +44,12 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 
 * Data-driven N-ary telemetry and micro-architectural analysis: [NaryFamily/Benchmark.md](docs/NaryFamily/Benchmark.md)
 * In-depth CPU Cache physics & degree (t) selection guide: [NaryFamily/DegreeOptimization.md](docs/NaryFamily/DegreeOptimization.md)
-* Added and updated [Architecture Decision Records (ADRs)](docs/ADR/README.md) covering node architecture, recursive vs iterative boundaries, and internal routing.
+* Added and updated [Architecture Decision Records (ADRs)](ADR/README.md) covering node architecture, recursive vs iterative boundaries, and internal routing.
 * Explicit tracking of benchmark environments (i5, JDK 21).
 
 #### Quality
 
-* 579 automated tests
+* 515 automated tests
 * Verified JDK 17 baseline compatibility (tested across JDK 17, 21, 25. 26)
 * Randomized fuzz testing
 * Concurrent access validation
@@ -56,4 +59,6 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 
 ### Notes
 
-This is the first public release of ChaosTree. I am incredibly proud of the architecture and the rigorous testing that went into this release._
+This is the first public release of ChaosTree. I am incredibly proud of the architecture and the rigorous testing that went into this release.
+
+

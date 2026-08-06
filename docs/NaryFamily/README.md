@@ -23,7 +23,7 @@ The N-ary Family is the high-density contiguous-memory module of ChaosTree — f
 | **[Complexity](Complexity.md)**                  | Time and space complexity per operation, detailing core algorithmic divergences                 |
 | **[Limits](Limits.md)**                          | Extreme heap saturation limits, stack depth immunity, and density comparisons                   |
 | **[DegreeOptimization](DegreeOptimization.md)**  | L1/L2 cache physics, degree selection guide, and GC allocation tradeoffs                        |
-| **[Design-decision](../ADR/README.md)** | Architecture decisions — N-ary node paradox, `Object[]` usage, and API segregation              |
+| **[Design-decision](../../ADR/README.md)** | Architecture decisions — N-ary node paradox, `Object[]` usage, and API segregation              |
 
 ## Quick Start
 

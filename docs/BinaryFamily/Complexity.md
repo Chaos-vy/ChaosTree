@@ -80,13 +80,13 @@ All positional queries perform a standard vertical traversal from the root down 
 
 ## Bulk Operations
 
-| Operation               |      Time       | Notes                                                                    |
-|-------------------------|:---------------:|--------------------------------------------------------------------------|
-| `insertAll(Iterable)`   |  O(k × insert)  | Inserts each element. Throws `DuplicateNodeException` on first duplicate |
-| `deleteAll(Iterable)`   |  O(k × delete)  | Deletes each element. Missing values silently ignored                    |
-| `containsAll(Iterable)` | O(k × contains) | Short-circuits on first miss                                             |
-| `retainAll(Iterable)`   |   O(n log n)    | Snapshots tree, deletes all elements not in the retain set               |
-| `mergeAll(Iterable)`    |  O(k × insert)  | Like `insertAll` but silently skips duplicates                           |
+| Operation               |      Time       | Space               | Notes                                                                    |
+|-------------------------|:---------------:|---------------------|--------------------------------------------------------------------------|
+| `insertAll(Iterable)`   |  O(k × insert)  | O(1)                | Inserts each element. Throws `DuplicateNodeException` on first duplicate |
+| `deleteAll(Iterable)`   |  O(k × delete)  | O(N)-Unique element | Deletes each element. Missing values silently ignored                    |
+| `containsAll(Iterable)` | O(k × contains) |                     | Short-circuits on first miss                                             |
+| `retainAll(Iterable)`   |   O(n log n)    | O(N)-Unique element | Snapshots tree, deletes all elements not in the retain set               |
+| `mergeAll(Iterable)`    |  O(k × insert)  | O(N)-Unique element | Like `insertAll` but silently skips duplicates                           |
 
 ---
 

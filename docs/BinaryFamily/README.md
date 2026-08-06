@@ -1,6 +1,6 @@
 # Binary Family
 
-The Binary Family is the core module of ChaosTree — five production-grade binary search tree implementations sharing a single generic API (`BinaryTree<T extends Comparable<T>>`). Every tree supports insertion, deletion, search, four traversal orders, positional queries (floor, ceil, successor, predecessor, kth-smallest, LCA), bulk operations (insertAll, deleteAll, retainAll, mergeAll), fail-fast iterators, Java Streams, and O(n) deep cloning via copy constructors. You pick the algorithm; the API stays the same.
+The Binary Family is the core module of ChaosTree — five production-grade binary search tree implementations sharing a single generic API (`BinaryTree<T extends Comparable<? extends T>>`). Every tree supports insertion, deletion, search, four traversal orders, positional queries (floor, ceil, successor, predecessor, kth-smallest, LCA), bulk operations (insertAll, deleteAll, retainAll, mergeAll), fail-fast iterators, Java Streams, and O(n) deep cloning via copy constructors. You pick the algorithm; the API stays the same.
 
 ---
 
@@ -25,7 +25,7 @@ The Binary Family is the core module of ChaosTree — five production-grade bina
 | **[API](API.md)**                             | Every method signature, parameters, return type, and usage example                          |
 | **[Benchmark](Benchmark.md)**                 | JMH results with L1 cache, branch miss, and instructions-per-op profiling                   |
 | **[Complexity](Complexity.md)**               | Time and space complexity per operation across all 5 trees                                  |
-| **[Design-decision](../ADR/README.md)**     | Architecture decisions — why CRTP, DeleteResult, Color enum, SearchResult, afterDelete hook |
+| **[Design-decision](../../ADR/README.md)**     | Architecture decisions — why CRTP, DeleteResult, Color enum, SearchResult, afterDelete hook |
 | **[Limits](Limits.md)**                       | OOM and SOF boundaries from Chaos Engine stress tests per tree                              |
 | **[Test](Test.md)**                           | 387 binary tests — all passed.                                                          |
 
@@ -202,7 +202,6 @@ BinaryFamily is not thread-safe by default. BST, AVL, RBT, and Treap can be made
 **Splay cannot use `ReadWriteLock`.** `contains()` is a structural write by design. Removing splay-on-search breaks the amortized O(log n) guarantee which is Splay's entire value proposition. A read-only `contains()` gives you O(n) worst-case on adversarial access patterns with no amortized recovery. The `ReadWriteLock` benefit doesn't justify breaking the core guarantee.
 **Concurrent Splay = clone-per-thread.**
 
-I am currently planning to build a true, fully lock-free Concurrent RBT for v1.1.0 on a completely separate hierarchy. (I explicitly decided *not* to build a concurrent AVL or Splay—see my ADRs for the full breakdown on why).
 
 > Full thread-safety analysis, external sync patterns, and verified stress
 > test results → [Benchmark.md](Benchmark.md)
@@ -210,7 +209,6 @@ I am currently planning to build a true, fully lock-free Concurrent RBT for v1.1
 
 ## Known Limits
 
-- **BST** degrades to O(n) with sorted input and hits `StackOverflowError` at ~19,654 nodes on sorted/degenerate input. Random input survives far deeper. All balanced trees are immune — they are heap-limited, not stack-limited.
-- **All trees** hit `OutOfMemoryError` at ~126M nodes on a 5.8 GB heap (12 GB DDR5 system). Per-node memory: 3 fields (BST/AVL/Treap) or 4 fields (RBT/Splay).
+- **All trees** hit `OutOfMemoryError` at ~126M nodes on a 5.8 GB heap (12 GB DDR5 system). Per-node memory: 3 fields (BST/AVL/Treap) or 4 fields (RBT/Splay). -{BST is not tested}
 
 > Full stress test data → [limits.md](Limits.md)

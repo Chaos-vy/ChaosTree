@@ -185,4 +185,4 @@ At t=4, millions of tiny 7-element `Object[]` arrays are allocated. Each carries
 
 ---
 
-> Related: [Benchmark.md](Benchmark.md) · [Complexity.md](Complexity.md) · [Limits.md](Limits.md) · [ADR-006](../ADR/ADR-006-Object-Array-over-ArrayList.md)
+> Related: [Benchmark.md](Benchmark.md) · [Complexity.md](Complexity.md) · [Limits.md](Limits.md) · [ADR-006](../../ADR/ADR-005-Object-Array-over-ArrayList.md)

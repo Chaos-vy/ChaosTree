@@ -2,38 +2,35 @@
 [![GitHub release](https://img.shields.io/github/v/release/Chaos-vy/ChaosTree)](https://github.com/Chaos-vy/ChaosTree/releases)
 [![License](https://img.shields.io/github/license/Chaos-vy/ChaosTree)](LICENSE)
 
-# 🌳 ChaosTree: A Fast, No-Nonsense Java Search Tree Library
+# 🌳 ChaosTree: A Fast Java Search Tree Library
 
 **ChaosTree** is a highly optimized in-memory search tree library for Java.
 
-I built ChaosTree because I wanted to see what happens when you take textbook data structures and optimize them for real-world JVM memory and CPU caches. It includes both classic Binary Trees (AVL, RBT, etc.) and cache-friendly N-ary Trees (B-Tree, B+ Tree).
+I build ChaosTree because I wanted to see what happens when I take textbook data structures and optimize them for real-world JVM memory and CPU caches. It includes both classic Binary Trees (AVL, RBT, etc.) and cache-friendly N-ary Trees (B-Tree, B+ Tree).
 
 ---
 ## Installation
 
-> **Note:** ChaosTree is actively maintained. For upcoming patch releases, known fixes, and the current release status, see [STATUS.md](STATUS.md).
-
-#### Latest Stable Release: v1.0.1
 ### Maven
 
 ```xml
 <dependency>
     <groupId>io.github.chaos-vy</groupId>
     <artifactId>chaos-tree</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin)
 
 ```kotlin
-implementation("io.github.chaos-vy:chaos-tree:1.0.1")
+implementation("io.github.chaos-vy:chaos-tree:1.1.0")
 ```
 
 ### Gradle (Groovy)
 
 ```groovy
-implementation 'io.github.chaos-vy:chaos-tree:1.0.1'
+implementation 'io.github.chaos-vy:chaos-tree:1.1.0'
 ```
 ## ☕ Requirements
 
@@ -42,8 +39,8 @@ implementation 'io.github.chaos-vy:chaos-tree:1.0.1'
 - Build Tool: Maven 3.8+
 
 * ChaosTree is compiled using `--release 17`.
-* Compatibility testing is performed on JDK 17, JDK 21, and JDK 26 to verify consistent behavior across modern Java runtimes.
-* Performance benchmarks are executed on JDK 21.
+* Compatibility testing is performed on JDK 17, JDK 21 and JDK 25 to verify consistent behavior across modern Java runtimes.
+* Performance benchmarks are executed on JDK 17.
 
 ---
 
@@ -55,7 +52,7 @@ ChaosTree provides a rich, modern, Java Collections-style API. It completely enc
 
 By packing data tightly into arrays, the N-ary trees are extremely friendly to your CPU's L1/L2 caches, making range queries really fast.
 ```java
-// Create a B+ Tree (degree must be greater than 1)
+// Create a B+ Tree (degree must be greater than 1)(CLRS)
 NaryTree<Integer> index = new BPlusTree<>(32);
 BPlusTree<List<Integer>> xyz = new BPlusTree<>(); //Default degree(t) = 32.
 index.insertAll(hugeDataset); //Huge dataset must be Iterable
@@ -71,7 +68,7 @@ index.rangeStream(100, 500)
 
 ### 2. Classic Binary Trees (Binary Engine)
 
-Great for everyday data storage, building priority queues, or when you just want a classic, fast binary tree.
+Great for everyday data storage, building priority queues, or when I just want a classic, fast binary tree.
 
 ```java
 // Create a classic auto-balancing Red-Black Tree
@@ -104,7 +101,7 @@ first(B)
     \-- library(R)
 ```
 ---
-## 🌟 Available Data Structures (v1.0.1)
+## 🌟 Available Data Structures (v1.1.0)
 
 * **The Binary Family:** BST, AVL, RBT, Splay, Treap
 * **The N-ary Family:** BTree, BPlusTree
@@ -191,9 +188,9 @@ The binary trees in ChaosTree are tuned for fast lookups without sacrificing str
 
 **ChaosTree AVL:** Maintains a stricter balancing invariant than Red-Black Trees, yielding a lower theoretical maximum height (≈1.44 log₂N versus ≈2 log₂N). This can improve lookup performance in read-heavy workloads.
 
-### ChaosTree vs java.util.TreeMap
+### ChaosTree vs TreeSet
 
-When compared against the JDK's standard `TreeMap` (which is a Red-Black tree), my `BPlusTree` range scan at 1M elements completes in 263K ns/op vs TreeMap's traversal-based approach — approximately 25% faster due to leaf-chain locality, but since it doesn't wrap everything in heavy `Map.Entry` objects, it uses significantly less memory when you just need a Set.
+When compared against the JDK's standard `TreeSet` (which is a Red-Black tree), my `BPlusTree` range scan at 1M elements completes in 263K ns/op vs TreeMap's traversal-based approach — approximately 25% faster due to leaf-chain locality, but since it doesn't wrap everything in heavy `Map.Entry` objects, it uses significantly less memory when you just need a Set.
 
 > Results are representative of the test environment described above and may vary across hardware, JVM versions, and workloads.
 
@@ -230,14 +227,14 @@ Detailed design documents and architectural decisions are available in the `Docs
 
 ### Architecture Decision Records (ADR)
 
-The [`Docs/ADR/`](docs/ADR) directory contains records explaining significant architectural and API decisions.
+The [`ADR/`](ADR) directory contains records explaining significant architectural and API decisions.
 
 Examples include:
 
-* Why the API is organized as `ITree → ISearchTree → BinaryTree / NaryTree`
+* Why the API is organized as `Tree → SearchTree → BinaryTree / NaryTree`
 * Why internal node implementations are hidden behind JPMS boundaries
 * Why traversal APIs are exclusive to the Binary family
-* Why range-query operations belong to the common `ISearchTree` contract
+* Why range-query operations belong to the common `SearchTree` contract
 
 ### Binary Family Documentation
 
@@ -269,9 +266,9 @@ Generated JavaDoc documentation is available with every release and provides com
 
 ChaosTree is actively evolving to support advanced fine-grained, lock-free concurrency models.
 
-* **v1.0.1:** Foundational Binary and N-ary Search Trees. (Current)
-* **v1.1.0:** Concurrent Red-Black Tree
-* **v1.2.0:** Concurrent B+ Tree
+* **v1.1.0:** Foundational Binary and N-ary Search Trees. (Current)
+* **v1.2.0:** Feature of map <K,V> key value pair.
+* **v2.0.0:** Thinking....
 
 ---
 

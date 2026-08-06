@@ -1,6 +1,6 @@
 # BinaryTree API Reference
 
-The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Traversal<T>`. I built it to provide a massive, comprehensive set of operations for ChaosTree's binary search trees.
+The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `Tree`, and `Traversal<T>`. I built it to provide a massive, comprehensive set of operations for ChaosTree's binary search trees.
 
 ← Back to [README](README.md)
 
@@ -40,13 +40,13 @@ The `BinaryTree<T>` interface inherits from `ISearchTree<T>`, `ITree`, and `Trav
 | `Stream<T> rangeStream(T from, T to)`           | Returns a lazy sequential stream of values within the half-open range.      | `NullPointerException`, `IllegalArgumentException` (if from > to) |
 
 ### Bulk Operations
-| Method                                              | Description                                                      | Exceptions Thrown                                              |
-|-----------------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------|
-| `void insertAll(Iterable<? extends T> values)`      | Inserts all values.                                              | `NullPointerException` (if any null), `DuplicateNodeException` |
-| `void deleteAll(Iterable<? extends T> values)`      | Deletes all specified values in iteration order.                 | `NullPointerException` (if any null)                           |
-| `boolean containsAll(Iterable<? extends T> values)` | Returns `true` if all values exist in the tree.                  | `NullPointerException` (if any null)                           |
-| `void retainAll(Iterable<? extends T> values)`      | Retains only elements present in both the tree and the iterable. | `NullPointerException` (if iterable is null)                   |
-| `void mergeAll(Iterable<? extends T> values)`       | Inserts all values, silently ignoring any duplicates.            | `NullPointerException` (if any null)                           |
+| Method                                              | Description                                                                                                                             | Exceptions Thrown                                              |
+|-----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| `void insertAll(Iterable<? extends T> values)`      | Inserts all values.                                                                                                                     | `NullPointerException` (if any null), `DuplicateNodeException` |
+| `void deleteAll(Iterable<? extends T> values)`      | Deletes all specified values in iteration order. (Iterable source is first snapshot in HashSet then any operation is performed further) | `NullPointerException` (if any null)                           |
+| `boolean containsAll(Iterable<? extends T> values)` | Returns `true` if all values exist in the tree.                                                                                         | `NullPointerException` (if any null)                           |
+| `void retainAll(Iterable<? extends T> values)`      | Retains only elements present in both the tree and the iterable.                                                                        | `NullPointerException` (if iterable is null)                   |
+| `void mergeAll(Iterable<? extends T> values)`       | Inserts all values, silently ignoring any duplicates.                                                                                   | `NullPointerException` (if any null)                           |
 
 ### Visualization
 | Method                             | Description                                                                                                                                                |

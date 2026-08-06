@@ -18,7 +18,7 @@ The following metrics represent the entire ChaosTree project, including both the
 
 * **Total Project Unit Tests:** 579 (387 Binary + 182 N-ary + 10 Fuzz Tests)
 
-Collectively, the suite validates that regardless of the underlying multi-way algorithm (B-Tree or B+ Tree), the structures adhere to the expected `NaryTree` and `ISearchTree` contracts. The suite verifies structural integrity, occupancy constraints, node splitting and merging behavior, range-query correctness, and stability under both isolated and contention-heavy workloads.
+Collectively, the suite validates that regardless of the underlying multi-way algorithm (B-Tree or B+ Tree), the structures adhere to the expected `NaryTree` and `SearchTree` contracts. The suite verifies structural integrity, occupancy constraints, node splitting and merging behavior, range-query correctness, and stability under both isolated and contention-heavy workloads.
 
 ---
 

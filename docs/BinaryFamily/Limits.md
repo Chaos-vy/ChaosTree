@@ -23,29 +23,29 @@ This limitation is a highly intentional, intentional JVM interoperability design
 `java.lang.OutOfMemoryError: Requested array size exceeds VM limit`
 Consequently, supporting collections larger than the JVM's maximum array size would require an entirely different ecosystem of APIs and data structures rather than the standard Java Collections Framework.
 2. **The Memory Reality:** Based on the validated node footprint of ≈48 bytes (via compressed OOPs), reaching the 32-bit integer ceiling would require approximately 103 GB of heap memory. In practice, heap exhaustion occurs long before the theoretical size limit is approached.
-3. **Collection Framework Compatibility:** Maintaining a 32-bit `volatile int` aligns with the capacity model used throughout the Java Collections Framework. Since interoperability ultimately depends on JVM-backed arrays and collection APIs, tracking capacities beyond `Integer.MAX_VALUE` provides little practical value.
+3. **Collection Framework Compatibility:** Maintaining a 32-bit `int` aligns with the capacity model used throughout the Java Collections Framework. Since interoperability ultimately depends on JVM-backed arrays and collection APIs, tracking capacities beyond `Integer.MAX_VALUE` provides little practical value.
 ---
 
 ## 2. Stack Depth & Recursion Limits
 
 Binary trees rely on vertical traversal paths. The depth of these paths dictates whether the collection is limited by the JVM's Heap space or the Thread Execution Stack.
 
-* **Unbalanced Trees (BST):** Bounded by the JVM Stack. In bare-metal testing, a sequentially inserted `BST` degenerated into a linked list and triggered a `StackOverflowError` at exactly **19,654 nodes**.
+* **Unbalanced Trees (BST):** This Tree is not battle tested against OOM because it becomes Linked List and Binary tree node does not support tail pointer. For strict policy of duplicate each of the value is compared.
 * **Balanced Trees (AVL, RBT, Treap, Splay):** Bounded by JVM Heap. Because their height is mathematically restricted to `O(log n)`, their depth grows logarithmically and remained negligible compared to heap limits throughout saturation testing. They successfully scale to **126.7+ Million nodes** before triggering an `OutOfMemoryError` on a 5.8 GB heap limit.
 
-| Tree      | Runtime Error | Allocated nodes | Description                                  |
-|-----------|---------------|-----------------|----------------------------------------------|
-| **BST**   | SOF           | ~19654          | (unbounded recursion on sorted input)        |
-| **Splay** | OOM           | ~126.8M         |                                              |
-| **AVL**   | OOM           | ~126.8M         | (height-bounded, recursion depth negligible) |
-| **RBT**   | OOM           | ~126.8M         |                                              |
-| **Treap** | OOM           | ~126.8M         |                                              |
+| Tree      | Runtime Error | Allocated nodes | Description                                                                                             |
+|-----------|---------------|-----------------|---------------------------------------------------------------------------------------------------------|
+| **BST**   | N/A           | ~Not Tested     | BinaryTree at sequential input behaves as Linked List which my BinaryTree does not posses tail-pointer. |
+| **Splay** | OOM           | ~126.8M         |                                                                                                         |
+| **AVL**   | OOM           | ~126.8M         | (height-bounded, recursion depth negligible)                                                            |
+| **RBT**   | OOM           | ~126.8M         |                                                                                                         |
+| **Treap** | OOM           | ~126.8M         |                                                                                                         |
 
 ---
 
 ## 3. Thread Safety Limits
 
-I deliberately built the Binary Family to be **not natively thread-safe** (except for ChaosTree's dedicated Concurrent RBT). You can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but you will hit severe micro-architectural bottlenecks under heavy contention:
+The chaos tree is currently not thread safe however we can technically wrap them in external synchronization (`synchronized` blocks or `ReadWriteLock`), but it severe with micro-architectural bottlenecks under heavy contention:
 
 * **The Splay Exclusion Zone:** `Splay` trees are poorly suited to `ReadWriteLock-style` concurrency because `contains()` performs structural modification rather than acting as a read-only operation.
 * **The Monitor Lock Tax:** When I ran an 8-thread write-heavy benchmark, applying external monitor locks caused my execution latency to spike to an awful **~34,000 ns/op**. This is an Operating System constraint—coarse-grained locking forces the OS to continuously park and context-switch threads, completely starving the CPU pipeline. For massive concurrent write throughput, wait for the lock-free B-Tree paging implementations.
@@ -57,8 +57,7 @@ I deliberately built the Binary Family to be **not natively thread-safe** (excep
 
 The ChaosTree iterators and stream spliterators are strictly **fail-fast**.
 
-* **ConcurrentModificationException:** All topological modifications (insertions, deletions, and Splay searches) increment a `volatile modCount`. If an active iterator detects a mismatch between its expected state and the tree's global state, it will immediately throw a `ConcurrentModificationException`.
-* **Visibility Guarantee:** Because `modCount` and `size` are declared as `volatile`, multithreaded modifications are instantly visible across core boundaries without requiring a lock acquisition. However, `volatile` does not prevent race conditions on compound operations (e.g., `modCount++`), meaning un-synchronized concurrent writes may silently drop fail-fast visibility.
+* **ConcurrentModificationException:** All topological modifications (insertions, deletions, and Splay searches) increment a `long modCount`. If an active iterator detects a mismatch between its expected state and the tree's global state, it will immediately throw a `ConcurrentModificationException`.
 
 ---
 
@@ -80,8 +79,8 @@ The ChaosTree architecture was tested directly against Java's native `java.util.
 | **ChaosTree Treap**  | **126,775,226**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
 | **ChaosTree AVL**    | **126,752,322**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
 | **ChaosTree Splay**  | **126,727,081**       | $\approx 48$ bytes          | `OutOfMemoryError` (Heap)    |
-| **Native `TreeSet`** | 84,523,757            | $\approx 72$ bytes          | `OutOfMemoryError` (Heap)    |
-| **ChaosTree BST**    | 19,654                | $\approx 40$ bytes          | `StackOverflowError` (Stack) |
+| **Native `TreeSet`** | **108,676,332**       | $\approx 72$ bytes          | `OutOfMemoryError` (Heap)    |
+| **ChaosTree BST**    | **N/A**               | $\approx 40$ bytes          | `StackOverflowError` (Stack) |
 
 | Tree    | Structural Overhead (Excluding Payload) |
 |---------|-----------------------------------------|
@@ -95,9 +94,11 @@ The ChaosTree architecture was tested directly against Java's native `java.util.
 ### Engineering Takeaways
 1. **Memory Efficiency:** The ChaosTree base nodes pack into 48-byte cache-line friendly footprints. Compared to the heavy `Map.Entry` objects utilized by the standard Java library, ChaosTree successfully houses **50% more nodes in the exact same memory footprint**.
 2. **Uniform Object Padding:** The balanced variants (AVL, RBT, Treap, Splay) all trigger heap exhaustion within a 0.04% margin. This indicates the JVM perfectly pads their distinct tracking variables (`color`, `height`, `priority`) into uniform byte boundaries with zero memory waste.
-3. **The Unbalanced Danger:** The standard BST failed via `StackOverflowError` at $\approx 19,654$ nodes. Without rotational balancing, sequential insertions degraded the tree into a linked list, destroying the thread execution stack long before the heap was threatened. All balanced family variants avoid this failure mode under the tested conditions.
+3. **The Unbalanced Danger:** The standard BST has no rotational balancing, sequential insertions degraded the tree into a linked list.
 
 ---
+
+#### Also Read: [docs/JOL.txt](../JOL.txt)
 <details>
 <summary><b>Click to expand raw Chaos Engine Saturation Logs</b></summary>
 
@@ -111,26 +112,14 @@ Available CPU Cores     : 16
 Java Vendor / Version   : Oracle Corporation 26.0.1
 =================================================
 
-[Chaos Engine] Initiating Stack Depth Degradation via BST...
->> SUCCESS: StackOverflowError caught at BST size: 19654
+Node count of AVL Tree              : 126741606
+Node count of RB  Tree              : 126728618
+Node count of Splay Tree            : 126790655
+Node count of Treap Tree            : 126780167
+Node count of Tree Set              : 108676332
 
-[Chaos Engine] Initiating Heap Saturation via AVL...
->> SUCCESS: OutOfMemoryError caught at allocation count: 126,752,322
+Process finished with exit code 0
 
-[Chaos Engine] Initiating Heap Saturation via RBT...
->> SUCCESS: OutOfMemoryError caught at allocation count: 126,777,335
-
-[Chaos Engine] Initiating Heap Saturation via Splay...
->> SUCCESS: OutOfMemoryError caught at allocation count: 126,727,081
-
-[Chaos Engine] Initiating Heap Saturation via Treap...
->> SUCCESS: OutOfMemoryError caught at allocation count: 126,775,226
-
-[Chaos Engine] Initiating Heap Saturation via Java TreeMap...
->> SUCCESS: OutOfMemoryError caught at allocation count: 84,523,757
-==================================================
-           CHAOS TEST SEQUENCE COMPLETED          
-==================================================
 
 ```
 </details>
