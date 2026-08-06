@@ -19,7 +19,7 @@ import java.util.List;
  * @see TraversalType
  * @since 1.0.0
  */
-public interface Traversal<T extends Comparable<T>> {
+public interface Traversal<T extends Comparable<? super T>> {
 
 
     /**

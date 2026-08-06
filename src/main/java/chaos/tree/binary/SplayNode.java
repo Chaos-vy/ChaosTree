@@ -15,7 +15,7 @@ import chaos.tree.core.searchtree.binary.node.ParentBiNode;
  * @see ParentBiNode
  * @since 1.0.0
  */
-public class SplayNode<T extends Comparable<T>> extends ParentBiNode<T, SplayNode<T>> {
+public class SplayNode<T extends Comparable<? super T>> extends ParentBiNode<T, SplayNode<T>> {
     /**
      * Constructs a Splay Tree node with the specified value.
      *

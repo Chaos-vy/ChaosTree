@@ -1,6 +1,6 @@
 package chaos.tree.core.searchtree;
 
-import chaos.tree.core.ITree;
+import chaos.tree.core.Tree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  *            must implement {@link Comparable}
  * @since 1.0.0
  */
-public interface ISearchTree<T extends Comparable<T>> extends ITree, Iterable<T> {
+public interface SearchTree<T extends Comparable<? super T>> extends Tree, Iterable<T> {
     /**
      * Inserts the specified value into this tree.
      * The tree will not be modified if the value already exists.

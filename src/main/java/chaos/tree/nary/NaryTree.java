@@ -1,6 +1,6 @@
 package chaos.tree.nary;
 
-import chaos.tree.core.searchtree.ISearchTree;
+import chaos.tree.core.searchtree.SearchTree;
 
 
 /**
@@ -13,14 +13,14 @@ import chaos.tree.core.searchtree.ISearchTree;
  *
  * <p>Because all N-ary trees in this library are fundamentally ordered search trees,
  * they inherit the complete positional query (min, max, floor, ceil) and range query
- * operations from {@link ISearchTree}. The structural mechanics of this family
+ * operations from {@link SearchTree}. The structural mechanics of this family
  * are strictly governed by the CLRS "minimum degree" (t) arithmetic to guarantee
  * perfectly symmetrical node splits and merges.</p>
  *
  * @param <T> the comparable type of elements held in this tree
  * @since 1.0.0
  */
-public interface NaryTree<T extends Comparable<T>> extends ISearchTree<T> {
+public interface NaryTree<T extends Comparable<T>> extends SearchTree<T> {
     
     /**
      * Returns the minimum degree (t) of the B-Tree as defined by CLRS.

@@ -11,7 +11,7 @@ package chaos.tree.core.searchtree.binary.node;
  * @param <N> the concrete node type
  * @since 1.0.0
  */
-public abstract class BiNode<T,N extends BiNode<T,N>> {
+public abstract class BiNode<T extends Comparable<? super T>,N extends BiNode<T,N>> {
 
     /**
      * Value stored in the current node.

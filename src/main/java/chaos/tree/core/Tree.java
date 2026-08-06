@@ -12,7 +12,7 @@ package chaos.tree.core;
  *
  * @since 1.0.0
  */
-public interface ITree {
+public interface Tree {
     /**
      * Returns the number of elements currently stored in this tree.
      *

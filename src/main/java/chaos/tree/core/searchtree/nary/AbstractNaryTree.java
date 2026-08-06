@@ -1,6 +1,6 @@
 package chaos.tree.core.searchtree.nary;
 
-import chaos.tree.core.searchtree.ISearchTree;
+import chaos.tree.core.searchtree.SearchTree;
 import chaos.tree.core.searchtree.PrintStyle;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
@@ -891,7 +891,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ISearchTree<?> other)) return false;
+        if (!(o instanceof SearchTree<?> other)) return false;
         if (this.size() != other.size()) return false;
         Iterator<T> it1 = this.iterator();
         Iterator<?> it2 = other.iterator();

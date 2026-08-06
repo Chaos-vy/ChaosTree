@@ -18,7 +18,7 @@ import chaos.tree.core.searchtree.binary.node.ParentBiNode;
  * @see ParentBiNode
  * @since 1.0.0
  */
-public abstract class AbstractParentRotateTree<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends AbstractBiTree<T,N> {
+public abstract class AbstractParentRotateTree<T extends Comparable<? super T>, N extends ParentBiNode<T,N>> extends AbstractBiTree<T,N> {
 
     /**
      * Overrides the base clone to additionally wire parent references

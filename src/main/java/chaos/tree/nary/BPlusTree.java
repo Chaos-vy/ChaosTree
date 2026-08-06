@@ -12,16 +12,32 @@ import java.util.stream.StreamSupport;
 
 
 /**
- * Self-balancing N-ary Search Tree implementation utilizing the B+ Tree invariant with Ghost Routing.
+ * A self-balancing multi-way search tree that stores all data entries in
+ * leaf nodes while internal nodes contain only separator keys used for
+ * navigation.
  *
- * <p>A B+ Tree is an advanced evolution of the standard B-Tree where all actual data elements are
- * strictly stored at the leaf level, forming a sequential linked list. Internal nodes
- * serve exclusively as "Ghost Routing" indexes, holding boundary copies of keys to direct traversal.</p>
+ * <p>This implementation follows the minimum degree definition described in
+ * <em>Introduction to Algorithms (CLRS)</em>, where:</p>
  *
- * <p>By maintaining these invariants, the tree not only guarantees <b>O(log_t(N))</b> search, insertion,
- * and deletion times, but also provides massive <b>O(1)</b> sequential range traversals through its leaf-level
- * linked list. This architecture makes it the absolute industry standard for database indexing,
- * file systems, and heavy range-query workloads.</p>
+ * <ul>
+ *     <li>Every non-root node contains between {@code t - 1} and
+ *     {@code 2t - 1} keys.</li>
+ *     <li>Every internal non-root node has between {@code t} and
+ *     {@code 2t} children.</li>
+ *     <li>The root contains at least one key unless the tree is empty.</li>
+ *     <li>All leaf nodes reside at the same depth.</li>
+ * </ul>
+ *
+ * <h2>Node Structure</h2>
+ *
+ * <p>Internal nodes store separator keys and child references, whereas leaf
+ * nodes store only data keys and are linked together to support efficient
+ * sequential and range traversal. To reduce memory overhead, leaf nodes do
+ * not allocate a children array; child references are created only for
+ * internal nodes.</p>
+ *
+ * <p>Search, insertion, and deletion execute in {@code O(log n)} time, while
+ * range queries benefit from the linked leaf structure.</p>
  *
  * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @see BPlusTreeNode

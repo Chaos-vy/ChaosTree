@@ -17,7 +17,7 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @see BiNode
  * @since 1.0.0
  */
-public abstract class AbstractRotateTree<T extends Comparable<T>, N extends BiNode<T,N>> extends AbstractBiTree<T,N> {
+public abstract class AbstractRotateTree<T extends Comparable<? super T>, N extends BiNode<T,N>> extends AbstractBiTree<T,N> {
     /**
      * Update the node after the rotation
      * @param node the node to be rotated

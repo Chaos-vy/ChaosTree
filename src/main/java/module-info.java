@@ -5,7 +5,6 @@
 module chaos.tree {
     requires static org.jetbrains.annotations;
 
-    // Core APIs and Exceptions
     exports chaos.tree.core;
     exports chaos.tree.core.searchtree;
     exports chaos.tree.exception;
@@ -22,8 +21,8 @@ module chaos.tree {
      * to access the underlying engine implementations directly:
      *
      * - chaos.tree.core.searchtree.binary (Hides AbstractBiTree)
-     * - chaos.tree.core.searchtree.binary.node
-     * - chaos.tree.core.searchtree.binary.rotation
+     * - chaos.tree.core.searchtree.binary.node (Hides Nodes Structure)
+     * - chaos.tree.core.searchtree.binary.rotation (Hides Rotation logic)
      * - chaos.tree.core.searchtree.nary (Hides AbstractNaryTree)
      */
 }

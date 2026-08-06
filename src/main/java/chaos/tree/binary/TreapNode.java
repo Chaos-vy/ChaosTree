@@ -16,7 +16,7 @@ import chaos.tree.core.searchtree.binary.node.BiNode;
  * @see Treap
  * @since 1.0.0
  */
-public class TreapNode<T extends Comparable<T>> extends BiNode<T,TreapNode<T>> {
+public class TreapNode<T extends Comparable<? super T>> extends BiNode<T,TreapNode<T>> {
 
 
     /** The priority of this node used to maintain the heap invariant. */

@@ -1,6 +1,6 @@
 package chaos.tree.binary;
 
-import chaos.tree.core.searchtree.ISearchTree;
+import chaos.tree.core.searchtree.SearchTree;
 import chaos.tree.exception.*;
 import chaos.tree.traversal.Traversal;
 import chaos.tree.traversal.TraversalType;
@@ -13,13 +13,13 @@ import java.util.stream.Stream;
  * Represents a binary search tree interface that supports custom traversals,
  * streaming, and advanced position queries like floor, ceil, and k-th smallest.
  *
- * <p>Extends {@link ISearchTree} and adds specialized operations that leverage
+ * <p>Extends {@link SearchTree} and adds specialized operations that leverage
  * the binary and sorted nature of the tree structure.</p>
  *
  * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
  * @since 1.0.0
  */
-public interface BinaryTree<T extends Comparable<T>> extends ISearchTree<T>, Traversal<T> {
+public interface BinaryTree<T extends Comparable<? super T>> extends SearchTree<T>, Traversal<T> {
 
 
     /**

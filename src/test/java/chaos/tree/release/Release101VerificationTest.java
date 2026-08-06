@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Core regression tests for the v1.0.1 major architectural updates.
- * Verifies the O(1) hashCode rolling sum, ISearchTree value-equality,
+ * Verifies the O(1) hashCode rolling sum, SearchTree value-equality,
  * lazy stream evaluation, and LCA bounds validation.
  */
 public class Release101VerificationTest {

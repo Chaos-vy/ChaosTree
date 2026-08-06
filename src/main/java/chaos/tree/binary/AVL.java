@@ -9,8 +9,8 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * (balance factor) between the left and right subtrees of any node is guaranteed
  * to be at most <b>1</b>.</p>
  * <p>By enforcing this strict structural constraint on every insertion and deletion,
- * the tree maintains an absolute worst-case height bound of approximately 1.44 log n.
- * This translates into exceptionally fast, highly deterministic <b>O(log n)</b> lookups,
+ * the tree maintains a worst-case height bound of approximately 1.44 log n.
+ * This makes it exceptionally fast, highly deterministic <b>O(log n)</b> lookups,
  * making it an excellent fit for read-heavy datasets.</p>
  *
  * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
@@ -19,7 +19,7 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * @see AbstractBiTree
  * @since 1.0.0
  */
-public final class AVL<T extends Comparable<T>> extends AbstractRotateTree<T, AVLNode<T>> {
+public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTree<T, AVLNode<T>> {
 
     /**
      * Constructs an empty AVL tree.

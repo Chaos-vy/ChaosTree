@@ -12,7 +12,7 @@ package chaos.tree.core.searchtree.binary.node;
  * @since 1.0.0
  *
  */
-public abstract class ParentBiNode<T extends Comparable<T>, N extends ParentBiNode<T,N>> extends BiNode<T,N> {
+public abstract class ParentBiNode<T extends Comparable<? super T>, N extends ParentBiNode<T,N>> extends BiNode<T,N> {
 
     private N parent;
 

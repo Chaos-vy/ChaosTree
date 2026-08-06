@@ -1,7 +1,7 @@
 package chaos.tree.core.searchtree.binary;
 
 import chaos.tree.binary.BinaryTree;
-import chaos.tree.core.searchtree.ISearchTree;
+import chaos.tree.core.searchtree.SearchTree;
 import chaos.tree.core.searchtree.PrintStyle;
 import chaos.tree.core.searchtree.binary.node.BiNode;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
@@ -37,23 +37,23 @@ import java.util.stream.Stream;
  * @see ParentBiNode
  * @since 1.0.0
  */
-public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T, N>> implements BinaryTree<T> {
+public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends BiNode<T, N>> implements BinaryTree<T> {
 
     protected int cachedHashedCode = 0;
     /**
      * Root of the Binary Search tree
      */
-    protected volatile N root;
+    protected N root;
 
     /**
      * Total element present in this tree
      */
-    protected volatile int size;
+    protected int size;
 
     /**
      * Stores the current modification of this tree
      */
-    protected volatile long modCount = 0;
+    protected long modCount = 0;
 
     /**
      * Construct an empty Binary tree
@@ -1183,7 +1183,7 @@ public abstract class AbstractBiTree<T extends Comparable<T>, N extends BiNode<T
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ISearchTree<?> other)) return false;
+        if (!(o instanceof SearchTree<?> other)) return false;
         if (this.size() != other.size()) return false;
         Iterator<T> it1 = this.iterator();
         Iterator<?> it2 = other.iterator();

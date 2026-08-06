@@ -3,21 +3,41 @@ package chaos.tree.nary;
 import chaos.tree.core.searchtree.nary.AbstractNaryTree;
 
 /**
- * Self-balancing N-ary Search Tree implementation utilizing the standard B-Tree invariant.
+ * A self-balancing N-ary search tree parameterized by its
+ * <em>minimum degree</em> {@code t}.
  *
- * <p>A B-Tree is a massively-wide balanced search tree where nodes contain multiple keys
- * and child pointers. By enforcing strict constraints on the minimum and maximum degree
- * (the number of children), the tree ensures that every leaf node remains at the exact
- * same depth. Keys are distributed across both internal and leaf nodes.</p>
+ * <p>Unlike binary search trees, each node stores multiple sorted keys and
+ * may have multiple children, resulting in a shallow tree with logarithmic
+ * height. B-Trees provide {@code O(log n)} search, insertion, and deletion
+ * operations while minimizing structural changes.</p>
  *
- * <p>By maintaining these invariants through proactive node splitting, merging, and
- * borrowing during mutations, the tree guarantees <b>O(log_t(N))</b> time for search, insertion,
- * and deletion operations. Its high branching factor significantly reduces the overall height
- * of the tree, making it highly efficient for block-storage architectures and disk I/O.</p>
+ * <p>This implementation follows the minimum degree definition described in
+ * <em>Introduction to Algorithms (CLRS)</em>, where:</p>
  *
- * @param <T> the type of elements maintained by this tree; must implement {@link Comparable}
+ * <ul>
+ *     <li>Every non-root node contains between {@code t - 1} and
+ *     {@code 2t - 1} keys.</li>
+ *     <li>Every internal non-root node has between {@code t} and
+ *     {@code 2t} children.</li>
+ *     <li>The root contains at least one key unless the tree is empty.</li>
+ *     <li>All leaf nodes appear at the same depth.</li>
+ * </ul>
+ *
+ * <p>The high branching factor keeps the tree height small, making B-Trees
+ * particularly well suited for databases, file systems, and storage systems
+ * where reducing page or disk accesses is essential.</p>
+ *
+ * Node Design:
+ *
+ * <p>This implementation optimizes memory usage by allocating child arrays
+ * only for internal nodes. Leaf nodes do not maintain a children array,
+ * reducing the per-node memory footprint since leaf nodes never reference
+ * child nodes.</p>
+ *
  * @see BTreeNode
  * @since 1.0.0
+ *
+ * @param <T> the type of elements maintained by this tree
  */
 public final class BTree<T extends Comparable<T>> extends AbstractNaryTree<T, BTreeNode<T>> implements NaryTree<T> {
 

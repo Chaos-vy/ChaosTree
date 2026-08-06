@@ -11,9 +11,16 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  *
  * <p>A Red-Black Tree is a balanced binary search tree where each node is colored either
  * {@link Color#RED} or {@link Color#BLACK}. By enforcing strict properties regarding node
- * coloring (e.g., the root is black, red nodes cannot have red children, and every path
- * from a node to any of its descendant leaves contains the same number of black nodes), the
- * tree guarantees that no path is more than twice as long as any other path.</p>
+ * coloring.
+ * <ol>
+ *     <lh>The properties of RBT trees:</lh>
+ *     <li>The root is BLACK</li>
+ *     <li>Node can be either BLACK or RED</li>
+ *     <li>All leaf node must be null/Black</li>
+ *     <li>A RED node cannot have a red children</li>
+ *     <li>Every path from a node to any descedent leaves contains the same no of BLACK node</li>
+ * </ol>
+ * Tree guarantees that no path is more than twice as long as any other path.</p>
  *
  * <p>By maintaining these invariants through color flips and rotations on insertion and
  * deletion, the tree guarantees <b>O(log n)</b> search, insertion, and deletion times. This makes
@@ -26,7 +33,7 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * @see AbstractBiTree
  * @since 1.0.0
  */
-public final class RBT<T extends Comparable<T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
+public final class RBT<T extends Comparable<? super T>> extends AbstractParentRotateTree<T, RBTNode<T>> {
 
     /**
      * Constructs an empty Red-Black Tree.

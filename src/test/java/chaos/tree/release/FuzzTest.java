@@ -2,7 +2,7 @@ package chaos.tree.release;
 
 import chaos.tree.binary.*;
 import chaos.tree.nary.*;
-import chaos.tree.core.searchtree.ISearchTree;
+import chaos.tree.core.searchtree.SearchTree;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class FuzzTest {
         }
     }
 
-    private void runFuzzTest(ISearchTree<DataPacket> tree) {
+    private void runFuzzTest(SearchTree<DataPacket> tree) {
         Random r = new Random(42);
         TreeSet<DataPacket> truth = new TreeSet<>();
 
@@ -70,7 +70,7 @@ class FuzzTest {
         assertEquals(expected, actual);
     }
 
-    private void runSequentialStressTest(ISearchTree<Integer> tree, int max) {
+    private void runSequentialStressTest(SearchTree<Integer> tree, int max) {
         for (int i = 0; i < max; i++) {
             tree.insert(i);
         }

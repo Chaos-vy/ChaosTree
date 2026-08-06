@@ -14,6 +14,16 @@ import chaos.tree.exception.DuplicateNodeException;
  * <p>By dynamically reshaping the tree structure, Splay Trees guarantee amortized
  * <b>O(log n)</b> time complexity for all basic search, insertion, and deletion operations.</p>
  *
+ * Splay Tree Rotation Cases:
+ *
+ * <ul>
+ *     <li><b>Zig</b> - Single right rotation (left child of root).</li>
+ *     <li><b>Zag</b> - Single left rotation (right child of root).</li>
+ *     <li><b>Zig-Zig</b> - Two consecutive right rotations (Left-Left).</li>
+ *     <li><b>Zag-Zag</b> - Two consecutive left rotations (Right-Right).</li>
+ *     <li><b>Zig-Zag</b> - Left rotation followed by a right rotation (Left-Right).</li>
+ *     <li><b>Zag-Zig</b> - Right rotation followed by a left rotation (Right-Left).</li>
+ * </ul>
  * <p><b>Thread-safety:</b> Concurrent use of this class is architecturally impossible
  * without sacrificing its core guarantee. {@link #contains(Comparable)} is a structural
  * write — it splays the accessed node to root — meaning there are no read-only operations
@@ -28,7 +38,7 @@ import chaos.tree.exception.DuplicateNodeException;
  * @see SplayNode
  * @since 1.0.0
  */
-public final class Splay<T extends Comparable<T>> extends AbstractParentRotateTree<T, SplayNode<T>> {
+public final class Splay<T extends Comparable<? super T>> extends AbstractParentRotateTree<T, SplayNode<T>> {
 
     /**
      * Constructs an empty Splay Tree.
