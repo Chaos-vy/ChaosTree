@@ -361,7 +361,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      *                              element produced by {@code values} is {@code null}
      */
     @Override
-    public boolean containsAll(Iterable<? extends T> values) {
+    public boolean containsAllElements(Iterable<? extends T> values) {
         Objects.requireNonNull(values);
         for (T value : values) {
             if (!contains(value)) {
@@ -600,7 +600,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      *                              produced by {@code values} is {@code null}
      */
     @Override
-    public void retainAll(Iterable<? extends T> values) {
+    public void retainAllElements(Iterable<? extends T> values) {
         if (isEmpty()) return;
         Objects.requireNonNull(values);
         Set<T> retain = new HashSet<>();

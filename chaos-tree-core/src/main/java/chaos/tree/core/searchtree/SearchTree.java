@@ -5,8 +5,7 @@ import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -24,7 +23,7 @@ import java.util.stream.Stream;
  *            must implement {@link Comparable}
  * @since 1.0.0
  */
-public interface SearchTree<T extends Comparable<? super T>> extends Tree, Iterable<T> {
+public interface SearchTree<T extends Comparable<? super T>> extends Tree, NavigableSet<T> {
     /**
      * Inserts the specified value into this tree.
      * The tree will not be modified if the value already exists.
@@ -66,7 +65,7 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Itera
      * {@code false} otherwise
      * @throws NullPointerException if the value is {@code null};
      */
-    boolean containsAll(Iterable<? extends T> values);
+    boolean containsAllElements(Iterable<? extends T> values);
 
     /**
      * Delete the node containing {@code value} in the tree.
@@ -279,7 +278,7 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Itera
      * @throws NullPointerException if {@code values} is {@code null}, or if any element
      *                              produced by {@code values} is {@code null}
      */
-    void retainAll(Iterable<? extends T> values);
+    void retainAllElements(Iterable<? extends T> values);
 
     /**
      * Merges all values from the specified iterable into this tree,
@@ -336,5 +335,186 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Itera
      * @return a multi-line formatted string detailing the exact tree topology
      */
     String toString(PrintStyle style);
+
+    @Override
+    default boolean add(T t) {
+        if (contains(t)) return false;
+        insert(t);
+        return true;
+    }
+
+    @Override
+    default boolean remove(Object o) {
+        try {
+            @SuppressWarnings("unchecked")
+            T val = (T) o;
+            if (!contains(val)) return false;
+            delete(val);
+            return true;
+        } catch (ClassCastException | NullPointerException e) {
+            return false;
+        }
+    }
+
+    @Override
+    default boolean contains(Object o) {
+        try {
+            @SuppressWarnings("unchecked")
+            T val = (T) o;
+            return contains(val);
+        } catch (ClassCastException | NullPointerException e) {
+            return false;
+        }
+    }
+
+    @Override
+    default T first() {
+        if (isEmpty()) throw new NoSuchElementException();
+        return min();
+    }
+
+    @Override
+    default T last() {
+        if (isEmpty()) throw new NoSuchElementException();
+        return max();
+    }
+
+    @Override
+    default T lower(T t) {
+        try {
+            return predecessor(t);
+        } catch (EmptyTreeException e) {
+            return null;
+        }
+    }
+
+    @Override
+    default T higher(T t) {
+        try {
+            return successor(t);
+        } catch (EmptyTreeException e) {
+            return null;
+        }
+    }
+
+    @Override
+    default T ceiling(T t) {
+        try {
+            return ceil(t);
+        } catch (EmptyTreeException e) {
+            return null;
+        }
+    }
+
+    @Override
+    default T pollFirst() {
+        try {
+            return pollMin();
+        } catch (EmptyTreeException e) {
+            return null;
+        }
+    }
+
+    @Override
+    default T pollLast() {
+        try {
+            return pollMax();
+        } catch (EmptyTreeException e) {
+            return null;
+        }
+    }
+
+    @Override
+    default java.util.Comparator<? super T> comparator() {
+        return null; // Natural ordering is used
+    }
+
+    @Override
+    default Object[] toArray() {
+        return stream().toArray();
+    }
+
+    @Override
+    default <T1> T1[] toArray(T1[] a) {
+        return toList().toArray(a);
+    }
+
+    @Override
+    default boolean addAll(Collection<? extends T> c) {
+        boolean modified = false;
+        for (T e : c) {
+            if (add(e)) modified = true;
+        }
+        return modified;
+    }
+
+    @Override
+    default boolean containsAll(Collection<?> c) {
+        for (Object e : c) {
+            if (!contains(e)) return false;
+        }
+        return true;
+    }
+
+    @Override
+    default boolean retainAll(Collection<?> c) {
+        List<T> toDelete = new java.util.ArrayList<>();
+        for (T e : this) {
+            if (!c.contains(e)) toDelete.add(e);
+        }
+        for (T e : toDelete) remove(e);
+        return !toDelete.isEmpty();
+    }
+
+    @Override
+    default boolean removeAll(Collection<?> c) {
+        boolean modified = false;
+        for (Object e : c) {
+            if (remove(e)) modified = true;
+        }
+        return modified;
+    }
+
+    // These API are not supported.
+
+    @Override
+    default NavigableSet<T> descendingSet() {
+        throw new UnsupportedOperationException("Descending views are not supported.");
+    }
+
+    @Override
+    default Iterator<T> descendingIterator() {
+        throw new UnsupportedOperationException("Descending iterator is not supported.");
+    }
+
+    @Override
+    default NavigableSet<T> subSet(T fromElement, boolean fromInclusive, T toElement, boolean toInclusive) {
+        throw new UnsupportedOperationException("Subset views are not supported.");
+    }
+
+    @Override
+    default NavigableSet<T> headSet(T toElement, boolean inclusive) {
+        throw new UnsupportedOperationException("Subset views are not supported.");
+    }
+
+    @Override
+    default NavigableSet<T> tailSet(T fromElement, boolean inclusive) {
+        throw new UnsupportedOperationException("Subset views are not supported.");
+    }
+
+    @Override
+    default SortedSet<T> subSet(T fromElement, T toElement) {
+        throw new UnsupportedOperationException("Subset views are not supported.");
+    }
+
+    @Override
+    default SortedSet<T> headSet(T toElement) {
+        throw new UnsupportedOperationException("Subset views are not supported.");
+    }
+
+    @Override
+    default SortedSet<T> tailSet(T fromElement) {
+        throw new UnsupportedOperationException("Subset views are not supported.");
+    }
 
 }

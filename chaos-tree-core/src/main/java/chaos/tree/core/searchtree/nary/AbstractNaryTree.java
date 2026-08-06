@@ -668,7 +668,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     }
 
     @Override
-    public boolean containsAll(Iterable<? extends T> values) {
+    public boolean containsAllElements(Iterable<? extends T> values) {
         Objects.requireNonNull(values);
         for(T item: values){
             if(!contains(item))return false;
@@ -852,7 +852,7 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         return h;
     }
     @Override
-    public void retainAll(Iterable<? extends T> values) {
+    public void retainAllElements(Iterable<? extends T> values) {
         if (isEmpty()) return;
         Objects.requireNonNull(values);
 

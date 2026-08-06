@@ -74,7 +74,7 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     void insertMultipleNodes() {
         tree.insertAll(List.of(10, 20, 30));
         assertEquals(3, tree.size());
-        assertTrue(tree.containsAll(List.of(10, 20, 30)));
+        assertTrue(tree.containsAllElements(List.of(10, 20, 30)));
     }
 
     @Test
@@ -261,9 +261,9 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     }
 
     @Test
-    void retainAllKeepsIntersectionOnly() {
+    void retainAllElementsKeepsIntersectionOnly() {
         tree.insertAll(List.of(10, 20, 30, 40, 50));
-        tree.retainAll(List.of(20, 40));
+        tree.retainAllElements(List.of(20, 40));
         assertEquals(List.of(20, 40), tree.inorder());
     }
 
@@ -282,9 +282,9 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     }
 
     @Test
-    void retainAllSelf() {
+    void retainAllElementsSelf() {
         tree.insertAll(List.of(10, 20, 30));
-        tree.retainAll(tree);
+        tree.retainAllElements(tree);
         assertEquals(3, tree.size());
     }
 
@@ -518,15 +518,15 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     }
 
     @Test
-    void containsAllWithEmptyCollectionReturnsTrue() {
-        assertDoesNotThrow(() -> tree.containsAll(List.of()));
-        assertTrue(tree.containsAll(List.of()));
+    void containsAllElementsWithEmptyCollectionReturnsTrue() {
+        assertDoesNotThrow(() -> tree.containsAllElements(List.of()));
+        assertTrue(tree.containsAllElements(List.of()));
     }
 
     @Test
-    void containsAllWithAbsentValueReturnsFalse() {
+    void containsAllElementsWithAbsentValueReturnsFalse() {
         tree.insertAll(List.of(10, 20, 30));
-        assertFalse(tree.containsAll(List.of(10, 99)));
+        assertFalse(tree.containsAllElements(List.of(10, 99)));
     }
 
 

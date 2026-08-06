@@ -184,17 +184,17 @@ public abstract class NaryTreeContractTest<NARY extends NaryTree<Integer>> {
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3, 10})
-    @DisplayName("retainAll() should drop unlisted elements and trigger merges")
+    @DisplayName("retainAllElements() should drop unlisted elements and trigger merges")
     void testRetainAll(int degree) {
         NARY tree = createTree(degree);
         List<Integer> initialData = IntStream.rangeClosed(1, 20).boxed().collect(Collectors.toList());
         tree.insertAll(initialData);
 
         List<Integer> evens = IntStream.rangeClosed(1, 20).filter(i -> i % 2 == 0).boxed().collect(Collectors.toList());
-        tree.retainAll(evens);
+        tree.retainAllElements(evens);
 
         assertEquals(10, tree.size());
-        assertTrue(tree.containsAll(evens));
+        assertTrue(tree.containsAllElements(evens));
         assertFalse(tree.contains(1));
         assertFalse(tree.contains(19));
     }
@@ -209,7 +209,7 @@ public abstract class NaryTreeContractTest<NARY extends NaryTree<Integer>> {
         tree.mergeAll(Arrays.asList(20, 30, 40, 50));
 
         assertEquals(5, tree.size());
-        assertTrue(tree.containsAll(Arrays.asList(10, 20, 30, 40, 50)));
+        assertTrue(tree.containsAllElements(Arrays.asList(10, 20, 30, 40, 50)));
     }
 
 
