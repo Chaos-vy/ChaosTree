@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.chaos-vy</groupId>
         <artifactId>chaos-tree-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>chaos-tree-benchmarks</artifactId>
@@ -15,6 +15,7 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <central.skipPublishing>true</central.skipPublishing>
     </properties>
 
     <dependencies>
@@ -74,6 +75,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.11.0</version>
+                <configuration>
+                    <skipPublishing>true</skipPublishing>
+                </configuration>
             </plugin>
         </plugins>
     </build>
