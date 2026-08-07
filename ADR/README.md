@@ -13,11 +13,11 @@ This directory contains my formalized Architecture Decision Records (ADRs). Thin
 |         **[ADR-001](ADR-001-DeleteResult-Record.md)**         | `DeleteResult` Record over `boolean[]`                                   |
 |          **[ADR-002](ADR-002-modCount-as-long.md)**           | Modification Count (`modCount`) as `long`                                |
 |            **[ADR-003](ADR-003-CRTP-Pattern.md)**             | CRTP Pattern (`BiNode<T, N extends BiNode<T,N>>`)                        |
-|         **[ADR-005](ADR-004-Leaf-children-null.md)**          | Leaf `children = null` (N-ary Node Memory Paradox)                       |
-|     **[ADR-006](ADR-005-Object-Array-over-ArrayList.md)**     | `Object[]` over `ArrayList` in N-ary Engine                              |
-| **[ADR-007](ADR-006-Rejecting-the-FlatTree-Architecture.md)** | `flatTree` Retired                                                       |
-|  **[ADR-008](ADR-007-Stream-Traversal-API-Segregation.md)**   | Stream & Traversal API Segregation                                       |
-|    **[ADR-009](ADR-008-BiNode-vs-ParentBiNode-Split.md)**     | `BiNode` vs `ParentBiNode` Split (Parent Pointer Separation)             |
+|         **[ADR-004](ADR-004-Leaf-children-null.md)**          | Leaf `children = null` (N-ary Node Memory Paradox)                       |
+|     **[ADR-005](ADR-005-Object-Array-over-ArrayList.md)**     | `Object[]` over `ArrayList` in N-ary Engine                              |
+| **[ADR-006](ADR-006-Rejecting-the-FlatTree-Architecture.md)** | `flatTree` Retired                                                       |
+|  **[ADR-007](ADR-007-Stream-Traversal-API-Segregation.md)**   | Stream & Traversal API Segregation                                       |
+|    **[ADR-008](ADR-008-BiNode-vs-ParentBiNode-Split.md)**     | `BiNode` vs `ParentBiNode` Split (Parent Pointer Separation)             |
 ---
 
 ## Long-Term Architectural Philosophy
