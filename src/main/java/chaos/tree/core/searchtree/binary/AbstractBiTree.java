@@ -394,7 +394,20 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * @param ceil the smallest value greater than or equal to the requested value, or
      *        {@code null} if no such value exists
      */
-    record SearchResult<T>(boolean contains, T floor, T ceil) {
+    static class SearchResult<T> {
+        private final boolean contains;
+        private final T floor;
+        private final T ceil;
+
+        SearchResult(boolean contains, T floor, T ceil) {
+            this.contains = contains;
+            this.floor = floor;
+            this.ceil = ceil;
+        }
+
+        boolean contains() { return contains; }
+        T floor() { return floor; }
+        T ceil() { return ceil; }
     }
 
     /**
@@ -461,7 +474,17 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * @param deleted {@code true} when the requested value was removed
      * @param <N> the node type
      */
-    protected record DeleteResult<N>(N root, boolean deleted) {
+    protected static class DeleteResult<N> {
+        private final N root;
+        private final boolean deleted;
+
+        public DeleteResult(N root, boolean deleted) {
+            this.root = root;
+            this.deleted = deleted;
+        }
+
+        public N root() { return root; }
+        public boolean deleted() { return deleted; }
     }
 
     /**
@@ -935,12 +958,13 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     public Iterator<T> iterator(TraversalType type) {
         if (type == null) throw new NullPointerException("Traversal type cannot be null");
 
-        return switch (type) {
-            case PREORDER -> new PreOrderIterator();
-            case INORDER -> new InOrderIterator();
-            case POSTORDER -> new PostOrderIterator();
-            case LEVEL_ORDER -> new LevelOrderIterator();
-        };
+        switch (type) {
+            case PREORDER: return new PreOrderIterator();
+            case INORDER: return new InOrderIterator();
+            case POSTORDER: return new PostOrderIterator();
+            case LEVEL_ORDER: return new LevelOrderIterator();
+            default: throw new IllegalArgumentException("Unknown traversal type: " + type);
+        }
     }
 
     /**
@@ -1183,7 +1207,8 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SearchTree<?> other)) return false;
+        if (!(o instanceof SearchTree)) return false;
+        SearchTree<?> other = (SearchTree<?>) o;
         if (this.size() != other.size()) return false;
         Iterator<T> it1 = this.iterator();
         Iterator<?> it2 = other.iterator();

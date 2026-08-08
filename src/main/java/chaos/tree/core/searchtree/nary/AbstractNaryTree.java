@@ -89,7 +89,18 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     protected abstract N createNode(int degree, boolean isLeaf);
 
 
-    protected record NodeSearchResult(boolean found, int index) {}
+    protected static class NodeSearchResult {
+        private final boolean found;
+        private final int index;
+
+        protected NodeSearchResult(boolean found, int index) {
+            this.found = found;
+            this.index = index;
+        }
+
+        public boolean found() { return found; }
+        public int index() { return index; }
+    }
 
     protected NodeSearchResult searchNode(N node, T key) {
         int left = 0;
@@ -238,10 +249,16 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
 
     /**
      * Result of deleting a value from a subtree.
-     *
-     * @param deleted {@code true} when the requested value was removed
      */
-    public record DeleteResult(boolean deleted) {}
+    public static class DeleteResult {
+        private final boolean deleted;
+
+        public DeleteResult(boolean deleted) {
+            this.deleted = deleted;
+        }
+
+        public boolean deleted() { return deleted; }
+    }
 
     /**
      * Removes the specified value from the tree.
@@ -891,7 +908,8 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SearchTree<?> other)) return false;
+        if (!(o instanceof SearchTree)) return false;
+        SearchTree<?> other = (SearchTree<?>) o;
         if (this.size() != other.size()) return false;
         Iterator<T> it1 = this.iterator();
         Iterator<?> it2 = other.iterator();
