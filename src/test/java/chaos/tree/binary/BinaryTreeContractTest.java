@@ -194,14 +194,14 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     @Test
     void rangeStreamReturnsCorrectHalfOpenInterval() {
         tree.insertAll(List.of(50, 20, 80, 10, 30, 70, 90, 25, 35));
-        assertEquals(List.of(25, 30, 35, 50), tree.rangeStream(25, 70).toList());
+        assertEquals(List.of(25, 30, 35, 50), tree.rangeStream(25, 70).collect(java.util.stream.Collectors.toList()));
     }
 
     @Test
     void rangeStreamWithBoundsOutsideTreeElements() {
         tree.insertAll(List.of(20, 40, 60));
-        assertEquals(List.of(20, 40, 60), tree.rangeStream(10, 70).toList());
-        assertEquals(List.of(), tree.rangeStream(70, 80).toList());
+        assertEquals(List.of(20, 40, 60), tree.rangeStream(10, 70).collect(java.util.stream.Collectors.toList()));
+        assertEquals(List.of(), tree.rangeStream(70, 80).collect(java.util.stream.Collectors.toList()));
     }
 
     @Test
@@ -330,7 +330,7 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     @Test
     void streamSortedAndCompleteness() {
         tree.insertAll(List.of(50, 10, 80, 20, 30));
-        List<Integer> fromStream = tree.stream().toList();
+        List<Integer> fromStream = tree.stream().collect(java.util.stream.Collectors.toList());
         assertEquals(List.of(10, 20, 30, 50, 80), fromStream);
     }
 
@@ -532,7 +532,7 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
 
     @Test
     void streamOnEmptyTreeReturnsEmptyList() {
-        assertTrue(tree.stream().toList().isEmpty());
+        assertTrue(tree.stream().collect(java.util.stream.Collectors.toList()).isEmpty());
     }
 
 

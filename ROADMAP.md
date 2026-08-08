@@ -6,7 +6,7 @@ This document outlines the upcoming features, architectural shifts, and performa
 
 ### 1. Zero-Padding Memory Optimization 
 * **Status:** In Development
-* **Details:** Refactoring the `NaryNode` internal layout by utilizing implicit `children == null` leaf checks. This drops the object footprint down to a perfect **24-byte boundary** (eliminating 7 bytes of dead JVM padding per node). This will drastically improve L1/L2 cache hit rates for massive B-Trees and B+Trees.
+* **Details:** Refactoring the `NaryNode` internal layout by utilizing implicit `children == null` leaf checks. This drops the object footprint down to a perfect **24-byte boundary** (eliminating 7 bytes of dead JVM padding per node). This will drastically improve L1/L2 cache hit rates for massive B-Trees only.
 
 ### 2. JDK 11 Enterprise Support 
 * **Status:** In Development

@@ -30,11 +30,11 @@
         <connection>scm:git:git://github.com/Chaos-vy/ChaosTree.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/Chaos-vy/ChaosTree.git</developerConnection>
         <url>https://github.com/Chaos-vy/ChaosTree</url>
-        <tag>v1.1.0</tag>
+        <tag>v1.2.0</tag>
     </scm>
     
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>11</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
@@ -164,7 +164,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.11.2</version>
                 <configuration>
-                    <release>17</release>
+                    <release>11</release>
                     <failOnError>false</failOnError>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <doclint>all,-missing</doclint>
