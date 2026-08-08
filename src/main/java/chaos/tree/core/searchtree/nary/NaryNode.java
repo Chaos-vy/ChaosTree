@@ -17,7 +17,6 @@ public abstract class NaryNode<T extends Comparable<T>, N extends NaryNode<T, N>
     private final Object[] keys;
     private final N[] children;
     private int keyCount;
-    private final boolean isLeaf;
 
     /**
      * Internal constructor for initializing an N-ary node with exact capacities.
@@ -35,7 +34,6 @@ public abstract class NaryNode<T extends Comparable<T>, N extends NaryNode<T, N>
         }
         else this.children = (N[]) new NaryNode[maxChildren];
         this.keyCount = 0;
-        this.isLeaf = isLeaf;
     }
 
     /**
@@ -135,7 +133,7 @@ public abstract class NaryNode<T extends Comparable<T>, N extends NaryNode<T, N>
      * @return {@code true} if this node is a leaf, {@code false} otherwise
      */
     public boolean isLeaf() {
-        return isLeaf;
+        return children == null;
     }
 
 }
