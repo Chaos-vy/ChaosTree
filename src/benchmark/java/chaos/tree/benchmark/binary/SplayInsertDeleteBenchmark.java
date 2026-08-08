@@ -4,6 +4,7 @@ import chaos.tree.binary.Splay;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,7 +46,7 @@ public class SplayInsertDeleteBenchmark extends AbstractBinaryBenchmark {
     }
 
     @Benchmark
-    public void splayInsertDelete() {
+    public void splayInsertDelete(Blackhole bh) {
         int activeIdx = step % size;
         int poolIdx = step % POOL_SIZE;
         int oldTarget = activeElements[activeIdx];
@@ -57,5 +58,6 @@ public class SplayInsertDeleteBenchmark extends AbstractBinaryBenchmark {
         activeElements[activeIdx] = newTarget;
 
         step++;
+        bh.consume(tree);
     }
 }

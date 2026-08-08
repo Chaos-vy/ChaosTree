@@ -8,6 +8,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
 
+import org.openjdk.jmh.infra.Blackhole;
 import java.util.TreeSet;
 
 /**
@@ -50,33 +51,38 @@ public class InsertDeleteBenchmark extends AbstractBinaryBenchmark {
     }
 
     @Benchmark
-    public void javaTreeSetInsertDelete() {
-        javaTreeSet.add(mutationTarget);
-        javaTreeSet.remove(mutationTarget);
+    public void javaTreeSetInsertDelete(Blackhole bh) {
+        bh.consume(javaTreeSet.add(mutationTarget));
+        bh.consume(javaTreeSet.remove(mutationTarget));
+        bh.consume(javaTreeSet);
     }
 
     @Benchmark
-    public void bstInsertDelete() {
+    public void bstInsertDelete(Blackhole bh) {
         bst.insert(mutationTarget);
         bst.delete(mutationTarget);
+        bh.consume(bst);
     }
 
     @Benchmark
-    public void avlInsertDelete() {
+    public void avlInsertDelete(Blackhole bh) {
         avl.insert(mutationTarget);
         avl.delete(mutationTarget);
+        bh.consume(avl);
     }
 
     @Benchmark
-    public void rbtInsertDelete() {
+    public void rbtInsertDelete(Blackhole bh) {
         rbt.insert(mutationTarget);
         rbt.delete(mutationTarget);
+        bh.consume(rbt);
     }
 
     @Benchmark
-    public void treapInsertDelete() {
+    public void treapInsertDelete(Blackhole bh) {
         treap.insert(mutationTarget);
         treap.delete(mutationTarget);
+        bh.consume(treap);
     }
 
 

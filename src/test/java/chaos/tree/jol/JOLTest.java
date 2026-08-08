@@ -1,8 +1,11 @@
-package chaos.tree.binary;
+package chaos.tree.jol;
 
+import chaos.tree.binary.*;
+import chaos.tree.nary.BPlusTreeNode;
+import chaos.tree.nary.BTreeNode;
 import org.openjdk.jol.info.ClassLayout;
 
-public class BinaryFamilyJOLTest {
+public class JOLTest {
 
     public static void testAVLNodeMemoryFootprint() {
         System.out.println("AVL Tree node:");
@@ -35,11 +38,25 @@ public class BinaryFamilyJOLTest {
         System.out.println("ExactByte : "+ClassLayout.parseClass(SplayNode.class).instanceSize());
         System.out.println("=".repeat(50)+"\n\n");
     }
+    public static void testBTreeNodeMemoryFootprint() {
+        System.out.println("\nB-Tree node:\n");
+        System.out.println(ClassLayout.parseClass(BTreeNode.class).toPrintable());
+        System.out.println("ExactByte : "+ClassLayout.parseClass(BTreeNode.class).instanceSize());
+        System.out.println("\n"+"=".repeat(20)+" B-Tree "+"=".repeat(20)+"\n");
+    }
+    public static void testBPlusTreeNodeMemoryFootprint() {
+        System.out.println("\nB+Tree node:\n");
+        System.out.println(ClassLayout.parseClass(BPlusTreeNode.class).toPrintable());
+        System.out.println("ExactByte : "+ClassLayout.parseClass(BPlusTreeNode.class).instanceSize());
+        System.out.println("\n"+"=".repeat(20)+" B+Tree "+"=".repeat(20)+"\n");
+    }
     public static void main(String[] args) {
         testAVLNodeMemoryFootprint();
         testRBTNodeMemoryFootprint();
         testBSTNodeMemoryFootprint();
         testSplayNodeMemoryFootprint();
         testTreapNodeMemoryFootprint();
+        testBPlusTreeNodeMemoryFootprint();
+        testBTreeNodeMemoryFootprint();
     }
 }

@@ -5,6 +5,7 @@ import chaos.tree.nary.BPlusTree;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.infra.Blackhole;
 
 
 public class InsertDeleteBenchmark extends AbstractNaryBenchmark {
@@ -29,14 +30,16 @@ public class InsertDeleteBenchmark extends AbstractNaryBenchmark {
     }
 
     @Benchmark
-    public void bTreeInsertDelete() {
+    public void bTreeInsertDelete(Blackhole bh) {
         btree.insert(mutationTarget);
         btree.delete(mutationTarget);
+        bh.consume(btree);
     }
 
     @Benchmark
-    public void bPlusTreeInsertDelete() {
+    public void bPlusTreeInsertDelete(Blackhole bh) {
         bplus.insert(mutationTarget);
         bplus.delete(mutationTarget);
+        bh.consume(bplus);
     }
 }

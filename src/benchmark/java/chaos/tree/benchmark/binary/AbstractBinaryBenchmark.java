@@ -13,7 +13,12 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 public abstract class AbstractBinaryBenchmark {
 
-    @Param({"1000", "10000", "100000"})
+    // Cache Boundary Testing:
+    // 1000    : Fits comfortably inside L1 Cache (32KB)
+    // 50000   : Spills into L2 Cache (256KB - 1MB)
+    // 1000000 : Spills into L3 Cache (8MB - 32MB)
+    // 5000000 : Complete L3 Cache Miss, forces Main RAM fetch
+    @Param({"1000", "50000", "1000000", "5000000"})
     public int size;
 
     protected static int[] getShuffledInts(int n) {
