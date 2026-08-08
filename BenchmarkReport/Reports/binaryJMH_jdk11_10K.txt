@@ -1,0 +1,1550 @@
+# JMH version: 1.37
+# VM version: JDK 11.0.31, OpenJDK 64-Bit Server VM, 11.0.31+11-post-1ubuntu1-26.04.2-Ubuntu
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: -Xms4G -Xmx4G
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 2 s each
+# Measurement: 5 iterations, 2 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete
+# Parameters: (size = 10000)
+
+# Run progress: 0.00% complete, ETA 00:01:20
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfProfiler LinuxPerfNormProfiler 
+# Profilers consume stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 230.459 ±(99.9%) 19.749 ns/op
+# Warmup Iteration   2: 161.717 ±(99.9%) 7.373 ns/op
+# Warmup Iteration   3: 162.771 ±(99.9%) 9.477 ns/op
+Iteration   1: 160.682 ±(99.9%) 3.892 ns/op
+                 gc.alloc.rate:      590.981 MB/sec
+                 gc.alloc.rate.norm: 80.013 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              134.000 ns/op
+                 p0.50:              145.000 ns/op
+                 p0.90:              159.000 ns/op
+                 p0.95:              162.000 ns/op
+                 p0.99:              246.010 ns/op
+                 p0.999:             3545.204 ns/op
+                 p0.9999:            12347.869 ns/op
+                 p1.00:              21280.000 ns/op
+
+Iteration   2: 160.210 ±(99.9%) 3.430 ns/op
+                 gc.alloc.rate:      589.676 MB/sec
+                 gc.alloc.rate.norm: 80.013 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            1.000 ms
+                 p0.00:              135.000 ns/op
+                 p0.50:              145.000 ns/op
+                 p0.90:              160.000 ns/op
+                 p0.95:              163.000 ns/op
+                 p0.99:              216.380 ns/op
+                 p0.999:             3535.504 ns/op
+                 p0.9999:            9499.504 ns/op
+                 p1.00:              29696.000 ns/op
+
+Iteration   3: 164.438 ±(99.9%) 15.787 ns/op
+                 gc.alloc.rate:      583.039 MB/sec
+                 gc.alloc.rate.norm: 80.013 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              136.000 ns/op
+                 p0.50:              147.000 ns/op
+                 p0.90:              160.000 ns/op
+                 p0.95:              164.000 ns/op
+                 p0.99:              274.000 ns/op
+                 p0.999:             2857.808 ns/op
+                 p0.9999:            11120.422 ns/op
+                 p1.00:              281088.000 ns/op
+
+Iteration   4: 159.170 ±(99.9%) 3.532 ns/op
+                 gc.alloc.rate:      585.835 MB/sec
+                 gc.alloc.rate.norm: 80.011 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              135.000 ns/op
+                 p0.50:              146.000 ns/op
+                 p0.90:              159.000 ns/op
+                 p0.95:              163.000 ns/op
+                 p0.99:              245.000 ns/op
+                 p0.999:             2708.608 ns/op
+                 p0.9999:            12143.322 ns/op
+                 p1.00:              16368.000 ns/op
+
+Iteration   5: 158.851 ±(99.9%) 3.344 ns/op
+                 gc.alloc.rate:      588.610 MB/sec
+                 gc.alloc.rate.norm: 80.011 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              134.000 ns/op
+                 p0.50:              146.000 ns/op
+                 p0.90:              159.000 ns/op
+                 p0.95:              162.000 ns/op
+                 p0.99:              216.000 ns/op
+                 p0.999:             3334.416 ns/op
+                 p0.9999:            10645.446 ns/op
+                 p1.00:              15344.000 ns/op
+
+# Processing profiler results: LinuxPerfNormProfiler LinuxPerfProfiler 
+
+
+Result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete":
+  N = 301618
+  mean =    160.665 ±(99.9%) 3.442 ns/op
+
+  Histogram, ns/op:
+    [     0.000,  25000.000) = 301616 
+    [ 25000.000,  50000.000) = 1 
+    [ 50000.000,  75000.000) = 0 
+    [ 75000.000, 100000.000) = 0 
+    [100000.000, 125000.000) = 0 
+    [125000.000, 150000.000) = 0 
+    [150000.000, 175000.000) = 0 
+    [175000.000, 200000.000) = 0 
+    [200000.000, 225000.000) = 0 
+    [225000.000, 250000.000) = 0 
+    [250000.000, 275000.000) = 0 
+
+  Percentiles, ns/op:
+      p(0.0000) =    134.000 ns/op
+     p(50.0000) =    146.000 ns/op
+     p(90.0000) =    160.000 ns/op
+     p(95.0000) =    163.000 ns/op
+     p(99.0000) =    249.000 ns/op
+     p(99.9000) =   3057.144 ns/op
+     p(99.9900) =  11546.819 ns/op
+     p(99.9990) =  21200.475 ns/op
+     p(99.9999) = 281088.000 ns/op
+    p(100.0000) = 281088.000 ns/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:279      cpu_atom/cpu-cycles/             #      1.7 GHz  cycles_frequency       (0.38%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:312      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.46%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:505      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.80%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:586      cpu_atom/dTLB-loads/             #      0.1 %  dtlb_miss_rate           (0.28%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/L1-dcache-loads/":
+  793.887 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/L1-dcache-stores/":
+  255.897 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/L1-icache-load-misses/":
+  0.341 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-load-misses/":
+  0.003 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-loads/":
+  0.024 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-store-misses/":
+  0.060 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-stores/":
+  0.063 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/branch-misses/":
+  0.053 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/branches/":
+  677.704 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/cycles/":
+  498.104 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-load-misses/":
+  0.007 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-loads/":
+  795.098 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-store-misses/":
+  0.014 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-stores/":
+  256.862 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/iTLB-load-misses/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:cpu_core/instructions/":
+  3131.004 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:gc.alloc.rate":
+  587.628 ±(99.9%) 12.279 MB/sec [Average]
+  (min, avg, max) = (583.039, 587.628, 590.981), stdev = 3.189
+  CI (99.9%): [575.349, 599.907] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:gc.alloc.rate.norm":
+  80.012 ±(99.9%) 0.004 B/op [Average]
+  (min, avg, max) = (80.011, 80.012, 80.013), stdev = 0.001
+  CI (99.9%): [80.008, 80.016] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:gc.count":
+  5.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (1.000, 1.000, 1.000), stdev = 0.001
+  CI (99.9%): [5.000, 5.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:gc.time":
+  9.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (1.000, 1.800, 2.000), stdev = 0.447
+  CI (99.9%): [9.000, 9.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete:perf":
+Perf stats:
+--------------------------------------------------
+
+               954      context-switches                 #     91.7 cs/sec  cs_per_second     
+                97      cpu-migrations                   #      9.3 migrations/sec  migrations_per_second
+           131,797      page-faults                      #  12669.2 faults/sec  page_faults_per_second
+         10,402.96 msec task-clock                       #      0.6 CPUs  CPUs_utilized       
+        16,813,312      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.46%)
+     <not counted>      cpu_core/L1-icache-load-misses/  #      nan %  l1i_miss_rate          
+         6,052,185      cpu_core/LLC-loads/              #     49.5 %  llc_miss_rate            (7.22%)
+         9,522,505      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.80%)
+    51,150,477,217      cpu_core/branches/               #   4916.9 M/sec  branch_frequency     (14.36%)
+    38,789,750,809      cpu_core/cpu-cycles/             #      3.7 GHz  cycles_frequency       (17.88%)
+   237,947,793,002      cpu_core/instructions/           #      6.1 instructions  insn_per_cycle  (21.36%)
+    61,137,311,598      cpu_core/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (24.51%)
+       204,999,098      cpu_atom/L1-icache-load-misses/  #      4.2 %  l1i_miss_rate            (0.15%)
+        42,263,762      cpu_atom/LLC-loads/              #      0.3 %  llc_miss_rate            (0.28%)
+        95,990,441      cpu_atom/branch-misses/          #      1.7 %  branch_miss_rate         (0.38%)
+     6,551,131,076      cpu_atom/branches/               #    629.7 M/sec  branch_frequency     (0.29%)
+    17,275,748,279      cpu_atom/cpu-cycles/             #      1.7 GHz  cycles_frequency       (0.38%)
+    31,350,178,989      cpu_atom/instructions/           #      1.8 instructions  insn_per_cycle  (0.42%)
+     9,351,383,586      cpu_atom/dTLB-loads/             #      0.1 %  dtlb_miss_rate           (0.28%)
+             TopdownL1 (cpu_core)                        #      0.6 %  tma_bad_speculation    
+                                                         #      2.0 %  tma_frontend_bound       (27.89%)
+                                                         #      9.5 %  tma_backend_bound      
+                                                         #     87.9 %  tma_retiring             (27.89%)
+             TopdownL1 (cpu_atom)                        #     28.0 %  tma_backend_bound        (14.75%)
+                                                         #     10.4 %  tma_frontend_bound       (9.90%)
+                                                         #     35.6 %  tma_bad_speculation    
+                                                         #     26.0 %  tma_retiring             (3.97%)
+
+      10.275157331 seconds time elapsed
+
+       0.025440000 seconds user
+       0.049774000 seconds sys
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 11.0.31, OpenJDK 64-Bit Server VM, 11.0.31+11-post-1ubuntu1-26.04.2-Ubuntu
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: -Xms4G -Xmx4G
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 2 s each
+# Measurement: 5 iterations, 2 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete
+# Parameters: (size = 10000)
+
+# Run progress: 20.00% complete, ETA 00:01:09
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfProfiler LinuxPerfNormProfiler 
+# Profilers consume stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 111.017 ±(99.9%) 15.772 ns/op
+# Warmup Iteration   2: 69.667 ±(99.9%) 5.239 ns/op
+# Warmup Iteration   3: 66.751 ±(99.9%) 2.929 ns/op
+Iteration   1: 65.000 ±(99.9%) 3.072 ns/op
+                 gc.alloc.rate:      1474.899 MB/sec
+                 gc.alloc.rate.norm: 56.003 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              49.000 ns/op
+                 p0.50:              56.000 ns/op
+                 p0.90:              59.000 ns/op
+                 p0.95:              74.000 ns/op
+                 p0.99:              89.000 ns/op
+                 p0.999:             1185.820 ns/op
+                 p0.9999:            10240.032 ns/op
+                 p1.00:              13408.000 ns/op
+
+Iteration   2: 72.218 ±(99.9%) 3.719 ns/op
+                 gc.alloc.rate:      1400.302 MB/sec
+                 gc.alloc.rate.norm: 56.004 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              49.000 ns/op
+                 p0.50:              56.000 ns/op
+                 p0.90:              74.000 ns/op
+                 p0.95:              77.000 ns/op
+                 p0.99:              127.000 ns/op
+                 p0.999:             2124.708 ns/op
+                 p0.9999:            12723.792 ns/op
+                 p1.00:              19552.000 ns/op
+
+Iteration   3: 74.851 ±(99.9%) 5.267 ns/op
+                 gc.alloc.rate:      1469.776 MB/sec
+                 gc.alloc.rate.norm: 56.004 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            5.000 ms
+                 p0.00:              49.000 ns/op
+                 p0.50:              56.000 ns/op
+                 p0.90:              59.000 ns/op
+                 p0.95:              75.000 ns/op
+                 p0.99:              141.630 ns/op
+                 p0.999:             2763.052 ns/op
+                 p0.9999:            13924.624 ns/op
+                 p1.00:              45504.000 ns/op
+
+Iteration   4: 62.147 ±(99.9%) 3.389 ns/op
+                 gc.alloc.rate:      1511.154 MB/sec
+                 gc.alloc.rate.norm: 56.003 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              49.000 ns/op
+                 p0.50:              56.000 ns/op
+                 p0.90:              58.000 ns/op
+                 p0.95:              59.000 ns/op
+                 p0.99:              77.000 ns/op
+                 p0.999:             393.905 ns/op
+                 p0.9999:            12273.787 ns/op
+                 p1.00:              28736.000 ns/op
+
+Iteration   5: 61.722 ±(99.9%) 4.125 ns/op
+                 gc.alloc.rate:      1519.189 MB/sec
+                 gc.alloc.rate.norm: 56.003 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            3.000 ms
+                 p0.00:              49.000 ns/op
+                 p0.50:              56.000 ns/op
+                 p0.90:              58.000 ns/op
+                 p0.95:              59.000 ns/op
+                 p0.99:              76.000 ns/op
+                 p0.999:             593.801 ns/op
+                 p0.9999:            10628.878 ns/op
+                 p1.00:              57216.000 ns/op
+
+# Processing profiler results: LinuxPerfNormProfiler LinuxPerfProfiler 
+
+
+Result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete":
+  N = 270970
+  mean =     67.087 ±(99.9%) 1.785 ns/op
+
+  Histogram, ns/op:
+    [    0.000,  5000.000) = 270839 
+    [ 5000.000, 10000.000) = 81 
+    [10000.000, 15000.000) = 42 
+    [15000.000, 20000.000) = 3 
+    [20000.000, 25000.000) = 0 
+    [25000.000, 30000.000) = 3 
+    [30000.000, 35000.000) = 0 
+    [35000.000, 40000.000) = 0 
+    [40000.000, 45000.000) = 0 
+    [45000.000, 50000.000) = 1 
+    [50000.000, 55000.000) = 0 
+
+  Percentiles, ns/op:
+      p(0.0000) =     49.000 ns/op
+     p(50.0000) =     56.000 ns/op
+     p(90.0000) =     59.000 ns/op
+     p(95.0000) =     74.000 ns/op
+     p(99.0000) =     89.000 ns/op
+     p(99.9000) =   1428.058 ns/op
+     p(99.9900) =  12073.786 ns/op
+     p(99.9990) =  33966.954 ns/op
+     p(99.9999) =  57216.000 ns/op
+    p(100.0000) =  57216.000 ns/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:727      cpu_atom/instructions/           #      1.8 instructions  insn_per_cycle  (1.32%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:815      cpu_core/LLC-loads/              #     41.0 %  llc_miss_rate            (7.27%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:818      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.89%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:921      cpu_atom/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (0.35%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/L1-dcache-loads/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/L1-dcache-stores/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/L1-icache-load-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-load-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-loads/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-store-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-stores/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/branch-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/branches/":
+  25.954 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/cycles/":
+  26.711 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-load-misses/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-loads/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-store-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-stores/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/iTLB-load-misses/":
+  ≈ 10⁻⁴ #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_atom/instructions/":
+  110.908 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/L1-dcache-loads/":
+  219.357 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/L1-dcache-stores/":
+  48.830 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/L1-icache-load-misses/":
+  0.058 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-load-misses/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-loads/":
+  0.013 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-store-misses/":
+  0.032 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-stores/":
+  0.035 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/branch-misses/":
+  0.015 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/branches/":
+  158.904 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/cycles/":
+  139.115 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-load-misses/":
+  0.002 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-loads/":
+  217.450 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-store-misses/":
+  0.008 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-stores/":
+  48.768 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/iTLB-load-misses/":
+  ≈ 10⁻³ #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:cpu_core/instructions/":
+  679.110 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:gc.alloc.rate":
+  1475.064 ±(99.9%) 181.296 MB/sec [Average]
+  (min, avg, max) = (1400.302, 1475.064, 1519.189), stdev = 47.082
+  CI (99.9%): [1293.768, 1656.360] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:gc.alloc.rate.norm":
+  56.004 ±(99.9%) 0.002 B/op [Average]
+  (min, avg, max) = (56.003, 56.004, 56.004), stdev = 0.001
+  CI (99.9%): [56.002, 56.005] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:gc.count":
+  6.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (1.000, 1.200, 2.000), stdev = 0.447
+  CI (99.9%): [6.000, 6.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:gc.time":
+  14.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (2.000, 2.800, 5.000), stdev = 1.304
+  CI (99.9%): [14.000, 14.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.bstInsertDelete:perf":
+Perf stats:
+--------------------------------------------------
+
+             1,071      context-switches                 #    103.4 cs/sec  cs_per_second     
+               137      cpu-migrations                   #     13.2 migrations/sec  migrations_per_second
+           236,950      page-faults                      #  22885.6 faults/sec  page_faults_per_second
+         10,353.67 msec task-clock                       #      0.6 CPUs  CPUs_utilized       
+        18,996,097      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.49%)
+     <not counted>      cpu_core/L1-icache-load-misses/  #      nan %  l1i_miss_rate          
+         8,478,815      cpu_core/LLC-loads/              #     41.0 %  llc_miss_rate            (7.27%)
+        10,216,818      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.89%)
+    42,141,518,740      cpu_core/branches/               #   4070.2 M/sec  branch_frequency     (14.42%)
+    38,431,261,531      cpu_core/cpu-cycles/             #      3.7 GHz  cycles_frequency       (17.93%)
+   182,677,000,284      cpu_core/instructions/           #      4.7 instructions  insn_per_cycle  (21.41%)
+    59,870,378,665      cpu_core/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (24.52%)
+       261,456,990      cpu_atom/L1-icache-load-misses/  #      3.2 %  l1i_miss_rate            (0.15%)
+        31,538,991      cpu_atom/LLC-loads/              #      1.3 %  llc_miss_rate            (0.28%)
+       125,394,325      cpu_atom/branch-misses/          #      1.8 %  branch_miss_rate         (0.34%)
+     2,636,799,477      cpu_atom/branches/               #    254.7 M/sec  branch_frequency     (0.96%)
+     7,940,119,230      cpu_atom/cpu-cycles/             #      0.8 GHz  cycles_frequency       (1.20%)
+    14,170,887,727      cpu_atom/instructions/           #      1.8 instructions  insn_per_cycle  (1.32%)
+    13,470,955,921      cpu_atom/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (0.35%)
+             TopdownL1 (cpu_core)                        #      0.2 %  tma_bad_speculation    
+                                                         #      3.1 %  tma_frontend_bound       (27.85%)
+                                                         #     31.4 %  tma_backend_bound      
+                                                         #     65.2 %  tma_retiring             (27.85%)
+             TopdownL1 (cpu_atom)                        #     18.5 %  tma_backend_bound        (0.19%)
+                                                         #      9.5 %  tma_frontend_bound       (0.16%)
+                                                         #     -1.9 %  tma_bad_speculation    
+                                                         #     73.9 %  tma_retiring             (0.12%)
+
+      10.230840719 seconds time elapsed
+
+       0.018279000 seconds user
+       0.052913000 seconds sys
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 11.0.31, OpenJDK 64-Bit Server VM, 11.0.31+11-post-1ubuntu1-26.04.2-Ubuntu
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: -Xms4G -Xmx4G
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 2 s each
+# Measurement: 5 iterations, 2 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete
+# Parameters: (size = 10000)
+
+# Run progress: 40.00% complete, ETA 00:00:53
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfProfiler LinuxPerfNormProfiler 
+# Profilers consume stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 127.873 ±(99.9%) 14.249 ns/op
+# Warmup Iteration   2: 82.387 ±(99.9%) 4.362 ns/op
+# Warmup Iteration   3: 76.663 ±(99.9%) 1.834 ns/op
+Iteration   1: 88.634 ±(99.9%) 6.039 ns/op
+                 gc.alloc.rate:      1213.052 MB/sec
+                 gc.alloc.rate.norm: 72.007 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            4.000 ms
+                 p0.00:              63.000 ns/op
+                 p0.50:              69.000 ns/op
+                 p0.90:              89.000 ns/op
+                 p0.95:              91.000 ns/op
+                 p0.99:              137.000 ns/op
+                 p0.999:             2637.980 ns/op
+                 p0.9999:            17032.864 ns/op
+                 p1.00:              85248.000 ns/op
+
+Iteration   2: 78.428 ±(99.9%) 2.744 ns/op
+                 gc.alloc.rate:      1254.965 MB/sec
+                 gc.alloc.rate.norm: 72.005 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              63.000 ns/op
+                 p0.50:              69.000 ns/op
+                 p0.90:              89.000 ns/op
+                 p0.95:              91.000 ns/op
+                 p0.99:              96.000 ns/op
+                 p0.999:             1173.792 ns/op
+                 p0.9999:            12049.920 ns/op
+                 p1.00:              27232.000 ns/op
+
+Iteration   3: 79.476 ±(99.9%) 2.430 ns/op
+                 gc.alloc.rate:      1249.021 MB/sec
+                 gc.alloc.rate.norm: 72.005 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              63.000 ns/op
+                 p0.50:              69.000 ns/op
+                 p0.90:              89.000 ns/op
+                 p0.95:              91.000 ns/op
+                 p0.99:              94.000 ns/op
+                 p0.999:             1219.108 ns/op
+                 p0.9999:            11562.475 ns/op
+                 p1.00:              15568.000 ns/op
+
+Iteration   4: 80.584 ±(99.9%) 2.533 ns/op
+                 gc.alloc.rate:      1230.346 MB/sec
+                 gc.alloc.rate.norm: 72.005 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              63.000 ns/op
+                 p0.50:              69.000 ns/op
+                 p0.90:              89.000 ns/op
+                 p0.95:              91.000 ns/op
+                 p0.99:              100.000 ns/op
+                 p0.999:             1287.638 ns/op
+                 p0.9999:            11231.421 ns/op
+                 p1.00:              12928.000 ns/op
+
+Iteration   5: 77.002 ±(99.9%) 2.623 ns/op
+                 gc.alloc.rate:      1273.548 MB/sec
+                 gc.alloc.rate.norm: 72.005 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            3.000 ms
+                 p0.00:              63.000 ns/op
+                 p0.50:              69.000 ns/op
+                 p0.90:              89.000 ns/op
+                 p0.95:              91.000 ns/op
+                 p0.99:              98.000 ns/op
+                 p0.999:             913.000 ns/op
+                 p0.9999:            11673.280 ns/op
+                 p1.00:              17824.000 ns/op
+
+# Processing profiler results: LinuxPerfNormProfiler LinuxPerfProfiler 
+
+
+Result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete":
+  N = 355056
+  mean =     80.771 ±(99.9%) 1.575 ns/op
+
+  Histogram, ns/op:
+    [    0.000,  5000.000) = 354913 
+    [ 5000.000, 10000.000) = 73 
+    [10000.000, 15000.000) = 55 
+    [15000.000, 20000.000) = 10 
+    [20000.000, 25000.000) = 0 
+    [25000.000, 30000.000) = 1 
+    [30000.000, 35000.000) = 2 
+    [35000.000, 40000.000) = 0 
+    [40000.000, 45000.000) = 0 
+    [45000.000, 50000.000) = 1 
+    [50000.000, 55000.000) = 0 
+    [55000.000, 60000.000) = 0 
+    [60000.000, 65000.000) = 0 
+    [65000.000, 70000.000) = 0 
+    [70000.000, 75000.000) = 0 
+    [75000.000, 80000.000) = 0 
+    [80000.000, 85000.000) = 0 
+
+  Percentiles, ns/op:
+      p(0.0000) =     63.000 ns/op
+     p(50.0000) =     69.000 ns/op
+     p(90.0000) =     89.000 ns/op
+     p(95.0000) =     91.000 ns/op
+     p(99.0000) =    100.000 ns/op
+     p(99.9000) =   1307.886 ns/op
+     p(99.9900) =  11791.818 ns/op
+     p(99.9990) =  33432.433 ns/op
+     p(99.9999) =  85248.000 ns/op
+    p(100.0000) =  85248.000 ns/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:388      cpu_atom/instructions/           #      1.9 instructions  insn_per_cycle  (1.29%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:684      cpu_core/LLC-loads/              #     42.4 %  llc_miss_rate            (7.30%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/LLC-load-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/LLC-loads/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/branch-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/branches/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/dTLB-store-misses/":
+  ≈ 10⁻⁷ #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/dTLB-stores/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/L1-dcache-loads/":
+  275.581 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/L1-dcache-stores/":
+  63.424 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/L1-icache-load-misses/":
+  0.090 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-load-misses/":
+  0.002 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-loads/":
+  0.015 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-store-misses/":
+  0.055 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-stores/":
+  0.059 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/branch-misses/":
+  0.162 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/branches/":
+  213.555 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/cycles/":
+  210.256 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-load-misses/":
+  0.003 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-loads/":
+  276.784 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-store-misses/":
+  0.014 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-stores/":
+  63.459 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/iTLB-load-misses/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/instructions/":
+  896.133 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.alloc.rate":
+  1244.186 ±(99.9%) 89.534 MB/sec [Average]
+  (min, avg, max) = (1213.052, 1244.186, 1273.548), stdev = 23.252
+  CI (99.9%): [1154.652, 1333.720] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.alloc.rate.norm":
+  72.005 ±(99.9%) 0.004 B/op [Average]
+  (min, avg, max) = (72.005, 72.005, 72.007), stdev = 0.001
+  CI (99.9%): [72.001, 72.010] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.count":
+  6.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (1.000, 1.200, 2.000), stdev = 0.447
+  CI (99.9%): [6.000, 6.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.time":
+  13.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (2.000, 2.600, 4.000), stdev = 0.894
+  CI (99.9%): [13.000, 13.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.javaTreeSetInsertDelete:perf":
+Perf stats:
+--------------------------------------------------
+
+             1,016      context-switches                 #     98.0 cs/sec  cs_per_second     
+               122      cpu-migrations                   #     11.8 migrations/sec  migrations_per_second
+           301,586      page-faults                      #  29088.3 faults/sec  page_faults_per_second
+         10,367.95 msec task-clock                       #      0.6 CPUs  CPUs_utilized       
+        18,129,836      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.57%)
+     <not counted>      cpu_core/L1-icache-load-misses/  #      nan %  l1i_miss_rate          
+         8,305,684      cpu_core/LLC-loads/              #     42.4 %  llc_miss_rate            (7.30%)
+        37,683,506      cpu_core/branch-misses/          #      0.1 %  branch_miss_rate         (10.89%)
+    37,573,603,360      cpu_core/branches/               #   3624.0 M/sec  branch_frequency     (14.48%)
+    38,617,258,944      cpu_core/cpu-cycles/             #      3.7 GHz  cycles_frequency       (18.02%)
+   159,634,748,259      cpu_core/instructions/           #      4.1 instructions  insn_per_cycle  (21.51%)
+    49,557,251,561      cpu_core/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (24.50%)
+         4,046,283      cpu_atom/L1-icache-load-misses/  #      1.7 %  l1i_miss_rate            (4.31%)
+         1,278,375      cpu_atom/LLC-loads/              #      0.5 %  llc_miss_rate            (3.87%)
+        25,529,920      cpu_atom/branch-misses/          #      1.4 %  branch_miss_rate         (1.44%)
+     2,522,834,551      cpu_atom/branches/               #    243.3 M/sec  branch_frequency     (0.87%)
+     6,476,076,359      cpu_atom/cpu-cycles/             #      0.6 GHz  cycles_frequency       (1.08%)
+    12,271,756,388      cpu_atom/instructions/           #      1.9 instructions  insn_per_cycle  (1.29%)
+     3,737,611,610      cpu_atom/dTLB-loads/             #      0.1 %  dtlb_miss_rate           (1.07%)
+             TopdownL1 (cpu_core)                        #      3.4 %  tma_bad_speculation    
+                                                         #      3.1 %  tma_frontend_bound       (27.80%)
+                                                         #     37.1 %  tma_backend_bound      
+                                                         #     56.4 %  tma_retiring             (27.80%)
+             TopdownL1 (cpu_atom)                        #     26.7 %  tma_backend_bound        (0.21%)
+                                                         #     21.9 %  tma_frontend_bound       (0.15%)
+                                                         #     10.8 %  tma_bad_speculation    
+                                                         #     40.6 %  tma_retiring             (0.10%)
+
+      10.241753008 seconds time elapsed
+
+       0.020561000 seconds user
+       0.046997000 seconds sys
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 11.0.31, OpenJDK 64-Bit Server VM, 11.0.31+11-post-1ubuntu1-26.04.2-Ubuntu
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: -Xms4G -Xmx4G
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 2 s each
+# Measurement: 5 iterations, 2 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete
+# Parameters: (size = 10000)
+
+# Run progress: 60.00% complete, ETA 00:00:35
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfProfiler LinuxPerfNormProfiler 
+# Profilers consume stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 175.560 ±(99.9%) 10.094 ns/op
+# Warmup Iteration   2: 131.876 ±(99.9%) 3.489 ns/op
+# Warmup Iteration   3: 142.216 ±(99.9%) 2.557 ns/op
+Iteration   1: 140.426 ±(99.9%) 2.785 ns/op
+                 gc.alloc.rate:      588.395 MB/sec
+                 gc.alloc.rate.norm: 64.010 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              110.000 ns/op
+                 p0.50:              138.000 ns/op
+                 p0.90:              144.000 ns/op
+                 p0.95:              145.000 ns/op
+                 p0.99:              184.000 ns/op
+                 p0.999:             1333.030 ns/op
+                 p0.9999:            11217.976 ns/op
+                 p1.00:              27488.000 ns/op
+
+Iteration   2: 143.449 ±(99.9%) 2.767 ns/op
+                 gc.alloc.rate:      588.260 MB/sec
+                 gc.alloc.rate.norm: 64.010 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              108.000 ns/op
+                 p0.50:              139.000 ns/op
+                 p0.90:              144.000 ns/op
+                 p0.95:              146.000 ns/op
+                 p0.99:              182.000 ns/op
+                 p0.999:             1443.068 ns/op
+                 p0.9999:            10109.018 ns/op
+                 p1.00:              23968.000 ns/op
+
+Iteration   3: 140.162 ±(99.9%) 2.512 ns/op
+                 gc.alloc.rate:      586.802 MB/sec
+                 gc.alloc.rate.norm: 64.010 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              110.000 ns/op
+                 p0.50:              138.000 ns/op
+                 p0.90:              143.000 ns/op
+                 p0.95:              144.000 ns/op
+                 p0.99:              179.000 ns/op
+                 p0.999:             1242.852 ns/op
+                 p0.9999:            10727.541 ns/op
+                 p1.00:              17216.000 ns/op
+
+Iteration   4: 141.097 ±(99.9%) 2.618 ns/op
+                 gc.alloc.rate:      583.029 MB/sec
+                 gc.alloc.rate.norm: 64.009 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              110.000 ns/op
+                 p0.50:              138.000 ns/op
+                 p0.90:              144.000 ns/op
+                 p0.95:              145.000 ns/op
+                 p0.99:              160.000 ns/op
+                 p0.999:             1362.494 ns/op
+                 p0.9999:            10795.066 ns/op
+                 p1.00:              14240.000 ns/op
+
+Iteration   5: 141.704 ±(99.9%) 2.782 ns/op
+                 gc.alloc.rate:      583.298 MB/sec
+                 gc.alloc.rate.norm: 64.010 B/op
+                 gc.count:           ≈ 0 counts
+                 p0.00:              109.000 ns/op
+                 p0.50:              139.000 ns/op
+                 p0.90:              145.000 ns/op
+                 p0.95:              147.000 ns/op
+                 p0.99:              157.000 ns/op
+                 p0.999:             1249.840 ns/op
+                 p0.9999:            10274.304 ns/op
+                 p1.00:              35840.000 ns/op
+
+# Processing profiler results: LinuxPerfNormProfiler LinuxPerfProfiler 
+
+
+Result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete":
+  N = 375746
+  mean =    141.368 ±(99.9%) 1.205 ns/op
+
+  Histogram, ns/op:
+    [    0.000,  2500.000) = 375492 
+    [ 2500.000,  5000.000) = 41 
+    [ 5000.000,  7500.000) = 84 
+    [ 7500.000, 10000.000) = 86 
+    [10000.000, 12500.000) = 33 
+    [12500.000, 15000.000) = 5 
+    [15000.000, 17500.000) = 1 
+    [17500.000, 20000.000) = 0 
+    [20000.000, 22500.000) = 1 
+    [22500.000, 25000.000) = 1 
+    [25000.000, 27500.000) = 1 
+    [27500.000, 30000.000) = 0 
+    [30000.000, 32500.000) = 0 
+    [32500.000, 35000.000) = 0 
+    [35000.000, 37500.000) = 1 
+
+  Percentiles, ns/op:
+      p(0.0000) =    108.000 ns/op
+     p(50.0000) =    138.000 ns/op
+     p(90.0000) =    144.000 ns/op
+     p(95.0000) =    145.000 ns/op
+     p(99.0000) =    176.000 ns/op
+     p(99.9000) =   1322.506 ns/op
+     p(99.9900) =  10468.048 ns/op
+     p(99.9990) =  21010.837 ns/op
+     p(99.9999) =  35840.000 ns/op
+    p(100.0000) =  35840.000 ns/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:119      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.88%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:159      cpu_atom/branch-misses/          #      1.5 %  branch_miss_rate         (2.47%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:449      cpu_atom/instructions/           #      1.9 instructions  insn_per_cycle  (1.09%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:606      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.47%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:655      cpu_atom/L1-icache-load-misses/  #      3.9 %  l1i_miss_rate            (1.89%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/L1-icache-load-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-load-misses/":
+  ≈ 0 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-loads/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-store-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-stores/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/branch-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/branches/":
+  299.847 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/cycles/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-load-misses/":
+  0.031 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-loads/":
+  458.566 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-store-misses/":
+  0.004 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-stores/":
+  147.408 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/iTLB-load-misses/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/instructions/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/L1-dcache-loads/":
+  532.399 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/L1-dcache-stores/":
+  172.474 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/L1-icache-load-misses/":
+  0.184 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-load-misses/":
+  0.003 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-loads/":
+  0.020 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-store-misses/":
+  0.044 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-stores/":
+  0.049 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/branch-misses/":
+  0.040 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/branches/":
+  517.080 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/cycles/":
+  399.234 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-load-misses/":
+  0.005 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-loads/":
+  535.662 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-store-misses/":
+  0.009 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-stores/":
+  172.232 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/iTLB-load-misses/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:cpu_core/instructions/":
+  2187.295 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:gc.alloc.rate":
+  585.957 ±(99.9%) 10.116 MB/sec [Average]
+  (min, avg, max) = (583.029, 585.957, 588.395), stdev = 2.627
+  CI (99.9%): [575.841, 596.073] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:gc.alloc.rate.norm":
+  64.010 ±(99.9%) 0.003 B/op [Average]
+  (min, avg, max) = (64.009, 64.010, 64.010), stdev = 0.001
+  CI (99.9%): [64.007, 64.013] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:gc.count":
+  4.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.800, 1.000), stdev = 0.447
+  CI (99.9%): [4.000, 4.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:gc.time":
+  8.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 1.600, 2.000), stdev = 0.894
+  CI (99.9%): [8.000, 8.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.rbtInsertDelete:perf":
+Perf stats:
+--------------------------------------------------
+
+             1,058      context-switches                 #    102.9 cs/sec  cs_per_second     
+               141      cpu-migrations                   #     13.7 migrations/sec  migrations_per_second
+           130,177      page-faults                      #  12664.4 faults/sec  page_faults_per_second
+         10,278.95 msec task-clock                       #      0.6 CPUs  CPUs_utilized       
+        14,774,606      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.47%)
+     <not counted>      cpu_core/L1-icache-load-misses/  #      nan %  l1i_miss_rate          
+         5,759,946      cpu_core/LLC-loads/              #     47.2 %  llc_miss_rate            (7.27%)
+        11,185,119      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.88%)
+    47,483,179,706      cpu_core/branches/               #   4619.5 M/sec  branch_frequency     (14.43%)
+    38,225,515,719      cpu_core/cpu-cycles/             #      3.7 GHz  cycles_frequency       (17.97%)
+   202,880,083,522      cpu_core/instructions/           #      5.3 instructions  insn_per_cycle  (21.47%)
+    50,110,979,258      cpu_core/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (24.59%)
+        12,614,655      cpu_atom/L1-icache-load-misses/  #      3.9 %  l1i_miss_rate            (1.89%)
+         1,903,454      cpu_atom/LLC-loads/              #      0.3 %  llc_miss_rate            (2.10%)
+        12,063,159      cpu_atom/branch-misses/          #      1.5 %  branch_miss_rate         (2.47%)
+     1,626,440,441      cpu_atom/branches/               #    158.2 M/sec  branch_frequency     (1.20%)
+     6,238,041,384      cpu_atom/cpu-cycles/             #      0.6 GHz  cycles_frequency       (0.91%)
+    11,780,684,449      cpu_atom/instructions/           #      1.9 instructions  insn_per_cycle  (1.09%)
+     3,618,193,713      cpu_atom/dTLB-loads/             #      0.1 %  dtlb_miss_rate           (0.76%)
+             TopdownL1 (cpu_core)                        #      0.3 %  tma_bad_speculation    
+                                                         #     16.8 %  tma_frontend_bound       (27.88%)
+                                                         #      8.9 %  tma_backend_bound      
+                                                         #     74.0 %  tma_retiring             (27.88%)
+             TopdownL1 (cpu_atom)                        #     17.3 %  tma_backend_bound        (0.51%)
+                                                         #     16.1 %  tma_frontend_bound       (0.38%)
+                                                         #    -10.0 %  tma_bad_speculation    
+                                                         #     76.6 %  tma_retiring             (0.29%)
+
+      10.162208733 seconds time elapsed
+
+       0.020194000 seconds user
+       0.045702000 seconds sys
+
+
+
+
+# JMH version: 1.37
+# VM version: JDK 11.0.31, OpenJDK 64-Bit Server VM, 11.0.31+11-post-1ubuntu1-26.04.2-Ubuntu
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: -Xms4G -Xmx4G
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 2 s each
+# Measurement: 5 iterations, 2 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete
+# Parameters: (size = 10000)
+
+# Run progress: 80.00% complete, ETA 00:00:17
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfProfiler LinuxPerfNormProfiler 
+# Profilers consume stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 178.828 ±(99.9%) 13.888 ns/op
+# Warmup Iteration   2: 134.068 ±(99.9%) 2.719 ns/op
+# Warmup Iteration   3: 134.871 ±(99.9%) 3.285 ns/op
+Iteration   1: 135.671 ±(99.9%) 2.761 ns/op
+                 gc.alloc.rate:      696.904 MB/sec
+                 gc.alloc.rate.norm: 80.011 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              113.000 ns/op
+                 p0.50:              121.000 ns/op
+                 p0.90:              145.000 ns/op
+                 p0.95:              153.000 ns/op
+                 p0.99:              199.000 ns/op
+                 p0.999:             1353.090 ns/op
+                 p0.9999:            10797.614 ns/op
+                 p1.00:              16896.000 ns/op
+
+Iteration   2: 136.334 ±(99.9%) 3.351 ns/op
+                 gc.alloc.rate:      708.065 MB/sec
+                 gc.alloc.rate.norm: 80.012 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              111.000 ns/op
+                 p0.50:              119.000 ns/op
+                 p0.90:              144.000 ns/op
+                 p0.95:              152.000 ns/op
+                 p0.99:              203.000 ns/op
+                 p0.999:             1584.304 ns/op
+                 p0.9999:            12530.973 ns/op
+                 p1.00:              33280.000 ns/op
+
+Iteration   3: 138.212 ±(99.9%) 3.204 ns/op
+                 gc.alloc.rate:      700.520 MB/sec
+                 gc.alloc.rate.norm: 80.011 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              110.000 ns/op
+                 p0.50:              120.000 ns/op
+                 p0.90:              145.000 ns/op
+                 p0.95:              152.000 ns/op
+                 p0.99:              210.000 ns/op
+                 p0.999:             2692.368 ns/op
+                 p0.9999:            12071.725 ns/op
+                 p1.00:              24768.000 ns/op
+
+Iteration   4: 138.464 ±(99.9%) 3.053 ns/op
+                 gc.alloc.rate:      693.371 MB/sec
+                 gc.alloc.rate.norm: 80.011 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            3.000 ms
+                 p0.00:              112.000 ns/op
+                 p0.50:              121.000 ns/op
+                 p0.90:              146.000 ns/op
+                 p0.95:              154.000 ns/op
+                 p0.99:              204.000 ns/op
+                 p0.999:             1739.050 ns/op
+                 p0.9999:            11472.368 ns/op
+                 p1.00:              25952.000 ns/op
+
+Iteration   5: 141.150 ±(99.9%) 8.310 ns/op
+                 gc.alloc.rate:      692.306 MB/sec
+                 gc.alloc.rate.norm: 80.013 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              111.000 ns/op
+                 p0.50:              121.000 ns/op
+                 p0.90:              146.000 ns/op
+                 p0.95:              154.000 ns/op
+                 p0.99:              201.000 ns/op
+                 p0.999:             2596.304 ns/op
+                 p0.9999:            13025.510 ns/op
+                 p1.00:              165376.000 ns/op
+
+# Processing profiler results: LinuxPerfNormProfiler LinuxPerfProfiler 
+
+
+Result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete":
+  N = 358361
+  mean =    137.956 ±(99.9%) 2.064 ns/op
+
+  Histogram, ns/op:
+    [     0.000,  12500.000) = 358337 
+    [ 12500.000,  25000.000) = 21 
+    [ 25000.000,  37500.000) = 2 
+    [ 37500.000,  50000.000) = 0 
+    [ 50000.000,  62500.000) = 0 
+    [ 62500.000,  75000.000) = 0 
+    [ 75000.000,  87500.000) = 0 
+    [ 87500.000, 100000.000) = 0 
+    [100000.000, 112500.000) = 0 
+    [112500.000, 125000.000) = 0 
+    [125000.000, 137500.000) = 0 
+    [137500.000, 150000.000) = 0 
+    [150000.000, 162500.000) = 0 
+    [162500.000, 175000.000) = 1 
+    [175000.000, 187500.000) = 0 
+
+  Percentiles, ns/op:
+      p(0.0000) =    110.000 ns/op
+     p(50.0000) =    121.000 ns/op
+     p(90.0000) =    145.000 ns/op
+     p(95.0000) =    153.000 ns/op
+     p(99.0000) =    204.000 ns/op
+     p(99.9000) =   1636.552 ns/op
+     p(99.9900) =  11871.450 ns/op
+     p(99.9990) =  25260.994 ns/op
+     p(99.9999) = 165376.000 ns/op
+    p(100.0000) = 165376.000 ns/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:309      cpu_atom/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (0.16%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:631      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.50%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:929      cpu_atom/cpu-cycles/             #      1.4 GHz  cycles_frequency       (0.36%)":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_atom/dTLB-load-misses/":
+  ≈ 10⁻⁴ #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_atom/dTLB-loads/":
+  0.003 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_atom/dTLB-stores/":
+  NaN #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/L1-dcache-loads/":
+  574.760 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/L1-dcache-stores/":
+  231.038 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/L1-icache-load-misses/":
+  0.308 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-load-misses/":
+  0.003 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-loads/":
+  0.023 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-store-misses/":
+  0.074 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-stores/":
+  0.081 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/branch-misses/":
+  0.578 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/branches/":
+  457.535 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/cycles/":
+  418.239 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-load-misses/":
+  0.007 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-loads/":
+  578.753 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-store-misses/":
+  0.017 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-stores/":
+  230.980 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/iTLB-load-misses/":
+  0.001 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:cpu_core/instructions/":
+  2318.037 #/op
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:gc.alloc.rate":
+  698.233 ±(99.9%) 24.538 MB/sec [Average]
+  (min, avg, max) = (692.306, 698.233, 708.065), stdev = 6.373
+  CI (99.9%): [673.695, 722.772] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:gc.alloc.rate.norm":
+  80.012 ±(99.9%) 0.003 B/op [Average]
+  (min, avg, max) = (80.011, 80.012, 80.013), stdev = 0.001
+  CI (99.9%): [80.008, 80.015] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:gc.count":
+  5.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (1.000, 1.000, 1.000), stdev = 0.001
+  CI (99.9%): [5.000, 5.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:gc.time":
+  11.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (2.000, 2.200, 3.000), stdev = 0.447
+  CI (99.9%): [11.000, 11.000] (assumes normal distribution)
+
+Secondary result "chaos.tree.benchmark.binary.InsertDeleteBenchmark.treapInsertDelete:perf":
+Perf stats:
+--------------------------------------------------
+
+             1,078      context-switches                 #    104.3 cs/sec  cs_per_second     
+               134      cpu-migrations                   #     13.0 migrations/sec  migrations_per_second
+           181,438      page-faults                      #  17559.2 faults/sec  page_faults_per_second
+         10,332.94 msec task-clock                       #      0.6 CPUs  CPUs_utilized       
+        17,365,631      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.50%)
+     <not counted>      cpu_core/L1-icache-load-misses/  #      nan %  l1i_miss_rate          
+         6,489,544      cpu_core/LLC-loads/              #     45.9 %  llc_miss_rate            (7.26%)
+        56,817,552      cpu_core/branch-misses/          #      0.1 %  branch_miss_rate         (10.81%)
+    40,808,034,445      cpu_core/branches/               #   3949.3 M/sec  branch_frequency     (14.34%)
+    38,362,044,288      cpu_core/cpu-cycles/             #      3.7 GHz  cycles_frequency       (17.84%)
+   207,538,572,592      cpu_core/instructions/           #      5.4 instructions  insn_per_cycle  (21.35%)
+    52,251,518,691      cpu_core/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (24.55%)
+       118,911,218      cpu_atom/L1-icache-load-misses/  #      3.2 %  l1i_miss_rate            (0.18%)
+        18,818,100      cpu_atom/LLC-loads/              #      0.9 %  llc_miss_rate            (0.31%)
+        66,276,937      cpu_atom/branch-misses/          #      1.2 %  branch_miss_rate         (0.41%)
+     6,308,527,560      cpu_atom/branches/               #    610.5 M/sec  branch_frequency     (0.31%)
+    14,686,046,929      cpu_atom/cpu-cycles/             #      1.4 GHz  cycles_frequency       (0.36%)
+    48,158,431,295      cpu_atom/instructions/           #      2.3 instructions  insn_per_cycle  (0.29%)
+    13,418,468,309      cpu_atom/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (0.16%)
+             TopdownL1 (cpu_core)                        #      5.7 %  tma_bad_speculation    
+                                                         #      4.3 %  tma_frontend_bound       (27.98%)
+                                                         #     12.8 %  tma_backend_bound      
+                                                         #     77.2 %  tma_retiring             (27.98%)
+             TopdownL1 (cpu_atom)                        #     26.8 %  tma_backend_bound        (0.12%)
+                                                         #     13.7 %  tma_frontend_bound       (0.09%)
+                                                         #     59.2 %  tma_bad_speculation    
+                                                         #      0.3 %  tma_retiring             (9.01%)
+
+      10.227553571 seconds time elapsed
+
+       0.017741000 seconds user
+       0.049280000 seconds sys
+
+
+
+
+# Run complete. Total time: 00:01:30
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+Benchmark                                                                                                                                 (size)    Mode     Cnt       Score     Error   Units
+InsertDeleteBenchmark.avlInsertDelete                                                                                                      10000  sample  301618     160.665 ±   3.442   ns/op
+InsertDeleteBenchmark.avlInsertDelete:279      cpu_atom/cpu-cycles/             #      1.7 GHz  cycles_frequency       (0.38%)             10000  sample                 NaN              #/op
+InsertDeleteBenchmark.avlInsertDelete:312      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.46%)            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.avlInsertDelete:505      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.80%)            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.avlInsertDelete:586      cpu_atom/dTLB-loads/             #      0.1 %  dtlb_miss_rate           (0.28%)             10000  sample                 NaN              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/L1-dcache-loads/                                                                            10000  sample             793.887              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/L1-dcache-stores/                                                                           10000  sample             255.897              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/L1-icache-load-misses/                                                                      10000  sample               0.341              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-load-misses/                                                                            10000  sample               0.003              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-loads/                                                                                  10000  sample               0.024              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-store-misses/                                                                           10000  sample               0.060              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/LLC-stores/                                                                                 10000  sample               0.063              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/branch-misses/                                                                              10000  sample               0.053              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/branches/                                                                                   10000  sample             677.704              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/cycles/                                                                                     10000  sample             498.104              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-load-misses/                                                                           10000  sample               0.007              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-loads/                                                                                 10000  sample             795.098              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-store-misses/                                                                          10000  sample               0.014              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/dTLB-stores/                                                                                10000  sample             256.862              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/iTLB-load-misses/                                                                           10000  sample               0.001              #/op
+InsertDeleteBenchmark.avlInsertDelete:cpu_core/instructions/                                                                               10000  sample            3131.004              #/op
+InsertDeleteBenchmark.avlInsertDelete:gc.alloc.rate                                                                                        10000  sample       5     587.628 ±  12.279  MB/sec
+InsertDeleteBenchmark.avlInsertDelete:gc.alloc.rate.norm                                                                                   10000  sample       5      80.012 ±   0.004    B/op
+InsertDeleteBenchmark.avlInsertDelete:gc.count                                                                                             10000  sample       5       5.000            counts
+InsertDeleteBenchmark.avlInsertDelete:gc.time                                                                                              10000  sample       5       9.000                ms
+InsertDeleteBenchmark.avlInsertDelete:p0.00                                                                                                10000  sample             134.000             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p0.50                                                                                                10000  sample             146.000             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p0.90                                                                                                10000  sample             160.000             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p0.95                                                                                                10000  sample             163.000             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p0.99                                                                                                10000  sample             249.000             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p0.999                                                                                               10000  sample            3057.144             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p0.9999                                                                                              10000  sample           11546.819             ns/op
+InsertDeleteBenchmark.avlInsertDelete:p1.00                                                                                                10000  sample          281088.000             ns/op
+InsertDeleteBenchmark.avlInsertDelete:perf                                                                                                 10000  sample                 NaN               ---
+InsertDeleteBenchmark.bstInsertDelete                                                                                                      10000  sample  270970      67.087 ±   1.785   ns/op
+InsertDeleteBenchmark.bstInsertDelete:727      cpu_atom/instructions/           #      1.8 instructions  insn_per_cycle  (1.32%)           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:815      cpu_core/LLC-loads/              #     41.0 %  llc_miss_rate            (7.27%)             10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:818      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.89%)            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:921      cpu_atom/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (0.35%)             10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/L1-dcache-loads/                                                                            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/L1-dcache-stores/                                                                           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/L1-icache-load-misses/                                                                      10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-load-misses/                                                                            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-loads/                                                                                  10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-store-misses/                                                                           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/LLC-stores/                                                                                 10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/branch-misses/                                                                              10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/branches/                                                                                   10000  sample              25.954              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/cycles/                                                                                     10000  sample              26.711              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-load-misses/                                                                           10000  sample               0.001              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-loads/                                                                                 10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-store-misses/                                                                          10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/dTLB-stores/                                                                                10000  sample                 NaN              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/iTLB-load-misses/                                                                           10000  sample              ≈ 10⁻⁴              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_atom/instructions/                                                                               10000  sample             110.908              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/L1-dcache-loads/                                                                            10000  sample             219.357              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/L1-dcache-stores/                                                                           10000  sample              48.830              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/L1-icache-load-misses/                                                                      10000  sample               0.058              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-load-misses/                                                                            10000  sample               0.001              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-loads/                                                                                  10000  sample               0.013              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-store-misses/                                                                           10000  sample               0.032              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/LLC-stores/                                                                                 10000  sample               0.035              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/branch-misses/                                                                              10000  sample               0.015              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/branches/                                                                                   10000  sample             158.904              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/cycles/                                                                                     10000  sample             139.115              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-load-misses/                                                                           10000  sample               0.002              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-loads/                                                                                 10000  sample             217.450              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-store-misses/                                                                          10000  sample               0.008              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/dTLB-stores/                                                                                10000  sample              48.768              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/iTLB-load-misses/                                                                           10000  sample              ≈ 10⁻³              #/op
+InsertDeleteBenchmark.bstInsertDelete:cpu_core/instructions/                                                                               10000  sample             679.110              #/op
+InsertDeleteBenchmark.bstInsertDelete:gc.alloc.rate                                                                                        10000  sample       5    1475.064 ± 181.296  MB/sec
+InsertDeleteBenchmark.bstInsertDelete:gc.alloc.rate.norm                                                                                   10000  sample       5      56.004 ±   0.002    B/op
+InsertDeleteBenchmark.bstInsertDelete:gc.count                                                                                             10000  sample       5       6.000            counts
+InsertDeleteBenchmark.bstInsertDelete:gc.time                                                                                              10000  sample       5      14.000                ms
+InsertDeleteBenchmark.bstInsertDelete:p0.00                                                                                                10000  sample              49.000             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p0.50                                                                                                10000  sample              56.000             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p0.90                                                                                                10000  sample              59.000             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p0.95                                                                                                10000  sample              74.000             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p0.99                                                                                                10000  sample              89.000             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p0.999                                                                                               10000  sample            1428.058             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p0.9999                                                                                              10000  sample           12073.786             ns/op
+InsertDeleteBenchmark.bstInsertDelete:p1.00                                                                                                10000  sample           57216.000             ns/op
+InsertDeleteBenchmark.bstInsertDelete:perf                                                                                                 10000  sample                 NaN               ---
+InsertDeleteBenchmark.javaTreeSetInsertDelete                                                                                              10000  sample  355056      80.771 ±   1.575   ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:388      cpu_atom/instructions/           #      1.9 instructions  insn_per_cycle  (1.29%)   10000  sample                 NaN              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:684      cpu_core/LLC-loads/              #     42.4 %  llc_miss_rate            (7.30%)     10000  sample                 NaN              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/LLC-load-misses/                                                                    10000  sample                 NaN              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/LLC-loads/                                                                          10000  sample                 NaN              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/branch-misses/                                                                      10000  sample                 NaN              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/branches/                                                                           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/dTLB-store-misses/                                                                  10000  sample              ≈ 10⁻⁷              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_atom/dTLB-stores/                                                                        10000  sample               0.001              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/L1-dcache-loads/                                                                    10000  sample             275.581              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/L1-dcache-stores/                                                                   10000  sample              63.424              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/L1-icache-load-misses/                                                              10000  sample               0.090              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-load-misses/                                                                    10000  sample               0.002              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-loads/                                                                          10000  sample               0.015              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-store-misses/                                                                   10000  sample               0.055              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/LLC-stores/                                                                         10000  sample               0.059              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/branch-misses/                                                                      10000  sample               0.162              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/branches/                                                                           10000  sample             213.555              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/cycles/                                                                             10000  sample             210.256              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-load-misses/                                                                   10000  sample               0.003              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-loads/                                                                         10000  sample             276.784              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-store-misses/                                                                  10000  sample               0.014              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/dTLB-stores/                                                                        10000  sample              63.459              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/iTLB-load-misses/                                                                   10000  sample               0.001              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:cpu_core/instructions/                                                                       10000  sample             896.133              #/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.alloc.rate                                                                                10000  sample       5    1244.186 ±  89.534  MB/sec
+InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.alloc.rate.norm                                                                           10000  sample       5      72.005 ±   0.004    B/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.count                                                                                     10000  sample       5       6.000            counts
+InsertDeleteBenchmark.javaTreeSetInsertDelete:gc.time                                                                                      10000  sample       5      13.000                ms
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.00                                                                                        10000  sample              63.000             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.50                                                                                        10000  sample              69.000             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.90                                                                                        10000  sample              89.000             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.95                                                                                        10000  sample              91.000             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.99                                                                                        10000  sample             100.000             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.999                                                                                       10000  sample            1307.886             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p0.9999                                                                                      10000  sample           11791.818             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:p1.00                                                                                        10000  sample           85248.000             ns/op
+InsertDeleteBenchmark.javaTreeSetInsertDelete:perf                                                                                         10000  sample                 NaN               ---
+InsertDeleteBenchmark.rbtInsertDelete                                                                                                      10000  sample  375746     141.368 ±   1.205   ns/op
+InsertDeleteBenchmark.rbtInsertDelete:119      cpu_core/branch-misses/          #      0.0 %  branch_miss_rate         (10.88%)            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:159      cpu_atom/branch-misses/          #      1.5 %  branch_miss_rate         (2.47%)             10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:449      cpu_atom/instructions/           #      1.9 instructions  insn_per_cycle  (1.09%)           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:606      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.47%)            10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:655      cpu_atom/L1-icache-load-misses/  #      3.9 %  l1i_miss_rate            (1.89%)             10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/L1-icache-load-misses/                                                                      10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-load-misses/                                                                            10000  sample                 ≈ 0              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-loads/                                                                                  10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-store-misses/                                                                           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/LLC-stores/                                                                                 10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/branch-misses/                                                                              10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/branches/                                                                                   10000  sample             299.847              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/cycles/                                                                                     10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-load-misses/                                                                           10000  sample               0.031              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-loads/                                                                                 10000  sample             458.566              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-store-misses/                                                                          10000  sample               0.004              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/dTLB-stores/                                                                                10000  sample             147.408              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/iTLB-load-misses/                                                                           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_atom/instructions/                                                                               10000  sample                 NaN              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/L1-dcache-loads/                                                                            10000  sample             532.399              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/L1-dcache-stores/                                                                           10000  sample             172.474              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/L1-icache-load-misses/                                                                      10000  sample               0.184              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-load-misses/                                                                            10000  sample               0.003              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-loads/                                                                                  10000  sample               0.020              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-store-misses/                                                                           10000  sample               0.044              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/LLC-stores/                                                                                 10000  sample               0.049              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/branch-misses/                                                                              10000  sample               0.040              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/branches/                                                                                   10000  sample             517.080              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/cycles/                                                                                     10000  sample             399.234              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-load-misses/                                                                           10000  sample               0.005              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-loads/                                                                                 10000  sample             535.662              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-store-misses/                                                                          10000  sample               0.009              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/dTLB-stores/                                                                                10000  sample             172.232              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/iTLB-load-misses/                                                                           10000  sample               0.001              #/op
+InsertDeleteBenchmark.rbtInsertDelete:cpu_core/instructions/                                                                               10000  sample            2187.295              #/op
+InsertDeleteBenchmark.rbtInsertDelete:gc.alloc.rate                                                                                        10000  sample       5     585.957 ±  10.116  MB/sec
+InsertDeleteBenchmark.rbtInsertDelete:gc.alloc.rate.norm                                                                                   10000  sample       5      64.010 ±   0.003    B/op
+InsertDeleteBenchmark.rbtInsertDelete:gc.count                                                                                             10000  sample       5       4.000            counts
+InsertDeleteBenchmark.rbtInsertDelete:gc.time                                                                                              10000  sample       5       8.000                ms
+InsertDeleteBenchmark.rbtInsertDelete:p0.00                                                                                                10000  sample             108.000             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p0.50                                                                                                10000  sample             138.000             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p0.90                                                                                                10000  sample             144.000             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p0.95                                                                                                10000  sample             145.000             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p0.99                                                                                                10000  sample             176.000             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p0.999                                                                                               10000  sample            1322.506             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p0.9999                                                                                              10000  sample           10468.048             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:p1.00                                                                                                10000  sample           35840.000             ns/op
+InsertDeleteBenchmark.rbtInsertDelete:perf                                                                                                 10000  sample                 NaN               ---
+InsertDeleteBenchmark.treapInsertDelete                                                                                                    10000  sample  358361     137.956 ±   2.064   ns/op
+InsertDeleteBenchmark.treapInsertDelete:309      cpu_atom/dTLB-loads/             #      0.0 %  dtlb_miss_rate           (0.16%)           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.treapInsertDelete:631      cpu_core/L1-dcache-load-misses/  #      nan %  l1d_miss_rate            (10.50%)          10000  sample                 NaN              #/op
+InsertDeleteBenchmark.treapInsertDelete:929      cpu_atom/cpu-cycles/             #      1.4 GHz  cycles_frequency       (0.36%)           10000  sample                 NaN              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_atom/dTLB-load-misses/                                                                         10000  sample              ≈ 10⁻⁴              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_atom/dTLB-loads/                                                                               10000  sample               0.003              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_atom/dTLB-stores/                                                                              10000  sample                 NaN              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/L1-dcache-loads/                                                                          10000  sample             574.760              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/L1-dcache-stores/                                                                         10000  sample             231.038              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/L1-icache-load-misses/                                                                    10000  sample               0.308              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-load-misses/                                                                          10000  sample               0.003              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-loads/                                                                                10000  sample               0.023              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-store-misses/                                                                         10000  sample               0.074              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/LLC-stores/                                                                               10000  sample               0.081              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/branch-misses/                                                                            10000  sample               0.578              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/branches/                                                                                 10000  sample             457.535              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/cycles/                                                                                   10000  sample             418.239              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-load-misses/                                                                         10000  sample               0.007              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-loads/                                                                               10000  sample             578.753              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-store-misses/                                                                        10000  sample               0.017              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/dTLB-stores/                                                                              10000  sample             230.980              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/iTLB-load-misses/                                                                         10000  sample               0.001              #/op
+InsertDeleteBenchmark.treapInsertDelete:cpu_core/instructions/                                                                             10000  sample            2318.037              #/op
+InsertDeleteBenchmark.treapInsertDelete:gc.alloc.rate                                                                                      10000  sample       5     698.233 ±  24.538  MB/sec
+InsertDeleteBenchmark.treapInsertDelete:gc.alloc.rate.norm                                                                                 10000  sample       5      80.012 ±   0.003    B/op
+InsertDeleteBenchmark.treapInsertDelete:gc.count                                                                                           10000  sample       5       5.000            counts
+InsertDeleteBenchmark.treapInsertDelete:gc.time                                                                                            10000  sample       5      11.000                ms
+InsertDeleteBenchmark.treapInsertDelete:p0.00                                                                                              10000  sample             110.000             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p0.50                                                                                              10000  sample             121.000             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p0.90                                                                                              10000  sample             145.000             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p0.95                                                                                              10000  sample             153.000             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p0.99                                                                                              10000  sample             204.000             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p0.999                                                                                             10000  sample            1636.552             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p0.9999                                                                                            10000  sample           11871.450             ns/op
+InsertDeleteBenchmark.treapInsertDelete:p1.00                                                                                              10000  sample          165376.000             ns/op
+InsertDeleteBenchmark.treapInsertDelete:perf                                                                                               10000  sample                 NaN               ---
