@@ -3,6 +3,20 @@
 All notable changes to ChaosTree will be documented in this file. I believe in being transparent about what I add, change, and fix.
 
 ---
+
+## [1.2.0] - 2026-08-09
+
+## ChaosTree v1.2.0 — Zero-Allocation Engine & JDK 11 Support
+
+### JDK 11 Support
+- Full codebase compatibility with **JDK 11**.
+- Removed Java 14+ `record` classes from core traversal paths.
+- Performance improvement
+- Removed enhanced switch expression.
+- New Benchmark data
+[Benchmark Reports](https://github.com/Chaos-vy/ChaosTree/tree/main/BenchmarkReport/Reports)
+
+---
 ## [1.1.0] - 2026-08-07
 ### Added
 - Added `NavigableSet` compatibility.
