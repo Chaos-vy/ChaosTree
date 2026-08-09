@@ -181,8 +181,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
     }
 
     private int routeIndex(BPlusTreeNode<T> valueNode, T key) {
-        NodeSearchResult result = searchNode(valueNode, key);
-        return result.found() ? result.index() + 1 : result.index();
+        int result = searchNode(valueNode, key);
+        return result >= 0 ? result + 1 : -(result + 1);
     }
 
 
@@ -208,10 +208,10 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
     protected void insertNonFull(BPlusTreeNode<T> node, T value) {
         while (true) {
             if (node.isLeaf()) {
-                NodeSearchResult result = searchNode(node, value);
-                if (result.found()) throw new DuplicateNodeException("Value already present in tree");
+                int result = searchNode(node, value);
+                if (result >= 0) throw new DuplicateNodeException("Value already present in tree");
 
-                int insertPos = result.index();
+                int insertPos = -(result + 1);
                 System.arraycopy(node.getKeys(), insertPos, node.getKeys(), insertPos + 1, node.getKeyCount() - insertPos);
                 node.setKey(insertPos, value);
                 node.setKeyCount(node.getKeyCount() + 1);
@@ -479,7 +479,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         while (!current.isLeaf()) {
             current = current.getChild(routeIndex(current, fromInclusive));
         }
-        int startIndex = searchNode(current, fromInclusive).index();
+        int startRes = searchNode(current, fromInclusive);
+        int startIndex = startRes >= 0 ? startRes : -(startRes + 1);
 
         while (current != null) {
             int count = current.getKeyCount();
@@ -492,7 +493,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
                     result.add(current.getKey(i));
                 }
             } else {
-                int endIndex = searchNode(current, toExclusive).index();
+                int endRes = searchNode(current, toExclusive);
+                int endIndex = endRes >= 0 ? endRes : -(endRes + 1);
                 for (int i = startIndex; i < endIndex; i++) {
                     result.add(current.getKey(i));
                 }
@@ -522,7 +524,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
                     while (!currentLeaf.isLeaf()) {
                         currentLeaf = currentLeaf.getChild(routeIndex(currentLeaf, fromInclusive));
                     }
-                    keyIndex = searchNode(currentLeaf, fromInclusive).index();
+                    int kRes = searchNode(currentLeaf, fromInclusive);
+                    keyIndex = kRes >= 0 ? kRes : -(kRes + 1);
                     advance();
                 }
             }
@@ -607,10 +610,11 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         treeIsEmpty();
         BPlusTreeNode<T> current = ceil_floorHelper(root, key);
         if (current == null) return null;
-        NodeSearchResult result = searchNode(current, key);
-        if (result.found()) return current.getKey(result.index());
+        int result = searchNode(current, key);
+        if (result >= 0) return current.getKey(result);
 
-        if (result.index() < current.getKeyCount()) return current.getKey(result.index());
+        int idx = -(result + 1);
+        if (idx < current.getKeyCount()) return current.getKey(idx);
 
         if (current.getNext() != null) return current.getNext().getKey(0);
         return null;
@@ -632,9 +636,10 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
             current = current.getChild(idx);
         }
 
-        NodeSearchResult result = searchNode(current, key);
-        int idx = result.index();
-        if (result.found()) return current.getKey(idx);
+        int result = searchNode(current, key);
+        if (result >= 0) return current.getKey(result);
+        
+        int idx = -(result + 1);
         if (idx > 0) return current.getKey(idx - 1);
 
         if (lastLeftNode != null) {
@@ -661,8 +666,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
             current = current.getChild(idx);
         }
 
-        NodeSearchResult result = searchNode(current, key);
-        int left = result.index();
+        int result = searchNode(current, key);
+        int left = result >= 0 ? result : -(result + 1);
         if (left > 0) return current.getKey(left - 1);
         if (lastLeftNode != null) {
             BPlusTreeNode<T> siblingLeaf = getRightmostLeaf(lastLeftNode.getChild(lastLeftIdx));
@@ -680,9 +685,8 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
             current = current.getChild(routeIndex(current, key));
         }
 
-        NodeSearchResult result = searchNode(current, key);
-        int left = result.index();
-        if (result.found()) left++;
+        int result = searchNode(current, key);
+        int left = result >= 0 ? result + 1 : -(result + 1);
         if (left < current.getKeyCount()) return current.getKey(left);
         if (current.getNext() != null) return current.getNext().getKey(0);
         return null;
