@@ -12,10 +12,6 @@ This document outlines the upcoming features, architectural shifts, and performa
 * **Status:** In Development
 * **Details:** Downgrading the compiler target from Java 17 to **Java 11**. By replacing internal Java 16 `record` types with standard POJOs, ChaosTree will become fully compatible with legacy enterprise systems while preserving ultra-fast Java 9 `VarHandle` concurrency support.
 
-### 3. Cloud Performance Suite (JMH & JFR) 
-* **Status:** Planned
-* **Details:** Execution of a massive JMH (Java Microbenchmark Harness) suite on cloud infrastructure (n2 instances). This will include Java Flight Recorder (JFR) profiling to formally document CPU cache misses, allocation rates, and thread-contention metrics for the concurrent trees.
-
 ---
 
 ## 🗺️ Future Horizons (v2.0+)

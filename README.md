@@ -67,6 +67,22 @@ index.rangeStream(100, 500)
 ```
 **Do read the Benchmark** [Report](BenchmarkReport/README.md)
 
+### JDK 11 (Latency in ns)
+| Tree Type  | Degree | Avg (ns/op) | p50 | p90 | p99 | p99.9 | pMax      |
+|:-----------|:-------|:------------|:----|:----|:----|:------|:----------|
+| **B+Tree** | t=8    | 119.5       | 121 | 124 | 137 | 1,433 | 116,224   |
+| **B+Tree** | t=32   | 108.5       | 116 | 130 | 134 | 4,160 | 121,088   |
+| **B+Tree** | t=64   | 102.4       | 95  | 112 | 125 | 1,075 | 30,976    |
+| **B+Tree** | t=128  | 102.0       | 94  | 110 | 114 | 1,402 | 2,519,040 |
+
+### JDK 21 (Latency in ns)
+| Tree Type  | Degree | Avg (ns/op) | p50 | p90 | p99 | p99.9 | pMax   |
+|:-----------|:-------|:------------|:----|:----|:----|:------|:-------|
+| **B+Tree** | t=8    | 117.2       | 112 | 119 | 126 | 985   | 13,856 |
+| **B+Tree** | t=32   | 111.2       | 109 | 113 | 120 | 1,133 | 14,080 |
+| **B+Tree** | t=64   | 108.7       | 107 | 111 | 127 | 1,228 | 13,888 |
+| **B+Tree** | t=128  | 105.5       | 106 | 109 | 121 | 1,043 | 15,200 |
+
 ### 2. Classic Binary Trees (Binary Engine)
 
 Great for everyday data storage, building priority queues, or when I just want a classic, fast binary tree.
@@ -271,28 +287,9 @@ Generated JavaDoc documentation is available with every release and provides com
 
 ChaosTree is actively evolving to support advanced fine-grained, lock-free concurrency models.
 
-* **v1.1.0:** Foundational Binary and N-ary Search Trees. (Current)
-* **v1.2.0:** Feature of map <K,V> key value pair.
-* **v2.0.0:** Thinking....
-
----
-
-## 📏 Codebase Metrics
-
-I believe in keeping the core engine clean, lean, and highly tested. Here is the exact breakdown of the ChaosTree v1.0.1 repository:
-
-| Module         | Files | Blank | Comments | Code (LOC) |
-|----------------|-------|-------|----------|------------|
-| **Production** | 41    | 600   | 1,979    | **2,875**  |
-| **Tests**      | 28    | 431   | 98       | **1,698**  |
-| **Benchmarks** | 17    | 196   | 92       | **1,003**  |
-| **Total**      | 86    | 1,227 | 2,169    | **5,576**  |
-
-**Production Ratio (`(Tests + Benchmarks) : Production Code`):** `0.94 : 1`
-
-**DRY (Don't Repeat Yourself) Integrity:** `0 Violations` (At a strict 50-token / 10-line threshold, PMD CPD confirms zero lazy algorithmic copy-pasting. The only identified duplicates are structurally forced by JVM inheritance rules or intentionally unrolled for maximum L1 Cache/Branch Predictor mechanical sympathy).
-
-For every line of production logic I write, ChaosTree maintains nearly a full line of test and micro-architectural benchmark code.
+* **v1.2.0:** Foundational Binary and N-ary Search Trees. (Current)
+* **v2.0.0:** Feature of map <K,V> key value pair.
+* **v3.0.0:** Thinking....
 
 ---
 
