@@ -346,7 +346,13 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     @Override
     public boolean contains(T value) {
         checkValue(value);
-        return search(value).contains;
+        N node = root;
+        while (node != null) {
+            int cp = value.compareTo(node.getValue());
+            if (cp == 0) return true;
+            node = cp > 0 ? node.getRight() : node.getLeft();
+        }
+        return false;
     }
 
     /**
@@ -394,59 +400,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * @param ceil the smallest value greater than or equal to the requested value, or
      *        {@code null} if no such value exists
      */
-    static class SearchResult<T> {
-        private final boolean contains;
-        private final T floor;
-        private final T ceil;
 
-        SearchResult(boolean contains, T floor, T ceil) {
-            this.contains = contains;
-            this.floor = floor;
-            this.ceil = ceil;
-        }
-
-        boolean contains() { return contains; }
-        T floor() { return floor; }
-        T ceil() { return ceil; }
-    }
-
-    /**
-     * Executes a top-down lookup for the specified value starting from the root.
-     *
-     * @param value the value to search for
-     * @return a {@link SearchResult} holding whether the exact value was found,
-     *         as well as the floor and ceiling candidates
-     */
-    private @NotNull SearchResult<T> search(T value) {
-        return searchHelper(value);
-    }
-
-    /**
-     * Recursively searches for the specified value while tracking the floor
-     * and ceiling candidates.
-     *
-     * @param value the target value being searched
-     * @return the definitive {@link SearchResult}
-     */
-    private @NotNull SearchResult<T> searchHelper(T value) {
-        N node = root;
-        T floor = null;
-        T ceil = null;
-        while (node != null) {
-            int cp = value.compareTo(node.getValue());
-            if (cp == 0) {
-                return new SearchResult<>(true, node.getValue(), node.getValue());
-            }
-            if (cp > 0) {
-                floor = node.getValue();
-                node = node.getRight();
-            } else {
-                ceil = node.getValue();
-                node = node.getLeft();
-            }
-        }
-        return new SearchResult<>(false, floor, ceil);
-    }
 
     /**
      * Return the node with the same value
@@ -468,36 +422,15 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     }
 
     /**
-     * Result of deleting a value from a subtree.
-     *
-     * @param root the updated subtree root
-     * @param deleted {@code true} when the requested value was removed
-     * @param <N> the node type
+     * Mutable flag to track deletion success down the recursive call stack.
+     * Provides a clean OOP structure while allowing C2 Escape Analysis to scalar-replace
+     * it into a register, ensuring zero allocations on the heap.
      */
-    protected static class DeleteResult<N> {
-        private final N root;
-        private final boolean deleted;
-
-        public DeleteResult(N root, boolean deleted) {
-            this.root = root;
-            this.deleted = deleted;
-        }
-
-        public N root() { return root; }
-        public boolean deleted() { return deleted; }
+    protected static class DeleteState {
+        public boolean deleted = false;
     }
 
-    /**
-     * Creates a deletion result for use by specialized tree implementations.
-     *
-     * @param root the updated subtree root
-     * @param deleted {@code true} when the requested value was removed
-     * @param <M> the specialized node type
-     * @return the deletion result
-     */
-    protected <M> DeleteResult<M> deleteResult(M root, boolean deleted) {
-        return new DeleteResult<>(root, deleted);
-    }
+
 
     /**
      * Deletes the specified non-null value from this tree if it exists.
@@ -512,9 +445,9 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     @Override
     public void delete(T value) {
         checkValue(value);
-        DeleteResult<N> result = delete(root, value);
-        root = result.root();
-        if (result.deleted()) {
+        DeleteState state = new DeleteState();
+        root = delete(root, value, state);
+        if (state.deleted) {
             size--;
             modCount++;
             cachedHashedCode -= value.hashCode();
@@ -552,36 +485,33 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      *
      * @param node  the node from where the tree propagates for deletion
      * @param value the value to delete
-     * @return the deletion result containing the updated subtree root and whether
-     *         the value was removed
+     * @param state tracks if the deletion actually occurred
+     * @return the updated subtree root after deletion
      */
-    protected DeleteResult<N> delete(N node, T value) {
-        if (node == null) return new DeleteResult<>(null, false);
+    protected N delete(N node, T value, DeleteState state) {
+        if (node == null) return null;
 
         int compare = compare(value, node);
 
         if (compare > 0) {
-            DeleteResult<N> result = delete(node.getRight(), value);
-            if (!result.deleted()) return new DeleteResult<>(node, false);
-            node.setRight(result.root());
+            node.setRight(delete(node.getRight(), value, state));
         } else if (compare < 0) {
-            DeleteResult<N> result = delete(node.getLeft(), value);
-            if (!result.deleted()) return new DeleteResult<>(node, false);
-            node.setLeft(result.root());
+            node.setLeft(delete(node.getLeft(), value, state));
         } else {
-            if (node.getLeft() == null) return new DeleteResult<>(node.getRight(), true);
-            if (node.getRight() == null) return new DeleteResult<>(node.getLeft(), true);
+            state.deleted = true;
+            if (node.getLeft() == null) return node.getRight();
+            if (node.getRight() == null) return node.getLeft();
 
             N successor = getMinNode(node.getRight());
             node.setValue(successor.getValue());
-            DeleteResult<N> successorResult = delete(node.getRight(), successor.getValue());
-            if (!successorResult.deleted()) {
+            DeleteState succState = new DeleteState();
+            node.setRight(delete(node.getRight(), successor.getValue(), succState));
+            if (!succState.deleted) {
                 throw new IllegalStateException(
                         "BST invariant violated: in-order successor not found in right subtree");
             }
-            node.setRight(successorResult.root());
         }
-        return new DeleteResult<>(afterDelete(node), true);
+        return afterDelete(node);
     }
 
     /**
@@ -696,7 +626,19 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     public T floor(T value) {
         treeIsEmpty();
         checkValue(value);
-        return search(value).floor;
+        N node = root;
+        T floor = null;
+        while (node != null) {
+            int cp = value.compareTo(node.getValue());
+            if (cp == 0) return node.getValue();
+            if (cp > 0) {
+                floor = node.getValue();
+                node = node.getRight();
+            } else {
+                node = node.getLeft();
+            }
+        }
+        return floor;
     }
 
     /**
@@ -716,7 +658,19 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     public T ceil(T value) {
         treeIsEmpty();
         checkValue(value);
-        return search(value).ceil;
+        N node = root;
+        T ceil = null;
+        while (node != null) {
+            int cp = value.compareTo(node.getValue());
+            if (cp == 0) return node.getValue();
+            if (cp > 0) {
+                node = node.getRight();
+            } else {
+                ceil = node.getValue();
+                node = node.getLeft();
+            }
+        }
+        return ceil;
     }
 
     /**

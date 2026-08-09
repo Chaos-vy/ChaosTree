@@ -89,38 +89,26 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     protected abstract N createNode(int degree, boolean isLeaf);
 
 
-    protected static class NodeSearchResult {
-        private final boolean found;
-        private final int index;
-
-        protected NodeSearchResult(boolean found, int index) {
-            this.found = found;
-            this.index = index;
-        }
-
-        public boolean found() { return found; }
-        public int index() { return index; }
-    }
-
-    protected NodeSearchResult searchNode(N node, T key) {
+    protected int searchNode(N node, T key) {
         int left = 0;
         int right = node.getKeyCount() - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
             int cmp = key.compareTo(node.getKey(mid));
-            if (cmp == 0) return new NodeSearchResult(true, mid);
+            if (cmp == 0) return mid;
             if (cmp > 0) left = mid + 1;
             else right = mid - 1;
         }
-        return new NodeSearchResult(false, left);
+        return -(left + 1);
     }
 
     protected int findIndex(N node, T key) {
-        return searchNode(node, key).index();
+        int idx = searchNode(node, key);
+        return idx >= 0 ? idx : -(idx + 1);
     }
 
     protected boolean binarySearch(N node, T key) {
-        return searchNode(node, key).found();
+        return searchNode(node, key) >= 0;
     }
 
     protected void checkValue(T value) {
@@ -670,16 +658,16 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
 
         N current = root;
         while (current != null) {
-            NodeSearchResult result = searchNode(current, key);
+            int result = searchNode(current, key);
 
-            if (result.found()) {
+            if (result >= 0) {
                 return true;
             }
 
             if (current.isLeaf()) {
                 break;
             }
-            current = current.getChild(result.index());
+            current = current.getChild(-(result + 1));
         }
         return false;
     }
@@ -759,10 +747,10 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         T floorVal = null;
 
         while (current != null) {
-            NodeSearchResult result = searchNode(current, key);
-            if (result.found()) return current.getKey(result.index());
+            int result = searchNode(current, key);
+            if (result >= 0) return current.getKey(result);
 
-            int left = result.index();
+            int left = -(result + 1);
             if (left > 0) floorVal = current.getKey(left - 1);
 
             if (current.isLeaf()) break;
@@ -786,10 +774,10 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         T ceilVal = null;
 
         while (current != null) {
-            NodeSearchResult result = searchNode(current, key);
-            if (result.found()) return current.getKey(result.index());
+            int result = searchNode(current, key);
+            if (result >= 0) return current.getKey(result);
 
-            int left = result.index();
+            int left = -(result + 1);
             if (left < current.getKeyCount()) ceilVal = current.getKey(left);
 
             if (current.isLeaf()) break;
@@ -806,8 +794,8 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         T predVal = null;
 
         while (current != null) {
-            NodeSearchResult result = searchNode(current, key);
-            int left = result.index();
+            int result = searchNode(current, key);
+            int left = result >= 0 ? result : -(result + 1);
 
             if (left > 0) predVal = current.getKey(left - 1);
 
@@ -825,10 +813,8 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         T succVal = null;
 
         while (current != null) {
-            NodeSearchResult result = searchNode(current, key);
-            int left = result.index();
-
-            if (result.found()) left++;
+            int result = searchNode(current, key);
+            int left = result >= 0 ? result + 1 : -(result + 1);
 
             if (left < current.getKeyCount()) succVal = current.getKey(left);
 
