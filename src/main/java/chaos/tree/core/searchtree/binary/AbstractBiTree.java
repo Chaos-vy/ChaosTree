@@ -422,9 +422,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     }
 
     /**
-     * Mutable flag to track deletion success down the recursive call stack.
-     * Provides a clean OOP structure while allowing C2 Escape Analysis to scalar-replace
-     * it into a register, ensuring zero allocations on the heap.
+     * Replaced in place of record class.
      */
     protected static class DeleteState {
         public boolean deleted = false;

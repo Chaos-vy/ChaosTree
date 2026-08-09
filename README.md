@@ -17,30 +17,30 @@ I build ChaosTree because I wanted to see what happens when I take textbook data
 <dependency>
     <groupId>io.github.chaos-vy</groupId>
     <artifactId>chaos-tree</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin)
 
 ```kotlin
-implementation("io.github.chaos-vy:chaos-tree:1.1.0")
+implementation("io.github.chaos-vy:chaos-tree:1.2.0")
 ```
 
 ### Gradle (Groovy)
 
 ```groovy
-implementation 'io.github.chaos-vy:chaos-tree:1.1.0'
+implementation 'io.github.chaos-vy:chaos-tree:1.2.0'
 ```
 ## ☕ Requirements
 
-- Minimum JDK: 17
-- Recommended JDK: 17+
+- Minimum JDK: 11
+- Recommended JDK: 11+
 - Build Tool: Maven 3.8+
 
-* ChaosTree is compiled using `--release 17`.
-* Compatibility testing is performed on JDK 17, JDK 21 and JDK 25 to verify consistent behavior across modern Java runtimes.
-* Performance benchmarks are executed on JDK 17.
+* ChaosTree is compiled using `--release 11`.
+* Compatibility testing is performed on JDK 11, JDK 17, JDK 21 and JDK 25 to verify consistent behavior across modern Java runtimes.
+* Performance benchmarks are executed on JDK 11 & JDK 21.
 
 ---
 
@@ -65,6 +65,7 @@ index.rangeStream(100, 500)
      .filter(val -> val % 2 == 0)
      .forEach(System.out::println);
 ```
+**Do read the Benchmark** [Report](BenchmarkReport/README.md)
 
 ### 2. Classic Binary Trees (Binary Engine)
 
@@ -100,8 +101,10 @@ first(B)
 \-- java(B)
     \-- library(R)
 ```
+**Do read the Benchmark** [Report](BenchmarkReport/README.md)
+
 ---
-## 🌟 Available Data Structures (v1.1.0)
+## 🌟 Available Data Structures (v1.2.0)
 
 * **The Binary Family:** BST, AVL, RBT, Splay, Treap
 * **The N-ary Family:** BTree, BPlusTree
@@ -143,18 +146,20 @@ ChaosTree has been extensively profiled to understand how it interacts with mode
 ### Test Environment:
 
 * **CPU:** Intel Core i5 13450HX (24GB DDR5)
-* **Java:** JDK 21
+* **Java:** JDK 11
 * **Tooling:** JMH + LinuxPerfNormProfiler
 
 
 ### 1. The N-ary Engine: Range Query Performance
 
-(Extracting 1,000,000 contiguous elements)
+### Range Scan Performance — Extracting 1,000,000 Elements
 
-| Implementation       | Average Time  |
-|----------------------|---------------|
-| B-Tree (Degree 128)  | 352,218 ns/op |
-| B+ Tree (Degree 128) | 263,157 ns/op |
+**Data size:** 10,000,000 | **Degree:** 128 | **Scan:** 10% of the entire tree
+
+| Tree Type   |  Average (ns/op) | L1 Cache Reads / op | CPU Instructions / op | Max Latency (pMax) |
+|:------------|-----------------:|--------------------:|----------------------:|-------------------:|
+| **B-Tree**  |     8,135,801 ns |        68.0 Million |           200 Million |            62.7 ms |
+| **B+ Tree** | **5,867,062 ns** |    **51.8 Million** |       **172 Million** |        **45.5 ms** |
 
 The B+ Tree completed the benchmark approximately 25% faster.
 
@@ -178,11 +183,11 @@ The binary trees in ChaosTree are tuned for fast lookups without sacrificing str
 
 | Implementation | Average Time |
 |----------------|--------------|
-| **AVL**        | 43 ns/op     |
-| **RBT**        | 46 ns/op     |
-| **Treap**      | 54 ns/op     |
-| **BST**        | 64 ns/op     |
-| **Splay**      | 686 ns/op    |
+| **AVL**        | 129 ns/op    |
+| **RBT**        | 129 ns/op    |
+| **Treap**      | 218 ns/op    |
+| **BST**        | 122 ns/op    |
+| **Splay**      | 351 ns/op    |
 
 **ChaosTree RBT:** Provides Red-Black Tree balancing while storing user values directly within tree nodes, reducing per-element memory overhead compared to key-value entry based structures.
 

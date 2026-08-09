@@ -215,3 +215,34 @@ The `narygc.csv` dataset validates the core mathematical advantage of the N-ary 
 3. **Latency & GC Pauses:** 142 MB of garbage at $t=4$ triggered 10 GC cycles, slowing construction to 5,207 ms. At $t=32$, only 37 MB triggered 1 GC cycle, accelerating construction to 3,800 ms.
 
 This data provides hard empirical proof for **ADR-005** and **ADR-006** — raw, high-degree `Object[]` arrays crush pure OOP implementations in both memory density and hardware cache utilization.
+
+---
+
+## 10. August 2026 Telemetry: The Degree-128 Cache Locality Triumph
+
+In August 2026, the `InsertDeleteBenchmark` was expanded to 1 Million nodes across `degree=128`, utilizing `-bm sample` to capture true individual operation percentiles (p99/pMax).
+
+### Insert & Delete Throughput (ns/op)
+
+| Tree Type | Degree | 1K (L1) | 50K (L2) | 1M (L3) | 5M (RAM) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **BTree** | 4 | 72.4 ns | 132.4 ns | 288.1 ns | 293.0 ns |
+| **BTree** | 32 | 51.5 ns | 80.3 ns | 210.1 ns | 208.3 ns |
+| **BTree** | **128** | **55.6 ns** | **81.5 ns** | **99.7 ns** | **109.2 ns** |
+| **BPlusTree** | 4 | 216.9 ns | 187.8 ns | 253.3 ns | 416.5 ns |
+| **BPlusTree** | 32 | 54.2 ns | 83.2 ns | 224.7 ns | 237.8 ns |
+| **BPlusTree** | **128** | **48.6 ns** | **85.3 ns** | **103.2 ns** | **127.6 ns** |
+
+*Note: For comparison, the best fully-balanced binary tree (RBT) scored **240.5 ns/op** at 1 Million nodes.*
+
+### BPlusTree (Size: 1M, Degree: 128) - Tail Latency Profile
+* **p50 (Median):** `139.0 ns`
+* **p90:** `144.0 ns`
+* **p99:** `160.0 ns`
+* **p99.9:** `1,972.0 ns` (Node Split/Merge Execution)
+* **Heap Allocation:** `48 B/op`
+
+### Architectural Verdict
+A `degree=128` tree holding 1 Million elements has a max depth of **~3 levels**. The CPU only performs 3 memory pointer jumps to reach the bottom, whereas an AVL/RBT tree requires ~20 memory jumps.
+
+Once at the leaf node, the 24-byte layout allows `System.arraycopy` to shift keys via hardware vector instructions (AVX2), fitting perfectly inside L1/L2 cache lines. The result is an N-ary tree that is **2.5x faster** than the most efficient binary tree, operating at a near-frictionless **103 ns/op** with a mathematically perfect **48 B/op** GC allocation.

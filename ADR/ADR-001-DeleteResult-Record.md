@@ -28,4 +28,15 @@ Using a `DeleteResult` record makes ChaosTree's contract clear, immutable, and s
 **Consequences:**  
 I get clean, predictable deletion signatures across the entire library. Each family gets exactly the data it needs to function—no more, no less.
 
+## 1.2.0 Verdict
 
+- **Removal of all record classes:** Yes, you heard it right. I am removing the record classes now and going back to POJOs.
+
+- **Why??** Creating new nodes/results during recursive traversal showed a massive GC footprint of around **~350 B/op** under `prof-gc` at **5M elements**.
+    - At 5M elements, the tree height is almost **~20**, so repeated object creation during recursive operations caused massive allocation pressure.
+
+- **The Resolution:** I completely eradicated the record wrappers from the traversal path. Instead of allocating and returning a new object at every recursive step, I refactored the architecture to use primitive status codes such as `INSERT_SUCCESS` and `INSERT_NEEDS_SPLIT`. Structural state is now updated directly through node mutation.
+
+- **The Result:** GC allocation collapsed from **~350 B/op → 48.0 B/op**. The structural GC overhead is now **0 B/op**. The remaining 48 B/op comes from the raw node and boxed generic value.
+
+- Because the JVM no longer has to deal with millions of short-lived traversal objects, **GC pressure and tail-latency spikes were drastically reduced**, with B+Tree reaching around **~111 ns/op on JDK 21**.

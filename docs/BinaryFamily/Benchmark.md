@@ -238,3 +238,28 @@ Splay P-core branch misses (17.40/op) are 3.11× higher than AVL (5.58/op), refl
   <img src="BinaryFamilyGallery/chaostree_write_heavy_branch_misses.svg" width="700" alt="chaostree_write_heavy_branch_misses.svg"/>
   <img src="BinaryFamilyGallery/chaostree_write_heavy_ipc.svg" width="700" alt="chaostree_write_heavy_ipc.svg"/>
 </p>
+
+---
+
+## 8. August 2026 Telemetry: The Recursive `DeleteResult` Defect
+
+In August 2026, the `InsertDeleteBenchmark` was expanded to test **1 Million** and **5 Million** node boundaries with `-prof gc` enabled. This exposed a critical memory allocation defect in the recursive structure of `AbstractBiTree`.
+
+### Insert & Delete GC Allocation Rate (1 Million Nodes)
+
+| Tree Type | Allocation Rate (`gc.alloc.rate.norm`) | Status |
+| :--- | :--- | :--- |
+| **BST** (Iterative) | **56 B/op** | 🟢 Perfect (Minimal Boxing) |
+| **RBT** (Parent Pointers) | **64 B/op** | 🟢 Highly Efficient |
+| **java.util.TreeSet** | **72 B/op** | 🟢 Java Standard |
+| **Treap** (Recursive) | **487 B/op** | 🔴 Severe Thrashing |
+| **AVL** (Recursive) | **520 B/op** | 🔴 Severe Thrashing |
+
+### The Architectural Flaw
+`BST.java` and `RBT.java` both override the base `delete()` method to perform in-place pointer manipulation iteratively (or via parent pointers). 
+
+However, `AVL` and `Treap` inherit `AbstractBiTree.delete()`, which is purely recursive. At every step of the recursive unwinding, `delete()` instantiates a `new DeleteResult()` wrapper object on the JVM Heap to pass metadata upwards. 
+
+For a tree with 1 Million nodes (depth ~20), a single delete operation instantiates ~40 transient objects, resulting in **520 Bytes** of pure GC trash per operation.
+
+**Action Item:** `[HARD]` Refactor `AbstractBiTree.delete()` to an Iterative Algorithm to eliminate `DeleteResult` allocation.
