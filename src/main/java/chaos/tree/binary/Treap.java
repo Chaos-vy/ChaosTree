@@ -144,29 +144,26 @@ public final class Treap<T extends Comparable<? super T>> extends AbstractRotate
     }
 
     @Override
-    protected DeleteResult<TreapNode<T>> delete(TreapNode<T> node, T value) {
-        if (node == null) return deleteResult(null, false);
+    protected TreapNode<T> delete(TreapNode<T> node, T value, DeleteState state) {
+        if (node == null) return null;
         int cmp = compare(value, node);
 
         if (cmp > 0) {
-            DeleteResult<TreapNode<T>> result = delete(node.getRight(), value);
-            if (!result.deleted()) return deleteResult(node, false);
-            node.setRight(result.root());
+            node.setRight(delete(node.getRight(), value, state));
         } else if (cmp < 0) {
-            DeleteResult<TreapNode<T>> result = delete(node.getLeft(), value);
-            if (!result.deleted()) return deleteResult(node, false);
-            node.setLeft(result.root());
+            node.setLeft(delete(node.getLeft(), value, state));
         } else {
-            if (node.getRight() == null) return deleteResult(node.getLeft(), true);
-            if (node.getLeft() == null) return deleteResult(node.getRight(), true);
+            state.deleted = true;
+            if (node.getRight() == null) return node.getLeft();
+            if (node.getLeft() == null) return node.getRight();
             if (node.getRight().getPriority() > node.getLeft().getPriority()) {
                 node = leftRotate(node);
-                node.setLeft(delete(node.getLeft(), value).root());
+                node.setLeft(delete(node.getLeft(), value, state));
             } else {
                 node = rightRotate(node);
-                node.setRight(delete(node.getRight(), value).root());
+                node.setRight(delete(node.getRight(), value, state));
             }
         }
-        return deleteResult(node, true);
+        return node;
     }
 }

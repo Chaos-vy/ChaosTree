@@ -197,11 +197,12 @@ public final class Splay<T extends Comparable<? super T>> extends AbstractParent
      *
      * @param node  unused — Splay delete is root-anchored after splay
      * @param value the value to remove
-     * @return a {@link DeleteResult} carrying the new root and deletion status
+     * @param state the deletion state container
+     * @return the new root of the tree
      */
     @Override
-    protected DeleteResult<SplayNode<T>> delete(SplayNode<T> node, T value) {
-        if (root == null) return deleteResult(null, false);
+    protected SplayNode<T> delete(SplayNode<T> node, T value, DeleteState state) {
+        if (root == null) return null;
 
         SplayNode<T> current = root;
         SplayNode<T> lastNonNull = null;
@@ -214,32 +215,35 @@ public final class Splay<T extends Comparable<? super T>> extends AbstractParent
         }
         if (current == null) {
             if (lastNonNull != null) splay(lastNonNull);
-            return deleteResult(root, false);
+            return root;
         }
+
+        state.deleted = true;
         splay(current);
 
-        SplayNode<T> target = root;
-        SplayNode<T> leftSubtree  = target.getLeft();
-        SplayNode<T> rightSubtree = target.getRight();
-        target.setLeft(null);
-        target.setRight(null);
-        if (leftSubtree  != null) leftSubtree.setParent(null);
-        if (rightSubtree != null) rightSubtree.setParent(null);
+        SplayNode<T> leftSubtree = root.getLeft();
+        SplayNode<T> rightSubtree = root.getRight();
 
         if (leftSubtree == null) {
             root = rightSubtree;
-        } else if (rightSubtree == null) {
-            root = leftSubtree;
+            if (root != null) {
+                root.setParent(null);
+            }
         } else {
             root = leftSubtree;
-            SplayNode<T> maxLeft = leftSubtree;
-            while (maxLeft.getRight() != null) maxLeft = maxLeft.getRight();
-            splay(maxLeft);
+            root.setParent(null);
+            SplayNode<T> maxNode = leftSubtree;
+            while (maxNode.getRight() != null) {
+                maxNode = maxNode.getRight();
+            }
+            splay(maxNode);
             root.setRight(rightSubtree);
-            rightSubtree.setParent(root);
+            if (rightSubtree != null) {
+                rightSubtree.setParent(root);
+            }
         }
 
-        return deleteResult(root, true);
+        return root;
     }
 }
 
