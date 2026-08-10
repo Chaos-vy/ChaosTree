@@ -12,22 +12,20 @@ package chaos.tree.core.searchTreeMap.binary;
  * @param <N> the concrete node type
  * @since 2.0.0
  */
-public abstract class BiNodeMap<K extends Comparable<? super K>,V,N extends BiNodeMap<K,V,N>>{
+public abstract class BiNodeMap<K extends Comparable<? super K>, V, N extends BiNodeMap<K, V, N>> {
     private K key;
     private V value;
     private N left;
     private N right;
 
     //I am not writing docs anymore here.
-    BiNodeMap(K key){
-        this.key = key;
-    }
-    public void setKey(K key, V value) {
+    BiNodeMap(K key, V value) {
         this.key = key;
         this.value = value;
     }
 
-    public void setValue(V value) {
+    public void setKey(K key, V value) {
+        this.key = key;
         this.value = value;
     }
 
@@ -39,19 +37,23 @@ public abstract class BiNodeMap<K extends Comparable<? super K>,V,N extends BiNo
         return value;
     }
 
-    public void setLeft(N left) {
-        this.left = left;
-    }
-
-    public void setRight(N right) {
-        this.right = right;
+    public void setValue(V value) {
+        this.value = value;
     }
 
     public N getLeft() {
         return left;
     }
 
+    public void setLeft(N left) {
+        this.left = left;
+    }
+
     public N getRight() {
         return right;
+    }
+
+    public void setRight(N right) {
+        this.right = right;
     }
 }
