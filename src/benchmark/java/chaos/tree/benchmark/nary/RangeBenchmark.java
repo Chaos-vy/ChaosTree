@@ -12,6 +12,7 @@ public class RangeBenchmark extends AbstractNaryBenchmark {
 
     private BTree<Integer> btree;
     private BPlusTree<Integer> bplus;
+    private java.util.TreeSet<Integer> treeSet;
 
     private int rangeStart;
     private int rangeEnd;
@@ -22,10 +23,12 @@ public class RangeBenchmark extends AbstractNaryBenchmark {
 
         btree = new BTree<>(degree);
         bplus = new BPlusTree<>(degree);
+        treeSet = new java.util.TreeSet<>();
 
         for (int v : data) {
             btree.insert(v);
             bplus.insert(v);
+            treeSet.add(v);
         }
 
         rangeStart = size / 2;
@@ -40,5 +43,13 @@ public class RangeBenchmark extends AbstractNaryBenchmark {
     @Benchmark
     public void bPlusTreeRange(Blackhole bh) {
         bh.consume(bplus.range(rangeStart, rangeEnd));
+    }
+
+    @Benchmark
+    public void treeSetRange(Blackhole bh) {
+        // TreeSet subSet returns a view, so we must instantiate an ArrayList 
+        // to force it to actually traverse the memory and extract elements, 
+        // making it a fair comparison to the N-ary trees.
+        bh.consume(new java.util.ArrayList<>(treeSet.subSet(rangeStart, rangeEnd)));
     }
 }

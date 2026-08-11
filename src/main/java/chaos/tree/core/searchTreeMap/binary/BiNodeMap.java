@@ -1,5 +1,7 @@
 package chaos.tree.core.searchTreeMap.binary;
 
+import java.util.Map;
+
 /**
  * Base node implementation for binary search tree map structures.
  *
@@ -12,7 +14,7 @@ package chaos.tree.core.searchTreeMap.binary;
  * @param <N> the concrete node type
  * @since 2.0.0
  */
-public abstract class BiNodeMap<K extends Comparable<? super K>, V, N extends BiNodeMap<K, V, N>> {
+public abstract class BiNodeMap<K extends Comparable<? super K>, V, N extends BiNodeMap<K, V, N>> implements Map.Entry<K,V>{
     private K key;
     private V value;
     private N left;
@@ -29,16 +31,21 @@ public abstract class BiNodeMap<K extends Comparable<? super K>, V, N extends Bi
         this.value = value;
     }
 
+    @Override
     public K getKey() {
         return key;
     }
 
+    @Override
     public V getValue() {
         return value;
     }
 
-    public void setValue(V value) {
+    @Override
+    public V setValue(V value) {
+        V old_value = this.value;
         this.value = value;
+        return old_value;
     }
 
     public N getLeft() {
