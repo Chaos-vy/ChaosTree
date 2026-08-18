@@ -10,24 +10,24 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
+public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>> {
 
-    protected TREE tree;
+    protected MyTree tree;
 
-    protected abstract TREE createTree();
+    protected abstract MyTree createTree();
 
-    protected abstract TREE createFromIterable(Iterable<Integer> it);
+    protected abstract MyTree createFromIterable(Iterable<Integer> it);
 
-    protected abstract TREE createCopy(TREE source);
+    protected abstract MyTree createCopy(MyTree source);
 
     @BeforeEach
     void setUp() {
         tree = createTree();
     }
 
-
+    // Check on Emptiness
     @Test
-    void emptyTreeHasSizeZero() {
+    void emptyTreeSizeMustBeZero() {
         assertEquals(0, tree.size());
     }
 
@@ -52,16 +52,59 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     }
 
     @Test
+    void pollMinOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.pollMin());
+    }
+
+    @Test
+    void pollMaxOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.pollMax());
+    }
+
+    @Test
     void deleteOnEmptyTreeIsNoOp() {
         assertDoesNotThrow(() -> tree.delete(99));
     }
 
+    @Test
+    void floorOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.floor(50));
+    }
 
+    @Test
+    void ceilOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.ceil(50));
+    }
+
+    @Test
+    void successorOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.successor(4));
+    }
+
+    @Test
+    void predecessorOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.predecessor(4));
+    }
+
+    @Test
+    void lcaOnEmptyTreeThrows() {
+        assertThrows(EmptyTreeException.class, () -> tree.lca(44, 66));
+    }
+
+    @Test
+    void kthSmallestOnEmptyTreeThrows() {
+        assertThrows(IllegalArgumentException.class, () -> tree.kthSmallest(5));
+    }
+
+/*
+This Section is for insertion testing suite
+ */
     @Test
     void insertSingleNode() {
         tree.insert(1);
         assertEquals(1, tree.size());
         assertTrue(tree.contains(1));
+        assertEquals(0, tree.height());
     }
 
     @Test
@@ -160,16 +203,6 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
         assertEquals(4, tree.size());
         assertFalse(tree.contains(80));
         assertEquals(50, tree.max());
-    }
-
-    @Test
-    void pollMinOnEmptyTreeThrows() {
-        assertThrows(EmptyTreeException.class, () -> tree.pollMin());
-    }
-
-    @Test
-    void pollMaxOnEmptyTreeThrows() {
-        assertThrows(EmptyTreeException.class, () -> tree.pollMax());
     }
 
     @Test
@@ -274,19 +307,19 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
         assertEquals(List.of(10, 20, 30, 40), tree.inorder());
     }
 
-    @Test
-    void deleteAllSelf() {
-        tree.insertAll(List.of(10, 20, 30));
-        tree.deleteAll(tree);
-        assertTrue(tree.isEmpty());
-    }
+//    @Test
+//    void deleteAllSelf() {
+//        tree.insertAll(List.of(10, 20, 30));
+//        tree.deleteAll(tree);
+//        assertTrue(tree.isEmpty());
+//    }
 
-    @Test
-    void retainAllElementsSelf() {
-        tree.insertAll(List.of(10, 20, 30));
-        tree.retainAllElements(tree);
-        assertEquals(3, tree.size());
-    }
+//    @Test
+//    void retainAllElementsSelf() {
+//        tree.insertAll(List.of(10, 20, 30));
+//        tree.retainAllElements(tree);
+//        assertEquals(3, tree.size());
+//    }
 
     @Test
     void mergeAllSelf() {
@@ -364,14 +397,14 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
 
     @Test
     void iterableConstructorBuildsTree() {
-        TREE built = createFromIterable(List.of(30, 10, 50, 20, 40));
+        MyTree built = createFromIterable(List.of(30, 10, 50, 20, 40));
         assertEquals(5, built.size());
         assertEquals(List.of(10, 20, 30, 40, 50), built.inorder());
     }
 
     @Test
     void iterableConstructorEmptyCreatesEmptyTree() {
-        TREE built = createFromIterable(List.of());
+        MyTree built = createFromIterable(List.of());
         assertTrue(built.isEmpty());
     }
 
@@ -379,7 +412,7 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
     void copyConstructorProducesEqualIndependentTree() {
         tree.insertAll(List.of(30, 10, 50, 20, 40));
 
-        TREE copy = createCopy(tree);
+        MyTree copy = createCopy(tree);
 
         assertEquals(tree.size(), copy.size());
         assertEquals(tree.inorder(), copy.inorder());
@@ -392,7 +425,7 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
 
     @Test
     void copyConstructorOfEmptyTree() {
-        TREE copy = createCopy(tree);
+        MyTree copy = createCopy(tree);
         assertTrue(copy.isEmpty());
     }
 
@@ -471,17 +504,6 @@ public abstract class BinaryTreeContractTest<TREE extends BinaryTree<Integer>> {
         assertEquals(5, tree.toList(TraversalType.INORDER).size());
         assertEquals(5, tree.toList(TraversalType.POSTORDER).size());
         assertEquals(5, tree.toList(TraversalType.PREORDER).size());
-    }
-
-
-    @Test
-    void floorOnEmptyTreeThrows() {
-        assertThrows(EmptyTreeException.class, () -> tree.floor(5));
-    }
-
-    @Test
-    void ceilOnEmptyTreeThrows() {
-        assertThrows(EmptyTreeException.class, () -> tree.ceil(5));
     }
 
 

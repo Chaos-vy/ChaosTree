@@ -1,5 +1,6 @@
 package chaos.tree.binary;
 
+import chaos.tree.binary.tier1.BinaryTreeContractTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
