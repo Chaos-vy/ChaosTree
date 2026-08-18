@@ -560,18 +560,10 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * Merges all values from the specified iterable into this tree,
      * silently ignoring values that already exist.
      *
-     * <p>This implementation iterates over the unique set of {@code values}
-     * and performs a {@link #contains(Comparable)} check for each element.
-     * If the element does not already exist in the tree, it invokes
-     * {@link #insert(Comparable)}. This preemptive checking completely avoids
-     * throwing and catching {@link DuplicateNodeException}, resulting in a
-     * cleaner control flow while preserving existing elements.</p>
-     *
-     * <p>If a null element appears anywhere in {@code values}, no modifications
-     * are made to this tree because full validation occurs before insertion begins and throws
+     * <p>If a null element appears anywhere in {@code values}, it throws
      * {@link NullPointerException}</p>
      *
-     * <p><b>Complexity:</b> O(k log n) where k is the number of unique elements
+     * <p><b>Complexity:</b> O(k log n) where k is the number of elements
      * in the iterable and n is the number of elements in this tree after
      * each insertion.</p>
      *
@@ -759,8 +751,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * Returns the greatest value strictly less than the specified value.
      *
      * <p>A null value is rejected before traversal because predecessor lookup
-     * <p>
-     * <p>
      * must compare
      * the requested value with node values to decide which branch can contain the previous
      * smaller value.</p>
