@@ -71,6 +71,7 @@ public final class Splay<T extends Comparable<? super T>> extends AbstractParent
         if (!source.isEmpty()) {
             this.root = cloneStructure(source.root);
             this.size = source.size();
+            this.cachedHashedCode = source.hashCode();
         }
     }
 

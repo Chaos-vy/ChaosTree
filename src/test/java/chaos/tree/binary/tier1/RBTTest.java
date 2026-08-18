@@ -22,7 +22,6 @@ class RBTTest extends StableStructureContractTest<RBT<Integer>> {
         return new RBT<>(src);
     }
 
-
     @Test
     void heightBoundHolds() {
         for (int i = 0; i < 100_000; i++) tree.insert(i);

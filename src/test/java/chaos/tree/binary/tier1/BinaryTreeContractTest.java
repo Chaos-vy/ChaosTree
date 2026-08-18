@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
@@ -30,7 +32,13 @@ public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>>
         tree = createTree();
     }
 
-    // Check on Emptiness
+    /*
+
+
+
+
+    These check are performed on Emptiness correctness.
+     */
     @Test
     void emptyTreeSizeMustBeZero() {
         assertEquals(0, tree.size());
@@ -102,11 +110,86 @@ public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>>
     }
     @Test
     void heightOnEmptyTree() { assertEquals(-1, tree.height());}
+    @Test
+    void emptyTraversal() {
+        assertTrue(tree.inorder().isEmpty());
+    }
 
-/*
-This Section is for insertion testing suite
-height is being ignored as for why ?? Read the class name of this test. Still not got ?-> Binary tree balancing is different.
- */
+    /*
+
+
+
+
+    This is checked for null values:
+     */
+    @Test
+    void insertAllNullIterableThrows() {
+        assertThrows(NullPointerException.class, () -> tree.insertAll(null));
+    }
+    @Test
+    void deleteAllNullIterableThrows() {
+        assertThrows(NullPointerException.class, () -> tree.deleteAll(null));
+    }
+    @Test
+    void mergeAllNullIterableThrows() {
+        assertThrows(NullPointerException.class, () -> tree.mergeAll(null));
+    }
+    @Test
+    void retainAllNullIterableThrows() {
+        assertThrows(NullPointerException.class, () -> tree.retainAllElements(null));
+    }
+    @Test
+    void containsAllNullIterableThrows() {
+        assertThrows(NullPointerException.class, () -> tree.containsAllElements(null));
+    }
+    @Test
+    void insertAllWithNullElement() {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);list.add(2);list.add(null);list.add(4);
+        assertThrows(NullPointerException.class, () -> tree.insertAll(list));
+        assertEquals(2, tree.size());
+    }
+    @Test
+    void containAllWithNullElement() {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);list.add(2);list.add(null);list.add(4);
+        tree.insertAll(List.of(1,2,3,4,5));
+        assertThrows(NullPointerException.class, () -> tree.containsAllElements(list));
+        assertEquals(5, tree.size());
+    }
+    @Test
+    void mergeAllWithNullElement() {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);list.add(2);list.add(null);list.add(4);
+        assertThrows(NullPointerException.class, () -> tree.mergeAll(list));
+        assertEquals(2, tree.size());
+    }
+    @Test
+    void retainAllWithNullElement() {
+        tree.insertAll(List.of(1,2,3,4));
+        List<Integer> list = new ArrayList<>();
+        list.add(1);list.add(2);list.add(null);list.add(4);
+        assertThrows(NullPointerException.class, () -> tree.retainAllElements(list));
+        assertEquals(4, tree.size());
+    }
+    @Test
+    void deleteAllWithNullElement() {
+        tree.insertAll(List.of(1,2,3,4));
+        List<Integer> list = new ArrayList<>();
+        list.add(1);list.add(2);list.add(null);list.add(4);
+        assertThrows(NullPointerException.class, () -> tree.deleteAll(list));
+        assertEquals(2, tree.size());
+        assertEquals(List.of(3, 4), tree.toList());
+    }
+
+    /*
+
+
+
+    This Section is for insertion testing suite
+    height is being ignored as for why ?? Read the class name of this test. Still not got ?->
+    Binary tree balancing is different.
+    */
     @Test
     void insertSingleNode() {
         tree.insert(1);
@@ -116,7 +199,7 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(1,tree.max());
         assertEquals(1,tree.min());
         assertEquals(List.of(1),tree.toList());
-        //I can't think much API after that
+        //I can't think much API after this
     }
     @Test
     void insertDuplicateThrows() {
@@ -130,18 +213,6 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(3, tree.size());
         assertTrue(tree.containsAllElements(List.of(10, 20, 30)));
     }
-
-    @Test
-    void insertAllNullIterableThrows() {
-        assertThrows(NullPointerException.class, () -> tree.insertAll(null));
-    }
-
-    @Test
-    void insertAllWithNullElementThrows() {
-        List<Integer> listWithNull = Arrays.asList(10, null, 20);
-        assertThrows(NullPointerException.class, () -> tree.insertAll(listWithNull));
-    }
-
 
     @Test
     void deleteNonExistingIsNoOp() {
@@ -185,7 +256,6 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(4, tree.size());
     }
 
-
     @Test
     void minReturnsSmallestValue() {
         tree.insertAll(List.of(50, 20, 80, 10, 30));
@@ -216,6 +286,11 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(50, tree.max());
     }
 
+    /*
+
+
+    The Range benchmark
+     */
     @Test
     void rangeReturnsCorrectHalfOpenInterval() {
         tree.insertAll(List.of(50, 20, 80, 10, 30, 70, 90, 25, 35));
@@ -238,14 +313,14 @@ height is being ignored as for why ?? Read the class name of this test. Still no
     @Test
     void rangeStreamReturnsCorrectHalfOpenInterval() {
         tree.insertAll(List.of(50, 20, 80, 10, 30, 70, 90, 25, 35));
-        assertEquals(List.of(25, 30, 35, 50), tree.rangeStream(25, 70).collect(java.util.stream.Collectors.toList()));
+        assertEquals(List.of(25, 30, 35, 50), tree.rangeStream(25, 70).collect(toList()));
     }
 
     @Test
     void rangeStreamWithBoundsOutsideTreeElements() {
         tree.insertAll(List.of(20, 40, 60));
-        assertEquals(List.of(20, 40, 60), tree.rangeStream(10, 70).collect(java.util.stream.Collectors.toList()));
-        assertEquals(List.of(), tree.rangeStream(70, 80).collect(java.util.stream.Collectors.toList()));
+        assertEquals(List.of(20, 40, 60), tree.rangeStream(10, 70).collect(toList()));
+        assertEquals(List.of(), tree.rangeStream(70, 80).collect(toList()));
     }
 
     @Test
@@ -261,7 +336,97 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(30, tree.successor(20));
         assertNull(tree.successor(50));
     }
+    @Test
+    void inorderIsSorted() {
+        tree.insertAll(List.of(50, 10, 80, 20, 30));
+        List<Integer> values = tree.inorder();
+        for (int i = 1; i < values.size(); i++) {
+            assertTrue(values.get(i - 1) < values.get(i));
+        }
+    }
 
+    @Test
+    void iteratorFailFastMechanics() {
+        tree.insertAll(List.of(10, 20, 30));
+        Iterator<Integer> it = tree.iterator();
+        tree.insert(40);
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+    // ── Traversal completeness ──────────────────────────────────────────────────
+
+    @Test
+    void allTraversalTypesReturnAllElements() {
+        tree.insertAll(List.of(50, 20, 80, 10, 30));
+        assertEquals(5, tree.toList(TraversalType.LEVEL_ORDER).size());
+        assertEquals(5, tree.toList(TraversalType.INORDER).size());
+        assertEquals(5, tree.toList(TraversalType.POSTORDER).size());
+        assertEquals(5, tree.toList(TraversalType.PREORDER).size());
+    }
+    @Test
+    void iterableConstructorBuildsTree() {
+        MyTree built = createFromIterable(List.of(30, 10, 50, 20, 40));
+        assertEquals(5, built.size());
+        assertEquals(List.of(10, 20, 30, 40, 50), built.inorder());
+    }
+
+    @Test
+    void iterableConstructorEmptyCreatesEmptyTree() {
+        MyTree built = createFromIterable(List.of());
+        assertTrue(built.isEmpty());
+    }
+    @Test
+    void streamOnEmptyTreeReturnsEmptyList() {
+        assertTrue(tree.stream().collect(toList()).isEmpty());
+    }
+    @Test
+    void exhaustedIteratorThrows() {
+        tree.insert(10);
+        Iterator<Integer> it = tree.iterator();
+        it.next();
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    void streamSortedAndCompleteness() {
+        tree.insertAll(List.of(50, 10, 80, 20, 30));
+        List<Integer> fromStream = tree.stream().collect(toList());
+        assertEquals(List.of(10, 20, 30, 50, 80), fromStream);
+    }
+
+    @Test
+    void failFastOnDelete() {
+        tree.insertAll(List.of(10, 20, 30));
+        Iterator<Integer> it = tree.iterator();
+        tree.delete(20);
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+
+    @Test
+    void independentIterators() {
+        tree.insertAll(List.of(10, 20));
+        Iterator<Integer> it1 = tree.iterator();
+        Iterator<Integer> it2 = tree.iterator();
+        assertEquals(10, it1.next());
+        assertEquals(10, it2.next());
+        assertEquals(20, it1.next());
+    }
+
+    @Test
+    void visitEachElementOnce() {
+        tree.insertAll(List.of(10, 20, 30));
+        int count = 0;
+        for (Integer val : tree) {
+            count++;
+        }
+        assertEquals(3, count);
+    }
+
+    /*
+
+
+    Miscellaneous Operations
+     */
     @Test
     void predecessorReturnsPreviousValue() {
         tree.insertAll(List.of(40, 20, 50, 10, 30));
@@ -295,7 +460,28 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertThrows(IllegalArgumentException.class, () -> tree.kthSmallest(8));
     }
 
+    /*
 
+
+
+    Bulk operation
+     */
+    @Test
+    void containsAllElementsWithEmptyCollectionReturnsTrue() {
+        assertDoesNotThrow(() -> tree.containsAllElements(List.of()));
+        assertTrue(tree.containsAllElements(List.of()));
+    }
+    @Test
+    void containsAllElementsWithAbsentValueReturnsFalse() {
+        tree.insertAll(List.of(10, 20, 30));
+        assertFalse(tree.containsAllElements(List.of(10, 99)));
+    }
+    @Test
+    void deleteAllWithNonExistentValuesIsNoOp() {
+        tree.insertAll(List.of(10, 20, 30));
+        tree.deleteAll(List.of(99, 100));
+        assertEquals(3, tree.size());
+    }
     @Test
     void deleteAllRemovesSpecifiedValues() {
         tree.insertAll(List.of(10, 20, 30, 40));
@@ -318,19 +504,12 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(List.of(10, 20, 30, 40), tree.inorder());
     }
 
-//    @Test
-//    void deleteAllSelf() {
-//        tree.insertAll(List.of(10, 20, 30));
-//        tree.deleteAll(tree);
-//        assertTrue(tree.isEmpty());
-//    }
-
-//    @Test
-//    void retainAllElementsSelf() {
-//        tree.insertAll(List.of(10, 20, 30));
-//        tree.retainAllElements(tree);
-//        assertEquals(3, tree.size());
-//    }
+    @Test
+    void retainAllElementsSelf() {
+        tree.insertAll(List.of(10, 20, 30));
+        tree.retainAllElements(tree);
+        assertEquals(3, tree.size());
+    }
 
     @Test
     void mergeAllSelf() {
@@ -339,95 +518,16 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(3, tree.size());
     }
 
-
-    @Test
-    void inorderIsSorted() {
-        tree.insertAll(List.of(50, 10, 80, 20, 30));
-        List<Integer> values = tree.inorder();
-        for (int i = 1; i < values.size(); i++) {
-            assertTrue(values.get(i - 1) < values.get(i));
-        }
-    }
-
-    @Test
-    void iteratorFailFastMechanics() {
-        tree.insertAll(List.of(10, 20, 30));
-        Iterator<Integer> it = tree.iterator();
-        tree.insert(40);
-        assertThrows(ConcurrentModificationException.class, it::next);
-    }
-
-    @Test
-    void exhaustedIteratorThrows() {
-        tree.insert(10);
-        Iterator<Integer> it = tree.iterator();
-        it.next();
-        assertFalse(it.hasNext());
-        assertThrows(NoSuchElementException.class, it::next);
-    }
-
-    @Test
-    void emptyTraversal() {
-        assertTrue(tree.inorder().isEmpty());
-    }
-
-    @Test
-    void streamSortedAndCompleteness() {
-        tree.insertAll(List.of(50, 10, 80, 20, 30));
-        List<Integer> fromStream = tree.stream().collect(java.util.stream.Collectors.toList());
-        assertEquals(List.of(10, 20, 30, 50, 80), fromStream);
-    }
-
-    @Test
-    void failFastOnDelete() {
-        tree.insertAll(List.of(10, 20, 30));
-        Iterator<Integer> it = tree.iterator();
-        tree.delete(20);
-        assertThrows(ConcurrentModificationException.class, it::next);
-    }
-
-    @Test
-    void independentIterators() {
-        tree.insertAll(List.of(10, 20));
-        Iterator<Integer> it1 = tree.iterator();
-        Iterator<Integer> it2 = tree.iterator();
-        assertEquals(10, it1.next());
-        assertEquals(10, it2.next());
-        assertEquals(20, it1.next());
-    }
-
-    @Test
-    void visitEachElementOnce() {
-        tree.insertAll(List.of(10, 20, 30));
-        int count = 0;
-        for (Integer val : tree) {
-            count++;
-        }
-        assertEquals(3, count);
-    }
-
-    @Test
-    void iterableConstructorBuildsTree() {
-        MyTree built = createFromIterable(List.of(30, 10, 50, 20, 40));
-        assertEquals(5, built.size());
-        assertEquals(List.of(10, 20, 30, 40, 50), built.inorder());
-    }
-
-    @Test
-    void iterableConstructorEmptyCreatesEmptyTree() {
-        MyTree built = createFromIterable(List.of());
-        assertTrue(built.isEmpty());
-    }
+    // Some of constructors work
 
     @Test
     void copyConstructorProducesEqualIndependentTree() {
         tree.insertAll(List.of(30, 10, 50, 20, 40));
-
         MyTree copy = createCopy(tree);
-
         assertEquals(tree.size(), copy.size());
         assertEquals(tree.inorder(), copy.inorder());
-
+        assertEquals(tree,copy);
+        assertEquals(tree.hashCode(), copy.hashCode());
         copy.insert(60);
         tree.delete(10);
         assertFalse(tree.contains(60));
@@ -506,16 +606,6 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         for (int i : list) tree.delete(i);
         assertTrue(tree.isEmpty());
     }
-    // ── Traversal completeness ──────────────────────────────────────────────────
-
-    @Test
-    void allTraversalTypesReturnAllElements() {
-        tree.insertAll(List.of(50, 20, 80, 10, 30));
-        assertEquals(5, tree.toList(TraversalType.LEVEL_ORDER).size());
-        assertEquals(5, tree.toList(TraversalType.INORDER).size());
-        assertEquals(5, tree.toList(TraversalType.POSTORDER).size());
-        assertEquals(5, tree.toList(TraversalType.PREORDER).size());
-    }
 
 
     @Test
@@ -547,40 +637,6 @@ height is being ignored as for why ?? Read the class name of this test. Still no
         assertEquals(0, tree.size());
         tree.insertAll(List.of(10, 20, 30));
         assertFalse(tree.isEmpty());
-        assertEquals(3, tree.size());
-    }
-
-    @Test
-    void containsAllElementsWithEmptyCollectionReturnsTrue() {
-        assertDoesNotThrow(() -> tree.containsAllElements(List.of()));
-        assertTrue(tree.containsAllElements(List.of()));
-    }
-
-    @Test
-    void containsAllElementsWithAbsentValueReturnsFalse() {
-        tree.insertAll(List.of(10, 20, 30));
-        assertFalse(tree.containsAllElements(List.of(10, 99)));
-    }
-
-
-    @Test
-    void streamOnEmptyTreeReturnsEmptyList() {
-        assertTrue(tree.stream().collect(java.util.stream.Collectors.toList()).isEmpty());
-    }
-
-
-    @Test
-    void deleteAllWithNonExistentValuesIsNoOp() {
-        tree.insertAll(List.of(10, 20, 30));
-        tree.deleteAll(List.of(99, 100));
-        assertEquals(3, tree.size());
-    }
-
-
-    @Test
-    void mergeAllWithEmptyCollectionIsNoOp() {
-        tree.insertAll(List.of(10, 20, 30));
-        tree.mergeAll(List.of());
         assertEquals(3, tree.size());
     }
 }

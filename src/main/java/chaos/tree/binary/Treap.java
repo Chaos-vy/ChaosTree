@@ -113,6 +113,7 @@ public final class Treap<T extends Comparable<? super T>> extends AbstractRotate
         if (!source.isEmpty()) {
             this.root = cloneStructure(source.root);
             this.size = source.size();
+            this.cachedHashedCode = source.hashCode();
         }
     }
 

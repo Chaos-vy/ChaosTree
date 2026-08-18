@@ -369,7 +369,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      */
     @Override
     public boolean containsAllElements(Iterable<? extends T> values) {
-        Objects.requireNonNull(values);
+        Objects.requireNonNull(values, "Values cannot be null");
         for (T value : values) {
             Objects.requireNonNull(value, "Value cannot be null");
             if (!contains(value)) {

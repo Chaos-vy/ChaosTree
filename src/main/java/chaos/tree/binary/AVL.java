@@ -53,6 +53,7 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTr
         if (!source.isEmpty()) {
             this.root = cloneStructure(source.root);
             this.size = source.size();
+            this.cachedHashedCode = source.hashCode();
         }
     }
 

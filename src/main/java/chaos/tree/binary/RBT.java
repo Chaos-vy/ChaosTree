@@ -67,6 +67,7 @@ public final class RBT<T extends Comparable<? super T>> extends AbstractParentRo
         if (!source.isEmpty()) {
             this.root = cloneStructure(source.root);
             this.size = source.size();
+            this.cachedHashedCode = source.hashCode();
         }
     }
 

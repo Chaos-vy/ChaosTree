@@ -62,6 +62,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
         if (!source.isEmpty()) {
             this.root = cloneStructure(source.root);
             this.size = source.size();
+            this.cachedHashedCode = source.cachedHashedCode;
         }
     }
 
@@ -77,6 +78,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
             root = new BSTNode<>(value);
             size += 1;
             modCount += 1;
+            cachedHashedCode += value.hashCode();
             return;
         }
         BSTNode<T> curr = root;
@@ -88,6 +90,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
                     curr.setRight(new BSTNode<>(value));
                     size += 1;
                     modCount += 1;
+                    cachedHashedCode += value.hashCode();
                     return;
                 }
                 curr = curr.getRight();
@@ -97,6 +100,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
                     curr.setLeft(new BSTNode<>(value));
                     size += 1;
                     modCount += 1;
+                    cachedHashedCode += value.hashCode();
                     return;
                 }
                 curr = curr.getLeft();
@@ -150,6 +154,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
 
         size--;
         modCount++;
+        cachedHashedCode -= value.hashCode();
     }
 
 }

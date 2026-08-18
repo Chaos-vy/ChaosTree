@@ -27,7 +27,6 @@ class TreapTest extends BinaryTreeContractTest<Treap<Integer>> {
         return new Treap<>(src);
     }
 
-
     @Test
     void deterministicSeedProducesIdenticalTopology() {
         // Two trees with the same seed must output the exact same Level-Order traversal
@@ -40,7 +39,6 @@ class TreapTest extends BinaryTreeContractTest<Treap<Integer>> {
 
         assertEquals(treeA.toList(TraversalType.LEVEL_ORDER), treeB.toList(TraversalType.LEVEL_ORDER));
     }
-
     @Test
     void blackBoxValidationThroughProbabilisticBalancing() {
         // Black-Box Proof: If we insert 10,000 perfectly sorted elements,
