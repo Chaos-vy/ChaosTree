@@ -1,5 +1,6 @@
-package chaos.tree.binary;
+package chaos.tree.binary.tier1;
 
+import chaos.tree.binary.Treap;
 import chaos.tree.traversal.TraversalType;
 import org.junit.jupiter.api.Test;
 

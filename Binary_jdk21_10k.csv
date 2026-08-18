@@ -1,0 +1,74 @@
+# JMH version: 1.37
+# VM version: JDK 21.0.11, OpenJDK 64-Bit Server VM, 21.0.11+10-1-26.04.2-Ubuntu
+# VM invoker: /usr/lib/jvm/java-21-openjdk-amd64/bin/java
+# VM options: -Xms4G -Xmx4G
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 2 s each
+# Measurement: 5 iterations, 2 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: chaos.tree.benchmark.binary.InsertDeleteBenchmark.avlInsertDelete
+# Parameters: (size = 10000)
+
+# Run progress: 0.00% complete, ETA 00:01:20
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfProfiler LinuxPerfNormProfiler 
+# Profilers consume stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 235.087 ±(99.9%) 9.996 ns/op
+# Warmup Iteration   2: 223.446 ±(99.9%) 9.126 ns/op
+# Warmup Iteration   3: 217.628 ±(99.9%) 6.303 ns/op
+Iteration   1: 223.677 ±(99.9%) 7.361 ns/op
+                 gc.alloc.rate:      330.411 MB/sec
+                 gc.alloc.rate.norm: 64.020 B/op
+                 gc.count:           ≈ 0 counts
+                 p0.00:              161.000 ns/op
+                 p0.50:              176.000 ns/op
+                 p0.90:              199.000 ns/op
+                 p0.95:              213.000 ns/op
+                 p0.99:              1214.000 ns/op
+                 p0.999:             7376.168 ns/op
+                 p0.9999:            16294.979 ns/op
+                 p1.00:              30112.000 ns/op
+
+Iteration   2: 201.178 ±(99.9%) 5.341 ns/op
+                 gc.alloc.rate:      364.270 MB/sec
+                 gc.alloc.rate.norm: 64.018 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+                 p0.00:              156.000 ns/op
+                 p0.50:              173.000 ns/op
+                 p0.90:              195.000 ns/op
+                 p0.95:              200.000 ns/op
+                 p0.99:              501.910 ns/op
+                 p0.999:             6311.712 ns/op
+                 p0.9999:            12810.986 ns/op
+                 p1.00:              16576.000 ns/op
+
+Iteration   3: 189.780 ±(99.9%) 6.675 ns/op
+                 gc.alloc.rate:      369.174 MB/sec
+                 gc.alloc.rate.norm: 64.019 B/op
+                 gc.count:           ≈ 0 counts
+                 p0.00:              156.000 ns/op
+                 p0.50:              171.000 ns/op
+                 p0.90:              194.000 ns/op
+                 p0.95:              198.000 ns/op
+                 p0.99:              296.000 ns/op
+                 p0.999:             5796.928 ns/op
+                 p0.9999:            13103.843 ns/op
+                 p1.00:              67328.000 ns/op
+
+Iteration   4: 192.739 ±(99.9%) 7.790 ns/op
+                 gc.alloc.rate:      367.997 MB/sec
+                 gc.alloc.rate.norm: 64.019 B/op
+                 gc.count:           ≈ 0 counts
+                 p0.00:              156.000 ns/op
+                 p0.50:              171.000 ns/op
+                 p0.90:              194.000 ns/op
+                 p0.95:              198.000 ns/op
+                 p0.99:              295.000 ns/op
+                 p0.999:             6266.608 ns/op
+                 p0.9999:            19163.328 ns/op
+                 p1.00:              53120.000 ns/op
+
+Iteration   5: 

@@ -1,8 +1,7 @@
-package chaos.tree.binary;
+package chaos.tree.binary.tier1;
 
+import chaos.tree.binary.RBT;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

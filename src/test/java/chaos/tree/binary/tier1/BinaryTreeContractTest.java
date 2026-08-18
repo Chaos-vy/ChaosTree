@@ -1,5 +1,6 @@
-package chaos.tree.binary;
+package chaos.tree.binary.tier1;
 
+import chaos.tree.binary.BinaryTree;
 import chaos.tree.exception.DuplicateNodeException;
 import chaos.tree.exception.EmptyTreeException;
 import chaos.tree.traversal.TraversalType;
@@ -10,6 +11,10 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
+These are the main test configured from here. Though,
+I am not a high level debugger But I will try my best to have correctness.
+ */
 public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>> {
 
     protected MyTree tree;
@@ -95,9 +100,12 @@ public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>>
     void kthSmallestOnEmptyTreeThrows() {
         assertThrows(IllegalArgumentException.class, () -> tree.kthSmallest(5));
     }
+    @Test
+    void heightOnEmptyTree() { assertEquals(-1, tree.height());}
 
 /*
 This Section is for insertion testing suite
+height is being ignored as for why ?? Read the class name of this test. Still not got ?-> Binary tree balancing is different.
  */
     @Test
     void insertSingleNode() {
@@ -105,8 +113,11 @@ This Section is for insertion testing suite
         assertEquals(1, tree.size());
         assertTrue(tree.contains(1));
         assertEquals(0, tree.height());
+        assertEquals(1,tree.max());
+        assertEquals(1,tree.min());
+        assertEquals(List.of(1),tree.toList());
+        //I can't think much API after that
     }
-
     @Test
     void insertDuplicateThrows() {
         tree.insert(10);

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Foundation abstract base class implementing the core operations of a Binary Search Tree.
@@ -370,6 +371,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     public boolean containsAllElements(Iterable<? extends T> values) {
         Objects.requireNonNull(values);
         for (T value : values) {
+            Objects.requireNonNull(value, "Value cannot be null");
             if (!contains(value)) {
                 return false;
             }
@@ -422,15 +424,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     }
 
     /**
-     * Replaced in place of record class.
-     */
-    protected static class DeleteState {
-        public boolean deleted = false;
-    }
-
-
-
-    /**
      * Deletes the specified non-null value from this tree if it exists.
      *
      * <p>The value is checked before deletion traversal starts. A null value cannot be
@@ -451,31 +444,29 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
             cachedHashedCode -= value.hashCode();
         }
     }
+
     /**
      * Deletes every value produced by the supplied iterable from this tree.
      *
      * <p>The iterable reference itself must be non-null. Each element is validated
-     * for null before any deletion begins, ensuring that no partial deletions occur
-     * if a null element is present. Missing values (not present in the tree) are
-     * silently ignored.</p>
+     * for null before any deletion begins</p>
      *
      * @param values the values to delete; the iterable and each contained value must
      *               not be {@code null}
-     * @throws NullPointerException   if {@code values} is {@code null}, or if any
-     *                                element produced by {@code values} is {@code null}
+     * @throws NullPointerException if {@code values} is {@code null}, or if any
+     *                              element produced by {@code values} is {@code null}
      */
     @Override
     public void deleteAll(Iterable<? extends T> values) {
         Objects.requireNonNull(values);
-
-        Set<T> snapshot = new HashSet<>();
         for (T value : values) {
             Objects.requireNonNull(value, "Value cannot be null");
-            snapshot.add(value);
-        }
-        for (T value : snapshot) {
             delete(value);
         }
+    }
+
+    protected static class DeleteState {
+        public boolean deleted = false;
     }
 
     /**
@@ -529,7 +520,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * {@link HashSet} for O(1) lookup, then snapshots the current tree state via
      * {@link #inorder()} before deletion begins. The snapshot is necessary
      * because iterating and structurally modifying the tree simultaneously would
-     * trigger {@link java.util.ConcurrentModificationException} from the underlying
+     * trigger {@link ConcurrentModificationException} from the underlying
      * fail-fast iterators.</p>
      *
      * <p>Values present in the iterable but absent from the tree are silently ignored,
@@ -552,15 +543,13 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      */
     @Override
     public void retainAllElements(Iterable<? extends T> values) {
-        if (isEmpty()) return;
         Objects.requireNonNull(values);
+        if (isEmpty()) return;
         Set<T> retain = new HashSet<>();
         for (T value : values) {
-            Objects.requireNonNull(value);
-            retain.add(value);
+            retain.add(Objects.requireNonNull(value));
         }
-        List<T> snapshot = this.inorder();
-        for (T value : snapshot) {
+        for (T value : inorder()) {
             if (!retain.contains(value)) {
                 delete(value);
             }
@@ -579,8 +568,8 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * cleaner control flow while preserving existing elements.</p>
      *
      * <p>If a null element appears anywhere in {@code values}, no modifications
-     *  are made to this tree because full validation occurs before insertion begins and throws
-     *  {@link NullPointerException}</p>
+     * are made to this tree because full validation occurs before insertion begins and throws
+     * {@link NullPointerException}</p>
      *
      * <p><b>Complexity:</b> O(k log n) where k is the number of unique elements
      * in the iterable and n is the number of elements in this tree after
@@ -595,14 +584,11 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     @Override
     public void mergeAll(Iterable<? extends T> values) {
         Objects.requireNonNull(values);
-        Set<T> unique = new HashSet<>();
         for (T value : values) {
             Objects.requireNonNull(value);
-            unique.add(value);
-        }
-        for (T value : unique) {
-            if (!contains(value)) {
+            try {
                 insert(value);
+            } catch (DuplicateNodeException ignored) {
             }
         }
     }
@@ -705,7 +691,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
         return successor == null ? null : successor.getValue();
     }
 
-
     /**
      * Returns a list of values in the tree that fall within the specified range.
      * The bounds are half-open: includes {@code fromInclusive} and excludes {@code toExclusive}.
@@ -714,7 +699,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * @param toExclusive   the upper bound (exclusive)
      * @return a list of values within the given range
      * @throws IllegalArgumentException if {@code fromInclusive > toExclusive}
-     * @throws NullPointerException if either bound is {@code null}
+     * @throws NullPointerException     if either bound is {@code null}
      */
     @Override
     public List<T> range(T fromInclusive, T toExclusive) {
@@ -774,9 +759,9 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * Returns the greatest value strictly less than the specified value.
      *
      * <p>A null value is rejected before traversal because predecessor lookup
-
-
- must compare
+     * <p>
+     * <p>
+     * must compare
      * the requested value with node values to decide which branch can contain the previous
      * smaller value.</p>
      *
@@ -811,9 +796,9 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      */
     @Override
     public T lca(T a, T b) {
+        treeIsEmpty();
         checkValue(a);
         checkValue(b);
-        treeIsEmpty();
         if (!contains(a) || !contains(b)) {
             throw new NodeNotFoundException("Node not found");
         }
@@ -834,6 +819,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
 
     /**
      * Recursively computes the k-th smallest node using an inorder traversal.
+     *
      * @param k the 1-based position of the element to retrieve
      * @return the k-th smallest node, or {@code null} if not found in this subtree
      * @throws IllegalArgumentException on k is out of bound {@code [1, this.size()]}
@@ -846,7 +832,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
         return result.getValue();
     }
 
-
     private N kthSmallest(N node, int[] count) {
         if (node == null) return null;
         N left = kthSmallest(node.getLeft(), count);
@@ -855,7 +840,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
         if (count[0] == 0) return node;
         return kthSmallest(node.getRight(), count);
     }
-
 
     @Override
     public List<T> inorder() {
@@ -891,7 +875,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      * }
      * </pre>
      * Failure to do so when the tree is concurrently modified will result
-     * in a {@link java.util.ConcurrentModificationException}.
+     * in a {@link ConcurrentModificationException}.
      */
     @Override
     public @NotNull Iterator<T> iterator() {
@@ -941,8 +925,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     @Override
     public Stream<T> stream(TraversalType type) {
         if (type == null) throw new NullPointerException("Traversal type cannot be null");
-        return java.util.stream.StreamSupport.stream(
-                java.util.Spliterators.spliterator(
+        return StreamSupport.stream(Spliterators.spliterator(
                         iterator(type),
                         size(),
                         getSpliteratorCharacteristics(type)
@@ -957,7 +940,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
      */
     @Override
     public Spliterator<T> spliterator() {
-        return java.util.Spliterators.spliterator(
+        return Spliterators.spliterator(
                 iterator(TraversalType.INORDER),
                 size(),
                 Spliterator.SIZED | Spliterator.DISTINCT | Spliterator.ORDERED | Spliterator.SORTED
@@ -975,6 +958,105 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
     private void concurrentModificationCheck(long expectedModCount) {
         if (modCount != expectedModCount) {
             throw new ConcurrentModificationException();
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SearchTree)) return false;
+        SearchTree<?> other = (SearchTree<?>) o;
+        if (this.size() != other.size()) return false;
+        Iterator<T> it1 = this.iterator();
+        Iterator<?> it2 = other.iterator();
+
+        while (it1.hasNext() && it2.hasNext()) {
+            T val1 = it1.next();
+            Object val2 = it2.next();
+            if (!val1.equals(val2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return cachedHashedCode;
+    }
+
+    /**
+     * Returns a visual representation of this tree's node hierarchy.
+     *
+     * <p>Each node is rendered on its own line using {@link #nodeText(BiNode)}.
+     * The root is rendered without a branch marker, while ASCII connectors and
+     * indentation indicate parent-child relationships for all descendants. Left
+     * children are rendered before right children. An empty tree is represented by
+     * an empty string.</p>
+     *
+     * @return the rendered tree hierarchy
+     */
+    @Override
+    public String toString() {
+        return toString(PrintStyle.ASCII);
+    }
+
+    @Override
+    public String toString(PrintStyle style) {
+        if (root == null) {
+            return "Tree is empty.";
+        }
+        StringBuilder sb = new StringBuilder();
+        buildString(root, "", true, true, sb, style);
+        return sb.toString();
+    }
+
+    /**
+     * Returns the text used to render the supplied node in {@link #toString()}.
+     *
+     * @param node the node to render; must not be {@code null}
+     * @return the string representation of {@code node}'s value
+     * @throws NullPointerException if {@code node} is {@code null}; callers should
+     *                              pass only nodes that were checked during tree rendering
+     */
+    protected String nodeText(N node) {
+        return String.valueOf(node.getValue());
+    }
+
+    private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, PrintStyle style) {
+        if (node == null) {
+            return;
+        }
+
+        String branch = (style == PrintStyle.UNICODE) ? "├── " : "+-- ";
+        String lastBranch = (style == PrintStyle.UNICODE) ? "└── " : "\\-- ";
+        String vertical = (style == PrintStyle.UNICODE) ? "│   " : "|   ";
+        String space = "    ";
+
+        sb.append(prefix);
+        if (!isRoot) {
+            sb.append(isTail ? lastBranch : branch);
+        }
+        sb.append(nodeText(node)).append('\n');
+
+        boolean hasLeft = node.getLeft() != null;
+        boolean hasRight = node.getRight() != null;
+
+        if (!hasLeft && !hasRight) {
+            return;
+        }
+
+        String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
+
+        if (hasLeft && hasRight) {
+            buildString(node.getLeft(), childPrefix, false, false, sb, style);
+            buildString(node.getRight(), childPrefix, true, false, sb, style);
+
+        } else if (hasLeft) {
+            buildString(node.getLeft(), childPrefix, true, false, sb, style);
+
+        } else {
+            buildString(node.getRight(), childPrefix, true, false, sb, style);
         }
     }
 
@@ -1003,7 +1085,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
             return curr.getValue();
         }
     }
-
 
     private class InOrderIterator implements Iterator<T> {
         private final Deque<N> stack = new ArrayDeque<>();
@@ -1129,7 +1210,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
         }
     }
 
-
     private final class LevelOrderIterator implements Iterator<T> {
         private final Queue<N> queue = new ArrayDeque<>();
         private final long expectedModCount = modCount;
@@ -1153,104 +1233,6 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
             if (curr.getLeft() != null) queue.offer(curr.getLeft());
             if (curr.getRight() != null) queue.offer(curr.getRight());
             return curr.getValue();
-        }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SearchTree)) return false;
-        SearchTree<?> other = (SearchTree<?>) o;
-        if (this.size() != other.size()) return false;
-        Iterator<T> it1 = this.iterator();
-        Iterator<?> it2 = other.iterator();
-
-        while (it1.hasNext() && it2.hasNext()) {
-            T val1 = it1.next();
-            Object val2 = it2.next();
-            if (!val1.equals(val2)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    @Override
-    public int hashCode() {
-        return cachedHashedCode;
-    }
-
-    /**
-     * Returns a visual representation of this tree's node hierarchy.
-     *
-     * <p>Each node is rendered on its own line using {@link #nodeText(BiNode)}.
-     * The root is rendered without a branch marker, while ASCII connectors and
-     * indentation indicate parent-child relationships for all descendants. Left
-     * children are rendered before right children. An empty tree is represented by
-     * an empty string.</p>
-     *
-     * @return the rendered tree hierarchy
-     */
-    @Override
-    public String toString() {
-        return toString(PrintStyle.ASCII);
-    }
-
-    @Override
-    public String toString(PrintStyle style) {
-        if (root == null) {
-            return "Tree is empty.";
-        }
-        StringBuilder sb = new StringBuilder();
-        buildString(root, "", true, true, sb, style);
-        return sb.toString();
-    }
-
-    /**
-     * Returns the text used to render the supplied node in {@link #toString()}.
-     *
-     * @param node the node to render; must not be {@code null}
-     * @return the string representation of {@code node}'s value
-     * @throws NullPointerException if {@code node} is {@code null}; callers should
-     *                              pass only nodes that were checked during tree rendering
-     */
-    protected String nodeText(N node) {
-        return String.valueOf(node.getValue());
-    }
-
-    private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, PrintStyle style) {
-        if (node == null) {
-            return;
-        }
-
-        String branch = (style == PrintStyle.UNICODE) ? "├── " : "+-- ";
-        String lastBranch = (style == PrintStyle.UNICODE) ? "└── " : "\\-- ";
-        String vertical = (style == PrintStyle.UNICODE) ? "│   " : "|   ";
-        String space = "    ";
-
-        sb.append(prefix);
-        if (!isRoot) {
-            sb.append(isTail ? lastBranch : branch);
-        }
-        sb.append(nodeText(node)).append('\n');
-
-        boolean hasLeft = node.getLeft() != null;
-        boolean hasRight = node.getRight() != null;
-
-        if (!hasLeft && !hasRight) {
-            return;
-        }
-
-        String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
-
-        if (hasLeft && hasRight) {
-            buildString(node.getLeft(), childPrefix, false, false, sb, style);
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
-
-        } else if (hasLeft) {
-            buildString(node.getLeft(), childPrefix, true, false, sb, style);
-
-        } else {
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
         }
     }
 }

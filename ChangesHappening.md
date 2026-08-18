@@ -3,5 +3,12 @@
 1. Trying first to remove the recursive Insert delete from the AVL,RBT,Treap may be possible but I need to benchmark that too.
 2. Working on Map
 3. Still learning so it will take time
-4. Major changes with exception and Benchmark will be seen from 2.0.
+4. Major changes with exception and Benchmark will be seen from 2.0.0
 5. Revised Test will be made.
+
+## Changes Made till now
+
+1. Removed delete all DSA mind logic LOL!.
+> After changing that I ended up on my test failure where I still used DSA logic going to change it or do I first revise then change the Test I think I should do All!
+2. So I also removed the DSA logic of mergeAll also -> the test were passed.
+3. All The Test coverage of BinaryTree on Emptiness has been refactored

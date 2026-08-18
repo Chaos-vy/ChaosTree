@@ -9,6 +9,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
 
 import org.openjdk.jmh.infra.Blackhole;
+
 import java.util.TreeSet;
 
 /**
@@ -84,6 +85,4 @@ public class InsertDeleteBenchmark extends AbstractBinaryBenchmark {
         treap.delete(mutationTarget);
         bh.consume(treap);
     }
-
-
 }

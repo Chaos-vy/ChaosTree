@@ -2,7 +2,6 @@ package chaos.tree.binary;
 
 import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
-import chaos.tree.exception.DuplicateNodeException;
 
 /**
  * Height-balanced Binary Search Tree implementation utilizing the AVL invariant.
@@ -21,17 +20,6 @@ import chaos.tree.exception.DuplicateNodeException;
  * @since 1.0.0
  */
 public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTree<T, AVLNode<T>> {
-
-    //This value is taken into consideration after 1.44log base 2(Integer.MAX_VALUE) =~ 44
-    private static final int PATH_CAPACITY = 48;
-    @SuppressWarnings("unchecked")
-    private final transient AVLNode<T>[] path = new AVLNode[PATH_CAPACITY];
-    /*
-    I used here boolean instead of int and byte because int is 4byte and byte will have runtime casting
-    false represent -> left node.
-    true represent -> right node.
-     */
-    private final transient boolean[] dirs = new boolean[PATH_CAPACITY];
 
     /**
      * Constructs an empty AVL tree.
@@ -89,132 +77,6 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTr
     @Override
     protected String nodeText(AVLNode<T> node) {
         return node.getValue() + "(h=" + node.getHeight() + ")";
-    }
-
-    /**
-     * Book reference: An Introduction to
-     * Binary Search Trees and Balanced Trees - Ben Pfaff
-     * @param value the value to insert; must not be {@code null}
-     */
-    @Override
-    public void insert(T value) {
-        checkValue(value);
-        if (root == null) {
-            root = createNode(value);
-            size++;
-            modCount++;
-            cachedHashedCode += value.hashCode();
-            return;
-        }
-
-        AVLNode<T> curr = root;
-        int k = 0;
-        while (true) {
-            path[k] = curr;
-            int cmp = value.compareTo(curr.getValue());
-            if (cmp == 0) {
-                for (int i = 0; i <= k; i++) path[i] = null;
-                throw new DuplicateNodeException("Value already present in tree");
-            }
-            dirs[k] = cmp > 0;
-            AVLNode<T> next = dirs[k] ? curr.getRight() : curr.getLeft();
-            if (next == null) break;
-            curr = next;
-            k++;
-        }
-
-        AVLNode<T> newNode = createNode(value);
-        if (dirs[k]) curr.setRight(newNode);
-        else curr.setLeft(newNode);
-
-        path[k + 1] = newNode;
-        size = Math.addExact(size, 1);
-        modCount++;
-        cachedHashedCode += value.hashCode();
-
-        rebalancer(k);
-        for (int i = 0; i <= k + 1; i++) path[i] = null;
-    }
-
-    @Override
-    public void delete(T value) {
-        checkValue(value);
-        if (root == null) return;
-
-        int k = 0;
-        AVLNode<T> curr = root;
-        while (curr != null) {
-            path[k] = curr;
-            int cmp = value.compareTo(curr.getValue());
-            if (cmp == 0) break;
-            dirs[k] = cmp > 0;
-            curr = dirs[k]? curr.getRight() : curr.getLeft();
-            k++;
-        }
-
-        if (curr == null) {
-            for (int i = 0; i < k; i++) path[i] = null;
-            return;
-        }
-
-        if (curr.getLeft() == null || curr.getRight() == null) {
-            AVLNode<T> child = curr.getLeft() != null ? curr.getLeft() : curr.getRight();
-            if (k == 0) {
-                root = child;
-            } else {
-                if (dirs[k - 1]) path[k - 1].setRight(child);
-                else path[k - 1].setLeft(child);
-            }
-            k--;
-        } else {
-            int s = k + 1;
-            path[s] = curr.getRight();
-            dirs[s - 1] = true;
-            AVLNode<T> succ = curr.getRight();
-            while (succ.getLeft() != null) {
-                dirs[s] = false;
-                succ = succ.getLeft();
-                s++;
-                path[s] = succ;
-            }
-
-            curr.setValue(succ.getValue());
-
-            AVLNode<T> child = succ.getRight();
-            if (s == k + 1) {
-                path[k].setRight(child);
-            } else {
-                path[s - 1].setLeft(child);
-            }
-            k = s - 1;
-        }
-
-        size--;
-        modCount++;
-        cachedHashedCode -= value.hashCode();
-
-        rebalancer(k);
-        for (int i = 0; i < 64; i++) {
-            if (path[i] == null) break;
-            path[i] = null;
-        }
-    }
-
-    private void rebalancer(int k) {
-        for (int i = k; i >= 0; i--) {
-            AVLNode<T> p = path[i];
-            updateMetadata(p);
-            AVLNode<T> rebalancedP = rebalanced(p);
-
-            if (rebalancedP != p) {
-                if (i == 0) {
-                    root = rebalancedP;
-                } else {
-                    if (dirs[i - 1]) path[i - 1].setRight(rebalancedP);
-                    else path[i - 1].setLeft(rebalancedP);
-                }
-            }
-        }
     }
 
     @Override
