@@ -117,6 +117,7 @@ public final class BTree<T extends Comparable<T>> extends AbstractNaryTree<T, BT
         if (other.root != null) {
             this.root = deepCloneNode(other.root);
             this.size = other.size;
+            this.cachedHashedCode = other.cachedHashedCode;
         }
     }
     /**

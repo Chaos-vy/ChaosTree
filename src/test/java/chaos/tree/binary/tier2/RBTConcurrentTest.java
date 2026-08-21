@@ -1,4 +1,4 @@
-package chaos.tree.binary.concurrent;
+package chaos.tree.binary.tier2;
 
 import chaos.tree.binary.RBT;
 

@@ -157,6 +157,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
         root = null;
         size = 0;
         modCount++;
+        cachedHashedCode = 0;
     }
 
     @Override

@@ -132,6 +132,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
             BPlusTreeNode<T>[] tracker = new BPlusTreeNode[1];
             this.root = deepCloneNode(other.root, tracker);
             this.size = other.size;
+            this.cachedHashedCode = other.cachedHashedCode;
         }
     }
 

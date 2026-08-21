@@ -12,3 +12,4 @@
 > After changing that I ended up on my test failure where I still used DSA logic going to change it or do I first revise then change the Test I think I should do All!
 2. So I also removed the DSA logic of mergeAll also -> the test were passed.
 3. All The Test coverage of BinaryTree on Emptiness has been refactored
+4. 21 aug Major bug fix: clear did not update the rolling hashcode value, equals after clear() call did not work which was breaking java contract.

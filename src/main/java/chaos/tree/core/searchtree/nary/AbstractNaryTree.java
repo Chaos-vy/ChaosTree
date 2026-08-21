@@ -62,6 +62,8 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
     public void clear() {
         this.size = 0;
         this.root = null;
+        this.modCount++;
+        this.cachedHashedCode = 0;
     }
 
     @Override

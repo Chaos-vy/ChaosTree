@@ -33,7 +33,7 @@ public class JOLTest {
         System.out.println("=".repeat(50)+"\n\n");
     }
     public static void testSplayNodeMemoryFootprint() {
-        System.out.println("RBT Tree node:");
+        System.out.println("Splay Tree node:");
         System.out.println(ClassLayout.parseClass(SplayNode.class).toPrintable());
         System.out.println("ExactByte : "+ClassLayout.parseClass(SplayNode.class).instanceSize());
         System.out.println("=".repeat(50)+"\n\n");

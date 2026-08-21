@@ -1,6 +1,7 @@
-package chaos.tree.nary;
+package chaos.tree.nary.tier1;
 
 
+import chaos.tree.nary.BTree;
 
 class BTreeTest extends NaryTreeContractTest<BTree<Integer>> {
 
