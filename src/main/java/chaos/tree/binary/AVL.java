@@ -2,7 +2,6 @@ package chaos.tree.binary;
 
 import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
-import chaos.tree.exception.DuplicateNodeException;
 
 /**
  * Height-balanced Binary Search Tree implementation utilizing the AVL invariant.
@@ -123,7 +122,7 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractParentRo
             parent = curr;
             cmp = compare(value, curr);
             if (cmp == 0) {
-                throw new DuplicateNodeException("Value already present in tree");
+                return;
             } else if (cmp < 0) {
                 curr = curr.getLeft();
             } else {
@@ -172,7 +171,7 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractParentRo
     }
     @Override
     public void delete(T value) {
-        checkValue(value);
+        if(value == null) return;
         AVLNode<T> target = findNode(root, value);
         if (target == null) {
             return;
