@@ -338,9 +338,9 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Navig
 
     @Override
     default boolean add(T t) {
-        if (contains(t)) return false;
+        int oldSize = size();
         insert(t);
-        return true;
+        return size() != oldSize;
     }
 
     @Override
@@ -348,9 +348,11 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Navig
         try {
             @SuppressWarnings("unchecked")
             T val = (T) o;
-            if (!contains(val)) return false;
+            int oldSize = size();
             delete(val);
-            return true;
+
+            return size() != oldSize;
+
         } catch (ClassCastException | NullPointerException e) {
             return false;
         }
@@ -425,7 +427,7 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Navig
     }
 
     @Override
-    default java.util.Comparator<? super T> comparator() {
+    default Comparator<? super T> comparator() {
         return null; // Natural ordering is used
     }
 
