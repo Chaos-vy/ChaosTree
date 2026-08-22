@@ -1,23 +1,23 @@
 package chaos.tree.binary;
 
-import chaos.tree.core.searchtree.binary.node.BiNode;
-import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
+import chaos.tree.core.searchtree.binary.node.ParentBiNode;
+import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 
 /**
  * Represents a node in an Adelson-Velsky and Landis ({@link AVL}) tree.
  *
- * <p>Alongside the value and child references inherited from {@link BiNode}, this
+ * <p>Alongside the value and child references inherited from {@link ParentBiNode}, this
  * node stores the height of its rooted subtree. The AVL tree uses this cached
  * height to calculate balance factors and determine when rotations are required.
  * Newly constructed nodes are leaves and therefore have a height of {@code 0}.</p>
  *
  * @param <T> the type of value stored in this node
  * @see AVL
- * @see BiNode
- * @see AbstractRotateTree
+ * @see ParentBiNode
+ * @see AbstractParentRotateTree
  * @since 1.0.0
  */
-public class AVLNode<T extends Comparable<? super T>> extends BiNode<T, AVLNode<T>> {
+public class AVLNode<T extends Comparable<? super T>> extends ParentBiNode<T, AVLNode<T>> {
 
     private int height;
 
