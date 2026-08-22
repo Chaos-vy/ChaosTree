@@ -14,3 +14,4 @@
 3. All The Test coverage of BinaryTree on Emptiness has been refactored
 4. 21 aug Major bug fix: clear did not update the rolling hashcode value, equals after clear() call did not work which was breaking java contract.
 5. 22nd aug it's a great feat just by adding a parent pointer my AVL tree has become blazing fast!!!
+6. 22nd aug Major refactor: removal of exception class and many chnages to fastly utilize and optimize code Chaos!!

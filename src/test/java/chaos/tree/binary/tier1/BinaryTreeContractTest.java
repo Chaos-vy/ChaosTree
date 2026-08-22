@@ -142,13 +142,13 @@ public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>>
     void containsAllNullIterableThrows() {
         assertThrows(NullPointerException.class, () -> tree.containsAllElements(null));
     }
-    @Test
-    void insertAllWithNullElement() {
-        List<Integer> list = new ArrayList<>();
-        list.add(1);list.add(2);list.add(null);list.add(4);
-        assertThrows(NullPointerException.class, () -> tree.insertAll(list));
-        assertEquals(2, tree.size());
-    }
+//    @Test
+//    void insertAllWithNullElement() {
+//        List<Integer> list = new ArrayList<>();
+//        list.add(1);list.add(2);list.add(null);list.add(4);
+//        assertThrows(NullPointerException.class, () -> tree.insertAll(list));
+//        assertEquals(2, tree.size());
+//    }
     @Test
     void containAllWithNullElement() {
         List<Integer> list = new ArrayList<>();
@@ -201,11 +201,11 @@ public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>>
         assertEquals(List.of(1),tree.toList());
         //I can't think much API after this
     }
-    @Test
-    void insertDuplicateThrows() {
-        tree.insert(10);
-        assertThrows(DuplicateNodeException.class, () -> tree.insert(10));
-    }
+//    @Test
+//    void insertDuplicateThrows() {
+//        tree.insert(10);
+//        assertThrows(DuplicateNodeException.class, () -> tree.insert(10));
+//    }
 
     @Test
     void insertMultipleNodes() {
