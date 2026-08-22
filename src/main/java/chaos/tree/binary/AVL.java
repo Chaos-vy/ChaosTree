@@ -1,7 +1,8 @@
 package chaos.tree.binary;
 
-import chaos.tree.core.searchtree.binary.rotation.AbstractRotateTree;
+import chaos.tree.core.searchtree.binary.rotation.AbstractParentRotateTree;
 import chaos.tree.core.searchtree.binary.AbstractBiTree;
+import chaos.tree.exception.DuplicateNodeException;
 
 /**
  * Height-balanced Binary Search Tree implementation utilizing the AVL invariant.
@@ -14,12 +15,12 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  * making it an excellent fit for read-heavy datasets.</p>
  *
  * @param <T> the type of elements maintained by this tree, must be {@link Comparable}
- * @see AbstractRotateTree
+ * @see AbstractParentRotateTree
  * @see AVLNode
  * @see AbstractBiTree
  * @since 1.0.0
  */
-public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTree<T, AVLNode<T>> {
+public final class AVL<T extends Comparable<? super T>> extends AbstractParentRotateTree<T, AVLNode<T>> {
 
     /**
      * Constructs an empty AVL tree.
@@ -70,12 +71,6 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTr
     }
 
     @Override
-    protected AVLNode<T> afterInsert(AVLNode<T> node) {
-        updateMetadata(node);
-        return rebalanced(node);
-    }
-
-    @Override
     protected String nodeText(AVLNode<T> node) {
         return node.getValue() + "(h=" + node.getHeight() + ")";
     }
@@ -85,8 +80,8 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTr
         return nodeHeight(root);
     }
 
-    @Override
-    protected void updateMetadata(AVLNode<T> root) {
+
+    private void updateHeight(AVLNode<T> root) {
         root.setHeight(1 + Math.max(nodeHeight(root.getLeft()), nodeHeight(root.getRight())));
     }
 
@@ -94,29 +89,121 @@ public final class AVL<T extends Comparable<? super T>> extends AbstractRotateTr
         return node == null ? -1 : node.getHeight();
     }
 
-    private int getBalance(AVLNode<T> node) {
-        return node == null ? 0 : nodeHeight(node.getLeft()) - nodeHeight(node.getRight());
-    }
-
-    private AVLNode<T> rebalanced(AVLNode<T> node) {
-        if (getBalance(node) > 1) {
-            if (getBalance(node.getLeft()) < 0) {
-                node.setLeft(leftRotate(node.getLeft()));
-            }
-            return rightRotate(node);
-        }
-        if (getBalance(node) < -1) {
-            if (getBalance(node.getRight()) > 0) {
-                node.setRight(rightRotate(node.getRight()));
-            }
-            return leftRotate(node);
-        }
-        return node;
+    @Override
+    protected AVLNode<T> leftRotate(AVLNode<T> node) {
+        AVLNode<T> x = super.leftRotate(node);
+        updateHeight(node);
+        updateHeight(x);
+        return x;
     }
 
     @Override
-    protected AVLNode<T> afterDelete(AVLNode<T> node) {
-        updateMetadata(node);
-        return rebalanced(node);
+    protected AVLNode<T> rightRotate(AVLNode<T> node) {
+        AVLNode<T> x = super.rightRotate(node);
+        updateHeight(node);
+        updateHeight(x);
+        return x;
+    }
+
+    @Override
+    public void insert(T value) {
+        checkValue(value);
+        if (root == null) {
+            root = createNode(value);
+            size = 1;
+            modCount++;
+            cachedHashedCode += value.hashCode();
+            return;
+        }
+
+        AVLNode<T> parent = null;
+        AVLNode<T> curr = root;
+        int cmp = 0;
+        while (curr != null) {
+            parent = curr;
+            cmp = compare(value, curr);
+            if (cmp == 0) {
+                throw new DuplicateNodeException("Value already present in tree");
+            } else if (cmp < 0) {
+                curr = curr.getLeft();
+            } else {
+                curr = curr.getRight();
+            }
+        }
+        AVLNode<T> newNode = createNode(value);
+        newNode.setParent(parent);
+        if (cmp < 0) {
+            parent.setLeft(newNode);
+        } else {
+            parent.setRight(newNode);
+        }
+        fixAfterModification(parent);
+
+        size = Math.addExact(size, 1);
+        modCount++;
+        cachedHashedCode += value.hashCode();
+    }
+    private void fixAfterModification(AVLNode<T> node) {
+        AVLNode<T> curr = node;
+        while (curr != null) {
+            int oldHeight = curr.getHeight();
+            int leftH = nodeHeight(curr.getLeft());
+            int rightH = nodeHeight(curr.getRight());
+            curr.setHeight(1 + Math.max(leftH, rightH));
+
+            int balance = leftH - rightH;
+            if (balance > 1) {
+                if (nodeHeight(curr.getLeft().getLeft()) - nodeHeight(curr.getLeft().getRight()) < 0) {
+                    leftRotate(curr.getLeft());
+                }
+                curr = rightRotate(curr);
+            }
+            else if (balance < -1) {
+                if (nodeHeight(curr.getRight().getLeft()) - nodeHeight(curr.getRight().getRight()) > 0) {
+                    rightRotate(curr.getRight());
+                }
+                curr = leftRotate(curr);
+            }
+            if (oldHeight == curr.getHeight()) {
+                break;
+            }
+            curr = curr.getParent();
+        }
+    }
+    @Override
+    public void delete(T value) {
+        checkValue(value);
+        AVLNode<T> target = findNode(root, value);
+        if (target == null) {
+            return;
+        }
+        if (target.getLeft() != null && target.getRight() != null) {
+            AVLNode<T> successor = getMinNode(target.getRight());
+            target.setValue(successor.getValue());
+            target = successor;
+        }
+
+        AVLNode<T> child = (target.getLeft() != null) ? target.getLeft() : target.getRight();
+        AVLNode<T> parent = target.getParent();
+
+        if (child != null) {
+            child.setParent(parent);
+        }
+
+        if (parent == null) {
+            root = child;
+        } else if (target == parent.getLeft()) {
+            parent.setLeft(child);
+        } else {
+            parent.setRight(child);
+        }
+        fixAfterModification(parent);
+
+        size--;
+        modCount++;
+        cachedHashedCode -= value.hashCode();
+        /*
+        The insert and delete of AVL tree is easy with addition of parent pointer do read the ADR-009 for more detail.
+         */
     }
 }
