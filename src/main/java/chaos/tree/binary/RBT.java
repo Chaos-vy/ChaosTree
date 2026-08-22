@@ -18,7 +18,7 @@ import chaos.tree.core.searchtree.binary.AbstractBiTree;
  *     <li>Node can be either BLACK or RED</li>
  *     <li>All leaf node must be null/Black</li>
  *     <li>A RED node cannot have a red children</li>
- *     <li>Every path from a node to any descedent leaves contains the same no of BLACK node</li>
+ *     <li>Every path from a node to any descendant leaves contains the same no of BLACK node</li>
  * </ol>
  * <p>Tree guarantees that no path is more than twice as long as any other path.</p>
  *
@@ -99,87 +99,88 @@ public final class RBT<T extends Comparable<? super T>> extends AbstractParentRo
     @Override
     public void insert(T value) {
         checkValue(value);
-        root = insert(root, value);
-        setColor(root, BLACK);
+        if (root == null) {
+            root = createNode(value);
+            setColor(root, BLACK);
+            size = 1;
+            modCount++;
+            cachedHashedCode += value.hashCode();
+            return;
+        }
+
+        RBTNode<T> parent = null;
+        RBTNode<T> curr = root;
+        int cmp = 0;
+
+        while (curr != null) {
+            parent = curr;
+            cmp = compare(value, curr);
+            if (cmp == 0) {
+                return;
+            } else if (cmp < 0) {
+                curr = curr.getLeft();
+            } else {
+                curr = curr.getRight();
+            }
+        }
+
+        RBTNode<T> newNode = createNode(value);
+        newNode.setParent(parent);
+        if (cmp < 0) {
+            parent.setLeft(newNode);
+        } else {
+            parent.setRight(newNode);
+        }
+        fixAfterInsertion(newNode);
+
         size = Math.addExact(size, 1);
         modCount++;
         cachedHashedCode += value.hashCode();
     }
+    private void fixAfterInsertion(RBTNode<T> x) {
+        setColor(x, RED);
 
-    @Override
-    protected RBTNode<T> insert(RBTNode<T> node, T value) {
-        if (node == null) {
-            return createNode(value);
-        }
-        int cmp = compare(value, node);
-
-        if (cmp == 0) {
-            throw new DuplicateNodeException("Value already present in tree");
-        }
-        if (cmp > 0) {
-            node.setRight(insert(node.getRight(), value));
-            node.getRight().setParent(node);
-        } else {
-            node.setLeft(insert(node.getLeft(), value));
-            node.getLeft().setParent(node);
-        }
-        return afterInsert(node);
-    }
-
-    private void refactorUncleRed(RBTNode<T> node) {
-        setColor(node, RED);
-        setColor(node.getLeft(), BLACK);
-        setColor(node.getRight(), BLACK);
-    }
-
-    private void refactorUncleBlack(RBTNode<T> node, RBTNode<T> child) {
-        setColor(node, BLACK);
-        setColor(child, RED);
-    }
-
-    @Override
-    protected RBTNode<T> afterInsert(RBTNode<T> node) {
-
-        RBTNode<T> left = node.getLeft();
-        RBTNode<T> right = node.getRight();
-
-        if (isRed(left) && isRed(left.getLeft())) {
-            if (!isRed(right)) {
-                node = rightRotate(node);
-                refactorUncleBlack(node, node.getRight());
+        while (x != null && x != root && isRed(x.getParent())) {
+            if (x.getParent() == x.getParent().getParent().getLeft()) {
+                RBTNode<T> y = x.getParent().getParent().getRight(); // Uncle
+                if (isRed(y)) {
+                    setColor(x.getParent(), BLACK);
+                    setColor(y, BLACK);
+                    setColor(x.getParent().getParent(), RED);
+                    x = x.getParent().getParent(); // Move up
+                } else {
+                    if (x == x.getParent().getRight()) {
+                        x = x.getParent();
+                        leftRotate(x);
+                    }
+                    setColor(x.getParent(), BLACK);
+                    setColor(x.getParent().getParent(), RED);
+                    rightRotate(x.getParent().getParent());
+                }
             } else {
-                refactorUncleRed(node);
-            }
-        } else if (isRed(left) && isRed(left.getRight())) {
-            if (!isRed(right)) {
-                node.setLeft(leftRotate(left));
-                node = rightRotate(node);
-                refactorUncleBlack(node, node.getRight());
-            } else {
-                refactorUncleRed(node);
-            }
-        } else if (isRed(right) && isRed(right.getRight())) {
-            if (!isRed(left)) {
-                node = leftRotate(node);
-                refactorUncleBlack(node, node.getLeft());
-            } else {
-                refactorUncleRed(node);
-            }
-        } else if (isRed(right) && isRed(right.getLeft())) {
-            if (!isRed(left)) {
-                node.setRight(rightRotate(right));
-                node = leftRotate(node);
-                refactorUncleBlack(node, node.getLeft());
-            } else {
-                refactorUncleRed(node);
+                RBTNode<T> y = x.getParent().getParent().getLeft(); // Uncle
+                if (isRed(y)) {
+                    setColor(x.getParent(), BLACK);
+                    setColor(y, BLACK);
+                    setColor(x.getParent().getParent(), RED);
+                    x = x.getParent().getParent(); // Move up
+                } else {
+                    if (x == x.getParent().getLeft()) {
+                        x = x.getParent();
+                        rightRotate(x);
+                    }
+                    setColor(x.getParent(), BLACK);
+                    setColor(x.getParent().getParent(), RED);
+                    leftRotate(x.getParent().getParent());
+                }
             }
         }
-        return node;
+        setColor(root, BLACK);
     }
 
     @Override
     public void delete(T value) {
-        checkValue(value);
+        if(value == null) return;
         RBTNode<T> target = findNode(root, value);
         if (target == null) {
             return;
@@ -302,5 +303,4 @@ public final class RBT<T extends Comparable<? super T>> extends AbstractParentRo
             }
         }
     }
-
 }
