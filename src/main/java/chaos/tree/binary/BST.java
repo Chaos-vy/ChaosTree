@@ -73,7 +73,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
 
     @Override
     public void insert(T value) {
-        checkValue(value);
+        if(value == null) return;
         if(root == null){
             root = new BSTNode<>(value);
             size += 1;
@@ -84,7 +84,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
         BSTNode<T> curr = root;
         while (curr!=null){
             int cmp = compare(value, curr);
-            if(cmp == 0) throw new DuplicateNodeException("Value already exist in tree");
+            if(cmp == 0) return;
             if(cmp > 0) {
                 if(curr.getRight() == null){
                     curr.setRight(new BSTNode<>(value));
@@ -111,7 +111,7 @@ public final class BST<T extends Comparable<? super T>> extends AbstractBiTree<T
     @Override
     public void delete(T value) {
         if (root == null) return;
-        checkValue(value);
+        if (value == null) return;
 
         BSTNode<T> curr = root;
         BSTNode<T> prev = null;
