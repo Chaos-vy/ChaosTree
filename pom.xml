@@ -64,7 +64,6 @@
 
     <modules>
         <module>ct-core</module>
-        <module>ct-core-java21</module>
         <module>ct-benchmark</module>
         <module>ct-jcstress</module>
     </modules>

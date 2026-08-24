@@ -127,7 +127,7 @@ The only statistically reliable write-heavy signal. RBT (17,960 ns/op at 100k) a
 
 ## 6. Workload Analysis: Construction & Memory Footprint
 
-All numbers from `ConstructionBenchmark` with `-prof gc`. `gc.alloc.rate.norm` is the canonical bytes-per-operation metric.
+All numbers from `ConstructionBenchmarkBinary` with `-prof gc`. `gc.alloc.rate.norm` is the canonical bytes-per-operation metric.
 
 ### Node size (bytes/node, derived from gc.alloc.rate.norm at 100k)
 

@@ -2,7 +2,7 @@
 
 ChaosTree is built on a deeply object-oriented, and DOD strongly encapsulated hierarchy. My goal was to maximize code reuse behind the scenes while keeping the public API as clean and approachable as possible.
 
-At its core, my architecture is driven by a mindset of **Mechanical Sympathy**. I didn't just organize these structures based on theoretical algorithms—I built them around how they physically interact with memory, CPU caches, and the JVM runtime. This led me to create two completely distinct engine families that are optimized for completely different workloads, while still sharing the same underlying search-tree contract.
+My architecture is driven by a view of **Mechanical Sympathy**. I didn't just organize these structures based on theoretical algorithms—I built them around how they physically interact with memory, CPU caches, and the JVM runtime. This led me to create two completely distinct engine families that are optimized for completely different workloads, while still sharing the same underlying search-tree contract.
 
 ## High-Level UML Class Diagram
 
@@ -91,7 +91,7 @@ Instead of writing the same rotation logic over and over again for different sel
 
 I built `AbstractRotateTree` to centralize all the core rotation mechanics used by my AVL, Red-Black, Treap, and Splay trees. 
 
-Then, I created `AbstractParentRotateTree` to extend that foundation with parent-aware operations, like parent rewiring and node transplants. This lets trees that need parent references share all their infrastructure without duplicating code.
+Then, I created `AbstractRotateTree` to extend that foundation with parent-aware operations, like parent rewiring and node transplants. This lets trees that need parent references share all their infrastructure without duplicating code.
 
 Because of this layered design, my balancing algorithms can focus strictly on maintaining their mathematical invariants, rather than getting bogged down in low-level pointer manipulation.
 
@@ -185,14 +185,9 @@ classDiagram
         <<abstract>>
     }
 
-    class AbstractParentRotateTree~T,N~ {
-        <<abstract>>
-    }
-
     AbstractBiTree ..|> BinaryTree
 
     AbstractRotateTree --|> AbstractBiTree
-    AbstractParentRotateTree --|> AbstractRotateTree
 
     %% =========================
     %% Concrete Trees
@@ -209,8 +204,8 @@ classDiagram
     AVL --|> AbstractRotateTree
     Treap --|> AbstractRotateTree
 
-    RBT --|> AbstractParentRotateTree
-    Splay --|> AbstractParentRotateTree
+    RBT --|> AbstractRotateTree
+    Splay --|> AbstractRotateTree
 
     %% =========================
     %% Node Hierarchy
@@ -237,9 +232,9 @@ classDiagram
     class SplayNode~T~
 
     BSTNode --|> BiNode
-    AVLNode --|> BiNode
-    TreapNode --|> BiNode
 
+    AVLNode --|> ParentBiNode
+    TreapNode --|> ParentBiNode
     RBTNode --|> ParentBiNode
     SplayNode --|> ParentBiNode
 ```
@@ -252,8 +247,8 @@ Think of `AbstractBiTree` as the backbone of the entire binary family. It handle
 #### `AbstractRotateTree`
 Writing raw pointer-manipulation code for tree rotations is notoriously error-prone. By centralizing left and right rotations into `AbstractRotateTree`, AVL and Treap can execute their distinct mathematical balancing strategies while relying on shared, battle-tested rotation mechanics.
 
-#### `AbstractParentRotateTree`
-Some trees need to know who their parents are to balance correctly. `AbstractParentRotateTree` extends my basic rotation layer with parent-aware rewiring and node transplants. This lets my Red-Black and Splay trees execute incredibly complex structural mutations while keeping their core balancing algorithms clean and focused.
+#### `AbstractRotateTree`
+Some trees need to know who their parents are to balance correctly. `AbstractRotateTree` extends my basic rotation layer with parent-aware rewiring and node transplants. This lets my Red-Black and Splay trees execute incredibly complex structural mutations while keeping their core balancing algorithms clean and focused.
 
 #### The `BiNode` vs `ParentBiNode` Split
 I intentionally split ChaosTree's node hierarchy into `BiNode` and `ParentBiNode`. Why? Because not all binary trees require parent references. 

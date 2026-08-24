@@ -2,6 +2,7 @@ package chaos.tree.binary;
 
 
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
+import chaos.tree.core.searchtree.binary.node.BiNode;
 
 /**
  * Represents a node in a Treap ({@link Treap}).

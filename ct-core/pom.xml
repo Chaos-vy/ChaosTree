@@ -9,7 +9,7 @@
     </parent>
     <artifactId>chaos-tree</artifactId>
     <packaging>jar</packaging>
-    <name>ChaosTree Java 8+ Core</name>
+    <name>ChaosTree</name>
     <description>Zero dependency Java Search Tree Library.</description>
     
     <properties>
@@ -30,7 +30,7 @@
     </dependencies>
 
 
-    <build>
+        <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -46,7 +46,7 @@
                             </excludes>
                         </configuration>
                     </execution>
-                    <!-- 2. Compile ONLY module-info.java to Java 9 Currently I am also seeing any vulnerability bug till then I am optimizing it-->
+                    <!-- 2. Compile ONLY module-info.java to Java 9 -->
                     <execution>
                         <id>compile-module-info</id>
                         <goals>
@@ -59,7 +59,33 @@
                             </includes>
                         </configuration>
                     </execution>
+                    <!-- 3. Compile Java 21 specific overrides into META-INF/versions/21 -->
+                    <execution>
+                        <id>compile-java21</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>21</release>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+                            </compileSourceRoots>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>

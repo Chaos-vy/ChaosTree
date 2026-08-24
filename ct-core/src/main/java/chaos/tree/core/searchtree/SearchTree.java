@@ -154,6 +154,7 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Navig
      * Otherwise, the next smaller value in the tree is returned.
      *
      * @param value the value whose ceiling is to be found
+     * @return the ceil value;
      * {@code null} if no smaller value exist, value passed is null and tree is empty.
      */
     T ceil(T value);
@@ -435,17 +436,15 @@ public interface SearchTree<T extends Comparable<? super T>> extends Tree, Navig
         return modified;
     }
 
-    // These API are not supported.
+    // UME from here totaling 7 UME Some are reasonable constraints and some have been not worked on. Contribution is
+    // allowed, but they must not heavily cost the Memory, gc , Time Complexity.
 
     @Override
     default NavigableSet<T> descendingSet() {
         throw new UnsupportedOperationException("Descending views are not supported.");
     }
 
-    @Override
-    default Iterator<T> descendingIterator() {
-        throw new UnsupportedOperationException("Descending iterator is not supported.");
-    }
+
 
     @Override
     default NavigableSet<T> subSet(T fromElement, boolean fromInclusive, T toElement, boolean toInclusive) {

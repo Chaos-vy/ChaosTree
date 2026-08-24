@@ -28,7 +28,7 @@ Node byte sizes confirmed via GC profiling (`-prof gc`) and `JOL`:
 That 8-byte jump between BST (24 bytes) and the balanced variants (32 bytes) is exactly the object header plus their required algorithm-specific field (`height`, `color`, or `priority`). I know exactly where every single byte is going. For detailed `Java Object Layout` click here -> [`docs/JOL.txt`](docs/JOL.txt)
 
 * **Pros:** Zero memory overhead for trees that only go down. Every single byte allocated in this library is explicitly justified by algorithm math.
-* **Cons:** It forces me to duplicate some abstract logic. I have `AbstractRotateTree` and `AbstractParentRotateTree` sitting side-by-side doing almost the exact same rotations, just because one has to rewire parent pointers and the other doesn't.
+* **Cons:** It forces me to duplicate some abstract logic. I have `AbstractRotateTree` and `AbstractRotateTree` sitting side-by-side doing almost the exact same rotations, just because one has to rewire parent pointers and the other doesn't.
 * **Resolution:** That code duplication is very narrow and completely isolated. It's the explicit, one-time engineering tax I pay to save gigabytes of RAM across the entire user base.
 
 **Consequences:**  
