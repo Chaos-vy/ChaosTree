@@ -283,17 +283,20 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
 
     @Override
     public void retainAllElements(Iterable<? extends T> values) {
-        //Iterable source must not be null
         Objects.requireNonNull(values);
         if (isEmpty()) return;
         Set<T> retain = new HashSet<>();
         for (T value : values) {
             retain.add(value);
         }
-        for (T value : inorder()) {
+        List<T> toDelete = new ArrayList<>();
+        for (T value : this) {
             if (!retain.contains(value)) {
-                delete(value);
+                toDelete.add(value);
             }
+        }
+        for (T value : toDelete) {
+            delete(value);
         }
     }
 

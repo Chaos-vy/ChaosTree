@@ -6,7 +6,6 @@ module chaos.tree {
 
     exports chaos.tree.core;
     exports chaos.tree.core.searchtree;
-    exports chaos.tree.exception;
     exports chaos.tree.traversal;
 
     exports chaos.tree.binary;

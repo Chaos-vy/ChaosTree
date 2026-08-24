@@ -433,6 +433,77 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         parent.setKeyCount(parent.getKeyCount() - 1);
     }
 
+    
+    @Override
+    public Iterator<T> descendingIterator() {
+        return new ReverseBPlusIterator();
+    }
+
+    private class ReverseBPlusIterator implements Iterator<T> {
+        private final java.util.Deque<NodeTracker> stack = new java.util.ArrayDeque<>();
+        private final long expectedModCount = modCount;
+
+        public ReverseBPlusIterator() {
+            if (root != null) pushRight(root);
+        }
+
+        private void pushRight(BPlusTreeNode<T> node) {
+            while (!node.isLeaf()) {
+                stack.push(new NodeTracker(node, node.getKeyCount()));
+                node = node.getChild(node.getKeyCount());
+            }
+            if (node.getKeyCount() > 0) {
+                stack.push(new NodeTracker(node, node.getKeyCount() - 1));
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+
+        @Override
+        public T next() {
+            if (modCount != expectedModCount) throw new java.util.ConcurrentModificationException();
+            if (!hasNext()) throw new java.util.NoSuchElementException();
+
+            NodeTracker top = stack.peek();
+            BPlusTreeNode<T> node = top.node;
+            
+            // In BPlusTree, only leaves hold the real data.
+            // But because we only pushed rightmost paths, and we ONLY pop from leaves,
+            // we will never yield internal node routing keys.
+            T value = node.getKey(top.index);
+            
+            top.index--;
+            if (top.index < 0) {
+                stack.pop();
+                // Step back up and find the next leftward child
+                while (!stack.isEmpty()) {
+                    NodeTracker parentTop = stack.peek();
+                    parentTop.index--;
+                    if (parentTop.index >= 0) {
+                        pushRight(parentTop.node.getChild(parentTop.index));
+                        break;
+                    } else {
+                        stack.pop();
+                    }
+                }
+            }
+            return value;
+        }
+
+        private class NodeTracker {
+            final BPlusTreeNode<T> node;
+            int index;
+
+            NodeTracker(BPlusTreeNode<T> node, int index) {
+                this.node = node;
+                this.index = index;
+            }
+        }
+    }
+
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {

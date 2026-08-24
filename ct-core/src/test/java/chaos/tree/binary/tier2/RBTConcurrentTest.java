@@ -1,0 +1,16 @@
+package chaos.tree.binary.tier2;
+
+import chaos.tree.binary.RBT;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class RBTConcurrentTest extends ConcurrentBinaryTreeTest<RBT<Integer>> {
+    @Override
+    protected RBT<Integer> createTree() {
+        return new RBT<>();
+    }
+
+    @Override
+    protected void validateInvariants() {
+    }
+}

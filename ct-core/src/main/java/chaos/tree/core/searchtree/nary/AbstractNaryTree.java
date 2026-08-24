@@ -398,6 +398,12 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
         return node.getKey(0);
     }
 
+
+    @Override
+    public Iterator<T> descendingIterator() {
+        return new ReverseInorderIterator();
+    }
+
     @Override
     public Iterator<T> iterator() {
         return new InorderIterator();
@@ -682,18 +688,20 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
 
     @Override
     public void retainAllElements(Iterable<? extends T> values) {
-        if (isEmpty()) return;
         Objects.requireNonNull(values);
-
-        Set<T> retainSet = new HashSet<>();
-        for (T val : values) {
-            if(val == null) continue;
-            retainSet.add(val);
+        if (isEmpty()) return;
+        Set<T> retain = new HashSet<>();
+        for (T value : values) {
+            retain.add(value);
         }
-        for(T x: this){
-            if(!retainSet.contains(x)){
-                delete(x);
+        List<T> toDelete = new ArrayList<>();
+        for (T value : this) {
+            if (!retain.contains(value)) {
+                toDelete.add(value);
             }
+        }
+        for (T value : toDelete) {
+            delete(value);
         }
     }
 
@@ -782,6 +790,64 @@ public abstract class AbstractNaryTree<T extends Comparable<T>, N extends NaryNo
 
         public boolean deleted() {
             return deleted;
+        }
+    }
+
+    
+    private class ReverseInorderIterator implements Iterator<T> {
+
+        private final Deque<NodeTracker> stack = new ArrayDeque<>();
+        private final long expectedModCount = modCount;
+
+        public ReverseInorderIterator() {
+            if (root != null) pushRight(root);
+        }
+
+        private void pushRight(N node) {
+            while (!node.isLeaf()) {
+                stack.push(new NodeTracker(node, node.getKeyCount() - 1));
+                node = node.getChild(node.getKeyCount());
+            }
+            if (node.getKeyCount() > 0) {
+                stack.push(new NodeTracker(node, node.getKeyCount() - 1));
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+
+        @Override
+        public T next() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            if (!hasNext()) throw new NoSuchElementException();
+
+            NodeTracker top = stack.peek();
+            N node = top.node;
+            int index = top.index;
+
+            T value = node.getKey(index);
+
+            top.index--;
+            if (top.index < 0) {
+                stack.pop();
+            }
+            if (!node.isLeaf()) {
+                pushRight(node.getChild(index));
+            }
+
+            return value;
+        }
+
+        private class NodeTracker {
+            final N node;
+            int index;
+
+            NodeTracker(N node, int index) {
+                this.node = node;
+                this.index = index;
+            }
         }
     }
 
