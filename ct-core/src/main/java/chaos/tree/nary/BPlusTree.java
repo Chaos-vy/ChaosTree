@@ -1,8 +1,6 @@
 package chaos.tree.nary;
 
 import chaos.tree.core.searchtree.nary.AbstractNaryTree;
-import chaos.tree.exception.EmptyTreeException;
-
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -190,6 +188,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
 
     @Override
     public boolean contains(T key) {
+        if(key == null) return false;
         if (root == null) return false;
         BPlusTreeNode<T> current = root;
         while (!current.isLeaf()) {
@@ -212,7 +211,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
         while (true) {
             if (node.isLeaf()) {
                 int result = searchNode(node, value);
-                if (result >= 0) throw new DuplicateNodeException("Value already present in tree");
+                if (result >= 0) return;
 
                 int insertPos = -(result + 1);
                 System.arraycopy(node.getKeys(), insertPos, node.getKeys(), insertPos + 1, node.getKeyCount() - insertPos);
@@ -595,7 +594,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
     @Override
     public T min() {
         if (isEmpty() || head == null || head.getKeyCount() == 0) {
-            throw new EmptyTreeException("Tree is empty");
+            return null;
         }
         return head.getKey(0);
     }
@@ -611,7 +610,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
 
     @Override
     public T ceil(T key) {
-        treeIsEmpty();
+        if(isEmpty()) return null;
         BPlusTreeNode<T> current = ceil_floorHelper(root, key);
         if (current == null) return null;
         int result = searchNode(current, key);
@@ -626,7 +625,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
 
     @Override
     public T floor(T key) {
-        treeIsEmpty();
+        if(isEmpty()) return null;
         if (root == null || key == null) return null;
         BPlusTreeNode<T> current = root;
         BPlusTreeNode<T> lastLeftNode = null;
@@ -656,7 +655,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
 
     @Override
     public T predecessor(T key) {
-        treeIsEmpty();
+        if(isEmpty()) return null;
         if (root == null || key == null) return null;
         BPlusTreeNode<T> current = root;
         BPlusTreeNode<T> lastLeftNode = null;
@@ -682,7 +681,7 @@ public final class BPlusTree<T extends Comparable<T>> extends AbstractNaryTree<T
 
     @Override
     public T successor(T key) {
-        treeIsEmpty();
+        if(isEmpty()) return null;
         if (root == null || key == null) return null;
         BPlusTreeNode<T> current = root;
         while (!current.isLeaf()) {
