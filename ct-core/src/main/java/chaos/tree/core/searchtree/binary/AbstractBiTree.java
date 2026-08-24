@@ -5,8 +5,6 @@ import chaos.tree.core.searchtree.PrintStyle;
 import chaos.tree.core.searchtree.SearchTree;
 import chaos.tree.core.searchtree.binary.node.BiNode;
 import chaos.tree.core.searchtree.binary.node.ParentBiNode;
-import chaos.tree.exception.EmptyTreeException;
-import chaos.tree.exception.NodeNotFoundException;
 import chaos.tree.traversal.TraversalType;
 
 import java.util.*;
@@ -367,6 +365,7 @@ public abstract class AbstractBiTree<T extends Comparable<? super T>, N extends 
         return successor == null ? null : successor.getValue();
     }
 
+    //Preferred recursive call stack rather than iterative stack It seems sometime we need to dependent on thread stack too.
     @Override
     public List<T> range(T fromInclusive, T toExclusive) {
         if (fromInclusive == null || toExclusive == null) {
