@@ -641,4 +641,50 @@ public abstract class BinaryTreeContractTest<MyTree extends BinaryTree<Integer>>
         assertFalse(tree.isEmpty());
         assertEquals(3, tree.size());
     }
+
+    @Test
+    void descendingIteratorYieldsElementsInReverseOrder() {
+        tree.insertAll(Arrays.asList(50, 10, 80, 20, 30));
+        List<Integer> expected = Arrays.asList(80, 50, 30, 20, 10);
+        List<Integer> actual = new ArrayList<>();
+        Iterator<Integer> it = tree.descendingIterator();
+        while (it.hasNext()) {
+            actual.add(it.next());
+        }
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void descendingIteratorOnEmptyTree() {
+        Iterator<Integer> it = tree.descendingIterator();
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    void descendingIteratorFailFastOnInsert() {
+        tree.insertAll(Arrays.asList(10, 20, 30));
+        Iterator<Integer> it = tree.descendingIterator();
+        assertEquals(30, it.next());
+        tree.insert(40);
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+
+    @Test
+    void descendingIteratorFailFastOnDelete() {
+        tree.insertAll(Arrays.asList(10, 20, 30));
+        Iterator<Integer> it = tree.descendingIterator();
+        assertEquals(30, it.next());
+        tree.delete(20);
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+    
+    @Test
+    void descendingIteratorExhaustedThrows() {
+        tree.insert(10);
+        Iterator<Integer> it = tree.descendingIterator();
+        assertEquals(10, it.next());
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
 }

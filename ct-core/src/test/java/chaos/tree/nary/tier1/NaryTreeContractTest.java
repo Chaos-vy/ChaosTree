@@ -2,6 +2,7 @@ package chaos.tree.nary.tier1;
 
 import chaos.tree.nary.NaryTree;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -443,20 +444,22 @@ public abstract class NaryTreeContractTest<NARY extends NaryTree<Integer>> {
         assertDoesNotThrow(() -> tree.delete(99));
     }
 
-//    @ParameterizedTest
-//    @ValueSource(ints = {2, 4, 8, 16})
-//    @DisplayName("Extreme operations on empty tree must throw EmptyTreeException")
-//    void testEmptyTreeExceptions(int degree) {
-//        NARY tree = createTree(degree);
-//        assertThrows(EmptyTreeException.class, tree::min);
-//        assertThrows(EmptyTreeException.class, tree::max);
-//        assertThrows(EmptyTreeException.class, tree::pollMin);
-//        assertThrows(EmptyTreeException.class, tree::pollMax);
-//        assertThrows(EmptyTreeException.class, () -> tree.floor(5));
-//        assertThrows(EmptyTreeException.class, () -> tree.ceil(5));
-//        assertThrows(EmptyTreeException.class, () -> tree.successor(5));
-//        assertThrows(EmptyTreeException.class, () -> tree.predecessor(5));
-//    }
+    @ParameterizedTest
+    @ValueSource(ints = {2, 4, 8, 16})
+    @DisplayName("Extreme operations on empty tree must throw EmptyTreeException")
+    void testEmptyTreeExceptions(int degree) {
+        NARY tree = createTree(degree);
+        assertNull( tree.min());
+        assertNull(tree.max());
+        assertNull(tree.pollMin());
+        assertNull(tree.pollFirst());
+        assertNull(tree.pollMax());
+        assertNull(tree.pollLast());
+        assertNull(tree.floor(5));
+        assertNull(tree.ceil(5));
+        assertNull(tree.successor(5));
+        assertNull(tree.predecessor(5));
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 4, 8, 16})
@@ -555,5 +558,60 @@ public abstract class NaryTreeContractTest<NARY extends NaryTree<Integer>> {
         List<Integer> treeState = new ArrayList<>();
         tree.iterator().forEachRemaining(treeState::add);
         assertEquals(new ArrayList<>(truth), treeState, "Final sorted state does not match TreeSet");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 4, 8, 16})
+    void descendingIteratorYieldsElementsInReverseOrder(int degree) {
+        NARY tree = createTree(degree);
+        tree.insertAll(Arrays.asList(50, 10, 80, 20, 30));
+        List<Integer> expected = Arrays.asList(80, 50, 30, 20, 10);
+        List<Integer> actual = new ArrayList<>();
+        Iterator<Integer> it = tree.descendingIterator();
+        while (it.hasNext()) {
+            actual.add(it.next());
+        }
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void descendingIteratorOnEmptyTree() {
+        NARY tree = createTree(32);
+        Iterator<Integer> it = tree.descendingIterator();
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 4, 8, 16})
+    void descendingIteratorFailFastOnInsert(int degree) {
+        NARY tree = createTree(degree);
+        tree.insertAll(Arrays.asList(10, 20, 30));
+        Iterator<Integer> it = tree.descendingIterator();
+        assertEquals(30, it.next());
+        tree.insert(40);
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 4, 8, 16})
+    void descendingIteratorFailFastOnDelete(int degree) {
+        NARY tree = createTree(degree);
+        tree.insertAll(Arrays.asList(10, 20, 30));
+        Iterator<Integer> it = tree.descendingIterator();
+        assertEquals(30, it.next());
+        tree.delete(20);
+        assertThrows(ConcurrentModificationException.class, it::next);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 4, 8, 16})
+    void descendingIteratorExhaustedThrows(int degree) {
+        NARY tree = createTree(degree);
+        tree.insert(10);
+        Iterator<Integer> it = tree.descendingIterator();
+        assertEquals(10, it.next());
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
     }
 }
