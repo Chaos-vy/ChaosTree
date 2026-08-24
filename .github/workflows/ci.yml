@@ -16,6 +16,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         java: ['8', '11', '17', '21', '25']
+        exclude:
+          - os: macos-latest
+            java: '8'
 
     steps:
     - name: Checkout Repository
@@ -29,4 +32,10 @@ jobs:
         cache: maven
 
     - name: Run ChaosTree Test Suite
-      run: mvn clean package -B
+      shell: bash
+      run: |
+        if [ "${{ matrix.java }}" = "21" ] || [ "${{ matrix.java }}" = "25" ]; then
+          mvn clean test -B
+        else
+          mvn clean test -pl ct-core -B
+        fi

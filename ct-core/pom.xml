@@ -48,19 +48,7 @@
                             </excludes>
                         </configuration>
                     </execution>
-                    <!-- 2. Compile ONLY module-info.java to Java 9 -->
-                    <execution>
-                        <id>compile-module-info</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>9</release>
-                            <includes>
-                                <include>module-info.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
+                    
                     
                 </executions>
             </plugin>
@@ -133,7 +121,7 @@
                                     <compileSourceRoots>
                                         <compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
                                     </compileSourceRoots>
-                                    <outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
+                                    <multiReleaseOutput>true</multiReleaseOutput>
                                 </configuration>
                             </execution>
                         </executions>
