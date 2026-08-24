@@ -13,7 +13,8 @@
     <description>Zero dependency Java Search Tree Library.</description>
     
     <properties>
-        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -40,7 +41,8 @@
                     <execution>
                         <id>default-compile</id>
                         <configuration>
-                            <release>8</release>
+                            <source>1.8</source>
+                            <target>1.8</target>
                             <excludes>
                                 <exclude>module-info.java</exclude>
                             </excludes>
@@ -59,20 +61,7 @@
                             </includes>
                         </configuration>
                     </execution>
-                    <!-- 3. Compile Java 21 specific overrides into META-INF/versions/21 -->
-                    <execution>
-                        <id>compile-java21</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>21</release>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
-                            </compileSourceRoots>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
-                        </configuration>
-                    </execution>
+                    
                 </executions>
             </plugin>
             
@@ -89,4 +78,69 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+
+        <profile>
+            <id>java9-module-info</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-module-info</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>9</release>
+                                    <includes>
+                                        <include>module-info.java</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>java21-mrjar-build</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-java21</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>21</release>
+                                    <compileSourceRoots>
+                                        <compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+                                    </compileSourceRoots>
+                                    <outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
