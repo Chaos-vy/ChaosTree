@@ -14,4 +14,5 @@
 3. All The Test coverage of BinaryTree on Emptiness has been refactored
 4. 21 aug Major bug fix: clear did not update the rolling hashcode value, equals after clear() call did not work which was breaking java contract.
 5. 22nd aug it's a great feat just by adding a parent pointer my AVL tree has become blazing fast!!!
-6. 22nd aug Major refactor: removal of exception class and many chnages to fastly utilize and optimize code Chaos!!
+6. 22nd aug Major refactor: removal of exception class and many chnages to fastly utilize and optimize code 
+7. 23-24 very tedios work all time was consumed in performance , testing with own stacka nd iterative stack without parent pointer and at last after JOL 4byte of padding I did add parent pointer to AVL and Treap as well now they have tuned for performance. Deleted all custom execption as they were populating thread stack very much no nulla nd duplicate node does not do any changes to tree!!
