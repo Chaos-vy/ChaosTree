@@ -1,3 +1,5 @@
+## August 25th onward there till the repo get's the balance it will not have any contribution it may be week or a month thanks for your patience.
+
 # Contributing to ChaosTree
 
 Thanks for your interest in ChaosTree! I'm excited to have you here. This document outlines how I build things, what kind of help I'm looking for, and how you can get your code merged smoothly.
