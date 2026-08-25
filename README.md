@@ -44,6 +44,7 @@ implementation 'io.github.chaos-vy:chaos-tree:1.2.0'
 
 ---
 
+### It is advisable not to use the current Github repo for test many changes are going to be made. Thanks a lot!
 ## 🚀 Quick Start: Modern API Usage
 
 ChaosTree provides a rich, modern, Java Collections-style API. It completely encapsulates pointer arithmetic and exposes functional paradigms like Streams, Range Queries, and Priority Polling.
@@ -255,7 +256,7 @@ Examples include:
 * Why the API is organized as `Tree → SearchTree → BinaryTree / NaryTree`
 * Why internal node implementations are hidden behind JPMS boundaries
 * Why traversal APIs are exclusive to the Binary family
-* Why range-query operations belong to the common `SearchTree` contract
+* Why range-query operations belong to the common `SearchTreeSet` contract
 
 ### Binary Family Documentation
 
