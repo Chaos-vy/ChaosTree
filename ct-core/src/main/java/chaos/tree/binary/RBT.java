@@ -246,42 +246,52 @@ public final class RBT<T extends Comparable<? super T>> extends AbstractRotateTr
 
     private void fixDoubleBlack(RBTNode<T> node) {
 
-        if (node == null) return;
-        if (node == root) return;
+    while (node != null && node != root) {
 
         RBTNode<T> parent = node.getParent();
         boolean isLeftChild = parent.getLeft() == node;
         RBTNode<T> sibling = isLeftChild ? parent.getRight() : parent.getLeft();
+
         if (sibling == null) {
-            fixDoubleBlack(parent);
-            return;
+            node = parent;
+            continue;
         }
+
         if (isRed(sibling)) {
             sibling.setColor(BLACK);
             parent.setColor(RED);
+
             if (isLeftChild) {
                 leftRotate(parent);
             } else {
                 rightRotate(parent);
             }
-            fixDoubleBlack(node);
-            return;
+
+            continue;
         }
-        boolean siblingHasRedChild = isRed(sibling.getLeft()) || isRed(sibling.getRight());
+
+        boolean siblingHasRedChild =
+                isRed(sibling.getLeft()) || isRed(sibling.getRight());
+
         if (!siblingHasRedChild) {
             sibling.setColor(RED);
+
             if (isRed(parent)) {
                 parent.setColor(BLACK);
-            } else {
-                fixDoubleBlack(parent);
+                return;
             }
-            return;
+
+            node = parent;
+            continue;
         }
+
         if (isLeftChild) {
+
             if (isRed(sibling.getRight())) {
                 sibling.setColor(parent.getColor());
                 parent.setColor(BLACK);
                 sibling.getRight().setColor(BLACK);
+
                 leftRotate(parent);
             } else {
                 sibling.getLeft().setColor(BLACK);
@@ -291,22 +301,32 @@ public final class RBT<T extends Comparable<? super T>> extends AbstractRotateTr
                 sibling = parent.getRight();
                 sibling.setColor(parent.getColor());
                 parent.setColor(BLACK);
+
                 leftRotate(parent);
             }
+
         } else {
+
             if (isRed(sibling.getLeft())) {
                 sibling.setColor(parent.getColor());
                 parent.setColor(BLACK);
                 sibling.getLeft().setColor(BLACK);
+
                 rightRotate(parent);
             } else {
                 sibling.getRight().setColor(BLACK);
+
                 leftRotate(sibling);
+
                 sibling = parent.getLeft();
                 sibling.setColor(parent.getColor());
                 parent.setColor(BLACK);
+
                 rightRotate(parent);
             }
         }
+
+        return;
     }
+}
 }
