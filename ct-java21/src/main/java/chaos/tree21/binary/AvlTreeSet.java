@@ -175,4 +175,43 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         return node == null ? -1 : node.getHeight();
     }
 
+    /**
+     * Internal mathematical debugger. Validates all AVL structural invariants.
+     * Throws IllegalStateException if any rule is broken.
+     */
+    void verifyInvariants() {
+        if (root == null) return;
+        validateAvlRules(root, null, null);
+    }
+
+    private int validateAvlRules(AvlNode<E> node, E min, E max) {
+        if (node == null) return -1;
+
+        if (min != null && compare(node.getValue(),min) <= 0) {
+            throw new IllegalStateException("AVL Corruption: BST Violation. Node " + node.getValue() + " is <= min bound " + min);
+        }
+        if (max != null && compare(node.getValue(),max) >= 0) {
+            throw new IllegalStateException("AVL Corruption: BST Violation. Node " + node.getValue() + " is >= max bound " + max);
+        }
+
+        int leftHeight = validateAvlRules(node.getLeft(), min, node.getValue());
+        int rightHeight = validateAvlRules(node.getRight(), node.getValue(), max);
+
+        // Rule 2: Height cached accurately
+        int actualHeight = 1 + Math.max(leftHeight, rightHeight);
+        if (node.getHeight() != actualHeight) {
+            throw new IllegalStateException("AVL Corruption: Cached height of Node " + node.getValue() + 
+                " is " + node.getHeight() + " but actual height is " + actualHeight);
+        }
+
+        // Rule 3: Balance Factor (-1, 0, 1)
+        int balance = leftHeight - rightHeight;
+        if (Math.abs(balance) > 1) {
+            throw new IllegalStateException("AVL Corruption: Balance Factor Violation at Node " + node.getValue() + 
+                "! Balance is " + balance);
+        }
+
+        return actualHeight;
+    }
+
 }
