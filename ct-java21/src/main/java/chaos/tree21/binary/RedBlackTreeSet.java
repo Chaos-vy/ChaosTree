@@ -60,6 +60,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             RbtNode<E> parent = x.getParent();
             // Grandparent is mathematically guaranteed to exist because parent is RED (root is always black)
             RbtNode<E> grandParent = parent.getParent();
+            //Left Symmetry
             if (parent == grandParent.getLeft()) {
                 RbtNode<E> uncle = grandParent.getRight();
                 // Case 1: Uncle is RED (The Recolor Case)
@@ -108,12 +109,74 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
     }
 
     @Override
+    public boolean remove(Object o) {
+        if (o == null) throw new NullPointerException();
+        //I am approaching the same way as of AVL tree delete. IDK will it hold true or not!!
+        try {
+            if (isEmpty()) return false;
+            @SuppressWarnings("unchecked")
+            E val = (E) o;
+            RbtNode<E> x = nodeFinder(val);
+            if (x == null) return false;
+
+            if (x.getLeft() != null && x.getRight() != null) {
+                RbtNode<E> successor = x.getRight();
+                while (successor.getLeft() != null) {
+                    successor = successor.getLeft();
+                }
+                x.setValue(successor.getValue());
+                x = successor;
+            }
+
+            //Guaranteed one child or none
+            RbtNode<E> node_replacer = x.getLeft() != null ? x.getLeft() : x.getRight();
+            boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
+
+            if (node_replacer != null) {
+                node_replacer.setParent(x.getParent());
+                if (x.getParent() == null) {
+                    root = node_replacer;
+                } else if (x == x.getParent().getLeft()) {
+                    x.getParent().setLeft(node_replacer);
+                } else {
+                    x.getParent().setRight(node_replacer);
+                }
+
+                // If the deleted node was Black, the tree lost a black weight. Fix it!
+                if (deletedNodeWasBlack) {
+                    fixDoubleBlack(node_replacer);
+                }
+            } else if (x.getParent() == null) {
+                root = null; // The tree is now empty
+            } else {
+                if (deletedNodeWasBlack) {
+                    fixDoubleBlack(x);
+                }
+
+                if (x == x.getParent().getLeft()) {
+                    x.getParent().setLeft(null);
+                } else {
+                    x.getParent().setRight(null);
+                }
+                x.setParent(null);
+            }
+
+            size--;
+            modCount++;
+            cachedHashcode -= val.hashCode();
+            return true;
+        } catch (ClassCastException e) {
+            return false;
+        }
+    }
+
+    private void fixDoubleBlack(RbtNode<E> node_replacer) {
+
+    }
+
+    @Override
     public int height() {
         return 0;
     }
 
-    @Override
-    public boolean remove(Object o) {
-        return false;
-    }
 }

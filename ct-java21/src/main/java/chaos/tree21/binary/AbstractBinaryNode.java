@@ -1,7 +1,7 @@
 package chaos.tree21.binary;
 
 sealed abstract class AbstractBinaryNode<E, N extends AbstractBinaryNode<E, N>>
-        implements BinaryNode<E, N> permits AvlNode, RbtNode, TreapNode {
+        implements BinaryNode<E, N> permits AvlNode, RbtNode {
 
     protected E value;
     protected N left;

@@ -2,15 +2,20 @@ package chaos.tree21.binary;
 
 final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
 
-    private Color color;
+    /*
+    Removed ENUM for Object header with simple boolean hack
+    RED === True === RED
+    BLACK === False === BLACK
+    Every New Node is default == RED ==
+     */
+    private boolean red;
     RbtNode(E value) {
         super(value);
-        this.color = Color.RED;
+        this.red = true;
     }
-     Color getColor(){
-        return color;
-     }
-     void setColor(Color color){
-        this.color = color;
-     }
+
+    public boolean isRed() { return red; }
+    public boolean isBlack() { return !red; }
+    public void setRed() { this.red = true; }
+    public void setBlack() { this.red = false; }
 }
