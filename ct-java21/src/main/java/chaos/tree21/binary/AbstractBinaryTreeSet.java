@@ -131,6 +131,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return prevCurrent == null ? null : prevCurrent.getValue();
     }
 
+
     @Override
     public E higher(E e) {
         if (root == null || e == null) return null;
@@ -762,13 +763,8 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return sb.toString();
     }
 
-
     @Override
-    public String print() {
-        return toStringBuilder(Style.ASCII);
-    }
-
-    public String toStringBuilder(Style style) {
+    public String display(Style style) {
         if (root == null) {
             return "";
         }
@@ -777,14 +773,9 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return sb.toString();
     }
 
-    /**
-     * Returns the text used to render the supplied node in {@link #toString()}.
-     *
-     * @param node the node to render; must not be {@code null}
-     * @throws NullPointerException if {@code node} is {@code null}; callers should
-     *                              pass only nodes that were checked during tree rendering
-     */
-
+    private String nodeText(N node) {
+        return String.valueOf(node.getValue());
+    }
     private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, Style style) {
         if (node == null) {
             return;
@@ -799,7 +790,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         if (!isRoot) {
             sb.append(isTail ? lastBranch : branch);
         }
-        sb.append('\n');
+        sb.append(nodeText(node)).append('\n');
 
         boolean hasLeft = node.getLeft() != null;
         boolean hasRight = node.getRight() != null;
@@ -872,4 +863,5 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         }
         return array;
     }
+    //Play with it, destroy with it, LOL!!
 }
