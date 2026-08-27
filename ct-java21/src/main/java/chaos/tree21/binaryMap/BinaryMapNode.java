@@ -2,13 +2,7 @@ package chaos.tree21.binaryMap;
 
 sealed interface BinaryMapNode<K, V, N extends BinaryMapNode<K, V, N>> permits AbstractBinaryMapNode {
 
-    K getKey();
-
-    void setKey();
-
-    V getValue();
-
-    void setValue(V value);
+    void setKey(K key);
 
     N getLeft();
 
@@ -21,4 +15,6 @@ sealed interface BinaryMapNode<K, V, N extends BinaryMapNode<K, V, N>> permits A
     N getParent();
 
     void setParent(N parent);
+
+    public void setPair(K key, V value);
 }
