@@ -43,15 +43,15 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             } else {
                 parent.setRight(newNode);
             }
-            fix_Up_from_bottom_Insertion(parent);
+            fix_Up_from_bottom_Insertion(newNode);
             size++;
             modCount++;
             cachedHashcode += val.hashCode();
+            return true;
         }
         catch (ClassCastException e){
             return false;
         }
-        return false;
     }
 
     private void fix_Up_from_bottom_Insertion(RbtNode<E> x) {
@@ -161,6 +161,14 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                 x.setParent(null);
             }
 
+            //just clearing GC but do I need let me guess
+            x.setLeft(null); //since I already removed all attachment to x to reach to x
+            x.setRight(null); //JVM GC is smart enough it will collect in GC
+            x.setParent(null); //Don't think JVM won't do. it will, even though it has reference
+            //L,R,P becoz x has become part of garbage.
+                /*
+                The lesson I got here we need to do because iterator Stability
+                 */
             size--;
             modCount++;
             cachedHashcode -= val.hashCode();
@@ -169,14 +177,105 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             return false;
         }
     }
+    private boolean isBlack(RbtNode<E> node) {
+        return node == null || node.isBlack();
+    }
 
-    private void fixDoubleBlack(RbtNode<E> node_replacer) {
+    private boolean isRed(RbtNode<E> node) {
+        return node != null && node.isRed();
+    }
 
+    private void fixDoubleBlack(RbtNode<E> x) {
+        // Bubble the "Phantom Black" weight up until we hit a Red node or the Root
+        while (x != root && isBlack(x)) {
+            RbtNode<E> parent = x.getParent();
+
+            if (x == parent.getLeft()) {
+                RbtNode<E> sibling = parent.getRight();
+
+                // Case 1: Sibling is RED
+                // We rotate to force the sibling to be BLACK, which pushes us into Case 2, 3, or 4
+                if (isRed(sibling)) {
+                    sibling.setBlack();
+                    parent.setRed();
+                    super.rotateLeft(parent);
+                    sibling = parent.getRight(); // Update sibling after rotation
+                }
+
+                // Case 2: Both of the sibling's children (nephews) are BLACK
+                if (isBlack(sibling.getLeft()) && isBlack(sibling.getRight())) {
+                    sibling.setRed();
+                    x = parent; // Push the Double-Black weight up to the parent!
+                } else {
+                    // Case 3: Sibling is BLACK, Right nephew is BLACK (Left nephew is RED)
+                    if (isBlack(sibling.getRight())) {
+                        if (sibling.getLeft() != null) sibling.getLeft().setBlack();
+                        sibling.setRed();
+                        super.rotateRight(sibling);
+                        sibling = parent.getRight(); // Update sibling
+                    }
+
+                    // Case 4: Sibling is BLACK, Right nephew is RED
+                    // This is the TERMINAL CASE. We need to fix the tree and instantly BREAK!
+                    if (parent.isRed()) sibling.setRed();
+                    else sibling.setBlack();
+
+                    parent.setBlack();
+                    if (sibling.getRight() != null) sibling.getRight().setBlack();
+                    super.rotateLeft(parent);
+
+                    break; // EARLY EXIT!
+                }
+            } else {
+                // Symmetrical cases for when 'x' is the Right child
+                RbtNode<E> sibling = parent.getLeft();
+
+                if (isRed(sibling)) {
+                    sibling.setBlack();
+                    parent.setRed();
+                    super.rotateRight(parent);
+                    sibling = parent.getLeft();
+                }
+
+                if (isBlack(sibling.getRight()) && isBlack(sibling.getLeft())) {
+                    sibling.setRed();
+                    x = parent;
+                } else {
+                    if (isBlack(sibling.getLeft())) {
+                        if (sibling.getRight() != null) sibling.getRight().setBlack();
+                        sibling.setRed();
+                        super.rotateLeft(sibling);
+                        sibling = parent.getLeft();
+                    }
+
+                    if (parent.isRed()) sibling.setRed();
+                    else sibling.setBlack();
+
+                    parent.setBlack();
+                    if (sibling.getLeft() != null) sibling.getLeft().setBlack();
+                    super.rotateRight(parent);
+
+                    break; // EARLY EXIT!
+                }
+            }
+        }
+        if (x != null) {
+            x.setBlack();
+        }
     }
 
     @Override
     public int height() {
-        return 0;
+        return calculateHeight(root);
+    }
+    private int calculateHeight(RbtNode<E> node) {
+        // Base case: null nodes have a mathematical height of -1
+        if (node == null) {
+            return -1;
+        }
+        // Recursively find the deepest path
+        return 1 + Math.max(calculateHeight(node.getLeft()), calculateHeight(node.getRight()));
+        //This operation cost thread stack.
     }
 
 }

@@ -165,18 +165,18 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public E pollFirst() {
-        if (isEmpty()) return null;
-        E first = getFirst();
-        remove(first);
-        return first;
+        if (root == null) return null;
+        E e = getFirstNode().getValue();
+        remove(e);
+        return e;
     }
 
     @Override
     public E pollLast() {
-        if (isEmpty()) return null;
-        E last = getLast();
-        remove(last);
-        return last;
+        if (root == null) return null;
+        E e = getLastNode().getValue();
+        remove(e);
+        return e;
     }
 
     @Override
@@ -192,6 +192,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     private N getFirstNode() {
+        if (root == null) return null;
         N current = root;
         while(current.getLeft() != null){
             current = current.getLeft();
@@ -221,13 +222,23 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     public Iterator<E> iterator() {
         return new Iterator<>() {
             private N nextNode = getFirstNode();
-            private final long expectedModCount = modCount;
+            private E lastReturned = null;
+            private long expectedModCount = modCount;
             @Override
             public boolean hasNext() {
                 if (modCount != expectedModCount) {
                     throw new ConcurrentModificationException();
                 }
                 return nextNode != null;
+            }
+            @Override
+            public void remove() {
+                if (lastReturned == null) {
+                    throw new IllegalStateException();
+                }
+                AbstractBinaryTreeSet.this.remove(lastReturned);
+                lastReturned = null;
+                expectedModCount = modCount;
             }
             @Override
             public E next() {
@@ -237,9 +248,9 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 if (nextNode == null) {
                     throw new NoSuchElementException();
                 }
-                E value = nextNode.getValue();
+                lastReturned = nextNode.getValue();
                 nextNode = successor(nextNode);
-                return value;
+                return lastReturned;
             }
         };
     }
@@ -263,6 +274,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     private N getLastNode() {
+        if (root == null) return null;
         N current = root;
         while(current.getRight() != null){
             current = current.getRight();
@@ -272,9 +284,10 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public Iterator<E> descendingIterator() {
-        return new Iterator<E>() {
+        return new Iterator<>() {
             private N nextNode = getLastNode();
-            private final long expectedModCount = modCount;
+            private E lastReturned = null;
+            private long expectedModCount = modCount;
             @Override
             public boolean hasNext() {
                 if (modCount != expectedModCount) {
@@ -284,6 +297,15 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             }
 
             @Override
+            public void remove() {
+                if (lastReturned == null) {
+                    throw new IllegalStateException();
+                }
+                AbstractBinaryTreeSet.this.remove(lastReturned);
+                lastReturned = null;
+                expectedModCount = modCount;
+            }
+            @Override
             public E next() {
                 if (modCount != expectedModCount) {
                     throw new ConcurrentModificationException();
@@ -291,11 +313,15 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 if (nextNode == null) {
                     throw new NoSuchElementException();
                 }
-                E value = nextNode.getValue();
+                lastReturned = nextNode.getValue();
                 nextNode = predecessor(nextNode);
-                return value;
+                return lastReturned;
             }
         };
+    }
+    @Override
+    public Spliterator<E> spliterator() {
+        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
     }
 
     @Override
@@ -500,8 +526,18 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
         @Override
         public Iterator<E> iterator() {
+            return descending ? descendingIteratorImpl() : ascendingIterator();
+        }
+
+        @Override
+        public Iterator<E> descendingIterator() {
+            return descending ? ascendingIterator() : descendingIteratorImpl();
+        }
+        private Iterator<E> ascendingIterator() {
             return new Iterator<>() {
                 private N nextNode = getStartNode();
+                private E val = null;
+                private long expectedModCount = modCount;
                 private N getStartNode() {
                     if (lo == null) return getFirstNode();
                     N curr = root;
@@ -520,22 +556,39 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
                 @Override
                 public boolean hasNext() {
+                    if (modCount != expectedModCount) {
+                        throw new ConcurrentModificationException();
+                    }
                     return nextNode != null && inRange(nextNode.getValue());
                 }
                 @Override
+                public void remove() {
+                    if (val == null) throw new IllegalStateException();
+                    AbstractBinaryTreeSet.this.remove(val);
+                    val = null;
+                    expectedModCount = modCount;
+                }
+                @Override
                 public E next() {
+                    if (modCount != expectedModCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    if (nextNode == null) {
+                        throw new NoSuchElementException();
+                    }
                     if (!hasNext()) throw new NoSuchElementException();
-                    E val = nextNode.getValue();
+                    val = nextNode.getValue();
                     nextNode = successor(nextNode);
                     return val;
                 }
             };
         }
-        @Override
-        public Iterator<E> descendingIterator() {
+
+        private Iterator<E> descendingIteratorImpl() {
             return new Iterator<E>() {
                 private N nextNode = getEndNode();
-
+                private E val = null;
+                private long expectedModCount = modCount;
                 private N getEndNode() {
                     if (hi == null) return getLastNode();
 
@@ -558,17 +611,56 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 public boolean hasNext() {
                     return nextNode != null && inRange(nextNode.getValue());
                 }
+                @Override
+                public void remove() {
+                    if (val == null) throw new IllegalStateException();
+                    AbstractBinaryTreeSet.this.remove(val);
+                    val = null;
+                    expectedModCount = modCount; // Sync it up!
+                }
 
                 @Override
                 public E next() {
+                    if (modCount != expectedModCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    if (nextNode == null) {
+                        throw new NoSuchElementException();
+                    }
                     if (!hasNext()) throw new NoSuchElementException();
-                    E val = nextNode.getValue();
+                    val = nextNode.getValue();
                     nextNode = predecessor(nextNode);
                     return val;
                 }
             };
         }
+        @Override
+        public Spliterator<E> spliterator() {
+            return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
+        }
+        @Override
+        public boolean remove(Object o) {
+            if (!contains(o)) return false; // Out of bounds or not found
+            return AbstractBinaryTreeSet.this.remove(o);
+        }
 
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            List<E> toRemove = new ArrayList<>();
+            for (E e : this) {
+                if (!c.contains(e)) toRemove.add(e);
+            }
+            boolean modified = false;
+            for (E e : toRemove) modified |= remove(e);
+            return modified;
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            boolean modified = false;
+            for (Object o : c) modified |= remove(o);
+            return modified;
+        }
         @Override
         public int size() {
             int count = 0;
@@ -594,13 +686,14 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
         @Override
         public E pollFirst() {
+            if (isEmpty()) return null;
             E e = first();
             AbstractBinaryTreeSet.this.remove(e);
             return e;
         }
 
-        @Override
         public E pollLast() {
+            if (isEmpty()) return null;
             E e = last();
             AbstractBinaryTreeSet.this.remove(e);
             return e;
@@ -652,13 +745,30 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     }
 
+    @Override
+    public String toString() {
+        if (isEmpty()) return "[]";
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            E e = it.next();
+            sb.append(e == this ? "(this Collection)" : e);
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
+        }
+        sb.append(']');
+        return sb.toString();
+    }
+
 
     @Override
     public String print() {
-        return toString(Style.ASCII);
+        return toStringBuilder(Style.ASCII);
     }
 
-    public String toString(Style style) {
+    public String toStringBuilder(Style style) {
         if (root == null) {
             return "";
         }

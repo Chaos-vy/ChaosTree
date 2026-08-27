@@ -40,11 +40,11 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             size++;
             modCount++;
             cachedHashcode += val.hashCode();
+            return true;
         }
         catch (ClassCastException e){
             return false;
         }
-        return false;
     }
 
     @Override
@@ -84,13 +84,6 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
                 } else {
                     x.getParent().setRight(replacement);
                 }
-                /*
-                just clearing GC but do I need let me guess
-                x.setLeft(null); since I already removed all attachment to x to reach to x
-                x.setRight(null); JVM GC is smart enough it will collect in GC
-                x.setParent(null); Don't think JVM won't do. it will, even though it has reference
-                L,R,P becoz x has become part of garbage.
-                 */
                 fix_Up_from_bottom(replacement.getParent());
 
             } else if (x.getParent() == null) { // when the little node has direct reach to root
@@ -106,9 +99,17 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
                 fix_Up_from_bottom(parent);
             }
 
+            //just clearing GC but do I need let me guess
+            x.setLeft(null); //since I already removed all attachment to x to reach to x
+            x.setRight(null); //JVM GC is smart enough it will collect in GC
+            x.setParent(null); //Don't think JVM won't do. it will, even though it has reference
+            //L,R,P becoz x has become part of garbage.
+                /*
+                The lesson I got here we need to do because iterator Stability
+                 */
             size--;
             modCount++;
-            cachedHashcode -= val.hashCode(); // Don't forget to remove the hash!
+            cachedHashcode -= val.hashCode();
             return true;
 
         }
