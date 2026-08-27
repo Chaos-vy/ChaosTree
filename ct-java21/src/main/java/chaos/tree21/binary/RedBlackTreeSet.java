@@ -111,7 +111,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
     @Override
     public boolean remove(Object o) {
         if (o == null) throw new NullPointerException();
-        //I am approaching the same way as of AVL tree delete. IDK will it hold true or not!!
+        //I am approaching the same way as of AVL tree delete. Reference: CLRS or take the AVL tree.
         try {
             if (isEmpty()) return false;
             @SuppressWarnings("unchecked")
@@ -166,9 +166,9 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             x.setRight(null); //JVM GC is smart enough it will collect in GC
             x.setParent(null); //Don't think JVM won't do. it will, even though it has reference
             //L,R,P becoz x has become part of garbage.
-                /*
-                The lesson I got here we need to do because iterator Stability
-                 */
+            /*
+            The lesson I got here we need to do because of iterator Stability
+            */
             size--;
             modCount++;
             cachedHashcode -= val.hashCode();
@@ -275,7 +275,51 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         }
         // Recursively find the deepest path
         return 1 + Math.max(calculateHeight(node.getLeft()), calculateHeight(node.getRight()));
-        //This operation cost thread stack.
+        //This operation cost thread stack. maximum: not more than ~60
+    }
+
+    /**
+     * Internal mathematical debugger. Validates all Red-Black structural invariants.
+     * Throws IllegalStateException if any rule is broken.
+     * These test are made to make endure the tree remains stable
+     */
+    void verifyInvariants() {
+        if (root == null) return;
+        if (root.isRed()) throw new IllegalStateException("RBT Corruption: Root is RED");
+        validateRbtRules(root, null, null);
+    }
+
+    private int validateRbtRules(RbtNode<E> node, E min, E max) {
+        if (node == null) return 1; // Null leaves have black height of 1
+
+        // Rule 1: Binary Search Tree Property
+        if (min != null && compare(node.getValue(),min) <= 0) {
+            throw new IllegalStateException("RBT Corruption: BST Violation. Node " + node.getValue() + " is <= min bound " + min);
+        }
+        if (max != null && compare(node.getValue(),max) >= 0) {
+            throw new IllegalStateException("RBT Corruption: BST Violation. Node " + node.getValue() + " is >= max bound " + max);
+        }
+
+        // Rule 2: Double Red Violation
+        if (node.isRed()) {
+            if (node.getLeft() != null && node.getLeft().isRed()) {
+                throw new IllegalStateException("RBT Corruption: Double Red! Node " + node.getValue() + " and Left Child " + node.getLeft().getValue() + " are both RED.");
+            }
+            if (node.getRight() != null && node.getRight().isRed()) {
+                throw new IllegalStateException("RBT Corruption: Double Red! Node " + node.getValue() + " and Right Child " + node.getRight().getValue() + " are both RED.");
+            }
+        }
+
+        int leftBlackHeight = validateRbtRules(node.getLeft(), min, node.getValue());
+        int rightBlackHeight = validateRbtRules(node.getRight(), node.getValue(), max);
+
+        // Rule 3: Perfect Black Height
+        if (leftBlackHeight != rightBlackHeight) {
+            throw new IllegalStateException("RBT Corruption: Black Height Mismatch at Node " + node.getValue() + 
+                "! Left BH=" + leftBlackHeight + ", Right BH=" + rightBlackHeight);
+        }
+
+        return leftBlackHeight + (node.isRed() ? 0 : 1);
     }
 
 }
