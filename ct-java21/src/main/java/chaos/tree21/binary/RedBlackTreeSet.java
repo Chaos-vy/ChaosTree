@@ -12,46 +12,39 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
      * </ol>
      */
     @Override
-    public boolean add(Object o) {
-        if(o == null) throw new NullPointerException();
-        try {
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            if(root == null){
-                root = new RbtNode<>(val);
-                root.setBlack();//A RBT rule must be Obeyed So I put the definition of RBT for not to forget.
-                size++;
-                cachedHashcode += val.hashCode();
-                modCount++;
-                return true;
-            }
-            RbtNode<E> parent = null;
-            RbtNode<E> curr = root;
-            int cmp = 0;
-            while (curr != null) {
-                parent = curr;
-                cmp = compare(val, curr.getValue());
-                if (cmp == 0) return false;
-                else if (cmp < 0) curr = curr.getLeft();
-                else curr = curr.getRight();
-            }
-            //Remember every node in RBT I made its default color is RED... true.... RED.....
-            RbtNode<E> newNode = new RbtNode<>(val);
-            newNode.setParent(parent);
-            if (cmp < 0) {
-                parent.setLeft(newNode);
-            } else {
-                parent.setRight(newNode);
-            }
-            fix_Up_from_bottom_Insertion(newNode);
+    public boolean add(E val) {
+        if (root == null) {
+            compare(val, val);
+            root = new RbtNode<>(val);
+            root.setBlack();//A RBT rule must be Obeyed So I put the definition of RBT for not to forget.
             size++;
-            modCount++;
             cachedHashcode += val.hashCode();
+            modCount++;
             return true;
         }
-        catch (ClassCastException e){
-            return false;
+        RbtNode<E> parent = null;
+        RbtNode<E> curr = root;
+        int cmp = 0;
+        while (curr != null) {
+            parent = curr;
+            cmp = compare(val, curr.getValue());
+            if (cmp == 0) return false;
+            else if (cmp < 0) curr = curr.getLeft();
+            else curr = curr.getRight();
         }
+        //Remember every node in RBT I made its default color is RED... true.... RED.....
+        RbtNode<E> newNode = new RbtNode<>(val);
+        newNode.setParent(parent);
+        if (cmp < 0) {
+            parent.setLeft(newNode);
+        } else {
+            parent.setRight(newNode);
+        }
+        fix_Up_from_bottom_Insertion(newNode);
+        size++;
+        modCount++;
+        cachedHashcode += val.hashCode();
+        return true;
     }
 
     private void fix_Up_from_bottom_Insertion(RbtNode<E> x) {
@@ -110,73 +103,69 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
 
     @Override
     public boolean remove(Object o) {
-        if (o == null) throw new NullPointerException();
         //I am approaching the same way as of AVL tree delete. Reference: CLRS or take the AVL tree.
-        try {
-            if (isEmpty()) return false;
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            RbtNode<E> x = nodeFinder(val);
-            if (x == null) return false;
+        if (isEmpty()) return false;
+        @SuppressWarnings("unchecked")
+        E val = (E) o;
+        RbtNode<E> x = nodeFinder(val);
+        if (x == null) return false;
 
-            if (x.getLeft() != null && x.getRight() != null) {
-                RbtNode<E> successor = x.getRight();
-                while (successor.getLeft() != null) {
-                    successor = successor.getLeft();
-                }
-                x.setValue(successor.getValue());
-                x = successor;
+        if (x.getLeft() != null && x.getRight() != null) {
+            RbtNode<E> successor = x.getRight();
+            while (successor.getLeft() != null) {
+                successor = successor.getLeft();
             }
-
-            //Guaranteed one child or none
-            RbtNode<E> node_replacer = x.getLeft() != null ? x.getLeft() : x.getRight();
-            boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
-
-            if (node_replacer != null) {
-                node_replacer.setParent(x.getParent());
-                if (x.getParent() == null) {
-                    root = node_replacer;
-                } else if (x == x.getParent().getLeft()) {
-                    x.getParent().setLeft(node_replacer);
-                } else {
-                    x.getParent().setRight(node_replacer);
-                }
-
-                // If the deleted node was Black, the tree lost a black weight. Fix it!
-                if (deletedNodeWasBlack) {
-                    fixDoubleBlack(node_replacer);
-                }
-            } else if (x.getParent() == null) {
-                root = null; // The tree is now empty
-            } else {
-                if (deletedNodeWasBlack) {
-                    fixDoubleBlack(x);
-                }
-
-                if (x == x.getParent().getLeft()) {
-                    x.getParent().setLeft(null);
-                } else {
-                    x.getParent().setRight(null);
-                }
-                x.setParent(null);
-            }
-
-            //just clearing GC but do I need let me guess
-            x.setLeft(null); //since I already removed all attachment to x to reach to x
-            x.setRight(null); //JVM GC is smart enough it will collect in GC
-            x.setParent(null); //Don't think JVM won't do. it will, even though it has reference
-            //L,R,P becoz x has become part of garbage.
-            /*
-            The lesson I got here we need to do because of iterator Stability
-            */
-            size--;
-            modCount++;
-            cachedHashcode -= val.hashCode();
-            return true;
-        } catch (ClassCastException e) {
-            return false;
+            x.setValue(successor.getValue());
+            x = successor;
         }
+
+        //Guaranteed one child or none
+        RbtNode<E> node_replacer = x.getLeft() != null ? x.getLeft() : x.getRight();
+        boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
+
+        if (node_replacer != null) {
+            node_replacer.setParent(x.getParent());
+            if (x.getParent() == null) {
+                root = node_replacer;
+            } else if (x == x.getParent().getLeft()) {
+                x.getParent().setLeft(node_replacer);
+            } else {
+                x.getParent().setRight(node_replacer);
+            }
+
+            // If the deleted node was Black, the tree lost a black weight. Fix it!
+            if (deletedNodeWasBlack) {
+                fixDoubleBlack(node_replacer);
+            }
+        } else if (x.getParent() == null) {
+            root = null; // The tree is now empty
+        } else {
+            if (deletedNodeWasBlack) {
+                fixDoubleBlack(x);
+            }
+
+            if (x == x.getParent().getLeft()) {
+                x.getParent().setLeft(null);
+            } else {
+                x.getParent().setRight(null);
+            }
+            x.setParent(null);
+        }
+
+        //just clearing GC but do I need let me guess
+        x.setLeft(null); //since I already removed all attachment to x to reach to x
+        x.setRight(null); //JVM GC is smart enough it will collect in GC
+        x.setParent(null); //Don't think JVM won't do. it will, even though it has reference
+        //L,R,P becoz x has become part of garbage.
+        /*
+        The lesson I got here we need to do because of iterator Stability
+        */
+        size--;
+        modCount++;
+        cachedHashcode -= val.hashCode();
+        return true;
     }
+
     private boolean isBlack(RbtNode<E> node) {
         return node == null || node.isBlack();
     }
@@ -264,20 +253,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         }
     }
 
-    @Override
-    public int height() {
-        return calculateHeight(root);
-    }
-    private int calculateHeight(RbtNode<E> node) {
-        // Base case: null nodes have a mathematical height of -1
-        if (node == null) {
-            return -1;
-        }
-        // Recursively find the deepest path
-        return 1 + Math.max(calculateHeight(node.getLeft()), calculateHeight(node.getRight()));
-        //This operation cost thread stack. maximum: not more than ~60
-    }
-
     /**
      * Internal mathematical debugger. Validates all Red-Black structural invariants.
      * Throws IllegalStateException if any rule is broken.
@@ -293,10 +268,10 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         if (node == null) return 1; // Null leaves have black height of 1
 
         // Rule 1: Binary Search Tree Property
-        if (min != null && compare(node.getValue(),min) <= 0) {
+        if (min != null && compare(node.getValue(), min) <= 0) {
             throw new IllegalStateException("RBT Corruption: BST Violation. Node " + node.getValue() + " is <= min bound " + min);
         }
-        if (max != null && compare(node.getValue(),max) >= 0) {
+        if (max != null && compare(node.getValue(), max) >= 0) {
             throw new IllegalStateException("RBT Corruption: BST Violation. Node " + node.getValue() + " is >= max bound " + max);
         }
 
@@ -315,8 +290,8 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
 
         // Rule 3: Perfect Black Height
         if (leftBlackHeight != rightBlackHeight) {
-            throw new IllegalStateException("RBT Corruption: Black Height Mismatch at Node " + node.getValue() + 
-                "! Left BH=" + leftBlackHeight + ", Right BH=" + rightBlackHeight);
+            throw new IllegalStateException("RBT Corruption: Black Height Mismatch at Node " + node.getValue() +
+                    "! Left BH=" + leftBlackHeight + ", Right BH=" + rightBlackHeight);
         }
 
         return leftBlackHeight + (node.isRed() ? 0 : 1);

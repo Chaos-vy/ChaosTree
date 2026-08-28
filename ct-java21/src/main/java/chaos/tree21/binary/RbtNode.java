@@ -9,13 +9,25 @@ final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
     Every New Node is default == RED ==
      */
     private boolean red;
+
     RbtNode(E value) {
         super(value);
         this.red = true;
     }
 
-    public boolean isRed() { return red; }
-    public boolean isBlack() { return !red; }
-    public void setRed() { this.red = true; }
-    public void setBlack() { this.red = false; }
+    public boolean isRed() {
+        return red;
+    }
+
+    public boolean isBlack() {
+        return !red;
+    }
+
+    public void setRed() {
+        this.red = true;
+    }
+
+    public void setBlack() {
+        this.red = false;
+    }
 }
