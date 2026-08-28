@@ -7,7 +7,7 @@ public final class AvlMapNode<K, V> extends AbstractBinaryMapNode<K, V, AvlMapNo
         super(key, value);
     }
 
-    public int getHeight(){
+    public int getHeight() {
         return height;
     }
 
