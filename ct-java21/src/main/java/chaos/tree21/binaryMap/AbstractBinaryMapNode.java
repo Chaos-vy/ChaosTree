@@ -23,6 +23,11 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
     }
 
     @Override
+    public void setKey(K key) {
+        this.key = key;
+    }
+
+    @Override
     public V getValue() {
         return value;
     }
@@ -32,11 +37,6 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
         V old_value = this.value;
         this.value = value;
         return old_value;
-    }
-
-    @Override
-    public void setKey(K key) {
-        this.key = key;
     }
 
     @Override
@@ -85,6 +85,7 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
     public String toString() {
         return key + "=" + value; // Standard Java Map formatting
     }
+
     public void setPair(K key, V value) {
         this.key = key;
         this.value = value;
