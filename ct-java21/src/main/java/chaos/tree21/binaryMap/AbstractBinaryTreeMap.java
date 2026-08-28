@@ -184,4 +184,57 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         }
         return p;
     }
+
+    @Override
+    public V get(Object o) {
+        if(isEmpty()) return null;
+        try {
+            @SuppressWarnings("unchecked")
+            K k = (K) o;
+            N node = nodeFinder(k);
+            return node==null? null: node.getValue();
+        }
+        catch (ClassCastException | NullPointerException e){
+            return null;
+        }
+    }
+
+    protected void rotateLeft(N p) {
+        N r = p.getRight();
+        p.setRight(r.getLeft());
+        if (r.getLeft() != null) {
+            r.getLeft().setParent(p);
+        }
+        r.setParent(p.getParent());
+        if (p.getParent() == null) {
+            root = r;
+        } else if (p.getParent().getLeft() == p) {
+            p.getParent().setLeft(r);
+        } else {
+            p.getParent().setRight(r);
+        }
+
+        r.setLeft(p);
+        p.setParent(r);
+    }
+
+    protected void rotateRight(N p) {
+        N l = p.getLeft();
+        p.setLeft(l.getRight());
+        if (l.getRight() != null) {
+            l.getRight().setParent(p);
+        }
+        l.setParent(p.getParent());
+        if (p.getParent() == null) {
+            root = l;
+        } else if (p.getParent().getRight() == p) {
+            p.getParent().setRight(l);
+        } else {
+            p.getParent().setLeft(l);
+        }
+        l.setRight(p);
+        p.setParent(l);
+    }
+
+
 }
