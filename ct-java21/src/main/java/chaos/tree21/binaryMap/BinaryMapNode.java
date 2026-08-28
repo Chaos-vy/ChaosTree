@@ -16,5 +16,5 @@ sealed interface BinaryMapNode<K, V, N extends BinaryMapNode<K, V, N>> permits A
 
     void setParent(N parent);
 
-    public void setPair(K key, V value);
+    void setPair(K key, V value);
 }
