@@ -8,10 +8,11 @@ final class AvlNode<E> extends AbstractBinaryNode<E, AvlNode<E>> {
         super(value);
     }
 
-    int getHeight(){
+    int getHeight() {
         return height;
     }
-    void setHeight(int height){
+
+    void setHeight(int height) {
         this.height = height;
     }
 }

@@ -1,17 +1,15 @@
-package chaos.tree21.binary;
+package chaos.tree21.binaryMap;
 
-final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
-
+public final class RbtMapNode<K, V> extends AbstractBinaryMapNode<K, V, RbtMapNode<K, V>> {
     /*
-    Removed ENUM for Object header with simple boolean hack
     RED === True === RED
     BLACK === False === BLACK
     Every New Node is default == RED ==
      */
     private boolean red;
 
-    RbtNode(E value) {
-        super(value);
+    RbtMapNode(K key, V value) {
+        super(key, value);
         this.red = true;
     }
 

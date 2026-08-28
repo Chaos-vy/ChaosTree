@@ -4,7 +4,19 @@ import chaos.tree21.core.SearchTreeSet;
 import chaos.tree21.core.Style;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Stream;
 
 /**
@@ -17,11 +29,11 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         permits AvlTreeSet, RedBlackTreeSet {
 
 
+    protected final Comparator<? super E> comparator;
     protected N root;
     protected int size = 0;
     protected long modCount = 0;
     protected int cachedHashcode = 0;
-    protected final Comparator<? super E> comparator;
 
 
     protected AbstractBinaryTreeSet() {
@@ -74,23 +86,19 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public boolean contains(Object o) {
-        if(root == null || o == null) return false;
-        try {
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            return nodeFinder(val) != null;
-        } catch (ClassCastException e) {
-            return false;
-        }
+        @SuppressWarnings("unchecked")
+        E val = (E) o;
+        return nodeFinder(val) != null;
     }
+
     //Prior to work of NPE must be done
-    protected N nodeFinder(E val){
-        if(root == null) return null;
+    protected N nodeFinder(E val) {
+        if (root == null) return null;
         N current = root;
-        int cmp =0;
-        while (current != null){
+        int cmp = 0;
+        while (current != null) {
             cmp = compare(val, current.getValue());
-            if(cmp == 0) return current;
+            if (cmp == 0) return current;
             else if (cmp > 0) current = current.getRight();
             else current = current.getLeft();
         }
@@ -99,7 +107,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public E floor(E e) {
-        if (root == null || e == null) return null;
+        if (root == null) return null;
         N current = root;
         N prevCurrent = null;
         while (current != null) {
@@ -116,7 +124,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public E ceiling(E e) {
-        if (root == null || e == null) return null;
+        if (root == null) return null;
         N current = root;
         N prevCurrent = null;
         while (current != null) {
@@ -134,7 +142,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public E higher(E e) {
-        if (root == null || e == null) return null;
+        if (root == null) return null;
         N current = root;
         N prevNode = null;
         while (current != null) {
@@ -150,7 +158,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public E lower(E e) {
-        if (root == null || e == null) return null;
+        if (root == null) return null;
         N current = root;
         N prevNode = null;
         while (current != null) {
@@ -195,7 +203,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     private N getFirstNode() {
         if (root == null) return null;
         N current = root;
-        while(current.getLeft() != null){
+        while (current.getLeft() != null) {
             current = current.getLeft();
         }
         return current;
@@ -225,6 +233,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             private N nextNode = getFirstNode();
             private E lastReturned = null;
             private long expectedModCount = modCount;
+
             @Override
             public boolean hasNext() {
                 if (modCount != expectedModCount) {
@@ -232,6 +241,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 }
                 return nextNode != null;
             }
+
             @Override
             public void remove() {
                 if (lastReturned == null) {
@@ -241,6 +251,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 lastReturned = null;
                 expectedModCount = modCount;
             }
+
             @Override
             public E next() {
                 if (modCount != expectedModCount) {
@@ -277,7 +288,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     private N getLastNode() {
         if (root == null) return null;
         N current = root;
-        while(current.getRight() != null){
+        while (current.getRight() != null) {
             current = current.getRight();
         }
         return current;
@@ -289,6 +300,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             private N nextNode = getLastNode();
             private E lastReturned = null;
             private long expectedModCount = modCount;
+
             @Override
             public boolean hasNext() {
                 if (modCount != expectedModCount) {
@@ -306,6 +318,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 lastReturned = null;
                 expectedModCount = modCount;
             }
+
             @Override
             public E next() {
                 if (modCount != expectedModCount) {
@@ -320,6 +333,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             }
         };
     }
+
     @Override
     public Spliterator<E> spliterator() {
         return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
@@ -345,7 +359,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     @Override
     public boolean removeAll(Collection<?> collection) {
         boolean modified = false;
-        for(Object o : collection) if(remove(o)) modified = true;
+        for (Object o : collection) if (remove(o)) modified = true;
         return modified;
     }
 
@@ -453,6 +467,129 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return tailSet(fromElement, true);
     }
 
+    @Override
+    public String toString() {
+        if (isEmpty()) return "[]";
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            E e = it.next();
+            sb.append(e == this ? "(this Collection)" : e);
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
+        }
+        sb.append(']');
+        return sb.toString();
+    }
+
+    @Override
+    public String display(Style style) {
+        if (root == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        buildString(root, "", true, true, sb, style);
+        return sb.toString();
+    }
+
+    private String nodeText(N node) {
+        return String.valueOf(node.getValue());
+    }
+
+    private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, Style style) {
+        if (node == null) {
+            return;
+        }
+
+        String branch = (style == Style.UNICODE) ? "├── " : "+-- ";
+        String lastBranch = (style == Style.UNICODE) ? "└── " : "\\-- ";
+        String vertical = (style == Style.UNICODE) ? "│   " : "|   ";
+        String space = "    ";
+
+        sb.append(prefix);
+        if (!isRoot) {
+            sb.append(isTail ? lastBranch : branch);
+        }
+        sb.append(nodeText(node)).append('\n');
+
+        boolean hasLeft = node.getLeft() != null;
+        boolean hasRight = node.getRight() != null;
+
+        if (!hasLeft && !hasRight) {
+            return;
+        }
+
+        String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
+
+        if (hasLeft && hasRight) {
+            buildString(node.getLeft(), childPrefix, false, false, sb, style);
+            buildString(node.getRight(), childPrefix, true, false, sb, style);
+
+        } else if (hasLeft) {
+            buildString(node.getLeft(), childPrefix, true, false, sb, style);
+
+        } else {
+            buildString(node.getRight(), childPrefix, true, false, sb, style);
+        }
+    }
+
+    @Override
+    public void addFirst(E e) {
+        throw new UnsupportedOperationException("Cannot force addFirst on a mathematically sorted tree.");
+    }
+
+    @Override
+    public void addLast(E e) {
+        throw new UnsupportedOperationException("Cannot force addLast on a mathematically sorted tree.");
+    }
+
+    @Override
+    public int hashCode() {
+        return cachedHashcode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Set<?> c)) return false;
+        if (c.size() != size()) return false;
+
+        try {
+            return containsAll(c);
+        } catch (ClassCastException | NullPointerException unused) {
+            return false;
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] a) {
+        if (a.length < size) {
+            a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+        }
+        int i = 0;
+        Object[] result = a;
+        for (E e : this) {
+            result[i++] = e;
+        }
+        if (a.length > size) {
+            a[size] = null;
+        }
+        return a;
+    }
+
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        int i = 0;
+        for (E e : this) {
+            array[i++] = e;
+        }
+        return array;
+    }
+
     protected final class TreeSubSet extends AbstractSet<E> implements NavigableSet<E> {
         private final E lo;
         private final boolean loInclusive;
@@ -470,6 +607,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             this.hiInclusive = hiInclusive;
             this.descending = descending;
         }
+
         private boolean inRange(E e) {
             if (lo != null) {
                 int cmp = compare(e, lo);
@@ -481,6 +619,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             }
             return true;
         }
+
         @Override
         public boolean add(E e) {
             if (!inRange(e)) {
@@ -491,13 +630,9 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
         @Override
         public boolean contains(Object o) {
-            try {
-                @SuppressWarnings("unchecked")
-                E e = (E) o;
-                return inRange(e) && AbstractBinaryTreeSet.this.contains(e);
-            } catch (ClassCastException ex) {
-                return false;
-            }
+            @SuppressWarnings("unchecked")
+            E e = (E) o;
+            return inRange(e) && AbstractBinaryTreeSet.this.contains(e);
         }
 
 
@@ -534,11 +669,13 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         public Iterator<E> descendingIterator() {
             return descending ? ascendingIterator() : descendingIteratorImpl();
         }
+
         private Iterator<E> ascendingIterator() {
             return new Iterator<>() {
                 private N nextNode = getStartNode();
                 private E val = null;
                 private long expectedModCount = modCount;
+
                 private N getStartNode() {
                     if (lo == null) return getFirstNode();
                     N curr = root;
@@ -562,6 +699,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                     }
                     return nextNode != null && inRange(nextNode.getValue());
                 }
+
                 @Override
                 public void remove() {
                     if (val == null) throw new IllegalStateException();
@@ -569,6 +707,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                     val = null;
                     expectedModCount = modCount;
                 }
+
                 @Override
                 public E next() {
                     if (modCount != expectedModCount) {
@@ -590,6 +729,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 private N nextNode = getEndNode();
                 private E val = null;
                 private long expectedModCount = modCount;
+
                 private N getEndNode() {
                     if (hi == null) return getLastNode();
 
@@ -612,6 +752,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 public boolean hasNext() {
                     return nextNode != null && inRange(nextNode.getValue());
                 }
+
                 @Override
                 public void remove() {
                     if (val == null) throw new IllegalStateException();
@@ -635,10 +776,12 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 }
             };
         }
+
         @Override
         public Spliterator<E> spliterator() {
             return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
         }
+
         @Override
         public boolean remove(Object o) {
             if (!contains(o)) return false; // Out of bounds or not found
@@ -662,6 +805,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             for (Object o : c) modified |= remove(o);
             return modified;
         }
+
         @Override
         public int size() {
             int count = 0;
@@ -712,7 +856,8 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
         @Override
         public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-            if (!inRange(fromElement) || !inRange(toElement)) throw new IllegalArgumentException("Requested bounds are outside current window");
+            if (!inRange(fromElement) || !inRange(toElement))
+                throw new IllegalArgumentException("Requested bounds are outside current window");
             return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, descending);
         }
 
@@ -745,123 +890,6 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
 
     }
-
-    @Override
-    public String toString() {
-        if (isEmpty()) return "[]";
-        StringBuilder sb = new StringBuilder();
-        sb.append('[');
-        Iterator<E> it = iterator();
-        while (it.hasNext()) {
-            E e = it.next();
-            sb.append(e == this ? "(this Collection)" : e);
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        sb.append(']');
-        return sb.toString();
-    }
-
-    @Override
-    public String display(Style style) {
-        if (root == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        buildString(root, "", true, true, sb, style);
-        return sb.toString();
-    }
-
-    private String nodeText(N node) {
-        return String.valueOf(node.getValue());
-    }
-    private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, Style style) {
-        if (node == null) {
-            return;
-        }
-
-        String branch = (style == Style.UNICODE) ? "├── " : "+-- ";
-        String lastBranch = (style == Style.UNICODE) ? "└── " : "\\-- ";
-        String vertical = (style == Style.UNICODE) ? "│   " : "|   ";
-        String space = "    ";
-
-        sb.append(prefix);
-        if (!isRoot) {
-            sb.append(isTail ? lastBranch : branch);
-        }
-        sb.append(nodeText(node)).append('\n');
-
-        boolean hasLeft = node.getLeft() != null;
-        boolean hasRight = node.getRight() != null;
-
-        if (!hasLeft && !hasRight) {
-            return;
-        }
-
-        String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
-
-        if (hasLeft && hasRight) {
-            buildString(node.getLeft(), childPrefix, false, false, sb, style);
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
-
-        } else if (hasLeft) {
-            buildString(node.getLeft(), childPrefix, true, false, sb, style);
-
-        } else {
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
-        }
-    }
-
-    @Override
-    public void addFirst(E e) {
-        throw new UnsupportedOperationException("Cannot force addFirst on a mathematically sorted tree.");
-    }
-
-    @Override
-    public void addLast(E e) {
-        throw new UnsupportedOperationException("Cannot force addLast on a mathematically sorted tree.");
-    }
-    @Override
-    public int hashCode() {
-        return cachedHashcode;
-    }
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Set<?> c)) return false;
-        if (c.size() != size()) return false;
-
-        try {
-            return containsAll(c);
-        } catch (ClassCastException | NullPointerException unused) {
-            return false;
-        }
-    }
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T[] toArray(T[] a) {
-        if (a.length < size) {
-            a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
-        }
-        int i = 0;
-        Object[] result = a;
-        for (E e : this) {
-            result[i++] = e;
-        }
-        if (a.length > size) {
-            a[size] = null;
-        }
-        return a;
-    }
-    @Override
-    public Object[] toArray() {
-        Object[] array = new Object[size];
-        int i = 0;
-        for (E e : this) {
-            array[i++] = e;
-        }
-        return array;
-    }
     //Play with it, destroy with it, LOL!!
+
 }
