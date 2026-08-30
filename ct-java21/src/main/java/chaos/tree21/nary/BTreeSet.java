@@ -3,38 +3,37 @@ package chaos.tree21.nary;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
+public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
 
     /**
-     Reference used CLRS and day-dreaming structure also took the help with Gemini and ChatGPT
-     to understand the concept.They told about wavy curve way. to read the Sql lite code.
-     So what I got islet's make up
-     we just have to fill the first leaf
-     Let's take an example target to fill only is 75% in my case
-     here for example I took it as 2.
-     I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
-                        L   L   R   L   L   R   L
-     A pattern can now be seen
-                 [ 30 ]           <-- rightEdge[1] (Root)
-                /      \
-            [10, 20]  [40, 50]     <-- rightEdge[0] (Leaf)
-     A same patter will be observed for the ht too as well when the root get's full
-     60 is pulled. It's the routing key! It goes into the parent (rightEdge[1]).
-     70, 80 go into the new Leaf (rightEdge[0]).
-     The tree now looks like this:
-
-                [ 30 , 60 ]             <-- rightEdge[1] is now FULL!
-               /     |     \
-         [10, 20] [40, 50] [70, 80]    <-- rightEdge[0] is FULL!
-     as I will put 90 it willl increase ht to +1 to 2.
-     TODO: Don't forgo parent linking.
-     Supported at creation from Constructor
-     The same way for B+Tree but I need to map routing key in diff way and also provide next and prev!!
-     The point by metioning here of B+tree I am not gonna go provide any docs there it may be in comment too.
-     I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
-                        L  LR   L  LR   L  LR   L
-     A lecture can help you visualize Jenny's Lecture.
+     * Reference used CLRS and day-dreaming structure also took the help with Gemini and ChatGPT
+     * to understand the concept.They told about wavy curve way. to read the SQL lite code.
+     * So what I got is, let's make up I will also draft ADR too.
+     * we just have to fill the first leaf
+     * Let's take an example target to fill only is 75% in my case
+     * here for example I took it as 2 as targetkey.
+     * I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
+     *                    L   L   R   L   L   R   L
+     * A pattern can now be seen
+     *              [ 30 ]           <-- rightEdge[1] (Root)
+     *             /      \
+     *         [10, 20]  [40, 50]     <-- rightEdge[0] (Leaf)
+     * A same patter will be observed for the ht too as well when the root get's full
+     * 60 is pulled. It's the routing key going into the parent (rightEdge[1]).
+     * 70, 80 go into the new Leaf (rightEdge[0]).
+     * The tree now looks like this:
+     *              [ 30 , 60 ]             <-- rightEdge[1] is now FULL!
+     *             /     |     \
+     *      [10, 20] [40, 50] [70, 80]    <-- rightEdge[0] is FULL!
+     * as I will put 90 it willl increase ht to +1 to 2.
+     * TODO: Don't forgo parent linking.
+     * Supported at creation from Constructor
+     * The same way for B+Tree but I need to map routing key in diff way and also provide next and prev!!
+     * The point by mentioning here of B+tree I am not gonna go provide any docs there it may be in comment too.
+     * I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
+     *                    L  LR   L  LR   L  LR   L
+     * A lecture can help you visualize Jenny's Lecture.
      */
     public void buildFromSorted(Iterator<? extends E> it, float fillFactor) {
         // Calculate the future mighty chaos target (e.g., 0.75 * 63 = 47 keys per node)
@@ -57,8 +56,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
                 // 1. FAST APPEND: Shove the data into the leaf!
                 rightLeaf.keys[rightLeaf.keyCount++] = it.next();
                 size++;
-            }
-            else {
+            } else {
                 // The VERY NEXT element acts as the routing key up above!
                 E routingKey = it.next();
                 size++;
@@ -97,6 +95,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
         // allow the right-most edge to be underfull immediately after a bulk load.
         // Future inserts will naturally fix it!
     }
+
     @Override
     public boolean add(E e) {
         if (root == null) {
@@ -214,6 +213,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
         sibling.keyCount--;
         starving.keyCount++;
     }
+
     private void borrowRight(BTreeNode<E> parent, int childIdx, BTreeNode<E> starving, BTreeNode<E> sibling) {
         //  Pull the Parent's routing key DOWN into the end of the starving node
         starving.keys[starving.keyCount] = parent.keys[childIdx];
@@ -298,12 +298,10 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
             if (leftSibling != null && leftSibling.keyCount > minKeys) {
                 borrowLeft(parent, childIdx, leftSibling, current);
                 break; // Rebalance complete!
-            }
-            else if (rightSibling != null && rightSibling.keyCount > minKeys) {
+            } else if (rightSibling != null && rightSibling.keyCount > minKeys) {
                 borrowRight(parent, childIdx, current, rightSibling);
                 break; // Rebalance complete!
-            }
-            else {
+            } else {
                 // Must Merge (Smasher)
                 if (leftSibling != null) {
                     mergeNodes(parent, childIdx - 1, leftSibling, current);
@@ -353,6 +351,4 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
 
         parent.keyCount--;
     }
-
-
 }

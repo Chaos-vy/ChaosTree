@@ -1,10 +1,13 @@
 package chaos.tree21.nary;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+
 /*
-I prioritize sometime DOD over OOD
+I prioritize mostly DOD over OOD
  */
-public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<E>>{
+public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<E>> {
 
     /*
     Yeah, a self varName. As the name suggest this Compaction count only works during deletion
@@ -12,9 +15,99 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      */
     private transient int chaosCompaction = 0; // Tracks ghost routing keys
 
-    public float getCompactionRatio() {
+    public BPlusTreeSet(int degree, Comparator<? super E> comparator) {
+        super(degree, comparator);
+    }
+
+    /*
+    Contributors here can track compaction ratio.
+    there must not be extensive branching or use of any such library it may be part of compaction and maybe not in the future.
+     */
+    private float getCompactionRatio() {
         if (size == 0) return 0.0f;
         return (float) chaosCompaction / size;
+    }
+
+    public boolean compactTree() {
+        // If the tree is heavily ghosted, I rebuild it from scratch!
+        if (getCompactionRatio() > 0.5f) {
+
+            // (Because it only walks the leaves, it completely ignores all internal ghosts!) I also assume the GC will be there
+            Iterator<E> cleanData = this.iterator();
+
+            // Swap of new one
+            BPlusTreeSet<E> newTree = new BPlusTreeSet<>(this.degree, this.comparator());
+            newTree.buildFromSorted(cleanData, 0.90f); // Pack to 90% it is hardcoded compaction from here
+            this.root = newTree.root;
+            this.chaosCompaction = 0;
+            this.size = newTree.size;
+            return true;
+        }
+        return false;
+    }
+
+    public void buildFromSorted(Iterator<? extends E> it, float fillFactor) {
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
+
+        @SuppressWarnings("unchecked")
+        BPlusTreeNode<E>[] rightEdge = new BPlusTreeNode[64];
+
+        int height = 0;
+        rightEdge[0] = createNode(degree, true);
+        root = rightEdge[0];
+
+        while (it.hasNext()) {
+            BPlusTreeNode<E> rightLeaf = rightEdge[0];
+
+            if (rightLeaf.keyCount < targetKeys) {//The diff!!
+                rightLeaf.keys[rightLeaf.keyCount++] = it.next();
+                size++;
+            } else {
+                // The VERY NEXT element is our routing key.
+                // We need to pull it from the iterator, but we will duplicate it later!
+                E routingKey = it.next();
+                size++;
+
+                int level = 1;
+                while (level <= height && rightEdge[level].keyCount == targetKeys) {
+                    level++;
+                }
+
+                // Height Crisis
+                if (level > height) {
+                    height++;
+                    BPlusTreeNode<E> newRoot = createNode(degree, false);
+                    newRoot.child[0] = rightEdge[height - 1];
+                    rightEdge[height - 1].parent = newRoot;
+
+                    rightEdge[height] = newRoot;
+                    root = newRoot;
+                }
+
+                // Drop the routing key COPY into the internal node!
+                BPlusTreeNode<E> targetNode = rightEdge[level];
+                targetNode.keys[targetNode.keyCount++] = routingKey;
+
+                // 3. REBUILD DOWNWARD
+                for (int i = level - 1; i >= 0; i--) {
+                    BPlusTreeNode<E> newNode = createNode(degree, i == 0);
+                    if (i == 0) {
+                        BPlusTreeNode<E> oldLeaf = rightEdge[0];
+                        oldLeaf.next = newNode;
+                        newNode.prev = oldLeaf;
+                    }
+
+                    rightEdge[i + 1].child[rightEdge[i + 1].keyCount] = newNode;
+                    newNode.parent = rightEdge[i + 1];
+
+                    rightEdge[i] = newNode;
+                }
+
+                // Because B+Tree stores all actual data in the leaves,
+                // the routing key we just pushed UP must also be pushed DOWN into the new empty leaf!
+                rightEdge[0].keys[rightEdge[0].keyCount++] = routingKey;
+            }
+        }
     }
 
     @Override
@@ -75,17 +168,17 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             sibling.keyCount = degree;
             // Shift right-half keys (degree keys) to sibling
             System.arraycopy(child.keys, degree, sibling.keys, 0, degree);
-            // GC Cleanup TODO: in Btree set: done
+            // GC Cleanup
             Arrays.fill(child.keys, degree, child.keyCount, null);
             child.keyCount = degree;
             //  Wire up the next and prev pointer!!
-            BPlusTreeNode<E> childNext = child.getNext();
-            sibling.setNext(childNext);
+            BPlusTreeNode<E> childNext = child.next;
+            sibling.next = childNext;
             if (childNext != null) {
-                childNext.setPrev(sibling);
+                childNext.prev = sibling;
             }
-            sibling.setPrev(child); // Sibling points back to child
-            child.setNext(sibling); // Child points forward to sibling
+            sibling.prev = child; // Sibling points back to child
+            child.next = sibling; // Child points forward to sibling
             //  Shift parent arrays
             System.arraycopy(parent.child, childIdx + 1, parent.child, childIdx + 2, parent.keyCount - childIdx);
             parent.setChild(childIdx + 1, sibling);
@@ -118,6 +211,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         }
         parent.keyCount++;
     }
+
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
@@ -125,10 +219,10 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
         BPlusTreeNode<E> current = root;
         E e = (E) o;
-        boolean createsGhost = false;
+        E ghost = null;
         while (!current.isLeaf()) {
             int idx = searchNode(current, e);
-            createsGhost = idx >= 0;
+            ghost = (idx >= 0) ? (E) current.keys[idx] : ghost;
             int childIdx = (idx >= 0) ? idx + 1 : ~idx;
             current = current.child[childIdx];
         }
@@ -137,6 +231,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         int idx = searchNode(current, e);
         if (idx < 0) return false; // Key does not exist
 
+        // If I deleted the 0th index, it was likely acting as a routing key higher up!
+        // We leave the routing key alone (Ghost Delete) but flag the compaction engine!
+        if (ghost != null && compare(ghost, (E) current.keys[idx]) == 0) {
+            chaosCompaction++;
+        }
         /*
         GHOST DELETE IN THE LEAF
         means I do not go up traversing deleting the route key.
@@ -146,10 +245,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         current.keyCount--;
         size--;
         modCount++;
-
-        // If I deleted the 0th index, it was likely acting as a routing key higher up!
-        // We leave the routing key alone (Ghost Delete) but flag the compaction engine!
-        if (createsGhost) chaosCompaction++;
 
 
         // 4. REBALANCE PHASE (Bottom-Up)
@@ -167,12 +262,10 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (leftSibling != null && leftSibling.keyCount > minKeys) {
                 borrowLeft(parent, childIdx, leftSibling, current);
                 break;
-            }
-            else if (rightSibling != null && rightSibling.keyCount > minKeys) {
+            } else if (rightSibling != null && rightSibling.keyCount > minKeys) {
                 borrowRight(parent, childIdx, current, rightSibling);
                 break;
-            }
-            else {
+            } else {
                 if (leftSibling != null) {
                     mergeNodes(parent, childIdx - 1, leftSibling, current);
                     current = parent;
@@ -186,13 +279,14 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         if (root.keyCount == 0) {
             if (root.isLeaf()) root = null;
             else {
-                root = root.child[0);
+                root = root.child[0];
                 root.parent = null;
             }
         }
 
         return true;
     }
+
     private void mergeNodes(BPlusTreeNode<E> parent, int childIdx, BPlusTreeNode<E> left, BPlusTreeNode<E> right) {
         if (left.isLeaf()) {
             // LEAF MERGE
@@ -200,22 +294,15 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             left.keyCount += right.keyCount;
 
             // SAFELY REPAIR THE DOUBLY-LINKED LIST!
-            BPlusTreeNode<E> rightNext = right.getNext();
-            left.setNext(rightNext);
+            BPlusTreeNode<E> rightNext = right.next;
+            left.next = rightNext;
             if (rightNext != null) {
-                rightNext.setPrev(left);
+                rightNext.prev = left;
             }
 
             // Shift parent arrays left to delete the routing key
-            System.arraycopy(parent.keys, childIdx + 1, parent.keys, childIdx, parent.keyCount - childIdx - 1);
-            parent.keys[parent.keyCount - 1] = null;
 
-            System.arraycopy(parent.child, childIdx + 2, parent.child, childIdx + 1, parent.keyCount - childIdx - 1);
-            parent.child[parent.keyCount] = null;
-
-            parent.keyCount--;
-        }
-        else {
+        } else {
             // INTERNAL NODE MERGE (Exactly like B-Tree)
             left.keys[left.keyCount] = parent.keys[childIdx];
             left.keyCount++;
@@ -227,12 +314,12 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
             left.keyCount += right.keyCount;
 
-            System.arraycopy(parent.keys, childIdx + 1, parent.keys, childIdx, parent.keyCount - childIdx - 1);
-            parent.keys[parent.keyCount - 1] = null;
-            System.arraycopy(parent.child, childIdx + 2, parent.child, childIdx + 1, parent.keyCount - childIdx - 1);
-            parent.child[parent.keyCount] = null;
-            parent.keyCount--;
         }
+        System.arraycopy(parent.keys, childIdx + 1, parent.keys, childIdx, parent.keyCount - childIdx - 1);
+        parent.keys[parent.keyCount - 1] = null;
+        System.arraycopy(parent.child, childIdx + 2, parent.child, childIdx + 1, parent.keyCount - childIdx - 1);
+        parent.child[parent.keyCount] = null;
+        parent.keyCount--;
     }
 
     private void borrowLeft(BPlusTreeNode<E> parent, int childIdx, BPlusTreeNode<E> sibling, BPlusTreeNode<E> starving) {
@@ -244,8 +331,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
             sibling.keyCount--;
             starving.keyCount++;
-        }
-        else {
+        } else {
             System.arraycopy(starving.keys, 0, starving.keys, 1, starving.keyCount);
             System.arraycopy(starving.child, 0, starving.child, 1, starving.keyCount + 1);
 
@@ -262,6 +348,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             starving.keyCount++;
         }
     }
+
     private void borrowRight(BPlusTreeNode<E> parent, int childIdx, BPlusTreeNode<E> starving, BPlusTreeNode<E> sibling) {
         if (starving.isLeaf()) {
             starving.keys[starving.keyCount] = sibling.keys[0];
@@ -271,8 +358,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
             starving.keyCount++;
             sibling.keyCount--;
-        }
-        else {
+        } else {
             starving.keys[starving.keyCount] = parent.keys[childIdx];
 
             starving.child[starving.keyCount + 1] = sibling.child[0];
