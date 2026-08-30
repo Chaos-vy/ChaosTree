@@ -68,11 +68,6 @@ public abstract sealed class AbstractNaryNode<E, N extends AbstractNaryNode<E, N
     }
 
     @Override
-    public int getKeyCount() {
-        return keyCount;
-    }
-
-    @Override
     public void setKeyCount(int keyCount) {
         this.keyCount = keyCount;
     }
@@ -85,15 +80,5 @@ public abstract sealed class AbstractNaryNode<E, N extends AbstractNaryNode<E, N
     @Override
     public void keyCount_INC1() {
         this.keyCount++;
-    }
-
-    @Override
-    public Object[] getKeys() {
-        return keys;
-    }
-
-    @Override
-    public N[] getChildren() {
-        return children;
     }
 }

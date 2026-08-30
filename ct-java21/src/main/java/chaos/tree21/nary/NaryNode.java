@@ -6,17 +6,11 @@ public sealed interface NaryNode<E, N extends NaryNode<E, N>> permits AbstractNa
 
     void setKey(int index, E key);
 
-    int getKeyCount();
-
     void setKeyCount(int keyCount);
 
     N getChild(int index);
 
     void setChild(int index, N child);
-
-    Object[] getKeys();
-
-    public N[] getChildren();
 
     void keyCount_INC1();
 
