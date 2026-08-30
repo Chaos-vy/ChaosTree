@@ -18,6 +18,10 @@ public sealed interface NaryNode<E, N extends NaryNode<E, N>> permits AbstractNa
 
     public N[] getChildren();
 
+    void keyCount_INC1();
+
+    void keyCount_DEC1();
+
     /*
     I don't know anything is missing for the structure of the B-Tree node
     any tweaks will be updated as soon as the insert and delete operation are made for
