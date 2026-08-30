@@ -1,5 +1,7 @@
 package chaos.tree21.nary;
 
+import java.util.Arrays;
+
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
 
 
@@ -64,9 +66,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
     }
 
     private void splitNode(BTreeNode<E> parent, int childIdx, BTreeNode<E> child) {
-        /*
-        It might be internal node I might be trifling, so I made the internal node as same of child.
-         */
         BTreeNode<E> sibling = new BTreeNode<>(degree, child.isLeaf());
         sibling.keyCount = degree - 1;
         // Shift right-half keys
@@ -78,11 +77,9 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
                 if (sibling.children[i] != null) sibling.children[i].parent = sibling;
             }
             // GC Cleanup
-            for (int i = degree; i <= child.keyCount; i++) child.children[i] = null;
+            Arrays.fill(child.children, degree, child.keyCount + 1, null);
         }
-        // GC Cleanup for keys
-        // I have seen this instability during iterator.
-        for (int i = degree; i < child.keyCount; i++) child.keys[i] = null;
+        Arrays.fill(child.keys, degree, child.keyCount, null);
         child.keyCount = degree - 1;
 
         // Shift parent arrays to make room
