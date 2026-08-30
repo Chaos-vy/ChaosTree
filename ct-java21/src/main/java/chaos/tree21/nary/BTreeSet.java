@@ -9,8 +9,8 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
     public boolean add(E e) {
         if (root == null) {
             root = new BTreeNode<>(degree, true);
-            root.setKey(0, e);
-            root.keyCount_INC1();
+            root.keys[0] = e;
+            root.keyCount++;
             size++;
             modCount++;
             return true;
@@ -34,7 +34,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
                  */
                 System.arraycopy(current.keys, childIdx, current.keys, childIdx + 1, current.keyCount - childIdx);
                 current.keys[childIdx] = e;
-                current.keyCount_INC1();
+                current.keyCount++;
                 size++;
                 modCount++;
                 /*
@@ -61,7 +61,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
                 }
                 return true;
             }
-            current = current.getChild(childIdx);
+            current = current.child[childIdx];
         }
     }
 
@@ -70,20 +70,20 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
         sibling.keyCount = degree - 1;
         // Shift right-half keys
         System.arraycopy(child.keys, degree, sibling.keys, 0, degree - 1);
-        // Shift right-half children and update parent pointers
+        // Shift right-half child and update parent pointers
         if (!child.isLeaf()) {
-            System.arraycopy(child.children, degree, sibling.children, 0, degree);
+            System.arraycopy(child.child, degree, sibling.child, 0, degree);
             for (int i = 0; i < degree; i++) {
-                if (sibling.children[i] != null) sibling.children[i].parent = sibling;
+                if (sibling.child[i] != null) sibling.child[i].parent = sibling;
             }
             // GC Cleanup
-            Arrays.fill(child.children, degree, child.keyCount + 1, null);
+            Arrays.fill(child.child, degree, child.keyCount + 1, null);
         }
         Arrays.fill(child.keys, degree, child.keyCount, null);
         child.keyCount = degree - 1;
 
         // Shift parent arrays to make room
-        System.arraycopy(parent.children, childIdx + 1, parent.children, childIdx + 2, parent.keyCount - childIdx);
+        System.arraycopy(parent.child, childIdx + 1, parent.child, childIdx + 2, parent.keyCount - childIdx);
         parent.setChild(childIdx + 1, sibling); // This auto-sets sibling.parent = parent!
 
         System.arraycopy(parent.keys, childIdx, parent.keys, childIdx + 1, parent.keyCount - childIdx);
@@ -92,7 +92,175 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
         parent.keys[childIdx] = child.keys[degree - 1];
         child.keys[degree - 1] = null;
 
-        parent.keyCount_INC1();
+        parent.keyCount++;
     }
+
+    private void borrowLeft(BTreeNode<E> parent, int childIdx, BTreeNode<E> sibling, BTreeNode<E> starving) {
+        // Shift starving node's keys & child RIGHT by 1 to make space at index 0
+        System.arraycopy(starving.keys, 0, starving.keys, 1, starving.keyCount);
+        if (!starving.isLeaf()) {
+            System.arraycopy(starving.child, 0, starving.child, 1, starving.keyCount + 1);
+        }
+
+        // Pull the Parent's routing key DOWN into the starving node's 0 index
+        starving.keys[0] = parent.keys[childIdx - 1];
+
+        // Move the Sibling's largest child over to the starving node
+        if (!starving.isLeaf()) {
+            starving.child[0] = sibling.child[sibling.keyCount];
+            if (starving.child[0] != null) {
+                starving.child[0].parent = starving;
+            }
+            sibling.child[sibling.keyCount] = null; // GC
+        }
+
+        // Push the Sibling's largest key UP to the parent
+        parent.keys[childIdx - 1] = sibling.keys[sibling.keyCount - 1];
+        sibling.keys[sibling.keyCount - 1] = null; // GC
+
+        //  Update counts
+        sibling.keyCount--;
+        starving.keyCount++;
+    }
+    private void borrowRight(BTreeNode<E> parent, int childIdx, BTreeNode<E> starving, BTreeNode<E> sibling) {
+        //  Pull the Parent's routing key DOWN into the end of the starving node
+        starving.keys[starving.keyCount] = parent.keys[childIdx];
+
+        //  Move the Sibling's smallest child over to the end of the starving node
+        if (!starving.isLeaf()) {
+            starving.child[starving.keyCount + 1] = sibling.child[0];
+            if (starving.child[starving.keyCount + 1] != null) {
+                starving.child[starving.keyCount + 1].parent = starving;
+            }
+        }
+
+        // Push the Sibling's smallest key UP to the parent
+        parent.keys[childIdx] = sibling.keys[0];
+
+        // Shift sibling's keys & child LEFT by 1 to fill the gap
+        System.arraycopy(sibling.keys, 1, sibling.keys, 0, sibling.keyCount - 1);
+        sibling.keys[sibling.keyCount - 1] = null; // GC
+
+        if (!sibling.isLeaf()) {
+            System.arraycopy(sibling.child, 1, sibling.child, 0, sibling.keyCount);
+            sibling.child[sibling.keyCount] = null; // GC
+        }
+
+        // Update counts
+        starving.keyCount++;
+        sibling.keyCount--;
+    }
+
+    private BTreeNode<E> getPredecessorLeaf(BTreeNode<E> node, int childIdx) {
+        BTreeNode<E> current = node.child[childIdx]; // Go left once
+        while (!current.isLeaf()) {
+            current = current.child[current.keyCount]; // Go right all the way down
+        }
+        return current;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean remove(Object o) {
+        if (root == null) return false;
+
+        BTreeNode<E> current = root;
+        int idx = -1;
+
+        E e = (E) o;
+        while (true) {
+            idx = searchNode(current, e);
+            if (idx >= 0) break; // Found it!
+
+            if (current.isLeaf()) return false; // Key does not exist
+            current = current.child[~idx];
+        }
+
+        if (!current.isLeaf()) {
+            BTreeNode<E> predLeaf = getPredecessorLeaf(current, idx);
+
+            E predKey = (E) predLeaf.keys[predLeaf.keyCount - 1];
+            current.keys[idx] = predKey;
+
+            current = predLeaf;
+            idx = current.keyCount - 1;
+        }
+        System.arraycopy(current.keys, idx + 1, current.keys, idx, current.keyCount - idx - 1);
+        current.keys[current.keyCount - 1] = null; // GC Cleanup
+        current.keyCount--;
+        size--;
+        modCount++;
+        while (current != root && current.keyCount < minKeys) {
+            BTreeNode<E> parent = current.parent;
+
+            // Find which child index 'current' represents in the parent
+            int childIdx = 0;
+            while (childIdx <= parent.keyCount && parent.child[childIdx] != current) {
+                childIdx++;
+            }
+
+            BTreeNode<E> leftSibling = (childIdx > 0) ? parent.child[childIdx - 1] : null;
+            BTreeNode<E> rightSibling = (childIdx < parent.keyCount) ? parent.child[childIdx + 1] : null;
+
+            // Trying the  borrowing first!
+            if (leftSibling != null && leftSibling.keyCount > minKeys) {
+                borrowLeft(parent, childIdx, leftSibling, current);
+                break; // Rebalance complete!
+            }
+            else if (rightSibling != null && rightSibling.keyCount > minKeys) {
+                borrowRight(parent, childIdx, current, rightSibling);
+                break; // Rebalance complete!
+            }
+            else {
+                // Must Merge (Smasher)
+                if (leftSibling != null) {
+                    mergeNodes(parent, childIdx - 1, leftSibling, current);
+                } else {
+                    mergeNodes(parent, childIdx, current, rightSibling);
+                    // The parent lost a key, so underflow bubbles UP!
+                    current = parent;
+                }
+            }
+        }
+        if (root.keyCount == 0) {
+            if (root.isLeaf()) {
+                root = null; // The tree is now completely empty
+            } else {
+                root = root.child[0];
+                root.parent = null; // Drop the old root to the GC
+            }
+        }
+
+        return true;
+    }
+
+    private void mergeNodes(BTreeNode<E> parent, int childIdx, BTreeNode<E> left, BTreeNode<E> right) {
+        // Pull the parent's routing key DOWN into the middle of the left node
+        left.keys[left.keyCount++] = parent.keys[childIdx];
+
+        // merge the right node's keys into the left node
+        System.arraycopy(right.keys, 0, left.keys, left.keyCount, right.keyCount);
+
+        // merge the right node's children into the left node only for non-leaf
+        if (!left.isLeaf()) {
+            System.arraycopy(right.child, 0, left.child, left.keyCount, right.keyCount + 1);
+            // Update the parent pointers for the children I just moved!
+            for (int i = 0; i <= right.keyCount; i++) {
+                if (right.child[i] != null) right.child[i].parent = left;
+            }
+        }
+
+        left.keyCount += right.keyCount;
+
+        // Shifting the parent's keys and children LEFT by 1 to close the gap left by the routing key
+        System.arraycopy(parent.keys, childIdx + 1, parent.keys, childIdx, parent.keyCount - childIdx - 1);
+        parent.keys[parent.keyCount - 1] = null; // Clean up GC
+
+        System.arraycopy(parent.child, childIdx + 2, parent.child, childIdx + 1, parent.keyCount - childIdx - 1);
+        parent.child[parent.keyCount] = null; // Clean up GC
+
+        parent.keyCount--;
+    }
+
 
 }
