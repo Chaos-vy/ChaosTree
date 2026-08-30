@@ -19,6 +19,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>>
         implements SearchTreeMap<K, V> permits AvlTreeMap, RedBlackTreeMap {
@@ -30,7 +32,6 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     protected N root;
     protected int size;
     protected long modCount;
-    protected int cachedHashcode = 0; //rolling hashcode
 
     protected AbstractBinaryTreeMap() {
         this.comparator = null;
@@ -43,11 +44,6 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     @Override
     public Comparator<? super K> comparator() {
         return this.comparator;
-    }
-
-    @Override
-    public int hashCode() {
-        return cachedHashcode;
     }
 
     @Override
@@ -121,7 +117,6 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         if (root == null) {
             compare(key, key); // JDK Semantic: Type (and possibly null) check!
             root = createNode(key, value);
-            cachedHashcode += root.hashCode();
             size = 1;
             modCount++;
             afterInsert(root);
@@ -136,9 +131,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             parent = current;
             cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                cachedHashcode -= current.hashCode();
                 V oldValue = current.setValue(value);
-                cachedHashcode += current.hashCode();
                 return oldValue;
             } else if (cmp < 0) current = current.getLeft();
             else current = current.getRight();
@@ -151,7 +144,6 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
         size++;
         modCount++;
-        cachedHashcode += newNode.hashCode();
         afterInsert(newNode);
         return null;
     }
@@ -164,6 +156,204 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     }
 
     @Override
+    public V putIfAbsent(K key, V value) {
+        if (root == null) {
+            compare(key, key);
+            root = createNode(key, value);
+            size = 1;
+            modCount++;
+            afterInsert(root);
+            return null;
+        }
+
+        N parent = null;
+        N current = root;
+        int cmp = 0;
+        while (current != null) {
+            parent = current;
+            cmp = compare(key, current.getKey());
+            if (cmp == 0) {
+                V oldValue = current.getValue();
+                if (oldValue == null) {
+                    current.setValue(value);
+                }
+                return oldValue;
+            } else if (cmp < 0) current = current.getLeft();
+            else current = current.getRight();
+        }
+        N newNode = createNode(key, value);
+        newNode.setParent(parent);
+        if (cmp < 0) parent.setLeft(newNode);
+        else parent.setRight(newNode);
+        size++;
+        modCount++;
+        afterInsert(newNode);
+        return null;
+    }
+
+    @Override
+    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+        java.util.Objects.requireNonNull(mappingFunction);
+        if (root == null) {
+            compare(key, key);
+            V newValue = mappingFunction.apply(key);
+            if (newValue != null) {
+                root = createNode(key, newValue);
+                size = 1;
+                modCount++;
+                afterInsert(root);
+            }
+            return newValue;
+        }
+
+        N parent = null;
+        N current = root;
+        int cmp = 0;
+        while (current != null) {
+            parent = current;
+            cmp = compare(key, current.getKey());
+            if (cmp == 0) {
+                V oldValue = current.getValue();
+                if (oldValue != null) {
+                    return oldValue;
+                }
+                V newValue = mappingFunction.apply(key);
+                if (newValue != null) {
+                    current.setValue(newValue);
+                }
+                return newValue;
+            } else if (cmp < 0) current = current.getLeft();
+            else current = current.getRight();
+        }
+        V newValue = mappingFunction.apply(key);
+        if (newValue != null) {
+            N newNode = createNode(key, newValue);
+            newNode.setParent(parent);
+            if (cmp < 0) parent.setLeft(newNode);
+            else parent.setRight(newNode);
+            size++;
+            modCount++;
+            afterInsert(newNode);
+        }
+        return newValue;
+    }
+
+    @Override
+    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        java.util.Objects.requireNonNull(remappingFunction);
+        N current = root;
+        while (current != null) {
+            int cmp = compare(key, current.getKey());
+            if (cmp == 0) {
+                V oldValue = current.getValue();
+                if (oldValue != null) {
+                    V newValue = remappingFunction.apply(key, oldValue);
+                    if (newValue != null) {
+                        current.setValue(newValue);
+                        return newValue;
+                    } else {
+                        remove(key);
+                        return null;
+                    }
+                }
+                return null;
+            } else if (cmp < 0) {
+                current = current.getLeft();
+            } else {
+                current = current.getRight();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        if (root == null) {
+            compare(key, key);
+            V newValue = remappingFunction.apply(key, null);
+            if (newValue != null) {
+                root = createNode(key, newValue);
+                size = 1;
+                modCount++;
+                afterInsert(root);
+            }
+            return newValue;
+        }
+
+        N parent = null;
+        N current = root;
+        int cmp = 0;
+        while (current != null) {
+            parent = current;
+            cmp = compare(key, current.getKey());
+            if (cmp == 0) {
+                V oldValue = current.getValue();
+                V newValue = remappingFunction.apply(key, oldValue);
+                if (newValue != null) {
+                    current.setValue(newValue);
+                    return newValue;
+                } else {
+                    remove(key);
+                    return null;
+                }
+            } else if (cmp < 0) current = current.getLeft();
+            else current = current.getRight();
+        }
+        V newValue = remappingFunction.apply(key, null);
+        if (newValue != null) {
+            N newNode = createNode(key, newValue);
+            newNode.setParent(parent);
+            if (cmp < 0) parent.setLeft(newNode);
+            else parent.setRight(newNode);
+            size++;
+            modCount++;
+            afterInsert(newNode);
+        }
+        return newValue;
+    }
+
+    @Override
+    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        Objects.requireNonNull(value);
+        if (root == null) {
+            compare(key, key);
+            root = createNode(key, value);
+            size = 1;
+            modCount++;
+            afterInsert(root);
+            return value;
+        }
+        N parent = null;
+        N current = root;
+        int cmp = 0;
+        while (current != null) {
+            parent = current;
+            cmp = compare(key, current.getKey());
+            if (cmp == 0) {
+                V oldValue = current.getValue();
+                V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+                if (newValue != null) {
+                    current.setValue(newValue);
+                } else {
+                    remove(key);
+                }
+                return newValue;
+            } else if (cmp < 0) current = current.getLeft();
+            else current = current.getRight();
+        }
+        N newNode = createNode(key, value);
+        newNode.setParent(parent);
+        if (cmp < 0) parent.setLeft(newNode);
+        else parent.setRight(newNode);
+        size++;
+        modCount++;
+        afterInsert(newNode);
+        return value;
+    }
+
+    @Override
     public int size() {
         return size;
     }
@@ -173,7 +363,6 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         root = null;
         size = 0;
         modCount++;
-        cachedHashcode = 0;
     }
 
     @Override
