@@ -1,10 +1,102 @@
 package chaos.tree21.nary;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>>{
 
 
+    /**
+     Reference used CLRS and day-dreaming structure also took the help with Gemini and ChatGPT
+     to understand the concept.They told about wavy curve way. to read the Sql lite code.
+     So what I got islet's make up
+     we just have to fill the first leaf
+     Let's take an example target to fill only is 75% in my case
+     here for example I took it as 2.
+     I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
+                        L   L   R   L   L   R   L
+     A pattern can now be seen
+                 [ 30 ]           <-- rightEdge[1] (Root)
+                /      \
+            [10, 20]  [40, 50]     <-- rightEdge[0] (Leaf)
+     A same patter will be observed for the ht too as well when the root get's full
+     60 is pulled. It's the routing key! It goes into the parent (rightEdge[1]).
+     70, 80 go into the new Leaf (rightEdge[0]).
+     The tree now looks like this:
+
+                [ 30 , 60 ]             <-- rightEdge[1] is now FULL!
+               /     |     \
+         [10, 20] [40, 50] [70, 80]    <-- rightEdge[0] is FULL!
+     as I will put 90 it willl increase ht to +1 to 2.
+     TODO: Don't forgo parent linking.
+     Supported at creation from Constructor
+     The same way for B+Tree but I need to map routing key in diff way and also provide next and prev!!
+     The point by metioning here of B+tree I am not gonna go provide any docs there it may be in comment too.
+     I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
+                        L  LR   L  LR   L  LR   L
+     A lecture can help you visualize Jenny's Lecture.
+     */
+    public void buildFromSorted(Iterator<? extends E> it, float fillFactor) {
+        // Calculate the future mighty chaos target (e.g., 0.75 * 63 = 47 keys per node)
+        /*
+        Well lemme explain it. If I banged with 100% node capacity there will a tremendous trigger of merge and split node LOL
+         */
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
+        // Track the right-most path of the tree (index 0 is the Leaf layer)
+        @SuppressWarnings("unchecked")
+        BTreeNode<E>[] rightEdge = new BTreeNode[64]; // 64 2,3,4 trees structure rest will never touch that depth LOL
+
+        int height = 0;
+        rightEdge[0] = createNode(degree, true);
+        root = rightEdge[0];
+
+        while (it.hasNext()) {
+            BTreeNode<E> rightLeaf = rightEdge[0];
+
+            if (rightLeaf.keyCount < targetKeys) {
+                // 1. FAST APPEND: Shove the data into the leaf!
+                rightLeaf.keys[rightLeaf.keyCount++] = it.next();
+                size++;
+            }
+            else {
+                // The VERY NEXT element acts as the routing key up above!
+                E routingKey = it.next();
+                size++;
+
+                // Find the lowest level on the right edge that has room for the routing key
+                int level = 1;
+                while (level <= height && rightEdge[level].keyCount == targetKeys) {
+                    level++;
+                }
+                // If I ran out of height grow the tree upwards! (New Root)
+                if (level > height) {
+                    height++;
+                    BTreeNode<E> newRoot = createNode(degree, false);
+                    newRoot.child[0] = rightEdge[height - 1]; // Link old root
+                    rightEdge[height - 1].parent = newRoot;      // Set parent pointer!
+
+                    rightEdge[height] = newRoot;
+                    root = newRoot;
+                }
+                // Insert the routing key into the target level
+                BTreeNode<E> targetNode = rightEdge[level];
+                targetNode.keys[targetNode.keyCount++] = routingKey;
+                // 3. REBUILD DOWNWARD: Create a fresh empty path down to the leaf layer
+                for (int i = level - 1; i >= 0; i--) {
+                    BTreeNode<E> newNode = createNode(degree, i == 0);
+                    // Link it to the parent above it
+                    rightEdge[i + 1].child[rightEdge[i + 1].keyCount] = newNode;
+                    newNode.parent = rightEdge[i + 1]; // Set parent pointer!
+                    // Update tracking array
+                    rightEdge[i] = newNode;
+                }
+            }
+        }
+
+        // Optional: If the very last leaf didn't reach minKeys, the B-Tree rules technically
+        // allow the right-most edge to be underfull immediately after a bulk load.
+        // Future inserts will naturally fix it!
+    }
     @Override
     public boolean add(E e) {
         if (root == null) {
