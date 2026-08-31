@@ -1,6 +1,34 @@
 package chaos.tree21.binaryMap;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.SortedMap;
+
 public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, RbtMapNode<K, V>> {
+
+
+    public RedBlackTreeMap() {
+        super();
+    }
+
+    public RedBlackTreeMap(Comparator<? super K> comparator) {
+        super(comparator);
+    }
+
+    public RedBlackTreeMap(Map<? extends K, ? extends V> m) {
+        super();
+        putAll(m);
+    }
+
+    public RedBlackTreeMap(SortedMap<K, ? extends V> m) {
+        buildFromSorted(m.size(), m.entrySet().iterator());
+    }
+
+    @Override
+    protected void afterNodeBuiltFromSorted(RbtMapNode<K, V> node, int level, int redLevel) {
+        if (level == redLevel) node.setRed();
+        else node.setBlack();
+    }
 
     @Override
     protected RbtMapNode<K, V> createNode(K key, V value) {
@@ -10,13 +38,13 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
     @Override
     protected void afterInsert(RbtMapNode<K, V> x) {
         // I need to only care if the parent is also RED (a Red-Red violation!)
-        while (x != null && x != root && x.getParent().isRed()) {
-            RbtMapNode<K, V> parent = x.getParent();
+        while (x != null && x != root && x.parent.isRed()) {
+            RbtMapNode<K, V> parent = x.parent;
             // Grandparent is mathematically guaranteed to exist because parent is RED (root is always black)
-            RbtMapNode<K, V> grandParent = parent.getParent();
+            RbtMapNode<K, V> grandParent = parent.parent;
             //Left Symmetry
-            if (parent == grandParent.getLeft()) {
-                RbtMapNode<K, V> uncle = grandParent.getRight();
+            if (parent == grandParent.left) {
+                RbtMapNode<K, V> uncle = grandParent.right;
                 // Case 1: Uncle is RED (The Recolor Case)
                 if (uncle != null && uncle.isRed()) {
                     parent.setBlack();
@@ -25,10 +53,10 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
                     x = grandParent; // Push the red violation up the tree and loop again!
                 } else {
                     // Case 2: Uncle is BLACK (The Triangle Case)
-                    if (x == parent.getRight()) {
+                    if (x == parent.right) {
                         x = parent;
                         super.rotateLeft(x);
-                        parent = x.getParent();
+                        parent = x.parent;
                     }
                     // Case 3: Uncle is BLACK (The Line Case)
                     parent.setBlack();
@@ -38,7 +66,7 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
                 }
             } else {
                 // Symmetrical cases for the Right side
-                RbtMapNode<K, V> uncle = grandParent.getLeft();
+                RbtMapNode<K, V> uncle = grandParent.left;
 
                 if (uncle != null && uncle.isRed()) {
                     parent.setBlack();
@@ -46,10 +74,10 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
                     grandParent.setRed();
                     x = grandParent;
                 } else {
-                    if (x == parent.getLeft()) {
+                    if (x == parent.left) {
                         x = parent;
                         super.rotateRight(x);
-                        parent = x.getParent();
+                        parent = x.parent;
                     }
                     parent.setBlack();
                     grandParent.setRed();
@@ -79,30 +107,29 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
         RbtMapNode<K, V> x = nodeFinder(key);
         if (x == null) return null; //No key, no operation LOL it's look like a dialogue.
         V oldValue = x.getValue();
-        cachedHashcode -= x.hashCode();
-        if (x.getLeft() != null && x.getRight() != null) {
-            RbtMapNode<K, V> successor = x.getRight();
-            while (successor.getLeft() != null) {
-                successor = successor.getLeft();
+        if (x.left != null && x.right != null) {
+            RbtMapNode<K, V> successor = x.right;
+            while (successor.left != null) {
+                successor = successor.left;
             }
             x.setPair(successor.getKey(), successor.getValue());
             x = successor;
         }
-        RbtMapNode<K, V> node_replacer = x.getLeft() != null ? x.getLeft() : x.getRight();
+        RbtMapNode<K, V> node_replacer = x.left != null ? x.left : x.right;
         boolean deletedNodeWasBlack = x.isBlack();
         if (node_replacer != null) {
-            node_replacer.setParent(x.getParent());
-            if (x.getParent() == null) {
+            node_replacer.parent = x.parent;
+            if (x.parent == null) {
                 root = node_replacer;
-            } else if (x == x.getParent().getLeft()) {
-                x.getParent().setLeft(node_replacer);
+            } else if (x == x.parent.left) {
+                x.parent.left = node_replacer;
             } else {
-                x.getParent().setRight(node_replacer);
+                x.parent.right = node_replacer;
             }
             if (deletedNodeWasBlack) {
                 fixDoubleBlack(node_replacer);
             }
-        } else if (x.getParent() == null) {
+        } else if (x.parent == null) {
             root = null; // The tree is now empty
         } else {
             // Leaf Node Deletion: We must fix the black weight BEFORE unlinking!
@@ -110,18 +137,18 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
                 fixDoubleBlack(x);
             }
 
-            if (x == x.getParent().getLeft()) {
-                x.getParent().setLeft(null);
+            if (x == x.parent.left) {
+                x.parent.left = null;
             } else {
-                x.getParent().setRight(null);
+                x.parent.right = null;
             }
-            x.setParent(null);
+            x.parent = null;
         }
 
         // Clearing GC references for Iterator stability
-        x.setLeft(null);
-        x.setRight(null);
-        x.setParent(null);
+        x.left = null;
+        x.right = null;
+        x.parent = null;
 
         size--;
         modCount++;
@@ -131,10 +158,10 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
     private void fixDoubleBlack(RbtMapNode<K, V> x) {
         // Bubble the "Phantom Black" weight up until we hit a Red node or the Root
         while (x != root && isBlack(x)) {
-            RbtMapNode<K, V> parent = x.getParent();
+            RbtMapNode<K, V> parent = x.parent;
 
-            if (x == parent.getLeft()) {
-                RbtMapNode<K, V> sibling = parent.getRight();
+            if (x == parent.left) {
+                RbtMapNode<K, V> sibling = parent.right;
 
                 // Case 1: Sibling is RED
                 // We rotate to force the sibling to be BLACK, which pushes us into Case 2, 3, or 4
@@ -142,20 +169,20 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
                     sibling.setBlack();
                     parent.setRed();
                     super.rotateLeft(parent);
-                    sibling = parent.getRight(); // Update sibling after rotation
+                    sibling = parent.right; // Update sibling after rotation
                 }
 
                 // Case 2: Both of the sibling's children (nephews) are BLACK
-                if (isBlack(sibling.getLeft()) && isBlack(sibling.getRight())) {
+                if (isBlack(sibling.left) && isBlack(sibling.right)) {
                     sibling.setRed();
                     x = parent; // Push the Double-Black weight up to the parent!
                 } else {
                     // Case 3: Sibling is BLACK, Right nephew is BLACK (Left nephew is RED)
-                    if (isBlack(sibling.getRight())) {
-                        if (sibling.getLeft() != null) sibling.getLeft().setBlack();
+                    if (isBlack(sibling.right)) {
+                        if (sibling.left != null) sibling.left.setBlack();
                         sibling.setRed();
                         super.rotateRight(sibling);
-                        sibling = parent.getRight(); // Update sibling
+                        sibling = parent.right; // Update sibling
                     }
 
                     // Case 4: Sibling is BLACK, Right nephew is RED
@@ -164,38 +191,38 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
                     else sibling.setBlack();
 
                     parent.setBlack();
-                    if (sibling.getRight() != null) sibling.getRight().setBlack();
+                    if (sibling.right != null) sibling.right.setBlack();
                     super.rotateLeft(parent);
 
                     break; // EARLY EXIT!
                 }
             } else {
                 // Symmetrical cases for when 'x' is the Right child
-                RbtMapNode<K, V> sibling = parent.getLeft();
+                RbtMapNode<K, V> sibling = parent.left;
 
                 if (isRed(sibling)) {
                     sibling.setBlack();
                     parent.setRed();
                     super.rotateRight(parent);
-                    sibling = parent.getLeft();
+                    sibling = parent.left;
                 }
 
-                if (isBlack(sibling.getRight()) && isBlack(sibling.getLeft())) {
+                if (isBlack(sibling.right) && isBlack(sibling.left)) {
                     sibling.setRed();
                     x = parent;
                 } else {
-                    if (isBlack(sibling.getLeft())) {
-                        if (sibling.getRight() != null) sibling.getRight().setBlack();
+                    if (isBlack(sibling.left)) {
+                        if (sibling.right != null) sibling.right.setBlack();
                         sibling.setRed();
                         super.rotateLeft(sibling);
-                        sibling = parent.getLeft();
+                        sibling = parent.left;
                     }
 
                     if (parent.isRed()) sibling.setRed();
                     else sibling.setBlack();
 
                     parent.setBlack();
-                    if (sibling.getLeft() != null) sibling.getLeft().setBlack();
+                    if (sibling.left != null) sibling.left.setBlack();
                     super.rotateRight(parent);
 
                     break; // EARLY EXIT!
