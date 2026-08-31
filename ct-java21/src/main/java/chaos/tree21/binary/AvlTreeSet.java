@@ -10,6 +10,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
     public AvlTreeSet() {
         super();
     }
+
     public AvlTreeSet(Comparator<? super E> comparator) {
         super(comparator);
     }
@@ -18,28 +19,29 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         super();
         addAll(m);
     }
+
     public AvlTreeSet(SortedSet<? extends E> s) {
         buildFromSorted(s.size(), s.iterator());
     }
 
     @Override
-    protected void afterNodeBuiltFromSorted(AvlNode<E> node, int level, int redLevel) {
+    void afterNodeBuiltFromSorted(AvlNode<E> node, int level, int redLevel) {
         int leftHeight = nodeHeight(node.left);
         int rightHeight = nodeHeight(node.right);
         node.height = Math.max(leftHeight, rightHeight) + 1;
     }
 
     @Override
-    protected AvlNode<E> createNode(E val) {
+    AvlNode<E> createNode(E val) {
         return new AvlNode<>(val);
     }
+
     @Override
     public boolean add(E val) {
         if (root == null) {
             compare(val, val); // JDK Semantic: Type (and possibly null) check!
             root = new AvlNode<>(val);
             size++;
-            cachedHashcode += val.hashCode();
             modCount++;
             return true;
         }
@@ -67,7 +69,6 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         fix_Up_from_bottom(p);
         size++;
         modCount++;
-        cachedHashcode += val.hashCode();
         return true;
     }
 
@@ -131,7 +132,6 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
              */
         size--;
         modCount++;
-        cachedHashcode -= val.hashCode();
         return true;
     }
 

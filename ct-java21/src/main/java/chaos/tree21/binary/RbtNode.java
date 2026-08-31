@@ -1,6 +1,6 @@
 package chaos.tree21.binary;
 
-public final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
+final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
 
     /*
     Removed ENUM for Object header with simple boolean hack
@@ -15,19 +15,19 @@ public final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
         this.red = true;
     }
 
-    public boolean isRed() {
+    boolean isRed() {
         return red;
     }
 
-    public boolean isBlack() {
+    boolean isBlack() {
         return !red;
     }
 
-    public void setRed() {
+    void setRed() {
         this.red = true;
     }
 
-    public void setBlack() {
+    void setBlack() {
         this.red = false;
     }
 }

@@ -1,12 +1,15 @@
 package chaos.tree21.binary;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.SortedSet;
 
 public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E>> {
 
     public RedBlackTreeSet() {
         super();
     }
+
     public RedBlackTreeSet(Comparator<? super E> comparator) {
         super(comparator);
     }
@@ -15,18 +18,19 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         super();
         addAll(m);
     }
+
     public RedBlackTreeSet(SortedSet<? extends E> s) {
         buildFromSorted(s.size(), s.iterator());
     }
 
     @Override
-    protected void afterNodeBuiltFromSorted(RbtNode<E> node, int level, int redLevel) {
+    void afterNodeBuiltFromSorted(RbtNode<E> node, int level, int redLevel) {
         if (level == redLevel) node.setRed();
         else node.setBlack();
     }
 
     @Override
-    protected RbtNode<E> createNode(E val) {
+    RbtNode<E> createNode(E val) {
         return new RbtNode<>(val);
     }
 
@@ -46,7 +50,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             root = new RbtNode<>(val);
             root.setBlack();//A RBT rule must be Obeyed So I put the definition of RBT for not to forget.
             size++;
-            cachedHashcode += val.hashCode();
             modCount++;
             return true;
         }
@@ -71,7 +74,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         fix_Up_from_bottom_Insertion(newNode);
         size++;
         modCount++;
-        cachedHashcode += val.hashCode();
         return true;
     }
 
@@ -190,7 +192,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         */
         size--;
         modCount++;
-        cachedHashcode -= val.hashCode();
         return true;
     }
 
@@ -280,49 +281,4 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             x.setBlack();
         }
     }
-
-    /**
-     * Internal mathematical debugger. Validates all Red-Black structural invariants.
-     * Throws IllegalStateException if any rule is broken.
-     * These test are made to make endure the tree remains stable
-     */
-    void verifyInvariants() {
-        if (root == null) return;
-        if (root.isRed()) throw new IllegalStateException("RBT Corruption: Root is RED");
-        validateRbtRules(root, null, null);
-    }
-
-    private int validateRbtRules(RbtNode<E> node, E min, E max) {
-        if (node == null) return 1; // Null leaves have black height of 1
-
-        // Rule 1: Binary Search Tree Property
-        if (min != null && compare(node.value, min) <= 0) {
-            throw new IllegalStateException("RBT Corruption: BST Violation. Node " + node.value + " is <= min bound " + min);
-        }
-        if (max != null && compare(node.value, max) >= 0) {
-            throw new IllegalStateException("RBT Corruption: BST Violation. Node " + node.value + " is >= max bound " + max);
-        }
-
-        // Rule 2: Double Red Violation
-        if (node.isRed()) {
-            if (node.left != null && node.left.isRed()) {
-                throw new IllegalStateException("RBT Corruption: Double Red! Node " + node.value + " and Left Child " + node.left.value + " are both RED.");
-            }
-            if (node.right != null && node.right.isRed()) {
-                throw new IllegalStateException("RBT Corruption: Double Red! Node " + node.value + " and Right Child " + node.right.value + " are both RED.");
-            }
-        }
-
-        int leftBlackHeight = validateRbtRules(node.left, min, node.value);
-        int rightBlackHeight = validateRbtRules(node.right, node.value, max);
-
-        // Rule 3: Perfect Black Height
-        if (leftBlackHeight != rightBlackHeight) {
-            throw new IllegalStateException("RBT Corruption: Black Height Mismatch at Node " + node.value +
-                    "! Left BH=" + leftBlackHeight + ", Right BH=" + rightBlackHeight);
-        }
-
-        return leftBlackHeight + (node.isRed() ? 0 : 1);
-    }
-
 }

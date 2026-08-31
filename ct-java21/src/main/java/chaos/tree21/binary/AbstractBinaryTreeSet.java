@@ -3,27 +3,46 @@ package chaos.tree21.binary;
 import chaos.tree21.core.SearchTreeSet;
 import chaos.tree21.core.Style;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
  * The core engine for all Binary Trees.
  * I used F-Form polymorphism to avoid unwanted casting
  * It is commonly known as CRTP in C++
+ * For people wondering no docs it's just that these API work same as of like Java Tree behaves.
  */
-public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>>
-        implements SearchTreeSet<E>
+sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>>
+        implements SearchTreeSet<E>, Cloneable
         permits AvlTreeSet, RedBlackTreeSet {
 
 
     protected final Comparator<? super E> comparator;
-    protected N root;
-    protected int size = 0;
-    protected long modCount = 0;
-    protected int cachedHashcode = 0;
+    protected transient N root;
+    protected transient int size = 0;
+    protected transient long modCount = 0;
 
-    protected final void buildFromSorted(int size, Iterator<? extends E> it) {
+    protected AbstractBinaryTreeSet() {
+        this.comparator = null;
+    }
+
+    protected AbstractBinaryTreeSet(Comparator<? super E> comparator) {
+        this.comparator = comparator;
+    }
+
+    protected static int computeRedLevel(int sz) {
+        int level = 0;
+        for (int m = sz - 1; m >= 0; m = (m / 2) - 1) level++;
+        return level;
+    }
+
+    final void buildFromSorted(int size, Iterator<? extends E> it) {
         this.size = size;
         root = buildFromSortedRecursive(0, 0, size - 1, computeRedLevel(size), it);
         this.modCount++;
@@ -52,23 +71,9 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return middle;
     }
 
-    protected abstract N createNode(E entry);
+    abstract N createNode(E entry);
 
-    protected void afterNodeBuiltFromSorted(N node, int level, int redLevel) {}
-
-    protected static int computeRedLevel(int sz) {
-        int level = 0;
-        for (int m = sz - 1; m >= 0; m = (m / 2) - 1) level++;
-        return level;
-    }
-    protected AbstractBinaryTreeSet() {
-        this.comparator = null;
-    }
-
-    protected AbstractBinaryTreeSet(Comparator<? super E> comparator) {
-        this.comparator = comparator;
-    }
-
+    abstract void afterNodeBuiltFromSorted(N node, int level, int redLevel);
 
     @SuppressWarnings("unchecked")
     protected int compare(E e1, E e2) {
@@ -78,6 +83,19 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return ((Comparable<? super E>) e1).compareTo(e2);
     }
 
+
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        Objects.requireNonNull(action);
+        long expectedModCount = modCount;
+
+        for (N node = getFirstNode(); node != null; node = successor(node)) {
+            action.accept(node.value);
+            if (expectedModCount != modCount) {
+                throw new ConcurrentModificationException();
+            }
+        }
+    }
 
     @Override
     public int size() {
@@ -94,7 +112,6 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         root = null;
         size = 0;
         modCount++;
-        cachedHashcode = 0;
     }
 
     @Override
@@ -361,7 +378,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public Spliterator<E> spliterator() {
-        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
+        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
     }
 
     @Override
@@ -375,9 +392,20 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     @Override
-    public boolean addAll(Collection<? extends E> collection) {
+    @SuppressWarnings("unchecked")
+    public boolean addAll(Collection<? extends E> c) {
+        if (this.size == 0 && c.size() > 0 && c instanceof SortedSet<?> sortedSet) {
+            if (Objects.equals(this.comparator(), sortedSet.comparator())) {
+                buildFromSorted(c.size(), (Iterator<? extends E>) c.iterator());
+                return true;
+            }
+        }
         boolean modified = false;
-        for (E e : collection) if (add(e)) modified = true;
+        for (E e : c) {
+            if (add(e)) {
+                modified = true;
+            }
+        }
         return modified;
     }
 
@@ -385,6 +413,20 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     public boolean removeAll(Collection<?> collection) {
         boolean modified = false;
         for (Object o : collection) if (remove(o)) modified = true;
+        return modified;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            if (!c.contains(it.next())) {
+                it.remove();
+                modified = true;
+            }
+        }
         return modified;
     }
 
@@ -559,7 +601,9 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public int hashCode() {
-        return cachedHashcode;
+        int h = 0;
+        for (E e : this) h += e.hashCode();
+        return h;
     }
 
     @Override
@@ -600,6 +644,64 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             array[i++] = e;
         }
         return array;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        try {
+            AbstractBinaryTreeSet<E, N> clone = (AbstractBinaryTreeSet<E, N>) super.clone();
+            clone.root = null;
+            clone.size = 0;
+            clone.modCount = 0;
+
+            if (this.size > 0) {
+                clone.buildFromSorted(this.size, this.iterator());
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        s.writeInt(size);
+        for (E x : this) {
+            s.writeObject(x);
+        }
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        int setSize = s.readInt();
+        if (setSize > 0) {
+            Iterator<E> it = new Iterator<E>() {
+                int count = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return count < setSize;
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public E next() {
+                    if (!hasNext()) throw new NoSuchElementException();
+                    try {
+                        E value = (E) s.readObject();
+                        count++;
+                        return value;
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException("Failed to deserialize tree data", e);
+                    }
+                }
+            };
+            buildFromSorted(setSize, it);
+        }
     }
 
     protected final class TreeSubSet extends AbstractSet<E> implements NavigableSet<E> {
@@ -791,7 +893,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
         @Override
         public Spliterator<E> spliterator() {
-            return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
+            return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
         }
 
         @Override
