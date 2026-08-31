@@ -3,38 +3,30 @@ package chaos.tree21.binary;
 import chaos.tree21.core.SearchTreeSet;
 import chaos.tree21.core.Style;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.lang.reflect.Array;
-import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
  * The core engine for all Binary Trees.
  * I used F-Form polymorphism to avoid unwanted casting
  * It is commonly known as CRTP in C++
+ * For people wondering no docs it's just that these API work same as of like Java Tree behaves.
  */
-public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>>
-        implements SearchTreeSet<E>
+sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>>
+        implements SearchTreeSet<E>, Cloneable
         permits AvlTreeSet, RedBlackTreeSet {
 
 
     protected final Comparator<? super E> comparator;
-    protected N root;
-    protected int size = 0;
-    protected long modCount = 0;
-    protected int cachedHashcode = 0;
-
+    protected transient N root;
+    protected transient int size = 0;
+    protected transient long modCount = 0;
 
     protected AbstractBinaryTreeSet() {
         this.comparator = null;
@@ -44,6 +36,44 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         this.comparator = comparator;
     }
 
+    protected static int computeRedLevel(int sz) {
+        int level = 0;
+        for (int m = sz - 1; m >= 0; m = (m / 2) - 1) level++;
+        return level;
+    }
+
+    final void buildFromSorted(int size, Iterator<? extends E> it) {
+        this.size = size;
+        root = buildFromSortedRecursive(0, 0, size - 1, computeRedLevel(size), it);
+        this.modCount++;
+    }
+
+    private final N buildFromSortedRecursive(int level, int lo, int hi, int redLevel, Iterator<? extends E> it) {
+        if (hi < lo) return null;
+        int mid = lo + ((hi - lo) >>> 1);
+        N left = null;
+        if (lo < mid) {
+            left = buildFromSortedRecursive(level + 1, lo, mid - 1, redLevel, it);
+        }
+        E entry = it.next();
+        N middle = createNode(entry);
+        if (left != null) {
+            middle.left = left;
+            left.parent = middle;
+        }
+
+        if (mid < hi) {
+            N right = buildFromSortedRecursive(level + 1, mid + 1, hi, redLevel, it);
+            middle.right = right;
+            right.parent = middle;
+        }
+        afterNodeBuiltFromSorted(middle, level, redLevel);
+        return middle;
+    }
+
+    abstract N createNode(E entry);
+
+    abstract void afterNodeBuiltFromSorted(N node, int level, int redLevel);
 
     @SuppressWarnings("unchecked")
     protected int compare(E e1, E e2) {
@@ -53,6 +83,19 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         return ((Comparable<? super E>) e1).compareTo(e2);
     }
 
+
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        Objects.requireNonNull(action);
+        long expectedModCount = modCount;
+
+        for (N node = getFirstNode(); node != null; node = successor(node)) {
+            action.accept(node.value);
+            if (expectedModCount != modCount) {
+                throw new ConcurrentModificationException();
+            }
+        }
+    }
 
     @Override
     public int size() {
@@ -69,19 +112,18 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         root = null;
         size = 0;
         modCount++;
-        cachedHashcode = 0;
     }
 
     @Override
     public E getFirst() {
         if (root == null) throw new NoSuchElementException();
-        return getFirstNode().getValue();
+        return getFirstNode().value;
     }
 
     @Override
     public E getLast() {
         if (root == null) throw new NoSuchElementException();
-        return getLastNode().getValue();
+        return getLastNode().value;
     }
 
     @Override
@@ -97,10 +139,10 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         N current = root;
         int cmp = 0;
         while (current != null) {
-            cmp = compare(val, current.getValue());
+            cmp = compare(val, current.value);
             if (cmp == 0) return current;
-            else if (cmp > 0) current = current.getRight();
-            else current = current.getLeft();
+            else if (cmp > 0) current = current.right;
+            else current = current.left;
         }
         return null;
     }
@@ -111,15 +153,15 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         N current = root;
         N prevCurrent = null;
         while (current != null) {
-            int cmp = compare(e, current.getValue());
-            if (cmp == 0) return current.getValue();
-            else if (cmp < 0) current = current.getLeft();
+            int cmp = compare(e, current.value);
+            if (cmp == 0) return current.value;
+            else if (cmp < 0) current = current.left;
             else {
                 prevCurrent = current;
-                current = current.getRight();
+                current = current.right;
             }
         }
-        return prevCurrent == null ? null : prevCurrent.getValue();
+        return prevCurrent == null ? null : prevCurrent.value;
     }
 
     @Override
@@ -128,15 +170,15 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         N current = root;
         N prevCurrent = null;
         while (current != null) {
-            int cmp = compare(e, current.getValue());
-            if (cmp == 0) return current.getValue();
-            else if (cmp > 0) current = current.getRight();
+            int cmp = compare(e, current.value);
+            if (cmp == 0) return current.value;
+            else if (cmp > 0) current = current.right;
             else {
                 prevCurrent = current;
-                current = current.getLeft();
+                current = current.left;
             }
         }
-        return prevCurrent == null ? null : prevCurrent.getValue();
+        return prevCurrent == null ? null : prevCurrent.value;
     }
 
 
@@ -146,14 +188,14 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         N current = root;
         N prevNode = null;
         while (current != null) {
-            int cmp = compare(e, current.getValue());
-            if (cmp >= 0) current = current.getRight();
+            int cmp = compare(e, current.value);
+            if (cmp >= 0) current = current.right;
             else {
                 prevNode = current;
-                current = current.getLeft();
+                current = current.left;
             }
         }
-        return prevNode == null ? null : prevNode.getValue();
+        return prevNode == null ? null : prevNode.value;
     }
 
     @Override
@@ -162,20 +204,20 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         N current = root;
         N prevNode = null;
         while (current != null) {
-            int cmp = compare(e, current.getValue());
-            if (cmp <= 0) current = current.getLeft();
+            int cmp = compare(e, current.value);
+            if (cmp <= 0) current = current.left;
             else {
                 prevNode = current;
-                current = current.getRight();
+                current = current.right;
             }
         }
-        return prevNode == null ? null : prevNode.getValue();
+        return prevNode == null ? null : prevNode.value;
     }
 
     @Override
     public E pollFirst() {
         if (root == null) return null;
-        E e = getFirstNode().getValue();
+        E e = getFirstNode().value;
         remove(e);
         return e;
     }
@@ -183,7 +225,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     @Override
     public E pollLast() {
         if (root == null) return null;
-        E e = getLastNode().getValue();
+        E e = getLastNode().value;
         remove(e);
         return e;
     }
@@ -203,26 +245,26 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     private N getFirstNode() {
         if (root == null) return null;
         N current = root;
-        while (current.getLeft() != null) {
-            current = current.getLeft();
+        while (current.left != null) {
+            current = current.left;
         }
         return current;
     }
 
     protected N successor(N node) {
         if (node == null) return null;
-        if (node.getRight() != null) {
-            N current = node.getRight();
-            while (current.getLeft() != null) {
-                current = current.getLeft();
+        if (node.right != null) {
+            N current = node.right;
+            while (current.left != null) {
+                current = current.left;
             }
             return current;
         }
-        N parent = node.getParent();
+        N parent = node.parent;
         N current = node;
-        while (parent != null && current == parent.getRight()) {
+        while (parent != null && current == parent.right) {
             current = parent;
-            parent = parent.getParent();
+            parent = parent.parent;
         }
         return parent;
     }
@@ -260,7 +302,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 if (nextNode == null) {
                     throw new NoSuchElementException();
                 }
-                lastReturned = nextNode.getValue();
+                lastReturned = nextNode.value;
                 nextNode = successor(nextNode);
                 return lastReturned;
             }
@@ -269,18 +311,18 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     protected N predecessor(N node) {
         if (node == null) return null;
-        if (node.getLeft() != null) {
-            N current = node.getLeft();
-            while (current.getRight() != null) {
-                current = current.getRight();
+        if (node.left != null) {
+            N current = node.left;
+            while (current.right != null) {
+                current = current.right;
             }
             return current;
         }
-        N parent = node.getParent();
+        N parent = node.parent;
         N current = node;
-        while (parent != null && current == parent.getLeft()) {
+        while (parent != null && current == parent.left) {
             current = parent;
-            parent = parent.getParent();
+            parent = parent.parent;
         }
         return parent;
     }
@@ -288,8 +330,8 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     private N getLastNode() {
         if (root == null) return null;
         N current = root;
-        while (current.getRight() != null) {
-            current = current.getRight();
+        while (current.right != null) {
+            current = current.right;
         }
         return current;
     }
@@ -327,7 +369,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                 if (nextNode == null) {
                     throw new NoSuchElementException();
                 }
-                lastReturned = nextNode.getValue();
+                lastReturned = nextNode.value;
                 nextNode = predecessor(nextNode);
                 return lastReturned;
             }
@@ -336,7 +378,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public Spliterator<E> spliterator() {
-        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
+        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
     }
 
     @Override
@@ -350,9 +392,20 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     @Override
-    public boolean addAll(Collection<? extends E> collection) {
+    @SuppressWarnings("unchecked")
+    public boolean addAll(Collection<? extends E> c) {
+        if (this.size == 0 && c.size() > 0 && c instanceof SortedSet<?> sortedSet) {
+            if (Objects.equals(this.comparator(), sortedSet.comparator())) {
+                buildFromSorted(c.size(), (Iterator<? extends E>) c.iterator());
+                return true;
+            }
+        }
         boolean modified = false;
-        for (E e : collection) if (add(e)) modified = true;
+        for (E e : c) {
+            if (add(e)) {
+                modified = true;
+            }
+        }
         return modified;
     }
 
@@ -364,12 +417,13 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     @Override
-    public boolean retainAll(Collection<?> collection) {
-        List<E> snapshot = new ArrayList<>(this);
+    public boolean retainAll(Collection<?> c) {
+        Objects.requireNonNull(c);
         boolean modified = false;
-        for (E element : snapshot) {
-            if (!collection.contains(element)) {
-                remove(element);
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            if (!c.contains(it.next())) {
+                it.remove();
                 modified = true;
             }
         }
@@ -377,40 +431,40 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     protected void rotateLeft(N p) {
-        N r = p.getRight();
-        p.setRight(r.getLeft());
-        if (r.getLeft() != null) {
-            r.getLeft().setParent(p);
+        N r = p.right;
+        p.right = r.left;
+        if (r.left != null) {
+            r.left.parent = p;
         }
-        r.setParent(p.getParent());
-        if (p.getParent() == null) {
+        r.parent = p.parent;
+        if (p.parent == null) {
             root = r;
-        } else if (p.getParent().getLeft() == p) {
-            p.getParent().setLeft(r);
+        } else if (p.parent.left == p) {
+            p.parent.left = r;
         } else {
-            p.getParent().setRight(r);
+            p.parent.right = r;
         }
 
-        r.setLeft(p);
-        p.setParent(r);
+        r.left = p;
+        p.parent = r;
     }
 
     protected void rotateRight(N p) {
-        N l = p.getLeft();
-        p.setLeft(l.getRight());
-        if (l.getRight() != null) {
-            l.getRight().setParent(p);
+        N l = p.left;
+        p.left = l.right;
+        if (l.right != null) {
+            l.right.parent = p;
         }
-        l.setParent(p.getParent());
-        if (p.getParent() == null) {
+        l.parent = p.parent;
+        if (p.parent == null) {
             root = l;
-        } else if (p.getParent().getRight() == p) {
-            p.getParent().setRight(l);
+        } else if (p.parent.right == p) {
+            p.parent.right = l;
         } else {
-            p.getParent().setLeft(l);
+            p.parent.left = l;
         }
-        l.setRight(p);
-        p.setParent(l);
+        l.right = p;
+        p.parent = l;
     }
 
     @Override
@@ -495,7 +549,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
     }
 
     private String nodeText(N node) {
-        return String.valueOf(node.getValue());
+        return String.valueOf(node.value);
     }
 
     private void buildString(N node, String prefix, boolean isTail, boolean isRoot, StringBuilder sb, Style style) {
@@ -514,8 +568,8 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         }
         sb.append(nodeText(node)).append('\n');
 
-        boolean hasLeft = node.getLeft() != null;
-        boolean hasRight = node.getRight() != null;
+        boolean hasLeft = node.left != null;
+        boolean hasRight = node.right != null;
 
         if (!hasLeft && !hasRight) {
             return;
@@ -524,14 +578,14 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
         String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
 
         if (hasLeft && hasRight) {
-            buildString(node.getLeft(), childPrefix, false, false, sb, style);
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
+            buildString(node.left, childPrefix, false, false, sb, style);
+            buildString(node.right, childPrefix, true, false, sb, style);
 
         } else if (hasLeft) {
-            buildString(node.getLeft(), childPrefix, true, false, sb, style);
+            buildString(node.left, childPrefix, true, false, sb, style);
 
         } else {
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
+            buildString(node.right, childPrefix, true, false, sb, style);
         }
     }
 
@@ -547,7 +601,9 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     @Override
     public int hashCode() {
-        return cachedHashcode;
+        int h = 0;
+        for (E e : this) h += e.hashCode();
+        return h;
     }
 
     @Override
@@ -588,6 +644,64 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
             array[i++] = e;
         }
         return array;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        try {
+            AbstractBinaryTreeSet<E, N> clone = (AbstractBinaryTreeSet<E, N>) super.clone();
+            clone.root = null;
+            clone.size = 0;
+            clone.modCount = 0;
+
+            if (this.size > 0) {
+                clone.buildFromSorted(this.size, this.iterator());
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        s.writeInt(size);
+        for (E x : this) {
+            s.writeObject(x);
+        }
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        int setSize = s.readInt();
+        if (setSize > 0) {
+            Iterator<E> it = new Iterator<E>() {
+                int count = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return count < setSize;
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public E next() {
+                    if (!hasNext()) throw new NoSuchElementException();
+                    try {
+                        E value = (E) s.readObject();
+                        count++;
+                        return value;
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException("Failed to deserialize tree data", e);
+                    }
+                }
+            };
+            buildFromSorted(setSize, it);
+        }
     }
 
     protected final class TreeSubSet extends AbstractSet<E> implements NavigableSet<E> {
@@ -681,12 +795,12 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                     N curr = root;
                     N bestMatch = null;
                     while (curr != null) {
-                        int cmp = compare(lo, curr.getValue());
+                        int cmp = compare(lo, curr.value);
                         if (cmp < 0 || (cmp == 0 && loInclusive)) {
                             bestMatch = curr;
-                            curr = curr.getLeft();
+                            curr = curr.left;
                         } else {
-                            curr = curr.getRight();
+                            curr = curr.right;
                         }
                     }
                     return bestMatch;
@@ -697,7 +811,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                     if (modCount != expectedModCount) {
                         throw new ConcurrentModificationException();
                     }
-                    return nextNode != null && inRange(nextNode.getValue());
+                    return nextNode != null && inRange(nextNode.value);
                 }
 
                 @Override
@@ -717,7 +831,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                         throw new NoSuchElementException();
                     }
                     if (!hasNext()) throw new NoSuchElementException();
-                    val = nextNode.getValue();
+                    val = nextNode.value;
                     nextNode = successor(nextNode);
                     return val;
                 }
@@ -737,12 +851,12 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                     N match = null;
 
                     while (curr != null) {
-                        int cmp = compare(hi, curr.getValue());
+                        int cmp = compare(hi, curr.value);
                         if (cmp > 0 || (cmp == 0 && hiInclusive)) {
                             match = curr;
-                            curr = curr.getRight();
+                            curr = curr.right;
                         } else {
-                            curr = curr.getLeft();
+                            curr = curr.left;
                         }
                     }
                     return match;
@@ -750,7 +864,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
                 @Override
                 public boolean hasNext() {
-                    return nextNode != null && inRange(nextNode.getValue());
+                    return nextNode != null && inRange(nextNode.value);
                 }
 
                 @Override
@@ -770,7 +884,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
                         throw new NoSuchElementException();
                     }
                     if (!hasNext()) throw new NoSuchElementException();
-                    val = nextNode.getValue();
+                    val = nextNode.value;
                     nextNode = predecessor(nextNode);
                     return val;
                 }
@@ -779,7 +893,7 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
         @Override
         public Spliterator<E> spliterator() {
-            return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT);
+            return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
         }
 
         @Override
@@ -891,5 +1005,4 @@ public sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNo
 
     }
     //Play with it, destroy with it, LOL!!
-
 }
