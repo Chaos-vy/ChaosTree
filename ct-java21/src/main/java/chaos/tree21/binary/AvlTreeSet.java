@@ -1,7 +1,38 @@
 package chaos.tree21.binary;
 
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.SortedSet;
+
 public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
 
+    public AvlTreeSet() {
+        super();
+    }
+    public AvlTreeSet(Comparator<? super E> comparator) {
+        super(comparator);
+    }
+
+    public AvlTreeSet(Collection<? extends E> m) {
+        super();
+        addAll(m);
+    }
+    public AvlTreeSet(SortedSet<? extends E> s) {
+        buildFromSorted(s.size(), s.iterator());
+    }
+
+    @Override
+    protected void afterNodeBuiltFromSorted(AvlNode<E> node, int level, int redLevel) {
+        int leftHeight = nodeHeight(node.left);
+        int rightHeight = nodeHeight(node.right);
+        node.height = Math.max(leftHeight, rightHeight) + 1;
+    }
+
+    @Override
+    protected AvlNode<E> createNode(E val) {
+        return new AvlNode<>(val);
+    }
     @Override
     public boolean add(E val) {
         if (root == null) {
@@ -12,28 +43,28 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             modCount++;
             return true;
         }
-        AvlNode<E> parent = null;
+        AvlNode<E> p = null;
         AvlNode<E> curr = root;
         int cmp = 0;
         while (curr != null) {
-            parent = curr;
-            cmp = compare(val, curr.getValue());
+            p = curr;
+            cmp = compare(val, curr.value);
             if (cmp == 0) {
                 return false;
             } else if (cmp < 0) {
-                curr = curr.getLeft();
+                curr = curr.left;
             } else {
-                curr = curr.getRight();
+                curr = curr.right;
             }
         }
         AvlNode<E> newNode = new AvlNode<>(val);
-        newNode.setParent(parent);
+        newNode.parent = p;
         if (cmp < 0) {
-            parent.setLeft(newNode);
+            p.left = newNode;
         } else {
-            parent.setRight(newNode);
+            p.right = newNode;
         }
-        fix_Up_from_bottom(parent);
+        fix_Up_from_bottom(p);
         size++;
         modCount++;
         cachedHashcode += val.hashCode();
@@ -49,12 +80,12 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         if (x == null) return false;
         //Just delete from here no tension haha LOL I feel like playing here node very much fun.
         //Just to be aware of optimization I need to add comment
-        if (x.getRight() != null && x.getLeft() != null) {
-            AvlNode<E> successor = x.getRight(); // Yes I do delete by successor method
-            while (successor.getLeft() != null) { //becoz it's optimized for iterator purpose
-                successor = successor.getLeft();
+        if (x.right != null && x.left != null) {
+            AvlNode<E> successor = x.right; // Yes I do delete by successor method
+            while (successor.left != null) { //becoz it's optimized for iterator purpose
+                successor = successor.left;
             }
-            x.setValue(successor.getValue());
+            x.value = successor.value;
             x = successor; //Now guaranteed this little node in the tree will be alone to one or none hehe LOL
         }
         /*
@@ -63,37 +94,37 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
           2: if L is null -> part of right node to be attached and markup of parent!
           3: if R is null -> part of left node to be attached and markup of parent!
          */
-        AvlNode<E> replacement = x.getLeft() != null ? x.getLeft() : x.getRight();
+        AvlNode<E> replacement = x.left != null ? x.left : x.right;
 
         //This block is for part when case 2 and case 3 falls
         if (replacement != null) {
-            replacement.setParent(x.getParent());
-            if (x.getParent() == null) {//most critical one
+            replacement.parent = x.parent;
+            if (x.parent == null) {//most critical one
                 root = replacement;
-            } else if (x == x.getParent().getLeft()) {
-                x.getParent().setLeft(replacement);
+            } else if (x == x.parent.left) {
+                x.parent.left = replacement;
             } else {
-                x.getParent().setRight(replacement);
+                x.parent.right = replacement;
             }
-            fix_Up_from_bottom(replacement.getParent());
+            fix_Up_from_bottom(replacement.parent);
 
-        } else if (x.getParent() == null) { // when the little node has direct reach to root
+        } else if (x.parent == null) { // when the little node has direct reach to root
             root = null;
         } else { // when the little node is left with no L and R
-            AvlNode<E> parent = x.getParent();
-            if (x == parent.getLeft()) {
-                parent.setLeft(null);
+            AvlNode<E> parent = x.parent;
+            if (x == parent.left) {
+                parent.left = null;
             } else {
-                parent.setRight(null);
+                parent.right = null;
             }
             //Lemme think do I
             fix_Up_from_bottom(parent);
         }
 
         //just clearing GC but do I need let me guess
-        x.setLeft(null); //since I already removed all attachment to x to reach to x
-        x.setRight(null); //JVM GC is smart enough it will collect in GC
-        x.setParent(null); //Don't think JVM won't do. it will, even though it has reference
+        x.left = null; //since I already removed all attachment to x to reach to x
+        x.right = null; //JVM GC is smart enough it will collect in GC
+        x.parent = null; //Don't think JVM won't do. it will, even though it has reference
         //L,R,P becoz x has become part of garbage.
             /*
             The lesson I got here we need to do because iterator Stability
@@ -106,35 +137,35 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
 
     private void fix_Up_from_bottom(AvlNode<E> node) {
         while (node != null) {
-            int oldHeight = node.getHeight();
+            int oldHeight = node.height;
             updateHeight(node);
-            int balance = nodeHeight(node.getLeft()) - nodeHeight(node.getRight());
+            int balance = nodeHeight(node.left) - nodeHeight(node.right);
             if (balance > 1) {
-                if (nodeHeight(node.getLeft().getLeft()) >= nodeHeight(node.getLeft().getRight())) {
+                if (nodeHeight(node.left.left) >= nodeHeight(node.left.right)) {
                     node = rotateRightAVL(node);
                 } else {
-                    rotateLeftAVL(node.getLeft());
+                    rotateLeftAVL(node.left);
                     node = rotateRightAVL(node);
                 }
             } else if (balance < -1) {
-                if (nodeHeight(node.getRight().getRight()) >= nodeHeight(node.getRight().getLeft())) {
+                if (nodeHeight(node.right.right) >= nodeHeight(node.right.left)) {
                     node = rotateLeftAVL(node);
                 } else {
-                    rotateRightAVL(node.getRight());
+                    rotateRightAVL(node.right);
                     node = rotateLeftAVL(node);
                 }
             }
-            if (oldHeight == node.getHeight()) {
+            if (oldHeight == node.height) {
                 break;
             }
-            node = node.getParent();
+            node = node.parent;
         }
     }
 
     // --- AVL-Specific Rotation Wrappers --- These are main parts.
 
     private AvlNode<E> rotateRightAVL(AvlNode<E> p) {
-        AvlNode<E> newRoot = p.getLeft();
+        AvlNode<E> newRoot = p.left;
         super.rotateRight(p);
         updateHeight(p);
         updateHeight(newRoot);
@@ -142,7 +173,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
     }
 
     private AvlNode<E> rotateLeftAVL(AvlNode<E> p) {
-        AvlNode<E> newRoot = p.getRight();
+        AvlNode<E> newRoot = p.right;
         super.rotateLeft(p);
         updateHeight(p);
         updateHeight(newRoot);
@@ -150,11 +181,11 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
     }
 
     private void updateHeight(AvlNode<E> root) {
-        root.setHeight(1 + Math.max(nodeHeight(root.getLeft()), nodeHeight(root.getRight())));
+        root.height = 1 + Math.max(nodeHeight(root.left), nodeHeight(root.right));
     }
 
     private int nodeHeight(AvlNode<E> node) {
-        return node == null ? -1 : node.getHeight();
+        return node == null ? -1 : node.height;
     }
 
     /**
@@ -169,27 +200,27 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
     private int validateAvlRules(AvlNode<E> node, E min, E max) {
         if (node == null) return -1;
 
-        if (min != null && compare(node.getValue(), min) <= 0) {
-            throw new IllegalStateException("AVL Corruption: BST Violation. Node " + node.getValue() + " is <= min bound " + min);
+        if (min != null && compare(node.value, min) <= 0) {
+            throw new IllegalStateException("AVL Corruption: BST Violation. Node " + node.value + " is <= min bound " + min);
         }
-        if (max != null && compare(node.getValue(), max) >= 0) {
-            throw new IllegalStateException("AVL Corruption: BST Violation. Node " + node.getValue() + " is >= max bound " + max);
+        if (max != null && compare(node.value, max) >= 0) {
+            throw new IllegalStateException("AVL Corruption: BST Violation. Node " + node.value + " is >= max bound " + max);
         }
 
-        int leftHeight = validateAvlRules(node.getLeft(), min, node.getValue());
-        int rightHeight = validateAvlRules(node.getRight(), node.getValue(), max);
+        int leftHeight = validateAvlRules(node.left, min, node.value);
+        int rightHeight = validateAvlRules(node.right, node.value, max);
 
         // Rule 2: Height cached accurately
         int actualHeight = 1 + Math.max(leftHeight, rightHeight);
-        if (node.getHeight() != actualHeight) {
-            throw new IllegalStateException("AVL Corruption: Cached height of Node " + node.getValue() +
-                    " is " + node.getHeight() + " but actual height is " + actualHeight);
+        if (node.height != actualHeight) {
+            throw new IllegalStateException("AVL Corruption: Cached height of Node " + node.value +
+                    " is " + node.height + " but actual height is " + actualHeight);
         }
 
         // Rule 3: Balance Factor (-1, 0, 1)
         int balance = leftHeight - rightHeight;
         if (Math.abs(balance) > 1) {
-            throw new IllegalStateException("AVL Corruption: Balance Factor Violation at Node " + node.getValue() +
+            throw new IllegalStateException("AVL Corruption: Balance Factor Violation at Node " + node.value +
                     "! Balance is " + balance);
         }
 
