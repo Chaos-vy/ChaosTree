@@ -1,6 +1,34 @@
 package chaos.tree21.binaryMap;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.SortedMap;
+
 public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNode<K, V>> {
+
+    public AvlTreeMap() {
+        super();
+    }
+
+    public AvlTreeMap(Comparator<? super K> comparator) {
+        super(comparator);
+    }
+
+    public AvlTreeMap(Map<? extends K, ? extends V> m) {
+        super();
+        putAll(m);
+    }
+
+    public AvlTreeMap(SortedMap<K, ? extends V> m) {
+        buildFromSorted(m.size(), m.entrySet().iterator());
+    }
+
+    @Override
+    protected void afterNodeBuiltFromSorted(AvlMapNode<K, V> node, int level, int redLevel) {
+        int leftHeight = nodeHeight(node.left);
+        int rightHeight = nodeHeight(node.right);
+        node.height = Math.max(leftHeight, rightHeight) + 1;
+    }
 
     @Override
     protected AvlMapNode<K, V> createNode(K key, V value) {
@@ -10,40 +38,40 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     @Override
     protected void afterInsert(AvlMapNode<K, V> node) {
         if (node != null) {
-            node = node.getParent(); // Skip the newly inserted leaf to allow optimization!
+            node = node.parent; // Skip the newly inserted leaf to allow optimization!
         }
         balanceNode(node);
     }
 
     private void balanceNode(AvlMapNode<K, V> node) {
         while (node != null) {
-            int oldHeight = node.getHeight();
+            int oldHeight = node.height;
             updateHeight(node);
-            int balance = nodeHeight(node.getLeft()) - nodeHeight(node.getRight());
+            int balance = nodeHeight(node.left) - nodeHeight(node.right);
             if (balance > 1) {
-                if (nodeHeight(node.getLeft().getLeft()) >= nodeHeight(node.getLeft().getRight())) {
+                if (nodeHeight(node.left.left) >= nodeHeight(node.left.right)) {
                     node = rotateRightAVL(node);
                 } else {
-                    rotateLeftAVL(node.getLeft());
+                    rotateLeftAVL(node.left);
                     node = rotateRightAVL(node);
                 }
             } else if (balance < -1) {
-                if (nodeHeight(node.getRight().getRight()) >= nodeHeight(node.getRight().getLeft())) {
+                if (nodeHeight(node.right.right) >= nodeHeight(node.right.left)) {
                     node = rotateLeftAVL(node);
                 } else {
-                    rotateRightAVL(node.getRight());
+                    rotateRightAVL(node.right);
                     node = rotateLeftAVL(node);
                 }
             }
-            if (oldHeight == node.getHeight()) {
+            if (oldHeight == node.height) {
                 break; // Safe early exit restored!
             }
-            node = node.getParent();
+            node = node.parent;
         }
     }
 
     private AvlMapNode<K, V> rotateRightAVL(AvlMapNode<K, V> p) {
-        AvlMapNode<K, V> newRoot = p.getLeft();
+        AvlMapNode<K, V> newRoot = p.left;
         super.rotateRight(p);
         updateHeight(p);
         updateHeight(newRoot);
@@ -51,7 +79,7 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     }
 
     private AvlMapNode<K, V> rotateLeftAVL(AvlMapNode<K, V> p) {
-        AvlMapNode<K, V> newRoot = p.getRight();
+        AvlMapNode<K, V> newRoot = p.right;
         super.rotateLeft(p);
         updateHeight(p);
         updateHeight(newRoot);
@@ -63,11 +91,11 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     }
 
     private void updateHeight(AvlMapNode<K, V> root) {
-        root.setHeight(1 + Math.max(nodeHeight(root.getLeft()), nodeHeight(root.getRight())));
+        root.height = 1 + Math.max(nodeHeight(root.left), nodeHeight(root.right));
     }
 
     private int nodeHeight(AvlMapNode<K, V> node) {
-        return node == null ? -1 : node.getHeight();
+        return node == null ? -1 : node.height;
     }
 
     @Override
@@ -78,36 +106,35 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
         AvlMapNode<K, V> x = nodeFinder(key);
         if (x == null) return null;
         V oldValue = x.getValue();
-        cachedHashcode -= x.hashCode();
-        if (x.getLeft() != null && x.getRight() != null) {
-            AvlMapNode<K, V> successor = x.getRight();
-            while (successor.getLeft() != null) {
-                successor = successor.getLeft();
+        if (x.left != null && x.right != null) {
+            AvlMapNode<K, V> successor = x.right;
+            while (successor.left != null) {
+                successor = successor.left;
             }
             x.setPair(successor.getKey(), successor.getValue());
             x = successor;
         }
 
         // Guaranteed one child or none
-        AvlMapNode<K, V> node_replacer = x.getLeft() != null ? x.getLeft() : x.getRight();
-        AvlMapNode<K, V> parentOfDeleted = x.getParent();
+        AvlMapNode<K, V> node_replacer = x.left != null ? x.left : x.right;
+        AvlMapNode<K, V> parentOfDeleted = x.parent;
 
         if (node_replacer != null) {
-            node_replacer.setParent(parentOfDeleted);
+            node_replacer.parent = parentOfDeleted;
             if (parentOfDeleted == null) {
                 root = node_replacer;
-            } else if (x == parentOfDeleted.getLeft()) {
-                parentOfDeleted.setLeft(node_replacer);
+            } else if (x == parentOfDeleted.left) {
+                parentOfDeleted.left = node_replacer;
             } else {
-                parentOfDeleted.setRight(node_replacer);
+                parentOfDeleted.right = node_replacer;
             }
         } else if (parentOfDeleted == null) {
             root = null;
         } else {
-            if (x == parentOfDeleted.getLeft()) {
-                parentOfDeleted.setLeft(null);
+            if (x == parentOfDeleted.left) {
+                parentOfDeleted.left = null;
             } else {
-                parentOfDeleted.setRight(null);
+                parentOfDeleted.right = null;
             }
         }
         if (parentOfDeleted != null) {
