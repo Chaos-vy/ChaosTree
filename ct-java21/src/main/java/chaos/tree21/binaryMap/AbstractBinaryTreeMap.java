@@ -3,6 +3,11 @@ package chaos.tree21.binaryMap;
 import chaos.tree21.core.SearchTreeMap;
 import chaos.tree21.core.Style;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -19,19 +24,20 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>>
-        implements SearchTreeMap<K, V> permits AvlTreeMap, RedBlackTreeMap {
+sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>>
+        implements SearchTreeMap<K, V>, Serializable, Cloneable permits AvlTreeMap, RedBlackTreeMap {
 
     protected final Comparator<? super K> comparator;
     protected transient Set<K> keySetView;
     protected transient Collection<V> valuesView;
     protected transient Set<Map.Entry<K, V>> entrySetView;
-    protected N root;
-    protected int size;
-    protected long modCount;
+    protected transient N root;
+    protected transient int size;
+    protected transient long modCount;
 
     protected AbstractBinaryTreeMap() {
         this.comparator = null;
@@ -41,35 +47,78 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         this.comparator = comparator;
     }
 
+    protected static int computeRedLevel(int sz) {
+        int level = 0;
+        for (int m = sz - 1; m >= 0; m = (m / 2) - 1) level++;
+        return level;
+    }
+
+    final void buildFromSorted(int size, Iterator<? extends Map.Entry<? extends K, ? extends V>> it) {
+        this.size = size;
+        root = buildFromSortedRecursive(0, 0, size - 1, computeRedLevel(size), it);
+        this.modCount++;
+    }
+
+    /*
+    Taken exact code and idea fromjdk source code
+    I came across this first time such thing.
+     */
+    final N buildFromSortedRecursive(int level, int lo, int hi, int redLevel, Iterator<? extends Map.Entry<? extends K, ? extends V>> it) {
+        if (hi < lo) return null;
+        int mid = lo + ((hi - lo) >>> 1);
+        N left = null;
+        if (lo < mid) {
+            left = buildFromSortedRecursive(level + 1, lo, mid - 1, redLevel, it);
+        }
+        Map.Entry<? extends K, ? extends V> entry = it.next();
+        N middle = createNode(entry.getKey(), entry.getValue());
+        if (left != null) {
+            middle.left = left;
+            left.parent = middle;
+        }
+
+        if (mid < hi) {
+            N right = buildFromSortedRecursive(level + 1, mid + 1, hi, redLevel, it);
+            middle.right = right;
+            right.parent = middle;
+        }
+        afterNodeBuiltFromSorted(middle, level, redLevel);
+        return middle;
+    }
+
+    abstract void afterNodeBuiltFromSorted(N node, int level, int redLevel);
+
     @Override
     public Comparator<? super K> comparator() {
         return this.comparator;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Map<?, ?> m)) return false;
-        if (m.size() != this.size()) return false;
-        if (m.hashCode() != this.hashCode()) return false;
+    public int hashCode() {
+        int h = 0;
+        for (Map.Entry<K, V> i : entrySet()) h += i.hashCode();
+        return h;
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Map<?, ?> m)) return false;
+        if (m.size() != size()) return false;
         try {
-            for (Map.Entry<K, V> e : this.entrySet()) {
+            for (Map.Entry<K, V> e : entrySet()) {
                 K key = e.getKey();
                 V value = e.getValue();
                 if (value == null) {
                     if (!(m.get(key) == null && m.containsKey(key))) return false;
-
                 } else {
-                    if (!value.equals(m.get(key))) {
-                        return false;
-                    }
+                    if (!value.equals(m.get(key))) return false;
                 }
             }
-            return true;
         } catch (ClassCastException | NullPointerException unused) {
             return false;
         }
+        return true;
     }
 
     @SuppressWarnings("unchecked")
@@ -80,15 +129,12 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         return ((Comparable<? super K>) k1).compareTo(k2);
     }
 
-    /*
-    Tree emptiness must be checked prior
-     */
     protected N nodeFinder(K key) {
         N current = root;
         while (current != null) {
             int cmp = compare(key, current.getKey());
             if (cmp == 0) return current;
-            current = cmp < 0 ? current.getLeft() : current.getRight();
+            current = cmp < 0 ? current.left : current.right;
         }
         return null;
     }
@@ -96,14 +142,14 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     protected N leftMostNode() {
         N current = root;
         if (current == null) return null;
-        while (current.getLeft() != null) current = current.getLeft();
+        while (current.left != null) current = current.left;
         return current;
     }
 
     protected N rightMostNode() {
         N current = root;
         if (current == null) return null;
-        while (current.getRight() != null) current = current.getRight();
+        while (current.right != null) current = current.right;
         return current;
     }
 
@@ -131,16 +177,15 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             parent = current;
             cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                V oldValue = current.setValue(value);
-                return oldValue;
-            } else if (cmp < 0) current = current.getLeft();
-            else current = current.getRight();
+                return current.setValue(value);
+            } else if (cmp < 0) current = current.left;
+            else current = current.right;
         }
         N newNode = createNode(key, value);
-        newNode.setParent(parent);
+        newNode.parent = parent;
 
-        if (cmp < 0) parent.setLeft(newNode);
-        else parent.setRight(newNode);
+        if (cmp < 0) parent.left = newNode;
+        else parent.right = newNode;
 
         size++;
         modCount++;
@@ -150,6 +195,10 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
+        if (size == 0 && m instanceof SortedMap && ((SortedMap<?, ?>) m).comparator() == comparator) {
+            buildFromSorted(m.size(), m.entrySet().iterator());
+            return;
+        }
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
         }
@@ -173,18 +222,18 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             parent = current;
             cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                V oldValue = current.getValue();
+                V oldValue = current.value;
                 if (oldValue == null) {
                     current.setValue(value);
                 }
                 return oldValue;
-            } else if (cmp < 0) current = current.getLeft();
-            else current = current.getRight();
+            } else if (cmp < 0) current = current.left;
+            else current = current.right;
         }
         N newNode = createNode(key, value);
-        newNode.setParent(parent);
-        if (cmp < 0) parent.setLeft(newNode);
-        else parent.setRight(newNode);
+        newNode.parent = parent;
+        if (cmp < 0) parent.left = newNode;
+        else parent.right = newNode;
         size++;
         modCount++;
         afterInsert(newNode);
@@ -193,7 +242,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
     @Override
     public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
-        java.util.Objects.requireNonNull(mappingFunction);
+        Objects.requireNonNull(mappingFunction);
         if (root == null) {
             compare(key, key);
             V newValue = mappingFunction.apply(key);
@@ -213,7 +262,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             parent = current;
             cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                V oldValue = current.getValue();
+                V oldValue = current.value;
                 if (oldValue != null) {
                     return oldValue;
                 }
@@ -222,15 +271,15 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
                     current.setValue(newValue);
                 }
                 return newValue;
-            } else if (cmp < 0) current = current.getLeft();
-            else current = current.getRight();
+            } else if (cmp < 0) current = current.left;
+            else current = current.right;
         }
         V newValue = mappingFunction.apply(key);
         if (newValue != null) {
             N newNode = createNode(key, newValue);
-            newNode.setParent(parent);
-            if (cmp < 0) parent.setLeft(newNode);
-            else parent.setRight(newNode);
+            newNode.parent = parent;
+            if (cmp < 0) parent.left = newNode;
+            else parent.right = newNode;
             size++;
             modCount++;
             afterInsert(newNode);
@@ -240,12 +289,12 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
     @Override
     public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        java.util.Objects.requireNonNull(remappingFunction);
+        Objects.requireNonNull(remappingFunction);
         N current = root;
         while (current != null) {
             int cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                V oldValue = current.getValue();
+                V oldValue = current.value;
                 if (oldValue != null) {
                     V newValue = remappingFunction.apply(key, oldValue);
                     if (newValue != null) {
@@ -258,9 +307,9 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
                 }
                 return null;
             } else if (cmp < 0) {
-                current = current.getLeft();
+                current = current.left;
             } else {
-                current = current.getRight();
+                current = current.right;
             }
         }
         return null;
@@ -288,7 +337,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             parent = current;
             cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                V oldValue = current.getValue();
+                V oldValue = current.value;
                 V newValue = remappingFunction.apply(key, oldValue);
                 if (newValue != null) {
                     current.setValue(newValue);
@@ -297,15 +346,15 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
                     remove(key);
                     return null;
                 }
-            } else if (cmp < 0) current = current.getLeft();
-            else current = current.getRight();
+            } else if (cmp < 0) current = current.left;
+            else current = current.right;
         }
         V newValue = remappingFunction.apply(key, null);
         if (newValue != null) {
             N newNode = createNode(key, newValue);
-            newNode.setParent(parent);
-            if (cmp < 0) parent.setLeft(newNode);
-            else parent.setRight(newNode);
+            newNode.parent = parent;
+            if (cmp < 0) parent.left = newNode;
+            else parent.right = newNode;
             size++;
             modCount++;
             afterInsert(newNode);
@@ -332,7 +381,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             parent = current;
             cmp = compare(key, current.getKey());
             if (cmp == 0) {
-                V oldValue = current.getValue();
+                V oldValue = current.value;
                 V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
                 if (newValue != null) {
                     current.setValue(newValue);
@@ -340,13 +389,13 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
                     remove(key);
                 }
                 return newValue;
-            } else if (cmp < 0) current = current.getLeft();
-            else current = current.getRight();
+            } else if (cmp < 0) current = current.left;
+            else current = current.right;
         }
         N newNode = createNode(key, value);
-        newNode.setParent(parent);
-        if (cmp < 0) parent.setLeft(newNode);
-        else parent.setRight(newNode);
+        newNode.parent = parent;
+        if (cmp < 0) parent.left = newNode;
+        else parent.right = newNode;
         size++;
         modCount++;
         afterInsert(newNode);
@@ -381,7 +430,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     public boolean containsValue(Object value) {
         N current = leftMostNode();
         while (current != null) {
-            if (Objects.equals(value, current.getValue())) {
+            if (Objects.equals(value, current.value)) {
                 return true;
             }
             current = successor(current);
@@ -392,17 +441,17 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     protected N successor(N t) {
         if (t == null) return null;
         N p;
-        if (t.getRight() != null) {
-            p = t.getRight();
-            while (p.getLeft() != null) {
-                p = p.getLeft();
+        if (t.right != null) {
+            p = t.right;
+            while (p.left != null) {
+                p = p.left;
             }
         } else {
-            p = t.getParent();
+            p = t.parent;
             N ch = t;
-            while (p != null && ch == p.getRight()) {
+            while (p != null && ch == p.right) {
                 ch = p;
-                p = p.getParent();
+                p = p.parent;
             }
         }
         return p;
@@ -411,20 +460,32 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     protected N predecessor(N t) {
         if (t == null) return null;
         N p;
-        if (t.getLeft() != null) {
-            p = t.getLeft();
-            while (p.getRight() != null) {
-                p = p.getRight();
+        if (t.left != null) {
+            p = t.left;
+            while (p.right != null) {
+                p = p.right;
             }
         } else {
-            p = t.getParent();
+            p = t.parent;
             N ch = t;
-            while (p != null && ch == p.getLeft()) {
+            while (p != null && ch == p.left) {
                 ch = p;
-                p = p.getParent();
+                p = p.parent;
             }
         }
         return p;
+    }
+
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        Objects.requireNonNull(action);
+        long expectedModCount = modCount;
+        for (N e = leftMostNode(); e != null; e = successor(e)) {
+            action.accept(e.getKey(), e.value);
+            if (expectedModCount != modCount) {
+                throw new ConcurrentModificationException();
+            }
+        }
     }
 
     @Override
@@ -434,47 +495,47 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             @SuppressWarnings("unchecked")
             K k = (K) o;
             N node = nodeFinder(k);
-            return node == null ? null : node.getValue();
+            return node == null ? null : node.value;
         } catch (ClassCastException | NullPointerException e) {
             return null;
         }
     }
 
     protected void rotateLeft(N p) {
-        N r = p.getRight();
-        p.setRight(r.getLeft());
-        if (r.getLeft() != null) {
-            r.getLeft().setParent(p);
+        N r = p.right;
+        p.right = r.left;
+        if (r.left != null) {
+            r.left.parent = p;
         }
-        r.setParent(p.getParent());
-        if (p.getParent() == null) {
+        r.parent = p.parent;
+        if (p.parent == null) {
             root = r;
-        } else if (p.getParent().getLeft() == p) {
-            p.getParent().setLeft(r);
+        } else if (p.parent.left == p) {
+            p.parent.left = r;
         } else {
-            p.getParent().setRight(r);
+            p.parent.right = r;
         }
 
-        r.setLeft(p);
-        p.setParent(r);
+        r.left = p;
+        p.parent = r;
     }
 
     protected void rotateRight(N p) {
-        N l = p.getLeft();
-        p.setLeft(l.getRight());
-        if (l.getRight() != null) {
-            l.getRight().setParent(p);
+        N l = p.left;
+        p.left = l.right;
+        if (l.right != null) {
+            l.right.parent = p;
         }
-        l.setParent(p.getParent());
-        if (p.getParent() == null) {
+        l.parent = p.parent;
+        if (p.parent == null) {
             root = l;
-        } else if (p.getParent().getRight() == p) {
-            p.getParent().setRight(l);
+        } else if (p.parent.right == p) {
+            p.parent.right = l;
         } else {
-            p.getParent().setLeft(l);
+            p.parent.left = l;
         }
-        l.setRight(p);
-        p.setParent(l);
+        l.right = p;
+        p.parent = l;
     }
 
     @Override
@@ -490,13 +551,13 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     @Override
     public Map.Entry<K, V> firstEntry() {
         N n = leftMostNode();
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
     }
 
     @Override
     public Map.Entry<K, V> lastEntry() {
         N n = rightMostNode();
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
     }
 
     @Override
@@ -517,7 +578,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     public Map.Entry<K, V> pollFirstEntry() {
         N first = leftMostNode();
         if (first == null) return null;
-        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(first.getKey(), first.getValue());
+        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(first.getKey(), first.value);
         remove(first.getKey());
         return result;
     }
@@ -526,7 +587,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     public Map.Entry<K, V> pollLastEntry() {
         N last = rightMostNode();
         if (last == null) return null;
-        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(last.getKey(), last.getValue());
+        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(last.getKey(), last.value);
         remove(last.getKey());
         return result;
     }
@@ -549,14 +610,14 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
                 public boolean contains(Object o) {
                     if (!(o instanceof Map.Entry<?, ?> e)) return false;
                     N node = nodeFinder((K) e.getKey());
-                    return node != null && Objects.equals(node.getValue(), e.getValue());
+                    return node != null && Objects.equals(node.value, e.getValue());
                 }
 
                 @Override
                 public boolean remove(Object o) {
                     if (!(o instanceof Map.Entry<?, ?> e)) return false;
                     if (contains(o)) {
-                        AbstractBinaryTreeMap.this.remove((K) e.getKey());
+                        AbstractBinaryTreeMap.this.remove(e.getKey());
                         return true;
                     }
                     return false;
@@ -605,10 +666,10 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         while (p != null) {
             int cmp = compare(key, p.getKey());
             if (cmp < 0) {
-                if (p.getLeft() != null) p = p.getLeft();
+                if (p.left != null) p = p.left;
                 else return p;
             } else if (cmp > 0) {
-                if (p.getRight() != null) p = p.getRight();
+                if (p.right != null) p = p.right;
                 else return successor(p);
             } else return p;
         }
@@ -620,10 +681,10 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         while (p != null) {
             int cmp = compare(key, p.getKey());
             if (cmp > 0) {
-                if (p.getRight() != null) p = p.getRight();
+                if (p.right != null) p = p.right;
                 else return p;
             } else if (cmp < 0) {
-                if (p.getLeft() != null) p = p.getLeft();
+                if (p.left != null) p = p.left;
                 else return predecessor(p);
             } else return p;
         }
@@ -635,10 +696,10 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         while (p != null) {
             int cmp = compare(key, p.getKey());
             if (cmp < 0) {
-                if (p.getLeft() != null) p = p.getLeft();
+                if (p.left != null) p = p.left;
                 else return p;
             } else {
-                if (p.getRight() != null) p = p.getRight();
+                if (p.right != null) p = p.right;
                 else return successor(p);
             }
         }
@@ -650,10 +711,10 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         while (p != null) {
             int cmp = compare(key, p.getKey());
             if (cmp > 0) {
-                if (p.getRight() != null) p = p.getRight();
+                if (p.right != null) p = p.right;
                 else return p;
             } else {
-                if (p.getLeft() != null) p = p.getLeft();
+                if (p.left != null) p = p.left;
                 else return predecessor(p);
             }
         }
@@ -663,7 +724,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     @Override
     public Map.Entry<K, V> lowerEntry(K k) {
         N n = getLowerNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
     }
 
     @Override
@@ -675,7 +736,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     @Override
     public Map.Entry<K, V> floorEntry(K k) {
         N n = getFloorNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
     }
 
     @Override
@@ -687,7 +748,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     @Override
     public Map.Entry<K, V> ceilingEntry(K k) {
         N n = getCeilingNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
     }
 
     @Override
@@ -699,7 +760,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
     @Override
     public Map.Entry<K, V> higherEntry(K k) {
         N n = getHigherNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
     }
 
     @Override
@@ -804,8 +865,8 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
         sb.append('[').append(nodeText(node)).append(']').append('\n');
 
-        boolean hasLeft = node.getLeft() != null;
-        boolean hasRight = node.getRight() != null;
+        boolean hasLeft = node.left != null;
+        boolean hasRight = node.right != null;
 
         if (!hasLeft && !hasRight) {
             return;
@@ -814,14 +875,14 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         String childPrefix = prefix + (isRoot ? "" : isTail ? space : vertical);
 
         if (hasLeft && hasRight) {
-            buildString(node.getLeft(), childPrefix, false, false, sb, style);
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
+            buildString(node.left, childPrefix, false, false, sb, style);
+            buildString(node.right, childPrefix, true, false, sb, style);
 
         } else if (hasLeft) {
-            buildString(node.getLeft(), childPrefix, true, false, sb, style);
+            buildString(node.left, childPrefix, true, false, sb, style);
 
         } else {
-            buildString(node.getRight(), childPrefix, true, false, sb, style);
+            buildString(node.right, childPrefix, true, false, sb, style);
         }
     }
 
@@ -843,6 +904,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         }
 
         @Override
+        @SuppressWarnings("SuspiciousMethodCalls")
         public boolean contains(Object o) {
             return m.containsKey(o);
         }
@@ -1013,6 +1075,9 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
             }
+            if (lastReturned.left != null && lastReturned.right != null) {
+                nextNode = lastReturned;
+            }
             AbstractBinaryTreeMap.this.remove(lastReturned.getKey());
             expectedModCount = modCount;
             lastReturned = null;
@@ -1029,80 +1094,13 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         }
     }
 
-    private final class KeyIterator extends MapIterator<K> {
-        KeyIterator(N first) {
-            super(first);
-        }
-
-        public K next() {
-            return stepForward().getKey();
-        }
-    }
-
     private final class ValueIterator extends MapIterator<V> {
         ValueIterator(N first) {
             super(first);
         }
 
         public V next() {
-            return stepForward().getValue();
-        }
-    }
-
-    private abstract class DescendingMapIterator<T> implements Iterator<T> {
-        N nextNode;
-        N lastReturned;
-        long expectedModCount;
-
-        DescendingMapIterator(N last) {
-            expectedModCount = modCount;
-            lastReturned = null;
-            nextNode = last;
-        }
-
-        public final boolean hasNext() {
-            return nextNode != null;
-        }
-
-        final N stepBackward() {
-            if (modCount != expectedModCount) {
-                throw new ConcurrentModificationException();
-            }
-            if (nextNode == null) {
-                throw new NoSuchElementException();
-            }
-            lastReturned = nextNode;
-            nextNode = predecessor(nextNode);
-            return lastReturned;
-        }
-
-        public final void remove() {
-            if (lastReturned == null) throw new IllegalStateException();
-            if (modCount != expectedModCount) throw new ConcurrentModificationException();
-
-            AbstractBinaryTreeMap.this.remove(lastReturned.getKey());
-            expectedModCount = modCount;
-            lastReturned = null;
-        }
-    }
-
-    private final class DescendingEntryIterator extends DescendingMapIterator<Map.Entry<K, V>> {
-        DescendingEntryIterator(N last) {
-            super(last);
-        }
-
-        public Map.Entry<K, V> next() {
-            return stepBackward();
-        }
-    }
-
-    private final class DescendingKeyIterator extends DescendingMapIterator<K> {
-        DescendingKeyIterator(N last) {
-            super(last);
-        }
-
-        public K next() {
-            return stepBackward().getKey();
+            return stepForward().value;
         }
     }
 
@@ -1127,6 +1125,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
         boolean tooLow(Object key) {
             if (!fromStart) {
+                @SuppressWarnings("unchecked")
                 int c = compare((K) key, lo);
                 return c < 0 || (c == 0 && !loInclusive);
             }
@@ -1135,6 +1134,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
 
         boolean tooHigh(Object key) {
             if (!toEnd) {
+                @SuppressWarnings("unchecked")
                 int c = compare((K) key, hi);
                 return c > 0 || (c == 0 && !hiInclusive);
             }
@@ -1168,25 +1168,25 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             return AbstractBinaryTreeMap.this.remove(key);
         }
 
-        final N subCeiling(K key) {
+        N subCeiling(K key) {
             if (inRange(key)) return getCeilingNode(key);
             if (tooLow(key)) return absLowest();
             return null;
         }
 
-        final N subHigher(K key) {
+        N subHigher(K key) {
             if (inRange(key)) return getHigherNode(key);
             if (tooLow(key)) return absLowest();
             return null;
         }
 
-        final N subFloor(K key) {
+        N subFloor(K key) {
             if (inRange(key)) return getFloorNode(key);
             if (tooHigh(key)) return absHighest();
             return null;
         }
 
-        final N subLower(K key) {
+        N subLower(K key) {
             if (inRange(key)) return getLowerNode(key);
             if (tooHigh(key)) return absHighest();
             return null;
@@ -1195,7 +1195,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         @Override
         public Map.Entry<K, V> lowerEntry(K k) {
             N n = descending ? subHigher(k) : subLower(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
         }
 
         @Override
@@ -1207,7 +1207,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         @Override
         public Map.Entry<K, V> floorEntry(K k) {
             N n = descending ? subCeiling(k) : subFloor(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
         }
 
         @Override
@@ -1219,7 +1219,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         @Override
         public Map.Entry<K, V> ceilingEntry(K k) {
             N n = descending ? subFloor(k) : subCeiling(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
         }
 
         @Override
@@ -1231,7 +1231,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         @Override
         public Map.Entry<K, V> higherEntry(K k) {
             N n = descending ? subLower(k) : subHigher(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
         }
 
         @Override
@@ -1243,20 +1243,20 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         @Override
         public Map.Entry<K, V> firstEntry() {
             N n = descending ? absHighest() : absLowest();
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
         }
 
         @Override
         public Map.Entry<K, V> lastEntry() {
             N n = descending ? absLowest() : absHighest();
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
         }
 
         @Override
         public Map.Entry<K, V> pollFirstEntry() {
             N n = descending ? absHighest() : absLowest();
             if (n == null) return null;
-            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
             TreeSubMap.this.remove(n.getKey());
             return result;
         }
@@ -1265,7 +1265,7 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
         public Map.Entry<K, V> pollLastEntry() {
             N n = descending ? absLowest() : absHighest();
             if (n == null) return null;
-            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.getValue());
+            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
             TreeSubMap.this.remove(n.getKey());
             return result;
         }
@@ -1390,7 +1390,13 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
                                 throw new ConcurrentModificationException();
                             }
 
+                            if (!descending && lastReturned.left != null && lastReturned.right != null) {
+                                nextNode = lastReturned;
+                            }
                             TreeSubMap.this.remove(lastReturned.getKey());
+                            if (nextNode == lastReturned && tooHigh(nextNode.getKey())) {
+                                nextNode = null;
+                            }
                             expectedModCount = modCount;
                             lastReturned = null;
                         }
@@ -1422,14 +1428,74 @@ public sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinar
             return e.getKey();
         }
 
-        final N absLowest() {
+        N absLowest() {
             N e = fromStart ? leftMostNode() : (loInclusive ? getCeilingNode(lo) : getHigherNode(lo));
             return (e == null || tooHigh(e.getKey())) ? null : e;
         }
 
-        final N absHighest() {
+        N absHighest() {
             N e = toEnd ? rightMostNode() : (hiInclusive ? getFloorNode(hi) : getLowerNode(hi));
             return (e == null || tooLow(e.getKey())) ? null : e;
+        }
+    }
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        try {
+            AbstractBinaryTreeMap<K, V, N> clone = (AbstractBinaryTreeMap<K, V, N>) super.clone();
+            clone.root = null;
+            clone.size = 0;
+            clone.modCount = 0;
+            clone.entrySetView = null;
+            clone.keySetView = null;
+            clone.valuesView = null;
+            if (this.size > 0) {
+                clone.buildFromSorted(this.size, this.entrySet().iterator());
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+    }
+    @Serial
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        s.writeInt(size);
+        for (Map.Entry<K, V> e : entrySet()) {
+            s.writeObject(e.getKey());
+            s.writeObject(e.getValue());
+        }
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        int mapSize = s.readInt();
+        if (mapSize > 0) {
+            Iterator<Map.Entry<K, V>> streamIterator = new Iterator<>() {
+                int count = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return count < mapSize;
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public Map.Entry<K, V> next() {
+                    if (!hasNext()) throw new NoSuchElementException();
+                    try {
+                        K key = (K) s.readObject();
+                        V value = (V) s.readObject();
+                        count++;
+                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException("Failed to deserialize tree data", e);
+                    }
+                }
+            };
+            buildFromSorted(mapSize, streamIterator);
         }
     }
 }

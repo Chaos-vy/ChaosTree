@@ -4,13 +4,13 @@ import java.util.Map;
 import java.util.Objects;
 
 sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNode<K, V, N>>
-        implements BinaryMapNode<K, V, N>, Map.Entry<K, V> permits AvlMapNode, RbtMapNode {
+        implements Map.Entry<K, V> permits AvlMapNode, RbtMapNode {
 
-    private K key;
-    private V value;
-    private N left;
-    private N right;
-    private N parent;
+    protected K key;
+    protected V value;
+    protected N left;
+    protected N right;
+    protected N parent;
 
     protected AbstractBinaryMapNode(K key, V value) {
         this.key = key;
@@ -23,11 +23,6 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
     }
 
     @Override
-    public void setKey(K key) {
-        this.key = key;
-    }
-
-    @Override
     public V getValue() {
         return value;
     }
@@ -37,36 +32,6 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
         V old_value = this.value;
         this.value = value;
         return old_value;
-    }
-
-    @Override
-    public N getLeft() {
-        return left;
-    }
-
-    @Override
-    public void setLeft(N left) {
-        this.left = left;
-    }
-
-    @Override
-    public N getRight() {
-        return right;
-    }
-
-    @Override
-    public void setRight(N right) {
-        this.right = right;
-    }
-
-    @Override
-    public N getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(N parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -86,7 +51,7 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
         return key + "=" + value; // Standard Java Map formatting
     }
 
-    public void setPair(K key, V value) {
+    protected void setPair(K key, V value) {
         this.key = key;
         this.value = value;
     }
