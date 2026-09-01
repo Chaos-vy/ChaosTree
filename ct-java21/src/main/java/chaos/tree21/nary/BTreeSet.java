@@ -1,21 +1,68 @@
 package chaos.tree21.nary;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.SortedSet;
 import java.util.function.Consumer;
 
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
 
+    /*
+     Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
+     */
+    private static final int DEFAULT_DEGREE = 64;
+
+    public BTreeSet() {
+        super(DEFAULT_DEGREE, null);
+    }
+    public BTreeSet(Comparator<? super E> comparator) {
+        super(DEFAULT_DEGREE, comparator);
+    }
+    public BTreeSet(Collection<? extends E> c) {
+        this();
+        addAll(c);
+    }
+
+    public BTreeSet(SortedSet<E> s) {
+        super(DEFAULT_DEGREE, s.comparator());
+        addAll(s);
+    }
     public BTreeSet(int degree) {
         super(degree, null);
     }
 
     public BTreeSet(int degree, Comparator<? super E> comparator) {
         super(degree, comparator);
+    }
+
+    /**
+     * Streams strictly sorted data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     *
+     * @param sortedData An iterator providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     *                   Hold the Chaos!!
+     */
+    public void bulkLoad(Iterator<E> sortedData, float fillFactor) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSorted(sortedData, fillFactor);
     }
 
     /**
@@ -47,7 +94,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      *
      * Observed insertion/filling pattern:
      *
-     *     L   L   R   L   L   R   L
+     *     L   R   L   L   R   L
      *
      * A pattern starts to appear.
      *
@@ -179,6 +226,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @Override
     public boolean add(E e) {
         if (root == null) {
+            compare(e, e);
             root = new BTreeNode<>(degree, true);
             root.keys[0] = e;
             root.keyCount++;
