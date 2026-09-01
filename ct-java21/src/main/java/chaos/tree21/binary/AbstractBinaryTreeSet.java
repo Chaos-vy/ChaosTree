@@ -7,8 +7,21 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
-import java.lang.reflect.Array;
-import java.util.*;
+import java.io.Serializable;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -18,8 +31,8 @@ import java.util.stream.Stream;
  * It is commonly known as CRTP in C++
  * For people wondering no docs it's just that these API work same as of like Java Tree behaves.
  */
-sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>>
-        implements SearchTreeSet<E>, Cloneable
+sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>> extends AbstractSet<E>
+        implements SearchTreeSet<E>, Cloneable, Serializable
         permits AvlTreeSet, RedBlackTreeSet {
 
 
@@ -48,7 +61,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         this.modCount++;
     }
 
-    private final N buildFromSortedRecursive(int level, int lo, int hi, int redLevel, Iterator<? extends E> it) {
+    final N buildFromSortedRecursive(int level, int lo, int hi, int redLevel, Iterator<? extends E> it) {
         if (hi < lo) return null;
         int mid = lo + ((hi - lo) >>> 1);
         N left = null;
@@ -130,7 +143,16 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
     public boolean contains(Object o) {
         @SuppressWarnings("unchecked")
         E val = (E) o;
-        return nodeFinder(val) != null;
+        // I removed the contains invoking nodeFinder with code directly
+        N curr = root;
+        if(root == null) return false;
+        while (curr != null){
+            int cmp = compare(val, curr.value);
+            if(cmp == 0) return true;
+            else if (cmp > 0) curr = curr.right;
+            else curr = curr.left;
+        }
+        return false;
     }
 
     //Prior to work of NPE must be done
@@ -382,48 +404,16 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
     }
 
     @Override
-    public boolean containsAll(Collection<?> collection) {
-        for (Object element : collection) {
-            if (!contains(element)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
     public boolean addAll(Collection<? extends E> c) {
-        if (this.size == 0 && c.size() > 0 && c instanceof SortedSet<?> sortedSet) {
+        if (this.size == 0 && !c.isEmpty() && c instanceof SortedSet<?> sortedSet) {
             if (Objects.equals(this.comparator(), sortedSet.comparator())) {
-                buildFromSorted(c.size(), (Iterator<? extends E>) c.iterator());
+                buildFromSorted(c.size(), c.iterator());
                 return true;
             }
         }
         boolean modified = false;
         for (E e : c) {
             if (add(e)) {
-                modified = true;
-            }
-        }
-        return modified;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> collection) {
-        boolean modified = false;
-        for (Object o : collection) if (remove(o)) modified = true;
-        return modified;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        Objects.requireNonNull(c);
-        boolean modified = false;
-        Iterator<E> it = iterator();
-        while (it.hasNext()) {
-            if (!c.contains(it.next())) {
-                it.remove();
                 modified = true;
             }
         }
@@ -600,53 +590,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
     }
 
     @Override
-    public int hashCode() {
-        int h = 0;
-        for (E e : this) h += e.hashCode();
-        return h;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Set<?> c)) return false;
-        if (c.size() != size()) return false;
-
-        try {
-            return containsAll(c);
-        } catch (ClassCastException | NullPointerException unused) {
-            return false;
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T[] toArray(T[] a) {
-        if (a.length < size) {
-            a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
-        }
-        int i = 0;
-        Object[] result = a;
-        for (E e : this) {
-            result[i++] = e;
-        }
-        if (a.length > size) {
-            a[size] = null;
-        }
-        return a;
-    }
-
-    @Override
-    public Object[] toArray() {
-        Object[] array = new Object[size];
-        int i = 0;
-        for (E e : this) {
-            array[i++] = e;
-        }
-        return array;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public Object clone() {
         try {
@@ -722,16 +665,16 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             this.descending = descending;
         }
 
+        private boolean tooLow(E e) {
+            return lo != null && (compare(e, lo) < 0 || (compare(e, lo) == 0 && !loInclusive));
+        }
+
+        private boolean tooHigh(E e) {
+            return hi != null && (compare(e, hi) > 0 || (compare(e, hi) == 0 && !hiInclusive));
+        }
+
         private boolean inRange(E e) {
-            if (lo != null) {
-                int cmp = compare(e, lo);
-                if (cmp < 0 || (cmp == 0 && !loInclusive)) return false;
-            }
-            if (hi != null) {
-                int cmp = compare(e, hi);
-                return cmp <= 0 && (cmp != 0 || hiInclusive);
-            }
-            return true;
+            return !tooLow(e) && !tooHigh(e);
         }
 
         @Override
@@ -752,24 +695,32 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public E lower(E e) {
+            if (tooLow(e)) return null;
+            if (tooHigh(e)) return isEmpty() ? null : last();
             E result = AbstractBinaryTreeSet.this.lower(e);
             return (result != null && inRange(result)) ? result : null;
         }
 
         @Override
         public E floor(E e) {
+            if (tooLow(e)) return null;
+            if (tooHigh(e)) return isEmpty() ? null : last();
             E result = AbstractBinaryTreeSet.this.floor(e);
             return (result != null && inRange(result)) ? result : null;
         }
 
         @Override
         public E ceiling(E e) {
+            if (tooHigh(e)) return null;
+            if (tooLow(e)) return isEmpty() ? null : first();
             E result = AbstractBinaryTreeSet.this.ceiling(e);
             return (result != null && inRange(result)) ? result : null;
         }
 
         @Override
         public E higher(E e) {
+            if (tooHigh(e)) return null;
+            if (tooLow(e)) return isEmpty() ? null : first();
             E result = AbstractBinaryTreeSet.this.higher(e);
             return (result != null && inRange(result)) ? result : null;
         }
@@ -816,7 +767,9 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
                 @Override
                 public void remove() {
-                    if (val == null) throw new IllegalStateException();
+                    if (val == null) {
+                        throw new IllegalStateException();
+                    }
                     AbstractBinaryTreeSet.this.remove(val);
                     val = null;
                     expectedModCount = modCount;
@@ -869,10 +822,12 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
                 @Override
                 public void remove() {
-                    if (val == null) throw new IllegalStateException();
+                    if (val == null) {
+                        throw new IllegalStateException();
+                    }
                     AbstractBinaryTreeSet.this.remove(val);
                     val = null;
-                    expectedModCount = modCount; // Sync it up!
+                    expectedModCount = modCount;
                 }
 
                 @Override
@@ -951,6 +906,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             return e;
         }
 
+        @Override
         public E pollLast() {
             if (isEmpty()) return null;
             E e = last();
@@ -960,7 +916,9 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public Comparator<? super E> comparator() {
-            return AbstractBinaryTreeSet.this.comparator;
+            Comparator<? super E> cmp = AbstractBinaryTreeSet.this.comparator;
+            if (!descending) return cmp;
+            return cmp == null ? Collections.reverseOrder() : Collections.reverseOrder(cmp);
         }
 
         @Override
@@ -1001,8 +959,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         public SortedSet<E> tailSet(E fromElement) {
             return tailSet(fromElement, true);
         }
-
-
     }
     //Play with it, destroy with it, LOL!!
 }
