@@ -5,7 +5,7 @@ import java.util.SequencedMap;
 
 public interface SearchTreeMap<K, V> extends NavigableMap<K, V>, SequencedMap<K, V> {
     default String display() {
-        return display(Style.ASCII);
+        return display(Style.UNICODE);
     }
 
     String display(Style style);
