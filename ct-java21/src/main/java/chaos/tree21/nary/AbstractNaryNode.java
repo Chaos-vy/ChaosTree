@@ -23,62 +23,29 @@ package chaos.tree21.nary;
  * </ul>
  *
  */
-public abstract sealed class AbstractNaryNode<E, N extends AbstractNaryNode<E, N>> implements NaryNode<E,N> permits BPlusTreeNode, BTreeNode {
+abstract sealed class AbstractNaryNode<E, N extends AbstractNaryNode<E, N>> permits BPlusTreeNode, BTreeNode {
 
     // Arrays sized for +1 overflow room to prevent bounds checks during splitting
     protected final Object[] keys;
-    protected final N[] children;
+    protected final N[] child;
 
     protected int keyCount;
     protected N parent;
 
-    @SuppressWarnings("unchecked")
-    protected AbstractNaryNode(int degree, boolean isLeaf) {
-        int maxKeys = (degree << 1) - 1;
-        // The +1 Overflow Optimization
-        this.keys = new Object[maxKeys + 1];
-        // Leaf nodes don't allocate children arrays to save RAM
-        this.children = isLeaf ? null : (N[]) new AbstractNaryNode[maxKeys + 2];
+    protected AbstractNaryNode(int degree, boolean isLeaf, N[] child) {
+        int maxKeys = degree << 1;
+        this.keys = new Object[maxKeys];
+        this.child = child;
         this.keyCount = 0;
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public E getKey(int index) {
-        return (E) keys[index];
+    public void setChild(int index, N node) {
+        child[index] = node;
+        if (node != null) node.parent = (N) this;
     }
 
-    @Override
-    public void setKey(int index, E key) {
-        keys[index] = key;
-    }
-
-    @Override
-    public N getChild(int index) {
-        return children[index];
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setChild(int index, N child) {
-        children[index] = child;
-        if (child != null) {
-            child.parent = (N) this;
-        }
-    }
-
-    @Override
-    public void setKeyCount(int keyCount) {
-        this.keyCount = keyCount;
-    }
-
-    @Override
-    public void keyCount_DEC1() {
-        this.keyCount--;
-    }
-
-    @Override
-    public void keyCount_INC1() {
-        this.keyCount++;
+    public boolean isLeaf() {
+        return child == null;
     }
 }
