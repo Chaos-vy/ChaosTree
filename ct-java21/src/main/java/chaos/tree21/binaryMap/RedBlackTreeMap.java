@@ -25,18 +25,18 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
     }
 
     @Override
-    protected void afterNodeBuiltFromSorted(RbtMapNode<K, V> node, int level, int redLevel) {
+    void afterNodeBuiltFromSorted(RbtMapNode<K, V> node, int level, int redLevel) {
         if (level == redLevel) node.setRed();
         else node.setBlack();
     }
 
     @Override
-    protected RbtMapNode<K, V> createNode(K key, V value) {
+    RbtMapNode<K, V> createNode(K key, V value) {
         return new RbtMapNode<>(key, value);
     }
 
     @Override
-    protected void afterInsert(RbtMapNode<K, V> x) {
+    void afterInsert(RbtMapNode<K, V> x) {
         // I need to only care if the parent is also RED (a Red-Red violation!)
         while (x != null && x != root && x.parent.isRed()) {
             RbtMapNode<K, V> parent = x.parent;
