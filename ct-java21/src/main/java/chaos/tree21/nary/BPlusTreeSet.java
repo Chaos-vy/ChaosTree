@@ -1,11 +1,13 @@
 package chaos.tree21.nary;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.SortedSet;
 import java.util.function.Consumer;
 
 /*
@@ -17,7 +19,28 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     Yeah, a self varName. As the name suggest this Compaction count only works during deletion
     case. Only and Only if the key was found to be in route else no!!
      */
-    private transient int chaosCompaction = 0; // Tracks ghost routing keys
+    private int chaosCompaction = 0; // Tracks ghost routing keys
+
+    /*
+     Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
+     */
+    private static final int DEFAULT_DEGREE = 64;
+
+    public BPlusTreeSet() {
+        super(DEFAULT_DEGREE, null);
+    }
+    public BPlusTreeSet(Comparator<? super E> comparator) {
+        super(DEFAULT_DEGREE, comparator);
+    }
+    public BPlusTreeSet(Collection<? extends E> c) {
+        this();
+        addAll(c);
+    }
+
+    public BPlusTreeSet(SortedSet<E> s) {
+        super(DEFAULT_DEGREE, s.comparator());
+        addAll(s);
+    }
 
     public BPlusTreeSet(int degree) {
         super(degree, null);
@@ -27,6 +50,30 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         super(degree, comparator);
     }
 
+    /**
+     * Streams strictly sorted data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     *
+     * @param sortedData An iterator providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     */
+    public void bulkLoad(Iterator<E> sortedData, float fillFactor) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSorted(sortedData, fillFactor);
+    }
+
     @Override
     BPlusTreeNode<E> createNode(int degree, boolean isLeaf) {
         return new BPlusTreeNode<>(degree, isLeaf);
@@ -34,7 +81,12 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
     /*
     Contributors here can track compaction ratio.
-    there must not be extensive branching or use of any such library it may be part of compaction and maybe not in the future.
+    there must not be extensive branching or use of any such library
+    i.e, stack, hashmap or arrayList or custom array stack
+    Reason: The compaction ratio is directly dealing with remove and
+    I don't want any slowness of anything
+    -> I also feel ghost deletion is tip of iceberg in my engine which I can completely ignore.
+     it may be part of compaction and maybe not in the future.
      */
     private float getCompactionRatio() {
         if (size == 0) return 0.0f;
@@ -123,10 +175,108 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         }
     }
 
+    /**
+     * Strictly sorted array data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided array MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     * <p>
+     * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
+     * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
+     *
+     * @param sortedArray An array providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     *                   Hold the Chaos!!
+     */
+    public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
+
+        if (sortedArray == null || sortedArray.length == 0) return;
+
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if(degree < 32){
+            throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSortedArray(sortedArray, fillFactor);
+    }
+
+    private void buildFromSortedArray(Object[] sortedArray, float factor){
+        int maxKeys = (degree << 1) - 1;
+        int targetKeys = Math.max(1, (int) (maxKeys * factor));
+
+        @SuppressWarnings("unchecked")
+        BPlusTreeNode<E>[] rightEdge = (BPlusTreeNode<E>[]) new BPlusTreeNode[32];
+        rightEdge[0] = new BPlusTreeNode<>(degree, true);
+        this.root = rightEdge[0];
+
+        int index = 0;
+        while (index < sortedArray.length) {
+            BPlusTreeNode<E> leaf = rightEdge[0];
+            int chunk = Math.min(targetKeys, sortedArray.length - index);
+            System.arraycopy(sortedArray, index, leaf.keys, 0, chunk);
+            leaf.keyCount = chunk;
+            this.size += chunk;
+            index += chunk;
+
+            if (index < sortedArray.length) {
+                @SuppressWarnings("unchecked")
+                E routingKey = (E) sortedArray[index];
+
+                int level = 1;
+                while (true) {
+                    if (rightEdge[level] == null) {
+                        BPlusTreeNode<E> newRoot = new BPlusTreeNode<>(degree, false);
+                        newRoot.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level] = newRoot;
+                        this.root = newRoot;
+                    }
+
+                    BPlusTreeNode<E> targetNode = rightEdge[level];
+                    targetNode.keys[targetNode.keyCount++] = routingKey;
+
+                    BPlusTreeNode<E> nextRight = new BPlusTreeNode<>(degree, (level - 1) == 0);
+                    targetNode.setChild(targetNode.keyCount, nextRight);
+                    if (level - 1 == 0) {
+                        rightEdge[0].next = nextRight;
+                        nextRight.prev = rightEdge[0];
+                    }
+                    rightEdge[level - 1] = nextRight;
+
+                    if (targetNode.keyCount < targetKeys) {
+                        for (int i = level - 2; i >= 0; i--) {
+                            BPlusTreeNode<E> fillNode = new BPlusTreeNode<>(degree, i == 0);
+                            rightEdge[i + 1].setChild(0, fillNode);
+                            if (i == 0) {
+                                rightEdge[0].next = fillNode;
+                                fillNode.prev = rightEdge[0];
+                            }
+                            rightEdge[i] = fillNode;
+                        }
+                        break;
+                    }
+                    routingKey = (E) targetNode.keys[targetNode.keyCount - 1];
+                    targetNode.keys[targetNode.keyCount - 1] = null;
+                    targetNode.keyCount--;
+                    level++;
+                }
+            }
+        }
+        this.modCount++;
+    }
     @Override
     @SuppressWarnings("unchecked")
     public boolean add(E e) {
         if (root == null) {
+            compare(e, e);
             root = createNode(degree, true);
             root.keys[0] = e;
             root.keyCount = 1;
