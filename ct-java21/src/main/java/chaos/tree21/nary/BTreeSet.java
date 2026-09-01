@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
-
+    //TODO: Making a Buider fn
     /*
      Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
      */
@@ -218,6 +218,97 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         // Future inserts will naturally fix it!
     }
 
+    /**
+     * Strictly sorted array data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided array MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     * <p>
+     * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
+     * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
+     *
+     * @param sortedArray An array providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     *                   Hold the Chaos!!
+     */
+    public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
+
+        if (sortedArray == null || sortedArray.length == 0) return;
+
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if(degree < 32){
+            throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSortedArray(sortedArray, fillFactor);
+    }
+
+    private void buildFromSortedArray(Object[] sortedArray, float fillfactor){
+        int maxKeys = (degree << 1) - 1;
+        int targetKeys = Math.max(1, (int) (maxKeys * fillfactor));
+
+        @SuppressWarnings("unchecked")
+        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
+        rightEdge[0] = new BTreeNode<>(degree, true);
+        this.root = rightEdge[0];
+
+        int index = 0;
+        while (index < sortedArray.length) {
+            BTreeNode<E> leaf = rightEdge[0];
+            int chunk = Math.min(targetKeys, sortedArray.length - index);
+            System.arraycopy(sortedArray, index, leaf.keys, 0, chunk);
+            leaf.keyCount = chunk;
+            this.size += chunk;
+            index += chunk;
+
+            if (index < sortedArray.length) {
+                @SuppressWarnings("unchecked")
+                E routingKey = (E) sortedArray[index++]; // <-- Note the index++ (Skip!)
+                this.size++;
+
+                int level = 1;
+                while (true) {
+                    if (rightEdge[level] == null) {
+                        BTreeNode<E> newRoot = new BTreeNode<>(degree, false);
+                        newRoot.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level] = newRoot;
+                        this.root = newRoot;
+                    }
+
+                    BTreeNode<E> targetNode = rightEdge[level];
+                    targetNode.keys[targetNode.keyCount++] = routingKey;
+
+                    BTreeNode<E> nextRight = new BTreeNode<>(degree, (level - 1) == 0);
+                    targetNode.setChild(targetNode.keyCount, nextRight);
+                    rightEdge[level - 1] = nextRight;
+
+                    if (targetNode.keyCount < targetKeys) {
+                        for (int i = level - 2; i >= 0; i--) {
+                            BTreeNode<E> fillNode = new BTreeNode<>(degree, i == 0);
+                            rightEdge[i + 1].setChild(0, fillNode);
+                            rightEdge[i] = fillNode;
+                        }
+                        break;
+                    }
+
+                    routingKey = (E) targetNode.keys[targetNode.keyCount - 1];
+                    targetNode.keys[targetNode.keyCount - 1] = null;
+                    targetNode.keyCount--;
+                    level++;
+                }
+            }
+        }
+        this.modCount++;
+    }
     @Override
     BTreeNode<E> createNode(int degree, boolean isLeaf) {
         return new BTreeNode<>(degree, isLeaf);
