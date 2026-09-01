@@ -28,7 +28,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>>
+sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>> extends AbstractMap<K, V>
         implements SearchTreeMap<K, V>, Serializable, Cloneable permits AvlTreeMap, RedBlackTreeMap {
 
     protected final Comparator<? super K> comparator;
@@ -59,10 +59,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         this.modCount++;
     }
 
-    /*
-    Taken exact code and idea fromjdk source code
-    I came across this first time such thing.
-     */
     final N buildFromSortedRecursive(int level, int lo, int hi, int redLevel, Iterator<? extends Map.Entry<? extends K, ? extends V>> it) {
         if (hi < lo) return null;
         int mid = lo + ((hi - lo) >>> 1);
@@ -91,34 +87,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     @Override
     public Comparator<? super K> comparator() {
         return this.comparator;
-    }
-
-    @Override
-    public int hashCode() {
-        int h = 0;
-        for (Map.Entry<K, V> i : entrySet()) h += i.hashCode();
-        return h;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Map<?, ?> m)) return false;
-        if (m.size() != size()) return false;
-        try {
-            for (Map.Entry<K, V> e : entrySet()) {
-                K key = e.getKey();
-                V value = e.getValue();
-                if (value == null) {
-                    if (!(m.get(key) == null && m.containsKey(key))) return false;
-                } else {
-                    if (!value.equals(m.get(key))) return false;
-                }
-            }
-        } catch (ClassCastException | NullPointerException unused) {
-            return false;
-        }
-        return true;
     }
 
     @SuppressWarnings("unchecked")
@@ -153,15 +121,14 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         return current;
     }
 
-    protected abstract N createNode(K key, V value);
+    abstract N createNode(K key, V value);
 
-    protected void afterInsert(N node) {
-    }
+    abstract void afterInsert(N node);
 
     @Override
     public V put(K key, V value) {
         if (root == null) {
-            compare(key, key); // JDK Semantic: Type (and possibly null) check!
+            compare(key, key);
             root = createNode(key, value);
             size = 1;
             modCount++;
@@ -886,6 +853,68 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        try {
+            AbstractBinaryTreeMap<K, V, N> clone = (AbstractBinaryTreeMap<K, V, N>) super.clone();
+            clone.root = null;
+            clone.size = 0;
+            clone.modCount = 0;
+            clone.entrySetView = null;
+            clone.keySetView = null;
+            clone.valuesView = null;
+            if (this.size > 0) {
+                clone.buildFromSorted(this.size, this.entrySet().iterator());
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        s.writeInt(size);
+        for (Map.Entry<K, V> e : entrySet()) {
+            s.writeObject(e.getKey());
+            s.writeObject(e.getValue());
+        }
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        int mapSize = s.readInt();
+        if (mapSize > 0) {
+            Iterator<Map.Entry<K, V>> streamIterator = new Iterator<>() {
+                int count = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return count < mapSize;
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public Map.Entry<K, V> next() {
+                    if (!hasNext()) throw new NoSuchElementException();
+                    try {
+                        K key = (K) s.readObject();
+                        V value = (V) s.readObject();
+                        count++;
+                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException("Failed to deserialize tree data", e);
+                    }
+                }
+            };
+            buildFromSorted(mapSize, streamIterator);
+        }
+    }
+
     static final class KeySetView<K, V> extends AbstractSet<K> implements NavigableSet<K> {
         private final NavigableMap<K, V> m;
 
@@ -1141,55 +1170,59 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return false;
         }
 
-        boolean inRange(Object key) {
-            return !tooLow(key) && !tooHigh(key);
+        boolean inClosedRange(Object key) {
+            @SuppressWarnings("unchecked")
+            int cLo = fromStart ? 1 : compare((K) key, lo);
+            @SuppressWarnings("unchecked")
+            int cHi = toEnd ? -1 : compare((K) key, hi);
+            return cLo >= 0 && cHi <= 0;
         }
 
         @Override
         public V put(K key, V value) {
-            if (!inRange(key)) throw new IllegalArgumentException("key out of range");
+            if (!inClosedRange(key)) throw new IllegalArgumentException("key out of range");
             return AbstractBinaryTreeMap.this.put(key, value);
         }
 
         @Override
         public V get(Object key) {
-            if (!inRange(key)) return null;
+            if (!inClosedRange(key)) return null;
             return AbstractBinaryTreeMap.this.get(key);
         }
 
         @Override
         public boolean containsKey(Object key) {
-            return inRange(key) && AbstractBinaryTreeMap.this.containsKey(key);
+            return inClosedRange(key) && AbstractBinaryTreeMap.this.containsKey(key);
         }
 
         @Override
         public V remove(Object key) {
-            if (!inRange(key)) return null;
+            if (!inClosedRange(key)) return null;
             return AbstractBinaryTreeMap.this.remove(key);
         }
 
         N subCeiling(K key) {
-            if (inRange(key)) return getCeilingNode(key);
             if (tooLow(key)) return absLowest();
-            return null;
+            N n = getCeilingNode(key);
+            return (n == null || tooHigh(n.getKey())) ? null : n;
         }
 
         N subHigher(K key) {
-            if (inRange(key)) return getHigherNode(key);
             if (tooLow(key)) return absLowest();
-            return null;
+            N n = getHigherNode(key);
+            return (n == null || tooHigh(n.getKey())) ? null : n;
         }
 
         N subFloor(K key) {
-            if (inRange(key)) return getFloorNode(key);
             if (tooHigh(key)) return absHighest();
-            return null;
+            N n = getFloorNode(key);
+            return (n == null || tooLow(n.getKey())) ? null : n;
         }
 
         N subLower(K key) {
-            if (inRange(key)) return getLowerNode(key);
             if (tooHigh(key)) return absHighest();
-            return null;
+            N n = getLowerNode(key);
+            return (n == null || tooLow(n.getKey())) ? null : n;
         }
 
         @Override
@@ -1310,7 +1343,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         @Override
         public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
-            if (!inRange(fromKey) || !inRange(toKey))
+            if (!inClosedRange(fromKey) || !inClosedRange(toKey))
                 throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(false, toKey, toInclusive, false, fromKey, fromInclusive, true);
@@ -1321,7 +1354,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         @Override
         public NavigableMap<K, V> headMap(K toKey, boolean inclusive) {
-            if (!inRange(toKey)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (!inClosedRange(toKey)) throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(false, toKey, inclusive, toEnd, hi, hiInclusive, true);
             } else {
@@ -1331,7 +1364,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         @Override
         public NavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
-            if (!inRange(fromKey)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (!inClosedRange(fromKey)) throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(fromStart, lo, loInclusive, false, fromKey, inclusive, true);
             } else {
@@ -1411,6 +1444,31 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                     }
                     return count;
                 }
+                @Override
+                @SuppressWarnings("unchecked")
+                public boolean contains(Object o) {
+                    if (!(o instanceof Map.Entry<?, ?> e)) return false;
+                    K key = (K) e.getKey();
+                    if (!inClosedRange(key)) return false;
+
+                    N node = nodeFinder(key);
+                    return node != null && Objects.equals(node.value, e.getValue());
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public boolean remove(Object o) {
+                    if (!(o instanceof Map.Entry<?, ?> e)) return false;
+                    K key = (K) e.getKey();
+                    if (!inClosedRange(key)) return false;
+
+                    N node = nodeFinder(key);
+                    if (node != null && Objects.equals(node.value, e.getValue())) {
+                        TreeSubMap.this.remove(key); // SubMap remove correctly updates modCount!
+                        return true;
+                    }
+                    return false;
+                }
             };
         }
 
@@ -1436,66 +1494,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         N absHighest() {
             N e = toEnd ? rightMostNode() : (hiInclusive ? getFloorNode(hi) : getLowerNode(hi));
             return (e == null || tooLow(e.getKey())) ? null : e;
-        }
-    }
-    @Override
-    @SuppressWarnings("unchecked")
-    public Object clone() {
-        try {
-            AbstractBinaryTreeMap<K, V, N> clone = (AbstractBinaryTreeMap<K, V, N>) super.clone();
-            clone.root = null;
-            clone.size = 0;
-            clone.modCount = 0;
-            clone.entrySetView = null;
-            clone.keySetView = null;
-            clone.valuesView = null;
-            if (this.size > 0) {
-                clone.buildFromSorted(this.size, this.entrySet().iterator());
-            }
-
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError(e);
-        }
-    }
-    @Serial
-    private void writeObject(ObjectOutputStream s) throws IOException {
-        s.defaultWriteObject();
-        s.writeInt(size);
-        for (Map.Entry<K, V> e : entrySet()) {
-            s.writeObject(e.getKey());
-            s.writeObject(e.getValue());
-        }
-    }
-
-    @Serial
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
-        s.defaultReadObject();
-        int mapSize = s.readInt();
-        if (mapSize > 0) {
-            Iterator<Map.Entry<K, V>> streamIterator = new Iterator<>() {
-                int count = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return count < mapSize;
-                }
-
-                @Override
-                @SuppressWarnings("unchecked")
-                public Map.Entry<K, V> next() {
-                    if (!hasNext()) throw new NoSuchElementException();
-                    try {
-                        K key = (K) s.readObject();
-                        V value = (V) s.readObject();
-                        count++;
-                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
-                    } catch (IOException | ClassNotFoundException e) {
-                        throw new RuntimeException("Failed to deserialize tree data", e);
-                    }
-                }
-            };
-            buildFromSorted(mapSize, streamIterator);
         }
     }
 }
