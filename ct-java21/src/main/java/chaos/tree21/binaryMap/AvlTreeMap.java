@@ -24,19 +24,19 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     }
 
     @Override
-    protected void afterNodeBuiltFromSorted(AvlMapNode<K, V> node, int level, int redLevel) {
+    void afterNodeBuiltFromSorted(AvlMapNode<K, V> node, int level, int redLevel) {
         int leftHeight = nodeHeight(node.left);
         int rightHeight = nodeHeight(node.right);
         node.height = Math.max(leftHeight, rightHeight) + 1;
     }
 
     @Override
-    protected AvlMapNode<K, V> createNode(K key, V value) {
+    AvlMapNode<K, V> createNode(K key, V value) {
         return new AvlMapNode<>(key, value);
     }
 
     @Override
-    protected void afterInsert(AvlMapNode<K, V> node) {
+    void afterInsert(AvlMapNode<K, V> node) {
         if (node != null) {
             node = node.parent; // Skip the newly inserted leaf to allow optimization!
         }
@@ -84,10 +84,6 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
         updateHeight(p);
         updateHeight(newRoot);
         return newRoot;
-    }
-
-    public int height() {
-        return nodeHeight(root);
     }
 
     private void updateHeight(AvlMapNode<K, V> root) {

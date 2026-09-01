@@ -186,7 +186,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         x.left = null; //since I already removed all attachment to x to reach to x
         x.right = null; //JVM GC is smart enough it will collect in GC
         x.parent = null; //Don't think JVM won't do. it will, even though it has reference
-        //L,R,P becoz x has become part of garbage.
+        //L,R,P because x has become part of garbage.
         /*
         The lesson I got here we need to do because of iterator Stability
         */

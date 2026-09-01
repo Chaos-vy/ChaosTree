@@ -6,7 +6,7 @@ import java.util.SequencedSet;
 public interface SearchTreeSet<E> extends NavigableSet<E>, SequencedSet<E> {
 
     default String display() {
-        return display(Style.ASCII);
+        return display(Style.UNICODE);
     }
 
     String display(Style style);

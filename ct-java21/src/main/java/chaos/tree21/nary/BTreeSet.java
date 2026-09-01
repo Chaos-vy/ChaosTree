@@ -1,41 +1,163 @@
 package chaos.tree21.nary;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.function.Consumer;
 
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
+    //TODO: Making a Buider fn
+    /*
+     Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
+     */
+    private static final int DEFAULT_DEGREE = 64;
+
+    public BTreeSet() {
+        super(DEFAULT_DEGREE, null);
+    }
+    public BTreeSet(Comparator<? super E> comparator) {
+        super(DEFAULT_DEGREE, comparator);
+    }
+    public BTreeSet(Collection<? extends E> c) {
+        this();
+        addAll(c);
+    }
+
+    public BTreeSet(SortedSet<E> s) {
+        super(DEFAULT_DEGREE, s.comparator());
+        addAll(s);
+    }
+    public BTreeSet(int degree) {
+        super(degree, null);
+    }
+
+    public BTreeSet(int degree, Comparator<? super E> comparator) {
+        super(degree, comparator);
+    }
 
     /**
-     * Reference used CLRS and day-dreaming structure also took the help with Gemini and ChatGPT
-     * to understand the concept.They told about wavy curve way. to read the SQL lite code.
-     * So what I got is, let's make up I will also draft ADR too.
-     * we just have to fill the first leaf
-     * Let's take an example target to fill only is 75% in my case
-     * here for example I took it as 2 as targetkey.
-     * I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
-     *                    L   L   R   L   L   R   L
-     * A pattern can now be seen
-     *              [ 30 ]           <-- rightEdge[1] (Root)
-     *             /      \
-     *         [10, 20]  [40, 50]     <-- rightEdge[0] (Leaf)
-     * A same patter will be observed for the ht too as well when the root get's full
-     * 60 is pulled. It's the routing key going into the parent (rightEdge[1]).
-     * 70, 80 go into the new Leaf (rightEdge[0]).
-     * The tree now looks like this:
-     *              [ 30 , 60 ]             <-- rightEdge[1] is now FULL!
-     *             /     |     \
-     *      [10, 20] [40, 50] [70, 80]    <-- rightEdge[0] is FULL!
-     * as I will put 90 it willl increase ht to +1 to 2.
-     * TODO: Don't forgo parent linking.
-     * Supported at creation from Constructor
-     * The same way for B+Tree but I need to map routing key in diff way and also provide next and prev!!
-     * The point by mentioning here of B+tree I am not gonna go provide any docs there it may be in comment too.
-     * I want to insert [10, 20, 30, 40, 50, 60, 70 ....]
-     *                    L  LR   L  LR   L  LR   L
-     * A lecture can help you visualize Jenny's Lecture.
+     * Streams strictly sorted data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     *
+     * @param sortedData An iterator providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     *                   Hold the Chaos!!
      */
-    public void buildFromSorted(Iterator<? extends E> it, float fillFactor) {
+    public void bulkLoad(Iterator<E> sortedData, float fillFactor) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSorted(sortedData, fillFactor);
+    }
+
+    /**
+     * <pre>
+     * B-Tree bulk construction / sorted-input strategy.
+     *
+     * References:
+     * - CLRS
+     * - Jenny's lectures
+     * - Discussions with Gemini and ChatGPT for concept exploration
+     *
+     * I am experimenting with a "wavy-curve" style construction pattern
+     * observed while studying SQLite and visualizing the structure myself.
+     * I will document the final decisions separately in an ADR as well.
+     * Well SQLite idea was taken I never read any such code. The explaination
+     * part was done by Jenny's lecture and CLRS book. But the curiosity of making
+     * it from sorted data was seen from Official JDK source code. By seeing that
+     * the tree now supports clone and Serializable.
+     *
+     * The basic idea:
+     *
+     * 1. Start by filling only the first leaf.
+     * 2. Maintain a target occupancy of approximately 75% for this experiment.
+     * 3. For this example, use targetKey = 2.
+     *
+     * Input:
+     *
+     *     [10, 20, 30, 40, 50, 60, 70, 80, 90, ...]
+     *
+     * Observed insertion/filling pattern:
+     *
+     *     L   R   L   L   R   L
+     *
+     * A pattern starts to appear.
+     *
+     * After filling the first leaf:
+     * For doubt of rightEdge :
+     * dev, don't think too much
+     * rightEdge you always move to right never to left so that's why rightEdge
+     *
+     *              [30]               <-- rightEdge[1] (Root)
+     *             /    \
+     *      [10,20]    [40,50]         <-- rightEdge[0] (Leaf)
+     *
+     * The same pattern appears when the root becomes full.
+     *
+     * When 60 arrives, it is pulled upward as the routing key into
+     * rightEdge[1] (the parent/root).
+     *
+     * 70 and 80 then go into the newly created leaf:
+     *
+     *              [30, 60]            <-- rightEdge[1] is now FULL
+     *             /    |    \
+     *      [10,20] [40,50] [70,80]     <-- rightEdge[0] is FULL
+     *
+     * When 90 is inserted, the tree height increases by one:
+     *
+     *     height: 1 → 2
+     *
+     * This structure is supported directly during construction through
+     * the constructor configuration.
+     *
+     * ---------------------------------------------------------------
+     *
+     * B+Tree variant
+     * ---------------------------------------------------------------
+     *
+     * I want to use the same general construction idea for the B+Tree,
+     * but the routing-key mapping is different.
+     *
+     * The B+Tree also requires:
+     *
+     * - different routing-key semantics
+     * - leaf-level next pointers
+     * - leaf-level previous pointers
+     *
+     * I do not plan to create a separate long-form document for the
+     * B+Tree construction. The important differences will be documented
+     * directly in the implementation comments and/or ADR.
+     *
+     * Example B+Tree filling pattern:
+     *
+     *     [10, 20, 30, 40, 50, 60, 70, ...]
+     *
+     *     L   LR   L   LR   L   LR   L
+     *
+     * Jenny's lecture helps visualize this pattern and the relationship
+     * between the leaf filling and routing-key movement.
+     *
+     * The goal here is not to blindly reproduce a textbook implementation,
+     * but to understand the pattern, formalize the invariants, and then
+     * turn the observation into a deterministic construction strategy.
+     * </pre>
+     */
+    void buildFromSorted(Iterator<E> it, float fillFactor) {
         // Calculate the future mighty chaos target (e.g., 0.75 * 63 = 47 keys per node)
         /*
         Well lemme explain it. If I banged with 100% node capacity there will a tremendous trigger of merge and split node LOL
@@ -96,9 +218,106 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         // Future inserts will naturally fix it!
     }
 
+    /**
+     * Strictly sorted array data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided array MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     * <p>
+     * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
+     * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
+     *
+     * @param sortedArray An array providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     *                   Hold the Chaos!!
+     */
+    public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
+
+        if (sortedArray == null || sortedArray.length == 0) return;
+
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if(degree < 32){
+            throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSortedArray(sortedArray, fillFactor);
+    }
+
+    private void buildFromSortedArray(Object[] sortedArray, float fillfactor){
+        int maxKeys = (degree << 1) - 1;
+        int targetKeys = Math.max(1, (int) (maxKeys * fillfactor));
+
+        @SuppressWarnings("unchecked")
+        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
+        rightEdge[0] = new BTreeNode<>(degree, true);
+        this.root = rightEdge[0];
+
+        int index = 0;
+        while (index < sortedArray.length) {
+            BTreeNode<E> leaf = rightEdge[0];
+            int chunk = Math.min(targetKeys, sortedArray.length - index);
+            System.arraycopy(sortedArray, index, leaf.keys, 0, chunk);
+            leaf.keyCount = chunk;
+            this.size += chunk;
+            index += chunk;
+
+            if (index < sortedArray.length) {
+                @SuppressWarnings("unchecked")
+                E routingKey = (E) sortedArray[index++]; // <-- Note the index++ (Skip!)
+                this.size++;
+
+                int level = 1;
+                while (true) {
+                    if (rightEdge[level] == null) {
+                        BTreeNode<E> newRoot = new BTreeNode<>(degree, false);
+                        newRoot.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level] = newRoot;
+                        this.root = newRoot;
+                    }
+
+                    BTreeNode<E> targetNode = rightEdge[level];
+                    targetNode.keys[targetNode.keyCount++] = routingKey;
+
+                    BTreeNode<E> nextRight = new BTreeNode<>(degree, (level - 1) == 0);
+                    targetNode.setChild(targetNode.keyCount, nextRight);
+                    rightEdge[level - 1] = nextRight;
+
+                    if (targetNode.keyCount < targetKeys) {
+                        for (int i = level - 2; i >= 0; i--) {
+                            BTreeNode<E> fillNode = new BTreeNode<>(degree, i == 0);
+                            rightEdge[i + 1].setChild(0, fillNode);
+                            rightEdge[i] = fillNode;
+                        }
+                        break;
+                    }
+
+                    routingKey = (E) targetNode.keys[targetNode.keyCount - 1];
+                    targetNode.keys[targetNode.keyCount - 1] = null;
+                    targetNode.keyCount--;
+                    level++;
+                }
+            }
+        }
+        this.modCount++;
+    }
+    @Override
+    BTreeNode<E> createNode(int degree, boolean isLeaf) {
+        return new BTreeNode<>(degree, isLeaf);
+    }
+
     @Override
     public boolean add(E e) {
         if (root == null) {
+            compare(e, e);
             root = new BTreeNode<>(degree, true);
             root.keys[0] = e;
             root.keyCount++;
@@ -158,13 +377,13 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
     private void splitNode(BTreeNode<E> parent, int childIdx, BTreeNode<E> child) {
         BTreeNode<E> sibling = new BTreeNode<>(degree, child.isLeaf());
-        sibling.keyCount = degree - 1;
+        sibling.keyCount = degree;
         // Shift right-half keys
-        System.arraycopy(child.keys, degree, sibling.keys, 0, degree - 1);
+        System.arraycopy(child.keys, degree, sibling.keys, 0, degree);
         // Shift right-half child and update parent pointers
         if (!child.isLeaf()) {
-            System.arraycopy(child.child, degree, sibling.child, 0, degree);
-            for (int i = 0; i < degree; i++) {
+            System.arraycopy(child.child, degree, sibling.child, 0, degree + 1);
+            for (int i = 0; i <= degree; i++) {
                 if (sibling.child[i] != null) sibling.child[i].parent = sibling;
             }
             // GC Cleanup
@@ -350,5 +569,281 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         parent.child[parent.keyCount] = null; // Clean up GC
 
         parent.keyCount--;
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new BTreeIterator(true);
+    }
+
+    @Override
+    public Iterator<E> descendingIterator() {
+        return new BTreeIterator(false);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public E ceiling(E e) {
+        if (root == null) return null;
+
+        BTreeNode<E> current = root;
+        E bestMatch = null;
+
+        while (true) {
+            int idx = searchNode(current, e);
+            if (idx >= 0) return (E) current.keys[idx];
+            int childIdx = ~idx;
+            if (childIdx < current.keyCount) {
+                bestMatch = (E) current.keys[childIdx];
+            }
+            if (current.isLeaf()) return bestMatch;
+            current = current.child[childIdx];
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public E floor(E e) {
+        if (root == null) return null;
+        BTreeNode<E> current = root;
+        E bestMatch = null;
+
+        while (true) {
+            int idx = searchNode(current, e);
+            if (idx >= 0) {
+                return (E) current.keys[idx];
+            }
+            int childIdx = ~idx;
+            if (childIdx > 0) {
+                bestMatch = (E) current.keys[childIdx - 1];
+            }
+            if (current.isLeaf()) {
+                return bestMatch;
+            }
+            current = current.child[childIdx];
+        }
+    }
+
+    private int findChildIndex(BTreeNode<E> parent, BTreeNode<E> child) {
+        if (parent == null) return -1;
+        for (int i = 0; i <= parent.keyCount; i++) {
+            if (parent.child[i] == child) return i;
+        }
+        return -1;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public E lower(E e) {
+        if (root == null) return null;
+        BTreeNode<E> current = root;
+        E bestMatch = null;
+
+        while (true) {
+            int idx = searchNode(current, e);
+            int childIdx = (idx >= 0) ? idx : ~idx;
+            if (childIdx > 0) {
+                bestMatch = (E) current.keys[childIdx - 1];
+            }
+            if (current.isLeaf()) return bestMatch;
+            current = current.child[childIdx];
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public E higher(E e) {
+        if (root == null) return null;
+        BTreeNode<E> current = root;
+        E bestMatch = null;
+
+        while (true) {
+            int idx = searchNode(current, e);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            if (childIdx < current.keyCount) {
+                bestMatch = (E) current.keys[childIdx];
+            }
+            if (current.isLeaf()) return bestMatch;
+            current = current.child[childIdx];
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void forEach(Consumer<? super E> action) {
+        java.util.Objects.requireNonNull(action);
+        long expectedModCount = modCount;
+
+        if (root == null) return;
+
+        BTreeNode<E> current = root;
+        while (!current.isLeaf()) {
+            current = current.child[0];
+        }
+        int index = 0;
+
+        while (current != null) {
+            action.accept((E) current.keys[index]);
+
+            if (expectedModCount != modCount) {
+                throw new java.util.ConcurrentModificationException();
+            }
+            if (!current.isLeaf()) {
+                current = current.child[index + 1];
+                while (!current.isLeaf()) {
+                    current = current.child[0];
+                }
+                index = 0;
+            } else if (index + 1 < current.keyCount) {
+                index++;
+            } else {
+                BTreeNode<E> parent = current.parent;
+                int childIdx = (parent != null) ? findChildIndex(parent, current) : -1;
+                while (parent != null && childIdx == parent.keyCount) {
+                    current = parent;
+                    parent = current.parent;
+                    childIdx = (parent != null) ? findChildIndex(parent, current) : -1;
+                }
+
+                if (parent != null) {
+                    current = parent;
+                    index = childIdx;
+                } else {
+                    current = null;
+                }
+            }
+        }
+    }
+
+    private class BTreeIterator implements Iterator<E> {
+        private final boolean ascending;
+        private BTreeNode<E> currentNode;
+        private int currentIndex;
+        private long expectedModCount;
+
+        private E lastReturned = null;
+        private E nextElement = null;
+
+        @SuppressWarnings("unchecked")
+        BTreeIterator(boolean ascending) {
+            this.ascending = ascending;
+            this.expectedModCount = modCount;
+
+            if (root == null) {
+                currentNode = null;
+            } else if (ascending) {
+                currentNode = root;
+                while (!currentNode.isLeaf()) currentNode = currentNode.child[0];
+                currentIndex = 0;
+            } else {
+                currentNode = root;
+                while (!currentNode.isLeaf()) currentNode = currentNode.child[currentNode.keyCount];
+                currentIndex = currentNode.keyCount - 1;
+            }
+
+            if (currentNode != null) nextElement = (E) currentNode.keys[currentIndex];
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentNode != null;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public E next() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            if (currentNode == null) throw new NoSuchElementException();
+
+            lastReturned = (E) currentNode.keys[currentIndex];
+
+            if (ascending) {
+                if (!currentNode.isLeaf()) {
+                    currentNode = currentNode.child[currentIndex + 1];
+                    while (!currentNode.isLeaf()) currentNode = currentNode.child[0];
+                    currentIndex = 0;
+                } else if (currentIndex + 1 < currentNode.keyCount) {
+                    currentIndex++;
+                } else {
+                    BTreeNode<E> parent = currentNode.parent;
+                    int childIdx = findChildIndex(parent, currentNode);
+
+                    while (parent != null && childIdx == parent.keyCount) {
+                        currentNode = parent;
+                        parent = currentNode.parent;
+                        childIdx = findChildIndex(parent, currentNode);
+                    }
+
+                    if (parent != null) {
+                        currentNode = parent;
+                        currentIndex = childIdx;
+                    } else {
+                        currentNode = null;
+                    }
+                }
+            } else {
+                if (!currentNode.isLeaf()) {
+                    currentNode = currentNode.child[currentIndex];
+                    while (!currentNode.isLeaf()) currentNode = currentNode.child[currentNode.keyCount];
+                    currentIndex = currentNode.keyCount - 1;
+                } else if (currentIndex - 1 >= 0) {
+                    currentIndex--;
+                } else {
+                    BTreeNode<E> parent = currentNode.parent;
+                    int childIdx = findChildIndex(parent, currentNode);
+
+                    while (parent != null && childIdx == 0) {
+                        currentNode = parent;
+                        parent = currentNode.parent;
+                        childIdx = findChildIndex(parent, currentNode);
+                    }
+
+                    if (parent != null) {
+                        currentNode = parent;
+                        currentIndex = childIdx - 1;
+                    } else {
+                        currentNode = null;
+                    }
+                }
+            }
+
+            if (currentNode != null) nextElement = (E) currentNode.keys[currentIndex];
+            else nextElement = null;
+
+            return lastReturned;
+        }
+
+        @Override
+        public void remove() {
+            if (lastReturned == null) throw new IllegalStateException();
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
+            BTreeSet.this.remove(lastReturned);
+
+            expectedModCount = modCount;
+            lastReturned = null;
+
+            if (nextElement != null) {
+                currentNode = root;
+                while (true) {
+                    int idx = searchNode(currentNode, nextElement);
+                    if (idx >= 0) {
+                        currentIndex = idx;
+                        break;
+                    }
+                    currentNode = currentNode.child[~idx];
+                }
+            } else {
+                currentNode = null;
+            }
+        }
+
+        private int findChildIndex(BTreeNode<E> parent, BTreeNode<E> child) {
+            if (parent == null) return -1;
+            for (int i = 0; i <= parent.keyCount; i++) {
+                if (parent.child[i] == child) return i;
+            }
+            return -1;
+        }
     }
 }

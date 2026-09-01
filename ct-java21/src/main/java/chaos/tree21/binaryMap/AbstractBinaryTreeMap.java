@@ -28,7 +28,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>>
+sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>> extends AbstractMap<K, V>
         implements SearchTreeMap<K, V>, Serializable, Cloneable permits AvlTreeMap, RedBlackTreeMap {
 
     protected final Comparator<? super K> comparator;
@@ -59,10 +59,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         this.modCount++;
     }
 
-    /*
-    Taken exact code and idea fromjdk source code
-    I came across this first time such thing.
-     */
     final N buildFromSortedRecursive(int level, int lo, int hi, int redLevel, Iterator<? extends Map.Entry<? extends K, ? extends V>> it) {
         if (hi < lo) return null;
         int mid = lo + ((hi - lo) >>> 1);
@@ -93,34 +89,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         return this.comparator;
     }
 
-    @Override
-    public int hashCode() {
-        int h = 0;
-        for (Map.Entry<K, V> i : entrySet()) h += i.hashCode();
-        return h;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Map<?, ?> m)) return false;
-        if (m.size() != size()) return false;
-        try {
-            for (Map.Entry<K, V> e : entrySet()) {
-                K key = e.getKey();
-                V value = e.getValue();
-                if (value == null) {
-                    if (!(m.get(key) == null && m.containsKey(key))) return false;
-                } else {
-                    if (!value.equals(m.get(key))) return false;
-                }
-            }
-        } catch (ClassCastException | NullPointerException unused) {
-            return false;
-        }
-        return true;
-    }
-
     @SuppressWarnings("unchecked")
     protected int compare(K k1, K k2) {
         if (comparator != null) {
@@ -132,7 +100,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     protected N nodeFinder(K key) {
         N current = root;
         while (current != null) {
-            int cmp = compare(key, current.getKey());
+            int cmp = compare(key, current.key);
             if (cmp == 0) return current;
             current = cmp < 0 ? current.left : current.right;
         }
@@ -153,15 +121,14 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         return current;
     }
 
-    protected abstract N createNode(K key, V value);
+    abstract N createNode(K key, V value);
 
-    protected void afterInsert(N node) {
-    }
+    abstract void afterInsert(N node);
 
     @Override
     public V put(K key, V value) {
         if (root == null) {
-            compare(key, key); // JDK Semantic: Type (and possibly null) check!
+            compare(key, key);
             root = createNode(key, value);
             size = 1;
             modCount++;
@@ -175,7 +142,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         while (current != null) {
             parent = current;
-            cmp = compare(key, current.getKey());
+            cmp = compare(key, current.key);
             if (cmp == 0) {
                 return current.setValue(value);
             } else if (cmp < 0) current = current.left;
@@ -220,7 +187,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         int cmp = 0;
         while (current != null) {
             parent = current;
-            cmp = compare(key, current.getKey());
+            cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
                 if (oldValue == null) {
@@ -260,7 +227,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         int cmp = 0;
         while (current != null) {
             parent = current;
-            cmp = compare(key, current.getKey());
+            cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
                 if (oldValue != null) {
@@ -292,7 +259,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         Objects.requireNonNull(remappingFunction);
         N current = root;
         while (current != null) {
-            int cmp = compare(key, current.getKey());
+            int cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
                 if (oldValue != null) {
@@ -335,7 +302,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         int cmp = 0;
         while (current != null) {
             parent = current;
-            cmp = compare(key, current.getKey());
+            cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
                 V newValue = remappingFunction.apply(key, oldValue);
@@ -379,7 +346,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         int cmp = 0;
         while (current != null) {
             parent = current;
-            cmp = compare(key, current.getKey());
+            cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
                 V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
@@ -481,7 +448,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         Objects.requireNonNull(action);
         long expectedModCount = modCount;
         for (N e = leftMostNode(); e != null; e = successor(e)) {
-            action.accept(e.getKey(), e.value);
+            action.accept(e.key, e.value);
             if (expectedModCount != modCount) {
                 throw new ConcurrentModificationException();
             }
@@ -551,35 +518,35 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     @Override
     public Map.Entry<K, V> firstEntry() {
         N n = leftMostNode();
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
     }
 
     @Override
     public Map.Entry<K, V> lastEntry() {
         N n = rightMostNode();
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
     }
 
     @Override
     public K firstKey() {
         N first = leftMostNode();
         if (first == null) throw new NoSuchElementException();
-        return first.getKey();
+        return first.key;
     }
 
     @Override
     public K lastKey() {
         N last = rightMostNode();
         if (last == null) throw new NoSuchElementException();
-        return last.getKey();
+        return last.key;
     }
 
     @Override
     public Map.Entry<K, V> pollFirstEntry() {
         N first = leftMostNode();
         if (first == null) return null;
-        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(first.getKey(), first.value);
-        remove(first.getKey());
+        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(first.key, first.value);
+        remove(first.key);
         return result;
     }
 
@@ -587,8 +554,8 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     public Map.Entry<K, V> pollLastEntry() {
         N last = rightMostNode();
         if (last == null) return null;
-        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(last.getKey(), last.value);
-        remove(last.getKey());
+        Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(last.key, last.value);
+        remove(last.key);
         return result;
     }
 
@@ -664,7 +631,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     protected N getCeilingNode(K key) {
         N p = root;
         while (p != null) {
-            int cmp = compare(key, p.getKey());
+            int cmp = compare(key, p.key);
             if (cmp < 0) {
                 if (p.left != null) p = p.left;
                 else return p;
@@ -679,7 +646,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     protected N getFloorNode(K key) {
         N p = root;
         while (p != null) {
-            int cmp = compare(key, p.getKey());
+            int cmp = compare(key, p.key);
             if (cmp > 0) {
                 if (p.right != null) p = p.right;
                 else return p;
@@ -694,7 +661,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     protected N getHigherNode(K key) {
         N p = root;
         while (p != null) {
-            int cmp = compare(key, p.getKey());
+            int cmp = compare(key, p.key);
             if (cmp < 0) {
                 if (p.left != null) p = p.left;
                 else return p;
@@ -709,7 +676,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     protected N getLowerNode(K key) {
         N p = root;
         while (p != null) {
-            int cmp = compare(key, p.getKey());
+            int cmp = compare(key, p.key);
             if (cmp > 0) {
                 if (p.right != null) p = p.right;
                 else return p;
@@ -724,49 +691,49 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     @Override
     public Map.Entry<K, V> lowerEntry(K k) {
         N n = getLowerNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
     }
 
     @Override
     public K lowerKey(K k) {
         N n = getLowerNode(k);
-        return n == null ? null : n.getKey();
+        return n == null ? null : n.key;
     }
 
     @Override
     public Map.Entry<K, V> floorEntry(K k) {
         N n = getFloorNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
     }
 
     @Override
     public K floorKey(K k) {
         N n = getFloorNode(k);
-        return n == null ? null : n.getKey();
+        return n == null ? null : n.key;
     }
 
     @Override
     public Map.Entry<K, V> ceilingEntry(K k) {
         N n = getCeilingNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
     }
 
     @Override
     public K ceilingKey(K k) {
         N n = getCeilingNode(k);
-        return n == null ? null : n.getKey();
+        return n == null ? null : n.key;
     }
 
     @Override
     public Map.Entry<K, V> higherEntry(K k) {
         N n = getHigherNode(k);
-        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+        return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
     }
 
     @Override
     public K higherKey(K k) {
         N n = getHigherNode(k);
-        return n == null ? null : n.getKey();
+        return n == null ? null : n.key;
     }
 
 
@@ -883,6 +850,68 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         } else {
             buildString(node.right, childPrefix, true, false, sb, style);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        try {
+            AbstractBinaryTreeMap<K, V, N> clone = (AbstractBinaryTreeMap<K, V, N>) super.clone();
+            clone.root = null;
+            clone.size = 0;
+            clone.modCount = 0;
+            clone.entrySetView = null;
+            clone.keySetView = null;
+            clone.valuesView = null;
+            if (this.size > 0) {
+                clone.buildFromSorted(this.size, this.entrySet().iterator());
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        s.writeInt(size);
+        for (Map.Entry<K, V> e : entrySet()) {
+            s.writeObject(e.getKey());
+            s.writeObject(e.getValue());
+        }
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        int mapSize = s.readInt();
+        if (mapSize > 0) {
+            Iterator<Map.Entry<K, V>> streamIterator = new Iterator<>() {
+                int count = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return count < mapSize;
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public Map.Entry<K, V> next() {
+                    if (!hasNext()) throw new NoSuchElementException();
+                    try {
+                        K key = (K) s.readObject();
+                        V value = (V) s.readObject();
+                        count++;
+                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException("Failed to deserialize tree data", e);
+                    }
+                }
+            };
+            buildFromSorted(mapSize, streamIterator);
         }
     }
 
@@ -1078,7 +1107,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             if (lastReturned.left != null && lastReturned.right != null) {
                 nextNode = lastReturned;
             }
-            AbstractBinaryTreeMap.this.remove(lastReturned.getKey());
+            AbstractBinaryTreeMap.this.remove(lastReturned.key);
             expectedModCount = modCount;
             lastReturned = null;
         }
@@ -1141,7 +1170,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return false;
         }
 
-        boolean inRange(Object key) {
+        final boolean inRange(Object key) {
             return !tooLow(key) && !tooHigh(key);
         }
 
@@ -1169,95 +1198,95 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         }
 
         N subCeiling(K key) {
-            if (inRange(key)) return getCeilingNode(key);
             if (tooLow(key)) return absLowest();
-            return null;
+            N n = getCeilingNode(key);
+            return (n == null || tooHigh(n.key)) ? null : n;
         }
 
         N subHigher(K key) {
-            if (inRange(key)) return getHigherNode(key);
             if (tooLow(key)) return absLowest();
-            return null;
+            N n = getHigherNode(key);
+            return (n == null || tooHigh(n.key)) ? null : n;
         }
 
         N subFloor(K key) {
-            if (inRange(key)) return getFloorNode(key);
             if (tooHigh(key)) return absHighest();
-            return null;
+            N n = getFloorNode(key);
+            return (n == null || tooLow(n.key)) ? null : n;
         }
 
         N subLower(K key) {
-            if (inRange(key)) return getLowerNode(key);
             if (tooHigh(key)) return absHighest();
-            return null;
+            N n = getLowerNode(key);
+            return (n == null || tooLow(n.key)) ? null : n;
         }
 
         @Override
         public Map.Entry<K, V> lowerEntry(K k) {
             N n = descending ? subHigher(k) : subLower(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
         }
 
         @Override
         public K lowerKey(K k) {
             N n = descending ? subHigher(k) : subLower(k);
-            return n == null ? null : n.getKey();
+            return n == null ? null : n.key;
         }
 
         @Override
         public Map.Entry<K, V> floorEntry(K k) {
             N n = descending ? subCeiling(k) : subFloor(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
         }
 
         @Override
         public K floorKey(K k) {
             N n = descending ? subCeiling(k) : subFloor(k);
-            return n == null ? null : n.getKey();
+            return n == null ? null : n.key;
         }
 
         @Override
         public Map.Entry<K, V> ceilingEntry(K k) {
             N n = descending ? subFloor(k) : subCeiling(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
         }
 
         @Override
         public K ceilingKey(K k) {
             N n = descending ? subFloor(k) : subCeiling(k);
-            return n == null ? null : n.getKey();
+            return n == null ? null : n.key;
         }
 
         @Override
         public Map.Entry<K, V> higherEntry(K k) {
             N n = descending ? subLower(k) : subHigher(k);
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
         }
 
         @Override
         public K higherKey(K k) {
             N n = descending ? subLower(k) : subHigher(k);
-            return n == null ? null : n.getKey();
+            return n == null ? null : n.key;
         }
 
         @Override
         public Map.Entry<K, V> firstEntry() {
             N n = descending ? absHighest() : absLowest();
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
         }
 
         @Override
         public Map.Entry<K, V> lastEntry() {
             N n = descending ? absLowest() : absHighest();
-            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
+            return n == null ? null : new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
         }
 
         @Override
         public Map.Entry<K, V> pollFirstEntry() {
             N n = descending ? absHighest() : absLowest();
             if (n == null) return null;
-            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
-            TreeSubMap.this.remove(n.getKey());
+            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
+            TreeSubMap.this.remove(n.key);
             return result;
         }
 
@@ -1265,8 +1294,8 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         public Map.Entry<K, V> pollLastEntry() {
             N n = descending ? absLowest() : absHighest();
             if (n == null) return null;
-            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.getKey(), n.value);
-            TreeSubMap.this.remove(n.getKey());
+            Map.Entry<K, V> result = new AbstractMap.SimpleImmutableEntry<>(n.key, n.value);
+            TreeSubMap.this.remove(n.key);
             return result;
         }
 
@@ -1368,12 +1397,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
                             if (descending) {
                                 nextNode = predecessor(nextNode);
-                                if (nextNode != null && tooLow(nextNode.getKey())) {
+                                if (nextNode != null && tooLow(nextNode.key)) {
                                     nextNode = null;
                                 }
                             } else {
                                 nextNode = successor(nextNode);
-                                if (nextNode != null && tooHigh(nextNode.getKey())) {
+                                if (nextNode != null && tooHigh(nextNode.key)) {
                                     nextNode = null;
                                 }
                             }
@@ -1393,8 +1422,8 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                             if (!descending && lastReturned.left != null && lastReturned.right != null) {
                                 nextNode = lastReturned;
                             }
-                            TreeSubMap.this.remove(lastReturned.getKey());
-                            if (nextNode == lastReturned && tooHigh(nextNode.getKey())) {
+                            TreeSubMap.this.remove(lastReturned.key);
+                            if (nextNode == lastReturned && tooHigh(nextNode.key)) {
                                 nextNode = null;
                             }
                             expectedModCount = modCount;
@@ -1411,6 +1440,31 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                     }
                     return count;
                 }
+                @Override
+                @SuppressWarnings("unchecked")
+                public boolean contains(Object o) {
+                    if (!(o instanceof Map.Entry<?, ?> e)) return false;
+                    K key = (K) e.getKey();
+                    if (!inRange(key)) return false;
+
+                    N node = nodeFinder(key);
+                    return node != null && Objects.equals(node.value, e.getValue());
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public boolean remove(Object o) {
+                    if (!(o instanceof Map.Entry<?, ?> e)) return false;
+                    K key = (K) e.getKey();
+                    if (!inRange(key)) return false;
+
+                    N node = nodeFinder(key);
+                    if (node != null && Objects.equals(node.value, e.getValue())) {
+                        TreeSubMap.this.remove(key); // SubMap remove correctly updates modCount!
+                        return true;
+                    }
+                    return false;
+                }
             };
         }
 
@@ -1418,84 +1472,24 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         public K firstKey() {
             N e = descending ? absHighest() : absLowest();
             if (e == null) throw new NoSuchElementException();
-            return e.getKey();
+            return e.key;
         }
 
         @Override
         public K lastKey() {
             N e = descending ? absLowest() : absHighest();
             if (e == null) throw new NoSuchElementException();
-            return e.getKey();
+            return e.key;
         }
 
         N absLowest() {
             N e = fromStart ? leftMostNode() : (loInclusive ? getCeilingNode(lo) : getHigherNode(lo));
-            return (e == null || tooHigh(e.getKey())) ? null : e;
+            return (e == null || tooHigh(e.key)) ? null : e;
         }
 
         N absHighest() {
             N e = toEnd ? rightMostNode() : (hiInclusive ? getFloorNode(hi) : getLowerNode(hi));
-            return (e == null || tooLow(e.getKey())) ? null : e;
-        }
-    }
-    @Override
-    @SuppressWarnings("unchecked")
-    public Object clone() {
-        try {
-            AbstractBinaryTreeMap<K, V, N> clone = (AbstractBinaryTreeMap<K, V, N>) super.clone();
-            clone.root = null;
-            clone.size = 0;
-            clone.modCount = 0;
-            clone.entrySetView = null;
-            clone.keySetView = null;
-            clone.valuesView = null;
-            if (this.size > 0) {
-                clone.buildFromSorted(this.size, this.entrySet().iterator());
-            }
-
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError(e);
-        }
-    }
-    @Serial
-    private void writeObject(ObjectOutputStream s) throws IOException {
-        s.defaultWriteObject();
-        s.writeInt(size);
-        for (Map.Entry<K, V> e : entrySet()) {
-            s.writeObject(e.getKey());
-            s.writeObject(e.getValue());
-        }
-    }
-
-    @Serial
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
-        s.defaultReadObject();
-        int mapSize = s.readInt();
-        if (mapSize > 0) {
-            Iterator<Map.Entry<K, V>> streamIterator = new Iterator<>() {
-                int count = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return count < mapSize;
-                }
-
-                @Override
-                @SuppressWarnings("unchecked")
-                public Map.Entry<K, V> next() {
-                    if (!hasNext()) throw new NoSuchElementException();
-                    try {
-                        K key = (K) s.readObject();
-                        V value = (V) s.readObject();
-                        count++;
-                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
-                    } catch (IOException | ClassNotFoundException e) {
-                        throw new RuntimeException("Failed to deserialize tree data", e);
-                    }
-                }
-            };
-            buildFromSorted(mapSize, streamIterator);
+            return (e == null || tooLow(e.key)) ? null : e;
         }
     }
 }
