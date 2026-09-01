@@ -595,5 +595,49 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
     }
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        if (size == 0 || root == null) return array;
+        BPlusTreeNode<E> current = root;
+        while (!current.isLeaf()) {
+            current = current.child[0];
+        }
+
+        //Blasting the chunks directly into the array via native memory copy
+        int offset = 0;
+        while (current != null) {
+            System.arraycopy(current.keys, 0, array, offset, current.keyCount);
+            offset += current.keyCount;
+            current = current.next;
+        }
+        return array;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] a) {
+        if (a.length < size) {
+            a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+        }
+        if (size == 0 || root == null) {
+            if (a.length > size) a[size] = null;
+            return a;
+        }
+        BPlusTreeNode<E> current = root;
+        while (!current.isLeaf()) {
+            current = current.child[0];
+        }
+
+        // Blasting the chunks directly into the array via native memory copy
+        int offset = 0;
+        while (current != null) {
+            System.arraycopy(current.keys, 0, a, offset, current.keyCount);
+            offset += current.keyCount;
+            current = current.next;
+        }
+        if (a.length > size) a[size] = null;
+        return a;
+    }
 
 }
