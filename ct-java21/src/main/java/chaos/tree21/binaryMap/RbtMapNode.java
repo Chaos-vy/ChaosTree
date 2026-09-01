@@ -1,6 +1,6 @@
 package chaos.tree21.binaryMap;
 
-public final class RbtMapNode<K, V> extends AbstractBinaryMapNode<K, V, RbtMapNode<K, V>> {
+final class RbtMapNode<K, V> extends AbstractBinaryMapNode<K, V, RbtMapNode<K, V>> {
     /*
     RED === True === RED
     BLACK === False === BLACK
