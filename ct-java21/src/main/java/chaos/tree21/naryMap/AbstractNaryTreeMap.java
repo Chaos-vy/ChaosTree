@@ -57,6 +57,8 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         return -1;
     }
 
+    abstract N createNode(int degree, boolean isLeaf);
+
 
 
 
