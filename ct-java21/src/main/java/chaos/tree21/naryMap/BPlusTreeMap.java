@@ -1,5 +1,7 @@
 package chaos.tree21.naryMap;
 
+import chaos.tree21.nary.BPlusTreeNode;
+
 import java.util.Arrays;
 
 public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTreeMapNode<K,V>> {
@@ -107,4 +109,167 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
         parent.keyCount++;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V remove(Object o) {
+        if (isEmpty()) return null;
+        K key = (K) o;
+        BPlusTreeMapNode<K,V> curr = root;
+        int idx, childIdx;
+        while (!curr.isLeaf()){
+            idx = searchNodeMap(curr, key);
+            childIdx = (idx>=0)?idx+1:~idx;
+            curr = curr.child[childIdx];
+        }
+        idx = searchNodeMap(curr, key);
+        if(idx < 0) return null;
+
+        //Ghost deletion in leaf only
+        V val = (V) curr.values[idx];
+        System.arraycopy(curr.keys, idx+1,curr.keys,idx,curr.keyCount-idx-1);
+        System.arraycopy(curr.values, idx+1,curr.values,idx,curr.keyCount-idx-1);
+
+        curr.keys[curr.keyCount - 1] = null;
+        curr.values[curr.keyCount -1] = null;
+        curr.keyCount--;
+        size--;
+        modCount++;
+
+        while (curr != root && curr.keyCount < minKeys) {
+            BPlusTreeMapNode<K,V> parent = curr.parent;
+
+            childIdx = 0;
+            while (childIdx <= parent.keyCount && parent.child[childIdx] != curr) childIdx++;
+
+            BPlusTreeMapNode<K,V> leftSibling = (childIdx > 0) ? parent.child[childIdx - 1] : null;
+            BPlusTreeMapNode<K,V> rightSibling = (childIdx < parent.keyCount) ? parent.child[childIdx + 1] : null;
+
+            if (leftSibling != null && leftSibling.keyCount > minKeys) {
+                borrowLeft(parent, childIdx, leftSibling, curr);
+                break;
+            } else if (rightSibling != null && rightSibling.keyCount > minKeys) {
+                borrowRight(parent, childIdx, curr, rightSibling);
+                break;
+            } else {
+                if (leftSibling != null) {
+                    mergeNodes(parent, childIdx - 1, leftSibling, curr);
+                    curr = parent;
+                } else {
+                    mergeNodes(parent, childIdx, curr, rightSibling);
+                    curr = parent;
+                }
+            }
+        }
+
+        if (root.keyCount == 0) {
+            if (root.isLeaf()) root = null;
+            else {
+                root = root.child[0];
+                root.parent = null;
+            }
+        }
+
+        return val;
+    }
+
+    private void mergeNodes(BPlusTreeMapNode<K, V> parent, int childIdx, BPlusTreeMapNode<K, V> left, BPlusTreeMapNode<K, V> right) {
+        if (left.isLeaf()) {
+            System.arraycopy(right.keys, 0, left.keys, left.keyCount, right.keyCount);
+            System.arraycopy(right.values, 0, left.values, left.keyCount, right.keyCount);
+            left.keyCount += right.keyCount;
+            BPlusTreeMapNode<K, V> rightNext = right.next;
+            left.next = rightNext;
+            if (rightNext != null) {
+                rightNext.prev = left;
+            }
+        } else {
+            left.keys[left.keyCount] = parent.keys[childIdx];
+            left.keyCount++;
+            System.arraycopy(right.keys, 0, left.keys, left.keyCount, right.keyCount);
+            System.arraycopy(right.child, 0, left.child, left.keyCount, right.keyCount + 1);
+            for (int i = 0; i <= right.keyCount; i++) {
+                if (right.child[i] != null) right.child[i].parent = left;
+            }
+            left.keyCount += right.keyCount;
+        }
+
+        System.arraycopy(parent.keys, childIdx + 1, parent.keys, childIdx, parent.keyCount - childIdx - 1);
+        System.arraycopy(parent.child, childIdx + 2, parent.child, childIdx + 1, parent.keyCount - childIdx - 1);
+
+        parent.keys[parent.keyCount - 1] = null;
+        parent.child[parent.keyCount] = null;
+        parent.keyCount--;
+    }
+
+    private void borrowLeft(BPlusTreeMapNode<K, V> parent, int childIdx, BPlusTreeMapNode<K, V> sibling, BPlusTreeMapNode<K, V> starving) {
+        if (starving.isLeaf()) {
+            System.arraycopy(starving.keys, 0, starving.keys, 1, starving.keyCount);
+            System.arraycopy(starving.values, 0, starving.values, 1, starving.keyCount);
+
+            starving.keys[0] = sibling.keys[sibling.keyCount - 1];
+            starving.values[0] = sibling.values[sibling.keyCount - 1];
+
+            sibling.keys[sibling.keyCount - 1] = null;
+            sibling.values[sibling.keyCount - 1] = null;
+
+            parent.keys[childIdx - 1] = starving.keys[0];
+
+            sibling.keyCount--;
+            starving.keyCount++;
+        } else {
+            System.arraycopy(starving.keys, 0, starving.keys, 1, starving.keyCount);
+            System.arraycopy(starving.child, 0, starving.child, 1, starving.keyCount + 1);
+
+            starving.keys[0] = parent.keys[childIdx - 1];
+            starving.child[0] = sibling.child[sibling.keyCount];
+            if (starving.child[0] != null) starving.child[0].parent = starving;
+
+            sibling.child[sibling.keyCount] = null;
+
+            parent.keys[childIdx - 1] = sibling.keys[sibling.keyCount - 1];
+
+            sibling.keys[sibling.keyCount - 1] = null;
+
+            sibling.keyCount--;
+            starving.keyCount++;
+        }
+    }
+
+    private void borrowRight(BPlusTreeMapNode<K, V> parent, int childIdx, BPlusTreeMapNode<K, V> starving, BPlusTreeMapNode<K, V> sibling) {
+        if (starving.isLeaf()) {
+            starving.keys[starving.keyCount] = sibling.keys[0];
+            starving.values[starving.keyCount] = sibling.values[0];
+
+            System.arraycopy(sibling.keys, 1, sibling.keys, 0, sibling.keyCount - 1);
+            System.arraycopy(sibling.values, 1, sibling.values, 0, sibling.keyCount - 1);
+
+            sibling.keys[sibling.keyCount - 1] = null;
+            sibling.values[sibling.keyCount - 1] = null;
+
+            parent.keys[childIdx] = sibling.keys[0];
+
+            starving.keyCount++;
+            sibling.keyCount--;
+        } else {
+            starving.keys[starving.keyCount] = parent.keys[childIdx];
+            starving.child[starving.keyCount + 1] = sibling.child[0];
+
+            if (starving.child[starving.keyCount + 1] != null) {
+                starving.child[starving.keyCount + 1].parent = starving;
+            }
+
+            parent.keys[childIdx] = sibling.keys[0];
+
+            System.arraycopy(sibling.keys, 1, sibling.keys, 0, sibling.keyCount - 1);
+            System.arraycopy(sibling.child, 1, sibling.child, 0, sibling.keyCount);
+
+            sibling.keys[sibling.keyCount - 1] = null;
+            sibling.child[sibling.keyCount] = null;
+
+            starving.keyCount++;
+            sibling.keyCount--;
+        }
+    }
+
 }
