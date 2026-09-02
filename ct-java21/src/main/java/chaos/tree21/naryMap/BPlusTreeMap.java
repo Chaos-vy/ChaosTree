@@ -1,6 +1,8 @@
 package chaos.tree21.naryMap;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 
 public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTreeMapNode<K,V>> {
 
@@ -272,4 +274,142 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
     }
 
+    @SuppressWarnings("unchecked")
+    void buildFromSorted(Iterator<Map.Entry<K, V>> it, float factor) {
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
+        BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[32];
+        rightEdge[0] = createNode(degree, true);
+        this.root = rightEdge[0];
+
+        while (it.hasNext()) {
+            Map.Entry<K, V> entry = it.next();
+            K key = entry.getKey();
+            V value = entry.getValue();
+
+            BPlusTreeMapNode<K, V> leaf = rightEdge[0];
+
+            if (leaf.keyCount < targetKeys) {
+                leaf.keys[leaf.keyCount] = key;
+                leaf.values[leaf.keyCount] = value;
+                leaf.keyCount++;
+                this.size++;
+            } else {
+                BPlusTreeMapNode<K, V> newLeaf = createNode(degree, true);
+                leaf.next = newLeaf;
+                newLeaf.prev = leaf;
+
+                newLeaf.keys[0] = key;
+                newLeaf.values[0] = value;
+                newLeaf.keyCount = 1;
+                this.size++;
+
+                K routingKey = key;
+                BPlusTreeMapNode<K, V> leftChild = leaf;
+                BPlusTreeMapNode<K, V> rightChild = newLeaf;
+
+                rightEdge[0] = newLeaf;
+
+                int level = 1;
+                while (true) {
+                    BPlusTreeMapNode<K, V> parent = rightEdge[level];
+
+                    if (parent == null) {
+                        parent = createNode(degree, false);
+                        parent.setChild(0, leftChild);
+                        leftChild.parent = parent;
+
+                        rightEdge[level] = parent;
+                        this.root = parent;
+                    }
+
+                    if (parent.keyCount < targetKeys) {
+                        parent.keys[parent.keyCount] = routingKey;
+                        parent.setChild(parent.keyCount + 1, rightChild);
+                        rightChild.parent = parent;
+                        parent.keyCount++;
+                        break;
+                    } else {
+                        BPlusTreeMapNode<K, V> newInternal = createNode(degree, false);
+                        newInternal.setChild(0, rightChild);
+                        rightChild.parent = newInternal;
+
+                        rightEdge[level] = newInternal;
+
+                        leftChild = parent;
+                        rightChild = newInternal;
+                        level++;
+                    }
+                }
+            }
+        }
+        this.modCount++;
+    }
+    @SuppressWarnings("unchecked")
+    void buildFromSortedArrays(Object[][] blast, float factor) {
+        Object[] inKeys = blast[0];
+        Object[] inValues = blast[1];
+        int totalSize = inKeys.length;
+
+        if (totalSize == 0) return;
+
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
+        BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[32];
+
+        int i = 0;
+        while (i < totalSize) {
+            int chunk = Math.min(targetKeys, totalSize - i);
+            BPlusTreeMapNode<K, V> leaf = createNode(degree, true);
+            System.arraycopy(inKeys, i, leaf.keys, 0, chunk);
+            System.arraycopy(inValues, i, leaf.values, 0, chunk);
+            leaf.keyCount = chunk;
+
+            if (i == 0) {
+                rightEdge[0] = leaf;
+                this.root = leaf;
+            } else {
+                BPlusTreeMapNode<K, V> prevLeaf = rightEdge[0];
+                prevLeaf.next = leaf;
+                leaf.prev = prevLeaf;
+                K routingKey = (K) inKeys[i];
+                BPlusTreeMapNode<K, V> leftChild = prevLeaf;
+                BPlusTreeMapNode<K, V> rightChild = leaf;
+
+                rightEdge[0] = leaf;
+
+                int level = 1;
+                while (true) {
+                    BPlusTreeMapNode<K, V> parent = rightEdge[level];
+
+                    if (parent == null) {
+                        parent = createNode(degree, false);
+                        parent.setChild(0, leftChild);
+                        leftChild.parent = parent;
+                        rightEdge[level] = parent;
+                        this.root = parent;
+                    }
+
+                    if (parent.keyCount < targetKeys) {
+                        parent.keys[parent.keyCount] = routingKey;
+                        parent.setChild(parent.keyCount + 1, rightChild);
+                        rightChild.parent = parent;
+                        parent.keyCount++;
+                        break;
+                    } else {
+                        BPlusTreeMapNode<K, V> newInternal = createNode(degree, false);
+                        newInternal.setChild(0, rightChild);
+                        rightChild.parent = newInternal;
+                        rightEdge[level] = newInternal;
+
+                        leftChild = parent;
+                        rightChild = newInternal;
+                        level++;
+                    }
+                }
+            }
+            i += chunk;
+        }
+
+        this.size = totalSize;
+        this.modCount++;
+    }
 }

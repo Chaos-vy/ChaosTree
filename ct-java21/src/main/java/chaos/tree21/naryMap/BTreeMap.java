@@ -1,8 +1,8 @@
 package chaos.tree21.naryMap;
 
-import chaos.tree21.nary.BTreeNode;
-
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 
 public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode<K, V>> {
 
@@ -252,6 +252,127 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         parent.child[parent.keyCount] = null;
 
         parent.keyCount--;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    void buildFromSorted(Iterator<Entry<K, V>> it, float factor) {
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
+        BTreeMapNode<K, V>[] rightEdge = (BTreeMapNode<K, V>[]) new BTreeMapNode[32];
+
+        rightEdge[0] = createNode(degree, true);
+        this.root = rightEdge[0];
+
+        while (it.hasNext()) {
+            BTreeMapNode<K, V> leaf = rightEdge[0];
+            while (leaf.keyCount < targetKeys && it.hasNext()) {
+                Map.Entry<K, V> entry = it.next();
+                leaf.keys[leaf.keyCount] = entry.getKey();
+                leaf.values[leaf.keyCount] = entry.getValue();
+                leaf.keyCount++;
+                this.size++;
+            }
+
+            if (it.hasNext()) {
+                Map.Entry<K, V> sepEntry = it.next();
+                this.size++;
+
+                int level = 1;
+                while (true) {
+                    BTreeMapNode<K, V> parent = rightEdge[level];
+
+                    if (parent == null) {
+                        parent = createNode(degree, false);
+                        parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level - 1].parent = parent;
+                        rightEdge[level] = parent;
+                        this.root = parent;
+                    }
+
+                    if (parent.keyCount < targetKeys) {
+                        parent.keys[parent.keyCount] = sepEntry.getKey();
+                        parent.values[parent.keyCount] = sepEntry.getValue();
+                        parent.keyCount++;
+
+                        BTreeMapNode<K, V> prevInternal = parent;
+                        for (int d = level - 1; d >= 0; d--) {
+                            BTreeMapNode<K, V> newNode = createNode(degree, d == 0);
+                            prevInternal.setChild(prevInternal.keyCount, newNode);
+                            newNode.parent = prevInternal;
+
+                            rightEdge[d] = newNode;
+                            prevInternal = newNode;
+                        }
+                        break;
+                    } else {
+                        level++;
+                    }
+                }
+            }
+        }
+        this.modCount++;
+    }
+
+    @SuppressWarnings("unchecked")
+    void buildFromSortedArrays(Object[][] blast, float factor) {
+        Object[] inKeys = blast[0];
+        Object[] inValues = blast[1];
+        int totalSize = inKeys.length;
+        if (totalSize == 0) return;
+
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
+        BTreeMapNode<K, V>[] rightEdge = (BTreeMapNode<K, V>[]) new BTreeMapNode[32];
+
+        rightEdge[0] = createNode(degree, true);
+        this.root = rightEdge[0];
+
+        int i = 0;
+        while (i < totalSize) {
+            BTreeMapNode<K, V> leaf = rightEdge[0];
+            int chunk = Math.min(targetKeys - leaf.keyCount, totalSize - i);
+            System.arraycopy(inKeys, i, leaf.keys, leaf.keyCount, chunk);
+            System.arraycopy(inValues, i, leaf.values, leaf.keyCount, chunk);
+            leaf.keyCount += chunk;
+            i += chunk;
+            if (i < totalSize) {
+                K sepKey = (K) inKeys[i];
+                V sepVal = (V) inValues[i];
+                i++;
+
+                int level = 1;
+                while (true) {
+                    BTreeMapNode<K, V> parent = rightEdge[level];
+                    if (parent == null) {
+                        parent = createNode(degree, false);
+                        parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level - 1].parent = parent;
+                        rightEdge[level] = parent;
+                        this.root = parent;
+                    }
+
+                    if (parent.keyCount < targetKeys) {
+                        parent.keys[parent.keyCount] = sepKey;
+                        parent.values[parent.keyCount] = sepVal;
+                        parent.keyCount++;
+
+                        BTreeMapNode<K, V> prevInternal = parent;
+                        for (int d = level - 1; d >= 0; d--) {
+                            BTreeMapNode<K, V> newNode = createNode(degree, d == 0);
+                            prevInternal.setChild(prevInternal.keyCount, newNode);
+                            newNode.parent = prevInternal;
+
+                            rightEdge[d] = newNode;
+                            prevInternal = newNode;
+                        }
+                        break;
+                    } else {
+                        level++;
+                    }
+                }
+            }
+        }
+        this.size = totalSize;
+        this.modCount++;
     }
 
 }
