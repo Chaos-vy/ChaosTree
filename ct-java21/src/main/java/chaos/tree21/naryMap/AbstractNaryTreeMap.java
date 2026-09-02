@@ -3,9 +3,11 @@ package chaos.tree21.naryMap;
 import chaos.tree21.core.SearchTreeMap;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
-sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryTreeMap<K, V, N>>
+sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K, V, N>>
         extends AbstractMap<K, V> implements SearchTreeMap<K, V> permits BTreeMap, BPlusTreeMap {
 
     protected final Comparator<? super K> comparator;
@@ -33,6 +35,26 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryTreeMap<K,
             return comparator.compare(k1, k2);
         }
         return ((Comparable<? super K>) k1).compareTo(k2);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected int searchNodeMap(N current, K k){
+        if(current.keyCount < 12){
+            for (int i = 0; i < current.keyCount; i++) {
+                int cmp = compare((K)current.keys[i], k);
+                if(cmp == 0) return i;
+                if(cmp > 0) return ~i;
+            }
+            return ~current.keyCount;
+        }
+        return Arrays.binarySearch((K[]) current.keys, 0, current.keyCount, k, comparator);
+    }
+
+    protected int searchNodeMapValue(N current, V v){
+        for (int i = 0; i < current.keyCount; i++){
+            if(Objects.equals(current.values[i], v)) return i;
+        }
+        return -1;
     }
 
 
