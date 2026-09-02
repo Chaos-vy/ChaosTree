@@ -12,10 +12,11 @@ sealed abstract class AbstractNaryMapNode<K, V, N extends AbstractNaryMapNode<K,
     protected int keyCount;
     protected N parent;
 
-    protected AbstractNaryMapNode(int degree, N[] child) {
+    protected AbstractNaryMapNode(int degree, N[] child, boolean isLeaf) {
         int maxKeys = degree << 1;
         this.keys = new Object[maxKeys];
-        this.values = new Object[maxKeys];
+        boolean needsValues = isLeaf || (this instanceof BTreeMapNode);
+        this.values = needsValues ? new Object[maxKeys] : null;
         this.child = child;
         this.keyCount = 0;
     }
