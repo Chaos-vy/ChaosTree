@@ -16,22 +16,23 @@ I prioritize mostly DOD over OOD
 public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<E>> {
 
     /*
+     Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
+     */
+    private static final int DEFAULT_DEGREE = 64;
+    /*
     Yeah, a self varName. As the name suggest this Compaction count only works during deletion
     case. Only and Only if the key was found to be in route else no!!
      */
     private int chaosCompaction = 0; // Tracks ghost routing keys
 
-    /*
-     Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
-     */
-    private static final int DEFAULT_DEGREE = 64;
-
     public BPlusTreeSet() {
         super(DEFAULT_DEGREE, null);
     }
+
     public BPlusTreeSet(Comparator<? super E> comparator) {
         super(DEFAULT_DEGREE, comparator);
     }
+
     public BPlusTreeSet(Collection<? extends E> c) {
         this();
         addAll(c);
@@ -186,12 +187,12 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
      * @param sortedArray An array providing strictly sorted elements.
-     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
-     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
-     *                   have it 1.0f but after that any insert or remove information will
-     *                   trigger massive split, merge, borrow, array shifting.
-     *                   Hold the Chaos!!
+     * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
+     *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                    have it 1.0f but after that any insert or remove information will
+     *                    trigger massive split, merge, borrow, array shifting.
+     *                    Hold the Chaos!!
      */
     public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
 
@@ -200,7 +201,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
-        if(degree < 32){
+        if (degree < 32) {
             throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
         }
         if (fillFactor < 0.5f || fillFactor > 1.0f) {
@@ -209,7 +210,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         buildFromSortedArray(sortedArray, fillFactor);
     }
 
-    private void buildFromSortedArray(Object[] sortedArray, float factor){
+    private void buildFromSortedArray(Object[] sortedArray, float factor) {
         int maxKeys = (degree << 1) - 1;
         int targetKeys = Math.max(1, (int) (maxKeys * factor));
 
@@ -272,6 +273,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         }
         this.modCount++;
     }
+
     @Override
     @SuppressWarnings("unchecked")
     public boolean add(E e) {
@@ -653,6 +655,51 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         }
     }
 
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        if (size == 0 || root == null) return array;
+        BPlusTreeNode<E> current = root;
+        while (!current.isLeaf()) {
+            current = current.child[0];
+        }
+
+        //Blasting the chunks directly into the array via native memory copy
+        int offset = 0;
+        while (current != null) {
+            System.arraycopy(current.keys, 0, array, offset, current.keyCount);
+            offset += current.keyCount;
+            current = current.next;
+        }
+        return array;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] a) {
+        if (a.length < size) {
+            a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+        }
+        if (size == 0 || root == null) {
+            if (a.length > size) a[size] = null;
+            return a;
+        }
+        BPlusTreeNode<E> current = root;
+        while (!current.isLeaf()) {
+            current = current.child[0];
+        }
+
+        // Blasting the chunks directly into the array via native memory copy
+        int offset = 0;
+        while (current != null) {
+            System.arraycopy(current.keys, 0, a, offset, current.keyCount);
+            offset += current.keyCount;
+            current = current.next;
+        }
+        if (a.length > size) a[size] = null;
+        return a;
+    }
+
     private class BPlusTreeIterator implements Iterator<E> {
         private final boolean ascending;
         private BPlusTreeNode<E> currentLeaf;
@@ -744,50 +791,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                 currentLeaf = null;
             }
         }
-    }
-    @Override
-    public Object[] toArray() {
-        Object[] array = new Object[size];
-        if (size == 0 || root == null) return array;
-        BPlusTreeNode<E> current = root;
-        while (!current.isLeaf()) {
-            current = current.child[0];
-        }
-
-        //Blasting the chunks directly into the array via native memory copy
-        int offset = 0;
-        while (current != null) {
-            System.arraycopy(current.keys, 0, array, offset, current.keyCount);
-            offset += current.keyCount;
-            current = current.next;
-        }
-        return array;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T[] toArray(T[] a) {
-        if (a.length < size) {
-            a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
-        }
-        if (size == 0 || root == null) {
-            if (a.length > size) a[size] = null;
-            return a;
-        }
-        BPlusTreeNode<E> current = root;
-        while (!current.isLeaf()) {
-            current = current.child[0];
-        }
-
-        // Blasting the chunks directly into the array via native memory copy
-        int offset = 0;
-        while (current != null) {
-            System.arraycopy(current.keys, 0, a, offset, current.keyCount);
-            offset += current.keyCount;
-            current = current.next;
-        }
-        if (a.length > size) a[size] = null;
-        return a;
     }
 
 }

@@ -32,9 +32,9 @@ import java.util.Spliterators;
 sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> extends AbstractSet<E>
         implements SearchTreeSet<E>, Serializable, Cloneable permits BPlusTreeSet, BTreeSet {
 
-    protected final int degree;
-    protected final int maxKeys;
-    protected final int minKeys;
+    protected transient final int degree;
+    protected transient final int maxKeys;
+    protected transient final int minKeys;
     protected final Comparator<? super E> comparator;
     protected transient N root;
     protected transient int size;
@@ -472,13 +472,24 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         }
 
         @Override
-        public E ceiling(E e) { return descending ? subFloor(e) : subCeiling(e); }
+        public E ceiling(E e) {
+            return descending ? subFloor(e) : subCeiling(e);
+        }
+
         @Override
-        public E floor(E e) { return descending ? subCeiling(e) : subFloor(e); }
+        public E floor(E e) {
+            return descending ? subCeiling(e) : subFloor(e);
+        }
+
         @Override
-        public E higher(E e) { return descending ? subLower(e) : subHigher(e); }
+        public E higher(E e) {
+            return descending ? subLower(e) : subHigher(e);
+        }
+
         @Override
-        public E lower(E e) { return descending ? subHigher(e) : subLower(e); }
+        public E lower(E e) {
+            return descending ? subHigher(e) : subLower(e);
+        }
 
         @Override
         public E first() {
@@ -557,23 +568,35 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         }
 
         @Override
-        public SortedSet<E> subSet(E fromElement, E toElement) { return subSet(fromElement, true, toElement, false); }
-        @Override
-        public SortedSet<E> headSet(E toElement) { return headSet(toElement, false); }
-        @Override
-        public SortedSet<E> tailSet(E fromElement) { return tailSet(fromElement, true); }
+        public SortedSet<E> subSet(E fromElement, E toElement) {
+            return subSet(fromElement, true, toElement, false);
+        }
 
         @Override
-        public Iterator<E> iterator() { return new SubSetIterator(false); }
+        public SortedSet<E> headSet(E toElement) {
+            return headSet(toElement, false);
+        }
 
         @Override
-        public Iterator<E> descendingIterator() { return new SubSetIterator(true); }
+        public SortedSet<E> tailSet(E fromElement) {
+            return tailSet(fromElement, true);
+        }
+
+        @Override
+        public Iterator<E> iterator() {
+            return new SubSetIterator(false);
+        }
+
+        @Override
+        public Iterator<E> descendingIterator() {
+            return new SubSetIterator(true);
+        }
 
         private class SubSetIterator implements Iterator<E> {
+            private final boolean iterateDescending;
             private long expectedModCount = AbstractNaryTreeSet.this.modCount;
             private E nextElement;
             private E lastReturned = null;
-            private final boolean iterateDescending;
 
             SubSetIterator(boolean reverseCall) {
                 // If the map is already descending, and we ask for reverse, it goes forward!
@@ -582,7 +605,9 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             }
 
             @Override
-            public boolean hasNext() { return nextElement != null; }
+            public boolean hasNext() {
+                return nextElement != null;
+            }
 
             @Override
             public E next() {
