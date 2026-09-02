@@ -8,6 +8,6 @@ final class BPlusTreeMapNode<K, V> extends AbstractNaryMapNode<K, V, BPlusTreeMa
 
     @SuppressWarnings("unchecked")
     public BPlusTreeMapNode(int degree, boolean isLeaf) {
-        super(degree, isLeaf, isLeaf ? null : new BPlusTreeMapNode[(degree << 1) + 1]);
+        super(degree, isLeaf ? null : new BPlusTreeMapNode[(degree << 1) + 1],isLeaf);
     }
 }

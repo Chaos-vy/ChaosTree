@@ -20,9 +20,11 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     public BTreeSet() {
         super(DEFAULT_DEGREE, null);
     }
+
     public BTreeSet(Comparator<? super E> comparator) {
         super(DEFAULT_DEGREE, comparator);
     }
+
     public BTreeSet(Collection<? extends E> c) {
         this();
         addAll(c);
@@ -32,6 +34,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         super(DEFAULT_DEGREE, s.comparator());
         addAll(s);
     }
+
     public BTreeSet(int degree) {
         super(degree, null);
     }
@@ -229,12 +232,12 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
      * @param sortedArray An array providing strictly sorted elements.
-     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
-     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
-     *                   have it 1.0f but after that any insert or remove information will
-     *                   trigger massive split, merge, borrow, array shifting.
-     *                   Hold the Chaos!!
+     * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
+     *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                    have it 1.0f but after that any insert or remove information will
+     *                    trigger massive split, merge, borrow, array shifting.
+     *                    Hold the Chaos!!
      */
     public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
 
@@ -243,7 +246,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
-        if(degree < 32){
+        if (degree < 32) {
             throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
         }
         if (fillFactor < 0.5f || fillFactor > 1.0f) {
@@ -252,7 +255,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         buildFromSortedArray(sortedArray, fillFactor);
     }
 
-    private void buildFromSortedArray(Object[] sortedArray, float fillfactor){
+    private void buildFromSortedArray(Object[] sortedArray, float fillfactor) {
         int maxKeys = (degree << 1) - 1;
         int targetKeys = Math.max(1, (int) (maxKeys * fillfactor));
 
@@ -272,7 +275,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
             if (index < sortedArray.length) {
                 @SuppressWarnings("unchecked")
-                E routingKey = (E) sortedArray[index++]; // <-- Note the index++ (Skip!)
+                E routingKey = (E) sortedArray[index++];
                 this.size++;
 
                 int level = 1;
@@ -309,6 +312,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         }
         this.modCount++;
     }
+
     @Override
     BTreeNode<E> createNode(int degree, boolean isLeaf) {
         return new BTreeNode<>(degree, isLeaf);

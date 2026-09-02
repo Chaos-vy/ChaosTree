@@ -1,6 +1,7 @@
 package chaos.tree21.naryMap;
 
 import java.util.Map;
+import java.util.Objects;
 
 sealed abstract class AbstractNaryMapNode<K, V, N extends AbstractNaryMapNode<K, V, N>>
         permits BTreeMapNode, BPlusTreeMapNode {
@@ -11,14 +12,16 @@ sealed abstract class AbstractNaryMapNode<K, V, N extends AbstractNaryMapNode<K,
     protected int keyCount;
     protected N parent;
 
-    protected AbstractNaryMapNode(int degree, boolean isLeaf, N[] child) {
+    protected AbstractNaryMapNode(int degree, N[] child, boolean isLeaf) {
         int maxKeys = degree << 1;
         this.keys = new Object[maxKeys];
-        this.values = new Object[maxKeys];
+        boolean needsValues = isLeaf || (this instanceof BTreeMapNode);
+        this.values = needsValues ? new Object[maxKeys] : null;
         this.child = child;
         this.keyCount = 0;
     }
-    // Hold ChapsEntry in game!!
+
+    // Hold ChaosEntry in game!!
     static final class ChaosEntry<K, V> implements Map.Entry<K, V> {
         private final AbstractNaryMapNode<K, V, ?> node;
         private final int index;
@@ -47,12 +50,12 @@ sealed abstract class AbstractNaryMapNode<K, V, N extends AbstractNaryMapNode<K,
             node.values[index] = newValue;
             return oldValue;
         }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof Map.Entry<?, ?> e)) return false;
-            return java.util.Objects.equals(getKey(), e.getKey()) &&
-                    java.util.Objects.equals(getValue(), e.getValue());
+            return Objects.equals(getKey(), e.getKey()) && Objects.equals(getValue(), e.getValue());
         }
 
         @Override
@@ -66,5 +69,15 @@ sealed abstract class AbstractNaryMapNode<K, V, N extends AbstractNaryMapNode<K,
         public String toString() {
             return getKey() + "=" + getValue();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    void setChild(int index, N node) {
+        child[index] = node;
+        if (node != null) node.parent = (N) this;
+    }
+
+    boolean isLeaf() {
+        return child == null;
     }
 }
