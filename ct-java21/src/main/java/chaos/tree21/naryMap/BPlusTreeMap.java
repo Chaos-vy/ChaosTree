@@ -274,6 +274,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     void buildFromSorted(Iterator<Map.Entry<K, V>> it, float factor) {
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
@@ -303,7 +304,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 newLeaf.keyCount = 1;
                 this.size++;
 
-                K routingKey = key;
+                K routingKey;
+                routingKey = key;
                 BPlusTreeMapNode<K, V> leftChild = leaf;
                 BPlusTreeMapNode<K, V> rightChild = newLeaf;
 
@@ -344,6 +346,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
         this.modCount++;
     }
+
+    @Override
     @SuppressWarnings("unchecked")
     void buildFromSortedArrays(Object[][] blast, float factor) {
         Object[] inKeys = blast[0];
@@ -411,5 +415,103 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
         this.size = totalSize;
         this.modCount++;
+    }
+
+    @Override
+    public Map.Entry<K, V> ceilingEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+        int idx = searchNodeMap(curr, key);
+        if (idx >= 0) {
+            return exportEntry(curr, idx);
+        }
+        int insertIdx = ~idx;
+        if (insertIdx < curr.keyCount) {
+            return exportEntry(curr, insertIdx);
+        }
+        if (curr.next != null) {
+            return exportEntry(curr.next, 0);
+        }
+        return null;
+    }
+
+    @Override
+    public Map.Entry<K, V> floorEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+        int idx = searchNodeMap(curr, key);
+        if (idx >= 0) {
+            return exportEntry(curr, idx);
+        }
+
+        int insertIdx = ~idx;
+
+        if (insertIdx > 0) {
+            return exportEntry(curr, insertIdx - 1);
+        }
+
+        if (curr.prev != null) {
+            return exportEntry(curr.prev, curr.prev.keyCount - 1);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Map.Entry<K, V> higherEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+
+        int idx = searchNodeMap(curr, key);
+        int targetIdx = (idx >= 0) ? idx + 1 : ~idx;
+
+        if (targetIdx < curr.keyCount) {
+            return exportEntry(curr, targetIdx);
+        }
+        if (curr.next != null) {
+            return exportEntry(curr.next, 0);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Map.Entry<K, V> lowerEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+
+        int idx = searchNodeMap(curr, key);
+        int targetIdx = (idx >= 0) ? idx - 1 : ~idx - 1;
+
+        if (targetIdx >= 0) {
+            return exportEntry(curr, targetIdx);
+        }
+        if (curr.prev != null) {
+            return exportEntry(curr.prev, curr.prev.keyCount - 1);
+        }
+
+        return null;
     }
 }

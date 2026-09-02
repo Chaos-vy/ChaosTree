@@ -375,4 +375,98 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         this.modCount++;
     }
 
+    @Override
+    public Map.Entry<K, V> ceilingEntry(K key) {
+        BTreeMapNode<K, V> curr = root;
+        BTreeMapNode<K, V> bestNode = null;
+        int bestIdx = -1;
+
+        while (curr != null) {
+            int idx = searchNodeMap(curr, key);
+            if (idx >= 0) return exportEntry(curr, idx);
+
+            int insertIdx = ~idx;
+            if (insertIdx < curr.keyCount) {
+                bestNode = curr;
+                bestIdx = insertIdx;
+            }
+            curr = curr.isLeaf() ? null : curr.child[insertIdx];
+        }
+        return exportEntry(bestNode, bestIdx);
+    }
+
+    @Override
+    public Map.Entry<K, V> floorEntry(K key) {
+        BTreeMapNode<K, V> curr = root;
+        BTreeMapNode<K, V> bestNode = null;
+        int bestIdx = -1;
+
+        while (curr != null) {
+            int idx = searchNodeMap(curr, key);
+            if (idx >= 0) return exportEntry(curr, idx);
+
+            int insertIdx = ~idx;
+            if (insertIdx > 0) {
+                bestNode = curr;
+                bestIdx = insertIdx - 1;
+            }
+            curr = curr.isLeaf() ? null : curr.child[insertIdx];
+        }
+        return exportEntry(bestNode, bestIdx);
+    }
+
+    @Override
+    public Map.Entry<K, V> higherEntry(K key) {
+        BTreeMapNode<K, V> curr = root;
+        BTreeMapNode<K, V> bestNode = null;
+        int bestIdx = -1;
+
+        while (curr != null) {
+            int idx = searchNodeMap(curr, key);
+            if (idx >= 0) {
+                if (!curr.isLeaf()) {
+                    curr = curr.child[idx + 1];
+                    while (!curr.isLeaf()) curr = curr.child[0];
+                    return exportEntry(curr, 0);
+                }
+                return exportEntry(bestNode, bestIdx);
+            }
+
+            int insertIdx = ~idx;
+            if (insertIdx < curr.keyCount) {
+                bestNode = curr;
+                bestIdx = insertIdx;
+            }
+            curr = curr.isLeaf() ? null : curr.child[insertIdx];
+        }
+        return exportEntry(bestNode, bestIdx);
+    }
+
+    @Override
+    public Map.Entry<K, V> lowerEntry(K key) {
+        BTreeMapNode<K, V> curr = root;
+        BTreeMapNode<K, V> bestNode = null;
+        int bestIdx = -1;
+
+        while (curr != null) {
+            int idx = searchNodeMap(curr, key);
+            if (idx >= 0) {
+                if (!curr.isLeaf()) {
+                    curr = curr.child[idx];
+                    while (!curr.isLeaf()) curr = curr.child[curr.keyCount];
+                    return exportEntry(curr, curr.keyCount - 1);
+                }
+                return exportEntry(bestNode, bestIdx);
+            }
+
+            int insertIdx = ~idx;
+            if (insertIdx > 0) {
+                bestNode = curr;
+                bestIdx = insertIdx - 1;
+            }
+            curr = curr.isLeaf() ? null : curr.child[insertIdx];
+        }
+        return exportEntry(bestNode, bestIdx);
+    }
+
 }
