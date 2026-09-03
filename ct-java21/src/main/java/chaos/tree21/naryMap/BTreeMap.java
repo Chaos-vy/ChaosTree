@@ -6,7 +6,10 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.SortedMap;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode<K, V>> {
 
@@ -40,9 +43,18 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         return new BTreeMapNode<>(degree, isLeaf);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public V put(K key, V value) {
+        return putInternal(key, value, false);
+    }
+
+    @Override
+    public V putIfAbsent(K key, V value) {
+        return putInternal(key, value, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public V putInternal(K key, V value, boolean onlyIfAbsent) {
         if (root == null) {
             compare(key, key);
             root = createNode(degree, true);
@@ -60,7 +72,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
             if (idx >= 0) {
                 old_val = (V) current.values[idx];
-                current.values[idx] = value;
+                if (!onlyIfAbsent || old_val == null) {
+                    current.values[idx] = value;
+                }
                 return old_val;
             }
             int childIdx = ~idx;
@@ -119,6 +133,140 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         child.values[degree - 1] = null;
 
         parent.keyCount++;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+        Objects.requireNonNull(mappingFunction);
+        if (key == null) throw new NullPointerException();
+
+        if (root == null) {
+            V computed = mappingFunction.apply(key);
+            if (computed != null) {
+                compare(key, key);
+                root = new BTreeMapNode<>(degree, true);
+                root.keys[0] = key;
+                root.values[0] = computed;
+                root.keyCount = 1;
+                size++;
+                modCount++;
+            }
+            return computed;
+        }
+
+        BTreeMapNode<K, V> curr = root;
+        while (true) {
+            int idx = searchNodeMap(curr, key);
+            if (idx >= 0) {
+                V oldValue = (V) curr.values[idx];
+                if (oldValue != null) {
+                    return oldValue;
+                }
+                V computed = mappingFunction.apply(key);
+                if (computed != null) {
+                    curr.values[idx] = computed;
+                }
+                return computed;
+            }
+
+            if (curr.isLeaf()) {
+                V computed = mappingFunction.apply(key);
+                if (computed == null) {
+                    return null;
+                }
+
+                int insertIdx = ~idx;
+                System.arraycopy(curr.keys, insertIdx, curr.keys, insertIdx + 1, curr.keyCount - insertIdx);
+                System.arraycopy(curr.values, insertIdx, curr.values, insertIdx + 1, curr.keyCount - insertIdx);
+                curr.keys[insertIdx] = key;
+                curr.values[insertIdx] = computed;
+                curr.keyCount++;
+                size++;
+                modCount++;
+
+                while (curr.keyCount > maxKeys) {
+                    if (curr == root) {
+                        BTreeMapNode<K, V> n_root = createNode(degree, false);
+                        n_root.setChild(0, root);
+                        splitNode(n_root, 0, root);
+                        root = n_root;
+                        break;
+                    }
+                    BTreeMapNode<K, V> parent = curr.parent;
+                    K k = (K) curr.keys[0];
+                    int pIdx = ~searchNodeMap(parent, k);
+                    splitNode(parent, pIdx, curr);
+                    curr = parent;
+                }
+
+                return computed;
+            }
+            int childIdx = ~idx;
+            curr = curr.child[childIdx];
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V merge(K key, V value, java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        java.util.Objects.requireNonNull(remappingFunction);
+        java.util.Objects.requireNonNull(value);
+        if (key == null) throw new NullPointerException();
+
+        if (root == null) {
+            compare(key, key);
+            root = createNode(degree, true);
+            root.keys[0] = key;
+            root.values[0] = value;
+            root.keyCount = 1;
+            size++;
+            modCount++;
+            return value;
+        }
+        BTreeMapNode<K, V> current = root;
+        while (true) {
+            int idx = searchNodeMap(current, key);
+
+            if (idx >= 0) {
+                V oldValue = (V) current.values[idx];
+                V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+                if (newValue == null) {
+                    remove(key);
+                    return null;
+                } else {
+                    current.values[idx] = newValue;
+                    modCount++;
+                    return newValue;
+                }
+            }
+            int childIdx = ~idx;
+            if (current.isLeaf()) {
+                System.arraycopy(current.keys, childIdx, current.keys, childIdx + 1, current.keyCount - childIdx);
+                System.arraycopy(current.values, childIdx, current.values, childIdx + 1, current.keyCount - childIdx);
+                current.keys[childIdx] = key;
+                current.values[childIdx] = value;
+                current.keyCount++;
+                size++;
+                modCount++;
+                while (current.keyCount > maxKeys) {
+                    if (current == root) {
+                        BTreeMapNode<K, V> n_root = createNode(degree, false);
+                        n_root.setChild(0, root);
+                        splitNode(n_root, 0, root);
+                        root = n_root;
+                        break;
+                    }
+                    BTreeMapNode<K, V> parent = current.parent;
+                    K k = (K) current.keys[0];
+                    int pIdx = ~searchNodeMap(parent, k);
+                    splitNode(parent, pIdx, current);
+                    current = parent;
+                }
+                return value;
+            }
+            current = current.child[childIdx];
+        }
     }
 
     @Override
@@ -461,6 +609,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     while (!curr.isLeaf()) curr = curr.child[0];
                     return exportEntry(curr, 0);
                 }
+                if (idx + 1 < curr.keyCount) {
+                    return exportEntry(curr, idx + 1);
+                }
                 return exportEntry(bestNode, bestIdx);
             }
 
@@ -488,6 +639,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     while (!curr.isLeaf()) curr = curr.child[curr.keyCount];
                     return exportEntry(curr, curr.keyCount - 1);
                 }
+                if (idx > 0) return exportEntry(curr, idx - 1);
                 return exportEntry(bestNode, bestIdx);
             }
 
@@ -573,6 +725,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                                 while (!curr.isLeaf()) curr = curr.child[0];
                                 bestNode = curr;
                                 bestIdx = 0;
+                            } else if (idx + 1 < curr.keyCount) {
+                                bestNode = curr;
+                                bestIdx = idx + 1;
                             }
                             break;
                         }
@@ -593,6 +748,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
         @Override
         public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
 
@@ -724,6 +880,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
         @Override
         public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex >= 0;
         }
         private Map.Entry<K, V> lastReturned = null;
@@ -797,6 +954,32 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     currentNode = parent;
                 }
             }
+        }
+    }
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        Objects.requireNonNull(action);
+        long expectedModCount = modCount;
+        if (root != null) {
+            forEachBTree(root, action);
+        }
+        if (modCount != expectedModCount) {
+            throw new ConcurrentModificationException();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void forEachBTree(BTreeMapNode<K, V> node, BiConsumer<? super K, ? super V> action) {
+        if (node.isLeaf()) {
+            for (int i = 0; i < node.keyCount; i++) {
+                action.accept((K) node.keys[i], (V) node.values[i]);
+            }
+        } else {
+            for (int i = 0; i < node.keyCount; i++) {
+                forEachBTree(node.child[i], action);
+                action.accept((K) node.keys[i], (V) node.values[i]);
+            }
+            forEachBTree(node.child[node.keyCount], action);
         }
     }
 }
