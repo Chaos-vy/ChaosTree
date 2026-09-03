@@ -324,7 +324,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             compare(e, e);
             root = new BTreeNode<>(degree, true);
             root.keys[0] = e;
-            root.keyCount++;
+            root.keyCount = 1;
             size++;
             modCount++;
             return true;
@@ -750,7 +750,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
         @Override
         public boolean hasNext() {
-            return currentNode != null;
+            return currentNode != null && currentIndex < currentNode.keyCount;
         }
 
         @Override

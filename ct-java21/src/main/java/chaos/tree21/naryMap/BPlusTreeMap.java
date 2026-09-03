@@ -1,96 +1,237 @@
 package chaos.tree21.naryMap;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.SortedMap;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
-public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTreeMapNode<K,V>> {
+public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTreeMapNode<K, V>> {
+
+
+    private static final int DEFAULT_DEGREE = 64;
+
+    public BPlusTreeMap() {
+        super(DEFAULT_DEGREE, null);
+    }
+
+    public BPlusTreeMap(Comparator<? super K> comparator) {
+        super(DEFAULT_DEGREE, comparator);
+    }
+
+    public BPlusTreeMap(Map<? extends K, ? extends V> m) {
+        super(DEFAULT_DEGREE, null);
+        putAll(m);
+    }
+
+    public BPlusTreeMap(SortedMap<K, ? extends V> m) {
+        super(DEFAULT_DEGREE, null);
+        buildFromSorted(m.entrySet().iterator(), 0.9f);
+    }
+    public BPlusTreeMap(int degree){
+        super(degree,null);
+    }
 
     @Override
-    BPlusTreeMapNode<K,V> createNode(int degree, boolean isLeaf){
+    BPlusTreeMapNode<K, V> createNode(int degree, boolean isLeaf) {
         return new BPlusTreeMapNode<>(degree, isLeaf);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public V put(K key, V value) {
-        if (root == null){
+        return putInternal(key, value, false);
+    }
+
+    @Override
+    public V putIfAbsent(K key, V value) {
+        return putInternal(key, value, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private V putInternal(K key, V value, boolean onlyIfAbsent) {
+        if (root == null) {
             compare(key, key);
-            root = new BPlusTreeMapNode<>(degree,true);
+            root = new BPlusTreeMapNode<>(degree, true);
             root.keys[0] = key;
             root.values[0] = value;
+            root.keyCount = 1;
             size++;
             modCount++;
             return null;
         }
         BPlusTreeMapNode<K, V> curr = root;
-        while (true){
+        while (true) {
             int idx = searchNodeMap(curr, key);
 
-            if(curr.isLeaf()){
-                if (idx>=0){
+            if (curr.isLeaf()) {
+                if (idx >= 0) {
                     V oldValue = (V) curr.values[idx];
-                    curr.values[idx] = value;
+                    if (!onlyIfAbsent || oldValue == null) {
+                        curr.values[idx] = value;
+                    }
                     return oldValue;
                 }
                 int insertIdx = ~idx;
-                System.arraycopy(curr.keys, insertIdx, curr.keys, insertIdx+1, curr.keyCount - insertIdx);
-                System.arraycopy(curr.values, insertIdx, curr.values, insertIdx+1, curr.keyCount - insertIdx);
+                System.arraycopy(curr.keys, insertIdx, curr.keys, insertIdx + 1, curr.keyCount - insertIdx);
+                System.arraycopy(curr.values, insertIdx, curr.values, insertIdx + 1, curr.keyCount - insertIdx);
                 curr.keys[insertIdx] = key;
                 curr.values[insertIdx] = value;
                 curr.keyCount++;
                 size++;
                 modCount++;
 
-                while (curr.keyCount > maxKeys){
-                    if(curr == root){
-                        BPlusTreeMapNode<K, V> n_root = createNode(degree,false);
-                        n_root.setChild(0,root);
+                while (curr.keyCount > maxKeys) {
+                    if (curr == root) {
+                        BPlusTreeMapNode<K, V> n_root = createNode(degree, false);
+                        n_root.setChild(0, root);
                         splitNode(n_root, 0, root);
                         root = n_root;
                         break;
                     }
-                    BPlusTreeMapNode<K,V> parent = curr.parent;
+                    BPlusTreeMapNode<K, V> parent = curr.parent;
                     idx = searchNodeMap(parent, (K) curr.keys[0]);
-                    int childIdx = (idx >=0)?idx+1:~idx;
-                    splitNode(parent,childIdx,curr);
+                    int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+                    splitNode(parent, childIdx, curr);
                     curr = parent;
                 }
                 return null;
             }
-            int childIdx = (idx>=0)? idx+1: ~idx;
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
             curr = curr.child[childIdx];
         }
     }
-    private void splitNode(BPlusTreeMapNode<K,V> parent, int childIdx, BPlusTreeMapNode<K,V> child){
-        BPlusTreeMapNode<K,V> sibling = createNode(degree, child.isLeaf());
-        if (child.isLeaf()){
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        if (key == null) throw new NullPointerException();
+        if (root == null) return null;
+
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+
+        int idx = searchNodeMap(curr, key);
+        if (idx >= 0) {
+            V oldValue = (V) curr.values[idx];
+
+            if (oldValue != null) {
+                V newValue = remappingFunction.apply(key, oldValue);
+
+                if (newValue != null) {
+                    curr.values[idx] = newValue;
+                    return newValue;
+                } else {
+                    remove(key);
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        Objects.requireNonNull(value);
+        if (key == null) throw new NullPointerException();
+
+        if (root == null) {
+            compare(key, key);
+            root = new BPlusTreeMapNode<>(degree, true);
+            root.keys[0] = key;
+            root.values[0] = value;
+            root.keyCount = 1;
+            size++;
+            modCount++;
+            return value;
+        }
+
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+
+        int idx = searchNodeMap(curr, key);
+        if (idx >= 0) {
+            V oldValue = (V) curr.values[idx];
+            V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+            if (newValue == null) {
+                remove(key);
+                return null;
+            } else {
+                curr.values[idx] = newValue;
+                modCount++;
+                return newValue;
+            }
+        }
+
+        int insertIdx = ~idx;
+        System.arraycopy(curr.keys, insertIdx, curr.keys, insertIdx + 1, curr.keyCount - insertIdx);
+        System.arraycopy(curr.values, insertIdx, curr.values, insertIdx + 1, curr.keyCount - insertIdx);
+        curr.keys[insertIdx] = key;
+        curr.values[insertIdx] = value;
+        curr.keyCount++;
+        size++;
+        modCount++;
+
+        while (curr.keyCount > maxKeys) {
+            if (curr == root) {
+                BPlusTreeMapNode<K, V> n_root = createNode(degree, false);
+                n_root.setChild(0, root);
+                splitNode(n_root, 0, root);
+                root = n_root;
+                break;
+            }
+            BPlusTreeMapNode<K, V> parent = curr.parent;
+            int pIdx = searchNodeMap(parent, (K) curr.keys[0]);
+            int childIdx = (pIdx >= 0) ? pIdx + 1 : ~pIdx;
+            splitNode(parent, childIdx, curr);
+            curr = parent;
+        }
+        return value;
+    }
+
+    private void splitNode(BPlusTreeMapNode<K, V> parent, int childIdx, BPlusTreeMapNode<K, V> child) {
+        BPlusTreeMapNode<K, V> sibling = createNode(degree, child.isLeaf());
+        if (child.isLeaf()) {
             sibling.keyCount = degree;
 
-            System.arraycopy(child.keys,degree,sibling.keys,0,degree);
-            System.arraycopy(child.values,degree,sibling.values,0,degree);
+            System.arraycopy(child.keys, degree, sibling.keys, 0, degree);
+            System.arraycopy(child.values, degree, sibling.values, 0, degree);
 
-            Arrays.fill(child.keys,degree,child.keyCount,null);
-            Arrays.fill(child.values,degree,child.keyCount,null);
+            Arrays.fill(child.keys, degree, child.keyCount, null);
+            Arrays.fill(child.values, degree, child.keyCount, null);
 
             child.keyCount = degree;
-            BPlusTreeMapNode<K,V> childNext = child.next;
+            BPlusTreeMapNode<K, V> childNext = child.next;
 
             sibling.next = childNext;
-            if(childNext!=null) childNext.prev = sibling;
-            sibling.prev=child;
-            child.next= sibling;
+            if (childNext != null) childNext.prev = sibling;
+            sibling.prev = child;
+            child.next = sibling;
 
-            System.arraycopy(parent.child,childIdx+1,parent.child,childIdx+2,parent.keyCount-childIdx);
-            parent.setChild(childIdx+1,sibling);
-            System.arraycopy(parent.keys,childIdx,parent.keys,childIdx+1,parent.keyCount-childIdx);
+            System.arraycopy(parent.child, childIdx + 1, parent.child, childIdx + 2, parent.keyCount - childIdx);
+            parent.setChild(childIdx + 1, sibling);
+            System.arraycopy(parent.keys, childIdx, parent.keys, childIdx + 1, parent.keyCount - childIdx);
 
             parent.keys[childIdx] = sibling.keys[0];
-        }
-        else {
+        } else {
             sibling.keyCount = degree;
-            System.arraycopy(child.keys,degree,sibling.keys,0,degree);
-            System.arraycopy(child.child,degree,sibling.child,0,degree+1);
+            System.arraycopy(child.keys, degree, sibling.keys, 0, degree);
+            System.arraycopy(child.child, degree, sibling.child, 0, degree + 1);
             //uff..
             for (int i = 0; i <= degree; i++) {
                 if (sibling.child[i] != null) sibling.child[i].parent = sibling;
@@ -117,35 +258,35 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     public V remove(Object o) {
         if (isEmpty()) return null;
         K key = (K) o;
-        BPlusTreeMapNode<K,V> curr = root;
+        BPlusTreeMapNode<K, V> curr = root;
         int idx, childIdx;
-        while (!curr.isLeaf()){
+        while (!curr.isLeaf()) {
             idx = searchNodeMap(curr, key);
-            childIdx = (idx>=0)?idx+1:~idx;
+            childIdx = (idx >= 0) ? idx + 1 : ~idx;
             curr = curr.child[childIdx];
         }
         idx = searchNodeMap(curr, key);
-        if(idx < 0) return null;
+        if (idx < 0) return null;
 
         //Ghost deletion in leaf only
         V val = (V) curr.values[idx];
-        System.arraycopy(curr.keys, idx+1,curr.keys,idx,curr.keyCount-idx-1);
-        System.arraycopy(curr.values, idx+1,curr.values,idx,curr.keyCount-idx-1);
+        System.arraycopy(curr.keys, idx + 1, curr.keys, idx, curr.keyCount - idx - 1);
+        System.arraycopy(curr.values, idx + 1, curr.values, idx, curr.keyCount - idx - 1);
 
         curr.keys[curr.keyCount - 1] = null;
-        curr.values[curr.keyCount -1] = null;
+        curr.values[curr.keyCount - 1] = null;
         curr.keyCount--;
         size--;
         modCount++;
 
         while (curr != root && curr.keyCount < minKeys) {
-            BPlusTreeMapNode<K,V> parent = curr.parent;
+            BPlusTreeMapNode<K, V> parent = curr.parent;
 
             childIdx = 0;
             while (childIdx <= parent.keyCount && parent.child[childIdx] != curr) childIdx++;
 
-            BPlusTreeMapNode<K,V> leftSibling = (childIdx > 0) ? parent.child[childIdx - 1] : null;
-            BPlusTreeMapNode<K,V> rightSibling = (childIdx < parent.keyCount) ? parent.child[childIdx + 1] : null;
+            BPlusTreeMapNode<K, V> leftSibling = (childIdx > 0) ? parent.child[childIdx - 1] : null;
+            BPlusTreeMapNode<K, V> rightSibling = (childIdx < parent.keyCount) ? parent.child[childIdx + 1] : null;
 
             if (leftSibling != null && leftSibling.keyCount > minKeys) {
                 borrowLeft(parent, childIdx, leftSibling, curr);
@@ -274,15 +415,16 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-    void buildFromSorted(Iterator<Map.Entry<K, V>> it, float factor) {
+    void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor) {
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
         BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[32];
         rightEdge[0] = createNode(degree, true);
         this.root = rightEdge[0];
 
         while (it.hasNext()) {
-            Map.Entry<K, V> entry = it.next();
+            Map.Entry<? extends K, ? extends V> entry = it.next();
             K key = entry.getKey();
             V value = entry.getValue();
 
@@ -303,7 +445,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 newLeaf.keyCount = 1;
                 this.size++;
 
-                K routingKey = key;
+                K routingKey;
+                routingKey = key;
                 BPlusTreeMapNode<K, V> leftChild = leaf;
                 BPlusTreeMapNode<K, V> rightChild = newLeaf;
 
@@ -344,6 +487,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
         this.modCount++;
     }
+
+    @Override
     @SuppressWarnings("unchecked")
     void buildFromSortedArrays(Object[][] blast, float factor) {
         Object[] inKeys = blast[0];
@@ -411,5 +556,324 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
         this.size = totalSize;
         this.modCount++;
+    }
+
+    @Override
+    public Map.Entry<K, V> ceilingEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+        int idx = searchNodeMap(curr, key);
+        if (idx >= 0) {
+            return exportEntry(curr, idx);
+        }
+        int insertIdx = ~idx;
+        if (insertIdx < curr.keyCount) {
+            return exportEntry(curr, insertIdx);
+        }
+        if (curr.next != null) {
+            return exportEntry(curr.next, 0);
+        }
+        return null;
+    }
+
+    @Override
+    public Map.Entry<K, V> floorEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+        int idx = searchNodeMap(curr, key);
+        if (idx >= 0) {
+            return exportEntry(curr, idx);
+        }
+
+        int insertIdx = ~idx;
+
+        if (insertIdx > 0) {
+            return exportEntry(curr, insertIdx - 1);
+        }
+
+        if (curr.prev != null) {
+            return exportEntry(curr.prev, curr.prev.keyCount - 1);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Map.Entry<K, V> higherEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+
+        int idx = searchNodeMap(curr, key);
+        int targetIdx = (idx >= 0) ? idx + 1 : ~idx;
+
+        if (targetIdx < curr.keyCount) {
+            return exportEntry(curr, targetIdx);
+        }
+        if (curr.next != null) {
+            return exportEntry(curr.next, 0);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Map.Entry<K, V> lowerEntry(K key) {
+        if (root == null) return null;
+        BPlusTreeMapNode<K, V> curr = root;
+
+        while (!curr.isLeaf()) {
+            int idx = searchNodeMap(curr, key);
+            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+            curr = curr.child[childIdx];
+        }
+
+        int idx = searchNodeMap(curr, key);
+        int targetIdx = (idx >= 0) ? idx - 1 : ~idx - 1;
+
+        if (targetIdx >= 0) {
+            return exportEntry(curr, targetIdx);
+        }
+        if (curr.prev != null) {
+            return exportEntry(curr.prev, curr.prev.keyCount - 1);
+        }
+
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean containsValue(Object value) {
+        if (root == null) return false;
+        BPlusTreeMapNode<K, V> curr = root;
+        while (!curr.isLeaf()) curr = curr.child[0];
+        while (curr != null) {
+            if (searchNodeMapValue(curr, (V) value) >= 0) return true;
+            curr = curr.next;
+        }
+        return false;
+    }
+
+    @Override
+    protected Iterator<Map.Entry<K, V>> entryIterator(K fromKey, boolean fromInclusive) {
+        return new BPlusTreeIterator(fromKey, fromInclusive);
+    }
+
+    @Override
+    protected Iterator<Map.Entry<K, V>> descendingEntryIterator(K fromKey, boolean fromInclusive) {
+        return new BPlusTreeReverseIterator(fromKey, fromInclusive);
+    }
+
+    private final class BPlusTreeIterator implements Iterator<Map.Entry<K, V>> {
+        private long expectedModCount;
+        private BPlusTreeMapNode<K, V> currentLeaf;
+        private int currentIndex;
+
+        BPlusTreeIterator(K startKey, boolean startInclusive) {
+            this.expectedModCount = modCount;
+
+            if (root == null) {
+                this.currentLeaf = null;
+                return;
+            }
+
+            if (startKey == null) {
+                BPlusTreeMapNode<K, V> curr = root;
+                while (!curr.isLeaf()) curr = curr.child[0];
+                this.currentLeaf = curr;
+                this.currentIndex = 0;
+            } else {
+                BPlusTreeMapNode<K, V> curr = root;
+                while (!curr.isLeaf()) {
+                    int idx = searchNodeMap(curr, startKey);
+                    curr = curr.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+
+                int idx = searchNodeMap(curr, startKey);
+                if (idx >= 0) {
+                    this.currentIndex = startInclusive ? idx : idx + 1;
+                } else {
+                    this.currentIndex = ~idx;
+                }
+
+                this.currentLeaf = curr;
+                if (this.currentIndex >= this.currentLeaf.keyCount) {
+                    this.currentLeaf = this.currentLeaf.next;
+                    this.currentIndex = 0;
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            return currentLeaf != null && currentIndex < currentLeaf.keyCount;
+        }
+
+        private Map.Entry<K,V> lastReturned = null;
+        @Override
+        public Map.Entry<K, V> next() {
+            if (modCount != expectedModCount) {
+                throw new ConcurrentModificationException();
+            }
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            Map.Entry<K, V> entry = new ChaosEntry(currentLeaf, currentIndex);
+            lastReturned = entry;
+            currentIndex++;
+            if (currentIndex >= currentLeaf.keyCount) {
+                currentLeaf = currentLeaf.next;
+                currentIndex = 0;
+            }
+            return entry;
+        }
+        @Override
+        public void remove() {
+            if (lastReturned == null) throw new IllegalStateException();
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
+            K keyToRemove = lastReturned.getKey();
+            Map.Entry<K, V> nextTarget = higherEntry(keyToRemove);
+            BPlusTreeMap.this.remove(keyToRemove);
+            expectedModCount = modCount;
+            lastReturned = null;
+            if (nextTarget == null) {
+                currentLeaf = null;
+            } else {
+                BPlusTreeMapNode<K, V> curr = root;
+                while (!curr.isLeaf()) {
+                    int idx = searchNodeMap(curr, nextTarget.getKey());
+                    curr = curr.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+                currentLeaf = curr;
+                currentIndex = searchNodeMap(curr, nextTarget.getKey());
+            }
+        }
+
+    }
+
+    private final class BPlusTreeReverseIterator implements Iterator<Map.Entry<K, V>> {
+        private long expectedModCount;
+        private BPlusTreeMapNode<K, V> currentLeaf;
+        private int currentIndex;
+
+        BPlusTreeReverseIterator(K startKey, boolean startInclusive) {
+            this.expectedModCount = modCount;
+            if (root == null) return;
+
+            if (startKey == null) {
+                BPlusTreeMapNode<K, V> curr = root;
+                while (!curr.isLeaf()) curr = curr.child[curr.keyCount];
+                this.currentLeaf = curr;
+                this.currentIndex = curr.keyCount - 1;
+            } else {
+                BPlusTreeMapNode<K, V> curr = root;
+                while (!curr.isLeaf()) {
+                    int idx = searchNodeMap(curr, startKey);
+                    curr = curr.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+
+                int idx = searchNodeMap(curr, startKey);
+                if (idx >= 0) {
+                    this.currentIndex = startInclusive ? idx : idx - 1;
+                } else {
+                    this.currentIndex = ~idx - 1;
+                }
+
+                this.currentLeaf = curr;
+                if (this.currentIndex < 0) {
+                    this.currentLeaf = this.currentLeaf.prev;
+                    if (this.currentLeaf != null) {
+                        this.currentIndex = this.currentLeaf.keyCount - 1;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            return currentLeaf != null && currentIndex >= 0;
+        }
+
+        Map.Entry<K,V> lastReturned = null;
+        @Override
+        public Map.Entry<K, V> next() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            if (!hasNext()) throw new NoSuchElementException();
+
+            Map.Entry<K, V> entry = new ChaosEntry(currentLeaf, currentIndex);
+            lastReturned = entry;
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentLeaf = currentLeaf.prev;
+                if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
+            }
+            return entry;
+        }
+
+        @Override
+        public void remove() {
+            if (lastReturned == null) throw new IllegalStateException();
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
+            K keyToRemove = lastReturned.getKey();
+            Map.Entry<K, V> nextTarget = lowerEntry(keyToRemove);;
+            BPlusTreeMap.this.remove(keyToRemove);
+            expectedModCount = modCount;
+            lastReturned = null;
+            if (nextTarget == null) {
+                currentLeaf = null;
+            } else {
+                BPlusTreeMapNode<K, V> curr = root;
+                while (!curr.isLeaf()) {
+                    int idx = searchNodeMap(curr, nextTarget.getKey());
+                    curr = curr.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+                currentLeaf = curr;
+                currentIndex = searchNodeMap(curr, nextTarget.getKey());
+            }
+        }
+
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        Objects.requireNonNull(action);
+        long expectedModCount = modCount;
+
+        BPlusTreeMapNode<K, V> curr = root;
+        if (curr != null) {
+            while (!curr.isLeaf()) {
+                curr = curr.child[0];
+            }
+            while (curr != null) {
+                for (int i = 0; i < curr.keyCount; i++) {
+                    action.accept((K) curr.keys[i], (V) curr.values[i]);
+                }
+                curr = curr.next;
+            }
+        }
+        if (modCount != expectedModCount) {
+            throw new ConcurrentModificationException();
+        }
     }
 }

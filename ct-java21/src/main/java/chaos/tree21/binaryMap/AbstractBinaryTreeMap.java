@@ -144,8 +144,11 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             parent = current;
             cmp = compare(key, current.key);
             if (cmp == 0) {
-                return current.setValue(value);
-            } else if (cmp < 0) current = current.left;
+                V oldVal = current.value;
+                current.value = value;
+                return oldVal;
+            }
+            else if (cmp < 0) current = current.left;
             else current = current.right;
         }
         N newNode = createNode(key, value);
@@ -191,7 +194,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             if (cmp == 0) {
                 V oldValue = current.value;
                 if (oldValue == null) {
-                    current.setValue(value);
+                    current.value = value;
                 }
                 return oldValue;
             } else if (cmp < 0) current = current.left;
@@ -235,7 +238,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 }
                 V newValue = mappingFunction.apply(key);
                 if (newValue != null) {
-                    current.setValue(newValue);
+                    current.value = newValue;
                 }
                 return newValue;
             } else if (cmp < 0) current = current.left;
@@ -265,7 +268,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 if (oldValue != null) {
                     V newValue = remappingFunction.apply(key, oldValue);
                     if (newValue != null) {
-                        current.setValue(newValue);
+                        current.value = newValue;
                         return newValue;
                     } else {
                         remove(key);
@@ -307,7 +310,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 V oldValue = current.value;
                 V newValue = remappingFunction.apply(key, oldValue);
                 if (newValue != null) {
-                    current.setValue(newValue);
+                    current.value = newValue;
                     return newValue;
                 } else {
                     remove(key);
@@ -351,7 +354,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 V oldValue = current.value;
                 V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
                 if (newValue != null) {
-                    current.setValue(newValue);
+                    current.value = newValue;
                 } else {
                     remove(key);
                 }
@@ -1170,7 +1173,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return false;
         }
 
-        final boolean inRange(Object key) {
+        boolean inRange(Object key) {
             return !tooLow(key) && !tooHigh(key);
         }
 
@@ -1440,6 +1443,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                     }
                     return count;
                 }
+
                 @Override
                 @SuppressWarnings("unchecked")
                 public boolean contains(Object o) {
