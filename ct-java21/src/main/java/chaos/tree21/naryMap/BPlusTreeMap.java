@@ -721,7 +721,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
             K keyToRemove = lastReturned.getKey();
-            Map.Entry<K, V> nextTarget = higherEntry(keyToRemove);
+            Map.Entry<K, V> nextTarget = lowerEntry(keyToRemove);;
             BPlusTreeMap.this.remove(keyToRemove);
             expectedModCount = modCount;
             lastReturned = null;
