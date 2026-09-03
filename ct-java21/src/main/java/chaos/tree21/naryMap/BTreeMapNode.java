@@ -4,6 +4,6 @@ final class BTreeMapNode<K, V> extends AbstractNaryMapNode<K, V, BTreeMapNode<K,
 
     @SuppressWarnings("unchecked")
     public BTreeMapNode(int degree, boolean isLeaf) {
-        super(degree, isLeaf ? null : new BTreeMapNode[(degree << 1) + 1],isLeaf);
+        super(degree, isLeaf ? null : new BTreeMapNode[(degree << 1) + 1], isLeaf);
     }
 }
