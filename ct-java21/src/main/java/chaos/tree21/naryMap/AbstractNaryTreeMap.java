@@ -276,6 +276,8 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         return e == null ? null : e.getKey();
     }
 
+
+
     protected abstract Iterator<Map.Entry<K, V>> entryIterator(K fromKey, boolean fromInclusive);
 
     protected abstract Iterator<Map.Entry<K, V>> descendingEntryIterator(K fromKey, boolean fromInclusive);
@@ -532,7 +534,6 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry<?, ?> e)) return false;
             Object key = e.getKey();
-            int idx = -1;
             return Objects.equals(get(key), e.getValue()) && containsKey(key);
         }
 
@@ -588,19 +589,16 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public V remove(Object key) {
             return inRange(key) ? AbstractNaryTreeMap.this.remove(key) : null;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public boolean containsKey(Object key) {
             return inRange(key) && AbstractNaryTreeMap.this.containsKey(key);
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public V get(Object key) {
             return inRange(key) ? AbstractNaryTreeMap.this.get(key) : null;
         }
@@ -734,6 +732,10 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             Comparator<? super K> cmp = AbstractNaryTreeMap.this.comparator();
             return descending ? Collections.reverseOrder(cmp) : cmp;
         }
+        @Override
+        public NavigableSet<K> keySet() {
+            return navigableKeySet();
+        }
 
         @Override
         public NavigableSet<K> navigableKeySet() {
@@ -856,7 +858,7 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public Iterator<V> iterator() {
             final Iterator<Map.Entry<K, V>> it = entryIterator(null, true);
-            return new Iterator<V>() {
+            return new Iterator<>() {
                 @Override
                 public boolean hasNext() {
                     return it.hasNext();
@@ -865,6 +867,10 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                 @Override
                 public V next() {
                     return it.next().getValue();
+                }
+                @Override
+                public void remove() {
+                    it.remove();
                 }
             };
         }
@@ -890,7 +896,7 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public Iterator<K> iterator() {
             final Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
-            return new Iterator<K>() {
+            return new Iterator<>() {
                 @Override
                 public boolean hasNext() {
                     return it.hasNext();
@@ -900,12 +906,17 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                 public K next() {
                     return it.next().getKey();
                 }
+
+                @Override
+                public void remove() {
+                    it.remove();
+                }
             };
         }
 
         @Override
         public Comparator<? super K> comparator() {
-            return AbstractNaryTreeMap.this.comparator;
+            return map.comparator();
         }
 
         @Override
@@ -924,8 +935,9 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public boolean contains(Object o) {
-            return map.containsKey(o);
+            return map.containsKey((K)o);
         }
 
         @Override
@@ -1004,6 +1016,7 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         public K last() {
             return map.lastKey();
         }
+
     }
 
     private final class DescendingMapFacade extends AbstractMap<K, V> implements NavigableMap<K, V> {
@@ -1096,6 +1109,9 @@ sealed abstract class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                     return AbstractNaryTreeMap.this.size();
                 }
             };
+        }
+        public NavigableSet<K> keySet() {
+            return navigableKeySet();
         }
 
         @Override
