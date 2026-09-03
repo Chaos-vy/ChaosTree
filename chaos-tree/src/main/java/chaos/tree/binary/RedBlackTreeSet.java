@@ -133,66 +133,71 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
 
     @Override
     public boolean remove(Object o) {
-        //I am approaching the same way as of AVL tree delete. Reference: CLRS or take the AVL tree.
-        if (isEmpty()) return false;
-        @SuppressWarnings("unchecked")
-        E val = (E) o;
-        RbtNode<E> x = nodeFinder(val);
-        if (x == null) return false;
+        if (root == null || o == null) return false;
+        try {
+            //I am approaching the same way as of AVL tree delete. Reference: CLRS or take the AVL tree.
+            if (isEmpty()) return false;
+            @SuppressWarnings("unchecked")
+            E val = (E) o;
+            RbtNode<E> x = nodeFinder(val);
+            if (x == null) return false;
 
-        if (x.left != null && x.right != null) {
-            RbtNode<E> successor = x.right;
-            while (successor.left != null) {
-                successor = successor.left;
+            if (x.left != null && x.right != null) {
+                RbtNode<E> successor = x.right;
+                while (successor.left != null) {
+                    successor = successor.left;
+                }
+                x.value = successor.value;
+                x = successor;
             }
-            x.value = successor.value;
-            x = successor;
-        }
 
-        //Guaranteed one child or none
-        RbtNode<E> node_replacer = x.left != null ? x.left : x.right;
-        boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
+            //Guaranteed one child or none
+            RbtNode<E> node_replacer = x.left != null ? x.left : x.right;
+            boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
 
-        if (node_replacer != null) {
-            node_replacer.parent = x.parent;
-            if (x.parent == null) {
-                root = node_replacer;
-            } else if (x == x.parent.left) {
-                x.parent.left = node_replacer;
+            if (node_replacer != null) {
+                node_replacer.parent = x.parent;
+                if (x.parent == null) {
+                    root = node_replacer;
+                } else if (x == x.parent.left) {
+                    x.parent.left = node_replacer;
+                } else {
+                    x.parent.right = node_replacer;
+                }
+
+                // If the deleted node was Black, the tree lost a black weight. Fix it!
+                if (deletedNodeWasBlack) {
+                    fixDoubleBlack(node_replacer);
+                }
+            } else if (x.parent == null) {
+                root = null; // The tree is now empty
             } else {
-                x.parent.right = node_replacer;
+                if (deletedNodeWasBlack) {
+                    fixDoubleBlack(x);
+                }
+
+                if (x == x.parent.left) {
+                    x.parent.left = null;
+                } else {
+                    x.parent.right = null;
+                }
+                x.parent = null;
             }
 
-            // If the deleted node was Black, the tree lost a black weight. Fix it!
-            if (deletedNodeWasBlack) {
-                fixDoubleBlack(node_replacer);
-            }
-        } else if (x.parent == null) {
-            root = null; // The tree is now empty
-        } else {
-            if (deletedNodeWasBlack) {
-                fixDoubleBlack(x);
-            }
-
-            if (x == x.parent.left) {
-                x.parent.left = null;
-            } else {
-                x.parent.right = null;
-            }
-            x.parent = null;
+            //just clearing GC but do I need let me guess
+            x.left = null; //since I already removed all attachment to x to reach to x
+            x.right = null; //JVM GC is smart enough it will collect in GC
+            x.parent = null; //Don't think JVM won't do. it will, even though it has reference
+            //L,R,P because x has become part of garbage.
+            /*
+            The lesson I got here we need to do because of iterator Stability
+            */
+            size--;
+            modCount++;
+            return true;
+        }catch (ClassCastException | NullPointerException e) {
+            return false;
         }
-
-        //just clearing GC but do I need let me guess
-        x.left = null; //since I already removed all attachment to x to reach to x
-        x.right = null; //JVM GC is smart enough it will collect in GC
-        x.parent = null; //Don't think JVM won't do. it will, even though it has reference
-        //L,R,P because x has become part of garbage.
-        /*
-        The lesson I got here we need to do because of iterator Stability
-        */
-        size--;
-        modCount++;
-        return true;
     }
 
     private boolean isBlack(RbtNode<E> node) {
