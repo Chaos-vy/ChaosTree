@@ -80,38 +80,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         return new BPlusTreeNode<>(degree, isLeaf);
     }
 
-    /*
-    Contributors here can track compaction ratio.
-    there must not be extensive branching or use of any such library
-    i.e, stack, hashmap or arrayList or custom array stack
-    Reason: The compaction ratio is directly dealing with remove and
-    I don't want any slowness of anything
-    -> I also feel ghost deletion is tip of iceberg in my engine which I can completely ignore.
-     it may be part of compaction and maybe not in the future.
-     */
-    private float getCompactionRatio() {
-        if (size == 0) return 0.0f;
-        return (float) chaosCompaction / size;
-    }
-
-    public boolean compactTree() {
-        // If the tree is heavily ghosted, I rebuild it from scratch!
-        if (getCompactionRatio() > 0.5f) {
-
-            // (Because it only walks the leaves, it completely ignores all internal ghosts!) I also assume the GC will be there
-            Iterator<E> cleanData = this.iterator();
-
-            // Swap of new one
-            BPlusTreeSet<E> newTree = new BPlusTreeSet<>(this.degree, this.comparator());
-            newTree.buildFromSorted(cleanData, 0.90f); // Pack to 90% it is hardcoded compaction from here
-            this.root = newTree.root;
-            this.chaosCompaction = 0;
-            this.size = newTree.size;
-            return true;
-        }
-        return false;
-    }
-
     void buildFromSorted(Iterator<E> it, float fillFactor) {
         int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
 
@@ -385,10 +353,8 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
         BPlusTreeNode<E> current = root;
         E e = (E) o;
-        E ghost = null;
         while (!current.isLeaf()) {
             int idx = searchNode(current, e);
-            ghost = (idx >= 0) ? (E) current.keys[idx] : ghost;
             int childIdx = (idx >= 0) ? idx + 1 : ~idx;
             current = current.child[childIdx];
         }
@@ -397,11 +363,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         int idx = searchNode(current, e);
         if (idx < 0) return false; // Key does not exist
 
-        // If I deleted the 0th index, it was likely acting as a routing key higher up!
-        // We leave the routing key alone (Ghost Delete) but flag the compaction engine!
-        if (ghost != null && compare(ghost, (E) current.keys[idx]) == 0) {
-            chaosCompaction++;
-        }
         /*
         GHOST DELETE IN THE LEAF
         means I do not go up traversing deleting the route key.
