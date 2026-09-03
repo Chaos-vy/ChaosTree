@@ -32,9 +32,9 @@ import java.util.Spliterators;
 sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> extends AbstractSet<E>
         implements SearchTreeSet<E>, Serializable, Cloneable permits BPlusTreeSet, BTreeSet {
 
-    protected transient final int degree;
-    protected transient final int maxKeys;
-    protected transient final int minKeys;
+    protected final int degree;
+    protected final int maxKeys;
+    protected final int minKeys;
     protected final Comparator<? super E> comparator;
     protected transient N root;
     protected transient int size;
@@ -300,6 +300,10 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         return sb.toString();
     }
 
+    private static final String RESET = "\u001B[0m";
+    private static final String KEY = "\u001B[1;38;2;255;193;7m";       // Gold
+    private static final String STRUCTURE = "\u001B[38;2;84;110;122m";         // Muted blue-gray
+
     private void buildString(StringBuilder sb, N node, String prefix, boolean isTail, Style style) {
         String lastBranch = (style == Style.UNICODE) ? "└── " : "\\-- ";
         String crossBranch = (style == Style.UNICODE) ? "├── " : "+-- ";
@@ -307,12 +311,16 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         sb.append(prefix).append(isTail ? lastBranch : crossBranch);
 
-        sb.append("[");
+        sb.append(STRUCTURE).append(prefix).append(isTail ? lastBranch : crossBranch).append(RESET);
+        sb.append(STRUCTURE).append("[").append(RESET);
+
         for (int i = 0; i < node.keyCount; i++) {
-            sb.append(node.keys[i]);
-            if (i < node.keyCount - 1) sb.append(", ");
+            sb.append(KEY).append(node.keys[i]).append(RESET);
+            if (i < node.keyCount - 1) {
+                sb.append(STRUCTURE).append(", ").append(RESET);
+            }
         }
-        sb.append("]\n");
+        sb.append(STRUCTURE).append("]").append(RESET).append("\n");
 
         if (!node.isLeaf()) {
             int numChildren = node.keyCount + 1;
