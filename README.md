@@ -2,6 +2,8 @@
 [![GitHub release](https://img.shields.io/github/v/release/Chaos-vy/ChaosTree)](https://github.com/Chaos-vy/ChaosTree/releases)
 [![License](https://img.shields.io/github/license/Chaos-vy/ChaosTree)](LICENSE)
 
+# REBUILDING PHASE!!
+
 # 🌳 ChaosTree: A Fast Java Search Tree Library
 
 **ChaosTree** is a highly optimized in-memory search tree library for Java.

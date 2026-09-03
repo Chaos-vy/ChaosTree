@@ -5,17 +5,14 @@
     <parent>
         <groupId>io.github.chaos-vy</groupId>
         <artifactId>chaos-tree-parent</artifactId>
-        <version>1.3.0</version>
+        <version>2.0.0</version>
     </parent>
     <artifactId>ct-benchmark</artifactId>
     <packaging>jar</packaging>
-<!--I do likely perform benchmark with jdk21 don't worry about test they have been arranged accordingly with jdk8 and jdk21 based.-->
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
     </properties>
-
     <dependencies>
-        <!-- Benchmarks against both cores! can be done by changing the dependency here-->
         <dependency>
             <groupId>io.github.chaos-vy</groupId>
             <artifactId>chaos-tree</artifactId>
@@ -24,26 +21,28 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
+            <version>1.37</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.37</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.openjdk.jmh</groupId>
                             <artifactId>jmh-generator-annprocess</artifactId>
-                            <version>${jmh.version}</version>
+                            <version>1.37</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -80,7 +79,6 @@
                     </execution>
                 </executions>
             </plugin>
-            
         </plugins>
     </build>
 </project>
