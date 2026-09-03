@@ -724,7 +724,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
         @Override
         public boolean hasNext() {
-            return currentNode != null && currentIndex < currentNode.keyCount;
+            return currentNode != null && currentIndex >= 0;
         }
         private Map.Entry<K, V> lastReturned = null;
 
@@ -745,7 +745,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
             K keyToRemove = lastReturned.getKey();
-            Map.Entry<K, V> nextTarget = higherEntry(keyToRemove);
+            Map.Entry<K, V> nextTarget = lowerEntry(keyToRemove);;
             BTreeMap.this.remove(keyToRemove);
             expectedModCount = modCount;
             lastReturned = null;
