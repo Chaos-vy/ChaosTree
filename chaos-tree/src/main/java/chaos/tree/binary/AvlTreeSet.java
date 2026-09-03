@@ -83,7 +83,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             //Just to be aware of optimization I need to add comment
             if (x.right != null && x.left != null) {
                 AvlNode<E> successor = x.right; // Yes I do delete by successor method
-                while (successor.left != null) { //becoz it's optimized for iterator purpose
+                while (successor.left != null) { //because it's optimized for iterator purpose
                     successor = successor.left;
                 }
                 x.value = successor.value;
@@ -126,7 +126,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             x.left = null; //since I already removed all attachment to x to reach to x
             x.right = null; //JVM GC is smart enough it will collect in GC
             x.parent = null; //Don't think JVM won't do. it will, even though it has reference
-            //L,R,P becoz x has become part of garbage.
+            //L,R,P because x has become part of garbage.
             /*
             The lesson I got here we need to do because iterator Stability
              */
