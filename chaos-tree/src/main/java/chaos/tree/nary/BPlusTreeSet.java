@@ -49,7 +49,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     /**
      * Constructs a ChaosTree using a configuration Builder.
      */
-    public BPlusTreeSet(Builder<E> builder) {
+    public BPlusTreeSet(BPlusTreeSet.Builder<E> builder) {
         super(builder.degree, builder.comparator);
 
         if (builder.flatArray != null) {
@@ -72,21 +72,30 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
         private Builder() {}
 
-        public static <E> Builder<E> degree(int degree) {
+        // Allows starting with defaults: BPlusTreeSet.newBuilder().build()
+        public static <E> BPlusTreeSet.Builder<E> newBuilder() {
+            return new BPlusTreeSet.Builder<>();
+        }
+
+        // Convenience start: BPlusTreeSet.Builder.degree(16).build()
+        public static <E> BPlusTreeSet.Builder<E> degree(int degree) {
+            return BPlusTreeSet.Builder.<E>newBuilder().setDegree(degree);
+        }
+
+        public BPlusTreeSet.Builder<E> setDegree(int degree) {
             if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
                 throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
             }
-            Builder<E> builder = new Builder<>();
-            builder.degree = degree;
-            return builder;
+            this.degree = degree;
+            return this;
         }
 
-        public Builder<E> comparator(Comparator<? super E> comparator) {
+        public BPlusTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
             this.comparator = comparator;
             return this;
         }
 
-        public Builder<E> factor(float factor) {
+        public BPlusTreeSet.Builder<E> factor(float factor) {
             if (factor < 0.5f || factor > 1.0f) {
                 throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
             }
@@ -94,22 +103,30 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             return this;
         }
 
-        public Builder<E> importFlatMatrix(Object[] flatArray) {
+        public BPlusTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
             this.flatArray = flatArray;
+            this.sortedIterator = null; // Clear others
+            this.collection = null;
             return this;
         }
 
-        public Builder<E> importSorted(Iterator<E> iterator) {
+        public BPlusTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
             this.sortedIterator = iterator;
+            this.flatArray = null;      // Clear others
+            this.collection = null;
             return this;
         }
 
-        public Builder<E> importCollection(Collection<? extends E> c) {
+        public BPlusTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
             this.collection = c;
+            this.flatArray = null;      // Clear others
+            this.sortedIterator = null;
             return this;
         }
-        public Builder<E> build() {
-            return this;
+
+        // Return the actual Set!
+        public BPlusTreeSet<E> build() {
+            return new BPlusTreeSet<>(this);
         }
     }
     /**
@@ -230,9 +247,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
+
         if (degree < 32) {
-            throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
+            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
         }
+
         if (fillFactor < 0.5f || fillFactor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
@@ -891,8 +910,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
             @SuppressWarnings("unchecked")
-            E nextTarget = (currentLeaf != null && currentIndex >= 0)
-                    ? (E) currentLeaf.keys[currentIndex] : null;
+            E nextTarget = (currentLeaf != null && currentIndex >= 0) ? (E) currentLeaf.keys[currentIndex] : null;
 
             BPlusTreeSet.this.remove(lastReturned);
             expectedModCount = modCount;

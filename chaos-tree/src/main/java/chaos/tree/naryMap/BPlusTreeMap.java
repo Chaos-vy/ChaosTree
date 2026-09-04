@@ -45,7 +45,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     /**
      * Constructs a ChaosTree using a configuration Builder.
      */
-    public BPlusTreeMap(BPlusTreeMap.Builder<K,V> builder) {
+    public BPlusTreeMap(BPlusTreeMap.Builder<K, V> builder) {
         super(builder.degree, builder.comparator);
 
         if (builder.flatMatrix != null) {
@@ -57,32 +57,39 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
     }
 
-    public static final class Builder<K,V> {
+    public static final class Builder<K, V> {
         private int degree = DEFAULT_DEGREE;
         private Comparator<? super K> comparator = null;
         private float factor = 0.9f;
 
         private Object[][] flatMatrix = null;
-        Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator= null;
+        private Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator = null;
         private Map<? extends K, ? extends V> map = null;
 
         private Builder() {}
 
-        public static <K,V> BPlusTreeMap.Builder<K,V> degree(int degree) {
+        public static <K, V> BPlusTreeMap.Builder<K, V> newBuilder() {
+            return new BPlusTreeMap.Builder<>();
+        }
+
+        public static <K, V> BPlusTreeMap.Builder<K, V> degree(int degree) {
+            return BPlusTreeMap.Builder.<K, V>newBuilder().setDegree(degree);
+        }
+
+        public BPlusTreeMap.Builder<K, V> setDegree(int degree) {
             if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
                 throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
             }
-            BPlusTreeMap.Builder<K,V> builder = new BPlusTreeMap.Builder<>();
-            builder.degree = degree;
-            return builder;
+            this.degree = degree;
+            return this;
         }
 
-        public BPlusTreeMap.Builder<K,V> comparator(Comparator<? super K> comparator) {
+        public BPlusTreeMap.Builder<K, V> comparator(Comparator<? super K> comparator) {
             this.comparator = comparator;
             return this;
         }
 
-        public BPlusTreeMap.Builder<K,V> factor(float factor) {
+        public BPlusTreeMap.Builder<K, V> factor(float factor) {
             if (factor < 0.5f || factor > 1.0f) {
                 throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
             }
@@ -90,22 +97,29 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             return this;
         }
 
-        public BPlusTreeMap.Builder<K,V> importFlatMatrix(Object[][] flatMatrix) {
+        public BPlusTreeMap.Builder<K, V> importFlatMatrix(Object[][] flatMatrix) {
             this.flatMatrix = flatMatrix;
+            this.sortedIterator = null;
+            this.map = null;
             return this;
         }
 
-        public BPlusTreeMap.Builder<K,V> importSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
+        public BPlusTreeMap.Builder<K, V> importSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
             this.sortedIterator = iterator;
+            this.flatMatrix = null;
+            this.map = null;
             return this;
         }
 
-        public BPlusTreeMap.Builder<K,V> importCollection(Map<? extends K, ? extends V> map) {
+        public BPlusTreeMap.Builder<K, V> importCollection(Map<? extends K, ? extends V> map) {
             this.map = map;
+            this.flatMatrix = null;
+            this.sortedIterator = null;
             return this;
         }
-        public BPlusTreeMap.Builder<K,V> build() {
-            return this;
+
+        public BPlusTreeMap<K, V> build() {
+            return new BPlusTreeMap<>(this);
         }
     }
 
@@ -562,7 +576,23 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
     @Override
     @SuppressWarnings("unchecked")
-    void importFlatMatrix(Object[][] blast, float factor) {
+    public void importFlatMatrix(Object[][] blast, float factor) {
+        if (blast == null || blast.length == 0) return;
+
+        if (blast.length < 2 || blast[0].length != blast[1].length) {
+            throw new IllegalArgumentException("Key and value size mismatch");
+        }
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+
+        if (degree < 32) {
+            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
+        }
+
+        if (factor < 0.5f || factor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
         Object[] inKeys = blast[0];
         Object[] inValues = blast[1];
         int totalSize = inKeys.length;

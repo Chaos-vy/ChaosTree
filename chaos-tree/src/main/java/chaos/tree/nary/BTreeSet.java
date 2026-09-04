@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
-    //TODO: Making a Builder fn
     /*
      Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
      */
@@ -69,13 +68,20 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
         private Builder() {}
 
+        public static <E> BTreeSet.Builder<E> newBuilder() {
+            return new BTreeSet.Builder<>();
+        }
+
         public static <E> BTreeSet.Builder<E> degree(int degree) {
+            return BTreeSet.Builder.<E>newBuilder().setDegree(degree);
+        }
+
+        public BTreeSet.Builder<E> setDegree(int degree) {
             if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
                 throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
             }
-            BTreeSet.Builder<E> builder = new BTreeSet.Builder<>();
-            builder.degree = degree;
-            return builder;
+            this.degree = degree;
+            return this;
         }
 
         public BTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
@@ -91,22 +97,28 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return this;
         }
 
-        public BTreeSet.Builder<E> importFlatMatrix(Object[] flatArray) {
+        public BTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
             this.flatArray = flatArray;
+            this.sortedIterator = null;
+            this.collection = null;
             return this;
         }
 
         public BTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
             this.sortedIterator = iterator;
+            this.flatArray = null;
+            this.collection = null;
             return this;
         }
 
         public BTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
             this.collection = c;
+            this.flatArray = null;
+            this.sortedIterator = null;
             return this;
         }
-        public BTreeSet.Builder<E> build() {
-            return this;
+        public BTreeSet<E> build() {
+            return new BTreeSet<>(this);
         }
     }
 
@@ -298,7 +310,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
-     * @param sortedArray An array providing strictly sorted elements.
+     * @param blast An array providing strictly sorted elements.
      * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
      *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
      *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
@@ -306,20 +318,22 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      *                    trigger massive split, merge, borrow, array shifting.
      *                    Hold the Chaos!!
      */
-    public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
+    public void importFlatMatrix(Object[] blast, float fillFactor) {
 
-        if (sortedArray == null || sortedArray.length == 0) return;
+        if (blast == null || blast.length == 0) return;
 
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
+
         if (degree < 32) {
-            throw new IllegalStateException("Bulk load only service for large chunks, degree must be greater than 32");
+            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
         }
+
         if (fillFactor < 0.5f || fillFactor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
-        buildFromSortedArray(sortedArray, fillFactor);
+        buildFromSortedArray(blast, fillFactor);
     }
 
     @SuppressWarnings("unchecked")

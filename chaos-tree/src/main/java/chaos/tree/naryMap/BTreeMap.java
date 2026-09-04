@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode<K, V>> {
@@ -41,7 +42,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     /**
      * Constructs a ChaosTree using a configuration Builder.
      */
-    public BTreeMap(BTreeMap.Builder<K,V> builder) {
+    public BTreeMap(BTreeMap.Builder<K, V> builder) {
         super(builder.degree, builder.comparator);
 
         if (builder.flatMatrix != null) {
@@ -53,32 +54,39 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         }
     }
 
-    public static final class Builder<K,V> {
+    public static final class Builder<K, V> {
         private int degree = DEFAULT_DEGREE;
         private Comparator<? super K> comparator = null;
         private float factor = 0.9f;
 
         private Object[][] flatMatrix = null;
-        Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator= null;
+        private Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator = null;
         private Map<? extends K, ? extends V> map = null;
 
         private Builder() {}
 
-        public static <K,V> BTreeMap.Builder<K,V> degree(int degree) {
+        public static <K, V> BTreeMap.Builder<K, V> newBuilder() {
+            return new BTreeMap.Builder<>();
+        }
+
+        public static <K, V> BTreeMap.Builder<K, V> degree(int degree) {
+            return BTreeMap.Builder.<K, V>newBuilder().setDegree(degree);
+        }
+
+        public BTreeMap.Builder<K, V> setDegree(int degree) {
             if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
                 throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
             }
-            BTreeMap.Builder<K,V> builder = new BTreeMap.Builder<>();
-            builder.degree = degree;
-            return builder;
+            this.degree = degree;
+            return this;
         }
 
-        public BTreeMap.Builder<K,V> comparator(Comparator<? super K> comparator) {
+        public BTreeMap.Builder<K, V> comparator(Comparator<? super K> comparator) {
             this.comparator = comparator;
             return this;
         }
 
-        public BTreeMap.Builder<K,V> factor(float factor) {
+        public BTreeMap.Builder<K, V> factor(float factor) {
             if (factor < 0.5f || factor > 1.0f) {
                 throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
             }
@@ -86,22 +94,29 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             return this;
         }
 
-        public BTreeMap.Builder<K,V> importFlatMatrix(Object[][] flatMatrix) {
+        public BTreeMap.Builder<K, V> importFlatMatrix(Object[][] flatMatrix) {
             this.flatMatrix = flatMatrix;
+            this.sortedIterator = null;
+            this.map = null;
             return this;
         }
 
-        public BTreeMap.Builder<K,V> importSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
+        public BTreeMap.Builder<K, V> importSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
             this.sortedIterator = iterator;
+            this.flatMatrix = null;
+            this.map = null;
             return this;
         }
 
-        public BTreeMap.Builder<K,V> importCollection(Map<? extends K, ? extends V> map) {
+        public BTreeMap.Builder<K, V> importCollection(Map<? extends K, ? extends V> map) {
             this.map = map;
+            this.flatMatrix = null;
+            this.sortedIterator = null;
             return this;
         }
-        public BTreeMap.Builder<K,V> build() {
-            return this;
+
+        public BTreeMap<K, V> build() {
+            return new BTreeMap<>(this);
         }
     }
 
@@ -276,9 +291,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
     @Override
     @SuppressWarnings("unchecked")
-    public V merge(K key, V value, java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-        java.util.Objects.requireNonNull(remappingFunction);
-        java.util.Objects.requireNonNull(value);
+    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        Objects.requireNonNull(value);
         if (key == null) throw new NullPointerException();
 
         if (root == null) {
@@ -561,7 +576,23 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     }
 
     @SuppressWarnings("unchecked")
-    void importFlatMatrix(Object[][] blast, float factor) {
+    public void importFlatMatrix(Object[][] blast, float factor) {
+        if (blast == null || blast.length == 0) return;
+
+        if (blast.length < 2 || blast[0].length != blast[1].length) {
+            throw new IllegalArgumentException("Key and value size mismatch");
+        }
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+
+        if (degree < 32) {
+            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
+        }
+
+        if (factor < 0.5f || factor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
         Object[] inKeys = blast[0];
         Object[] inValues = blast[1];
         int totalSize = inKeys.length;
