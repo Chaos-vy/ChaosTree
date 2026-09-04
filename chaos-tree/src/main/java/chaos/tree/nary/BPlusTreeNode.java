@@ -8,6 +8,6 @@ final class BPlusTreeNode<E> extends AbstractNaryNode<E, BPlusTreeNode<E>> {
 
     @SuppressWarnings("unchecked")
     public BPlusTreeNode(int degree, boolean isLeaf) {
-        super(degree, isLeaf, isLeaf ? null : new BPlusTreeNode[(degree << 1) + 1]);
+        super(degree, isLeaf ? null : new BPlusTreeNode[(degree << 1) + 1]);
     }
 }
