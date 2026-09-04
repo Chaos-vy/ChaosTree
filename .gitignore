@@ -64,3 +64,4 @@ secrets/
 .Trashes
 ehthumbs.db
 Thumbs.db
+.jqwik-database

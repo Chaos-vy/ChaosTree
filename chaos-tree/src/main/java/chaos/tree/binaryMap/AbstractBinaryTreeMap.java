@@ -577,6 +577,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 }
 
                 @Override
+                @SuppressWarnings("unchecked")
                 public boolean contains(Object o) {
                     if (!(o instanceof Map.Entry<?, ?> e)) return false;
                     N node = nodeFinder((K) e.getKey());
