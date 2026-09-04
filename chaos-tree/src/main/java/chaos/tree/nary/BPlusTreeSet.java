@@ -158,8 +158,8 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
      *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
      *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
-     *                    have it 1.0f but after that any insert or remove information will
-     *                    trigger massive split, merge, borrow, array shifting.
+     *                    have it 1.0f but after that any insert will
+     *                    trigger massive split, and new creation of node.
      *                    Hold the Chaos!!
      */
     public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
@@ -349,10 +349,18 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
-        if (root == null) return false;
+        if (root == null || o == null) return false;
+        E e;
+        try {
+            @SuppressWarnings("unchecked")
+            E temp = (E) o;
+            e = temp;
+            compare(e, e);
+        } catch (ClassCastException | NullPointerException ex) {
+            return false;
+        }
 
         BPlusTreeNode<E> current = root;
-        E e = (E) o;
         while (!current.isLeaf()) {
             int idx = searchNode(current, e);
             int childIdx = (idx >= 0) ? idx + 1 : ~idx;
@@ -508,16 +516,23 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
     @Override
     public boolean contains(Object o) {
-        @SuppressWarnings("unchecked")
-        E val = (E) o;
-        BPlusTreeNode<E> current = root;
-        while (current != null) {
-            int idx = searchNode(current, val);
-            if (current.isLeaf()) return idx >= 0;
-            int childIdx = (idx >= 0) ? idx + 1 : ~idx;
-            current = current.child[childIdx];
+        if(root == null || o == null){
+            return false;
         }
-        return false;
+        try {
+            @SuppressWarnings("unchecked")
+            E val = (E) o;
+            BPlusTreeNode<E> current = root;
+            while (current != null) {
+                int idx = searchNode(current, val);
+                if (current.isLeaf()) return idx >= 0;
+                int childIdx = (idx >= 0) ? idx + 1 : ~idx;
+                current = current.child[childIdx];
+            }
+            return false;
+        } catch (ClassCastException e) {
+            return false;
+        }
     }
 
     @Override

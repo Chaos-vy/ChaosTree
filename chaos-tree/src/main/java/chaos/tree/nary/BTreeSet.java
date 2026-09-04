@@ -477,12 +477,20 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
-        if (root == null) return false;
+        if (root == null || o == null) return false;
+        E e;
+        try {
+            @SuppressWarnings("unchecked")
+            E temp = (E) o;
+            e = temp;
+            compare(e, e);
+        } catch (ClassCastException | NullPointerException ex) {
+            return false;
+        }
 
         BTreeNode<E> current = root;
         int idx ;
 
-        E e = (E) o;
         while (true) {
             idx = searchNode(current, e);
             if (idx >= 0) break; // Found it!
