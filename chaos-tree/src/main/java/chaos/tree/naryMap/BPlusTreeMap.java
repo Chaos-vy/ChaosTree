@@ -1,6 +1,9 @@
 package chaos.tree.naryMap;
 
+import chaos.tree.nary.BPlusTreeSet;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -16,6 +19,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
     private static final int DEFAULT_DEGREE = 64;
 
+    // this was something that Guava testlib to be survived
     public BPlusTreeMap() {
         super(DEFAULT_DEGREE, null);
     }
@@ -33,8 +37,76 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         super(DEFAULT_DEGREE, null);
         buildFromSorted(m.entrySet().iterator(), 0.9f);
     }
+    // for simple playground
     public BPlusTreeMap(int degree){
         super(degree,null);
+    }
+
+    /**
+     * Constructs a ChaosTree using a configuration Builder.
+     */
+    public BPlusTreeMap(BPlusTreeMap.Builder<K,V> builder) {
+        super(builder.degree, builder.comparator);
+
+        if (builder.flatMatrix != null) {
+            importFlatMatrix(builder.flatMatrix, builder.factor);
+        } else if (builder.sortedIterator != null) {
+            buildFromSorted(builder.sortedIterator, builder.factor);
+        } else if (builder.map != null) {
+            putAll(builder.map);
+        }
+    }
+
+    public static final class Builder<K,V> {
+        private int degree = DEFAULT_DEGREE;
+        private Comparator<? super K> comparator = null;
+        private float factor = 0.9f;
+
+        private Object[][] flatMatrix = null;
+        Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator= null;
+        private Map<? extends K, ? extends V> map = null;
+
+        private Builder() {}
+
+        public static <K,V> BPlusTreeMap.Builder<K,V> degree(int degree) {
+            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            }
+            BPlusTreeMap.Builder<K,V> builder = new BPlusTreeMap.Builder<>();
+            builder.degree = degree;
+            return builder;
+        }
+
+        public BPlusTreeMap.Builder<K,V> comparator(Comparator<? super K> comparator) {
+            this.comparator = comparator;
+            return this;
+        }
+
+        public BPlusTreeMap.Builder<K,V> factor(float factor) {
+            if (factor < 0.5f || factor > 1.0f) {
+                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+            }
+            this.factor = factor;
+            return this;
+        }
+
+        public BPlusTreeMap.Builder<K,V> importFlatMatrix(Object[][] flatMatrix) {
+            this.flatMatrix = flatMatrix;
+            return this;
+        }
+
+        public BPlusTreeMap.Builder<K,V> importSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
+            this.sortedIterator = iterator;
+            return this;
+        }
+
+        public BPlusTreeMap.Builder<K,V> importCollection(Map<? extends K, ? extends V> map) {
+            this.map = map;
+            return this;
+        }
+        public BPlusTreeMap.Builder<K,V> build() {
+            return this;
+        }
     }
 
     @Override
@@ -490,7 +562,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
     @Override
     @SuppressWarnings("unchecked")
-    void buildFromSortedArrays(Object[][] blast, float factor) {
+    void importFlatMatrix(Object[][] blast, float factor) {
         Object[] inKeys = blast[0];
         Object[] inValues = blast[1];
         int totalSize = inKeys.length;
@@ -923,5 +995,27 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         if (modCount != expectedModCount) {
             throw new ConcurrentModificationException();
         }
+    }
+
+    public Object[][] exportFlatMatrix() {
+        Object[] keys = new Object[size];
+        Object[] values = new Object[size];
+        if (size == 0 || root == null) return new Object[][]{keys, values};
+
+        BPlusTreeMapNode<K, V> current = root;
+        while (!current.isLeaf()) {
+            current = current.child[0];
+        }
+
+        int offset = 0;
+        while (current != null) {
+            // Blast both arrays simultaneously
+            System.arraycopy(current.keys, 0, keys, offset, current.keyCount);
+            System.arraycopy(current.values, 0, values, offset, current.keyCount);
+            offset += current.keyCount;
+            current = current.next;
+        }
+
+        return new Object[][]{keys, values};
     }
 }
