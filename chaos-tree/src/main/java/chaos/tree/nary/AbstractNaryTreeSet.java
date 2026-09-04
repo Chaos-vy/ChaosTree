@@ -20,14 +20,11 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.Spliterator;
-import java.util.Spliterators;
-
 
 /**
  * Base Engine for B-Tree and B+Tree variants.
- * And also B-Tree* and B+Tree* variants
  * Fuses CLRS node arithmetic with Lehman & Yao concurrent/bottom-up memory layout.
+ * The add and remove and build from sorted is played by concrete classes.
  */
 sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> extends AbstractSet<E>
         implements SearchTreeSet<E>, Serializable, Cloneable permits BPlusTreeSet, BTreeSet {
@@ -40,6 +37,9 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     protected transient int size;
     protected transient long modCount;
 
+    /*
+    Here You just need to know that this is just a boundary I created for CLRS system.
+     */
     protected AbstractNaryTreeSet(int degree, Comparator<? super E> comparator) {
         this.comparator = comparator;
         if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
@@ -67,6 +67,10 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     abstract N createNode(int degree, boolean isLeaf);
 
+    /*
+    This needed to be put in ADR as well might be no or yes
+    TODO: ADR of this
+     */
     @SuppressWarnings("unchecked")
     protected int searchNode(N node, E key) {
         if (node.keyCount < 12) { //actually faster.
@@ -100,16 +104,21 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Override
     public boolean contains(Object o) {
-        @SuppressWarnings("unchecked")
-        E val = (E) o;
-        N current = root;
-        while (current != null) {
-            int idx = searchNode(current, val);
-            if (idx >= 0) return true;
-            if (current.isLeaf()) return false;
-            current = current.child[~idx];
+        if (root == null || o == null) return false;
+        try {
+            @SuppressWarnings("unchecked")
+            E val = (E) o;
+            N current = root;
+            while (current != null) {
+                int idx = searchNode(current, val);
+                if (idx >= 0) return true;
+                if (current.isLeaf()) return false;
+                current = current.child[~idx];
+            }
+            return false;
+        } catch (ClassCastException | NullPointerException e) {
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -178,10 +187,8 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         throw new UnsupportedOperationException("Cannot force addLast on a mathematically sorted tree.");
     }
 
-    @Override
-    public Spliterator<E> spliterator() {
-        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
-    }
+    protected abstract Iterator<E> baseIterator(E startKey, boolean startInclusive);
+    protected abstract Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -369,7 +376,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         return new NarySubSet(null, true, null, true, true);
     }
 
-    private final class NarySubSet extends AbstractSet<E> implements NavigableSet<E> {
+    private final class NarySubSet extends AbstractSet<E> implements NavigableSet<E>, Serializable {
         private final E lo;
         private final boolean loInclusive;
         private final E hi;
@@ -429,14 +436,24 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public boolean contains(Object o) {
-            @SuppressWarnings("unchecked") E e = (E) o;
-            return inRange(e) && AbstractNaryTreeSet.this.contains(e);
+            if (o == null) return false;
+            try {
+                @SuppressWarnings("unchecked") E e = (E) o;
+                return inRange(e) && AbstractNaryTreeSet.this.contains(e);
+            } catch (ClassCastException | NullPointerException ex) {
+                return false;
+            }
         }
 
         @Override
         public boolean remove(Object o) {
-            @SuppressWarnings("unchecked") E e = (E) o;
-            return inRange(e) && AbstractNaryTreeSet.this.remove(e);
+            if (o == null) return false;
+            try {
+                @SuppressWarnings("unchecked") E e = (E) o;
+                return inRange(e) && AbstractNaryTreeSet.this.remove(e);
+            } catch (ClassCastException | NullPointerException ex) {
+                return false;
+            }
         }
 
         private E getAbsLowest() {
@@ -592,56 +609,126 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public Iterator<E> iterator() {
-            return new SubSetIterator(false);
+            return descending ? descendingIteratorImpl() : ascendingIteratorImpl();
         }
 
         @Override
         public Iterator<E> descendingIterator() {
-            return new SubSetIterator(true);
+            return descending ? ascendingIteratorImpl() : descendingIteratorImpl();
         }
 
-        private class SubSetIterator implements Iterator<E> {
-            private final boolean iterateDescending;
-            private long expectedModCount = AbstractNaryTreeSet.this.modCount;
-            private E nextElement;
-            private E lastReturned = null;
+        private Iterator<E> ascendingIteratorImpl() {
+            return new Iterator<>() {
+                private Iterator<E> backingIt = baseIterator(lo, loInclusive);
+                private E nextElement = null;
+                private E lastReturned = null;
+                private long expectedModCount = AbstractNaryTreeSet.this.modCount;
 
-            SubSetIterator(boolean reverseCall) {
-                // If the map is already descending, and we ask for reverse, it goes forward!
-                this.iterateDescending = (descending != reverseCall);
-                nextElement = this.iterateDescending ? getAbsHighest() : getAbsLowest();
-            }
+                { advance(); }
 
-            @Override
-            public boolean hasNext() {
-                return nextElement != null;
-            }
-
-            @Override
-            public E next() {
-                if (expectedModCount != AbstractNaryTreeSet.this.modCount) throw new ConcurrentModificationException();
-                if (nextElement == null) throw new NoSuchElementException();
-
-                lastReturned = nextElement;
-                if (iterateDescending) {
-                    nextElement = AbstractNaryTreeSet.this.lower(lastReturned);
-                    if (nextElement != null && tooLow(nextElement)) nextElement = null;
-                } else {
-                    nextElement = AbstractNaryTreeSet.this.higher(lastReturned);
-                    if (nextElement != null && tooHigh(nextElement)) nextElement = null;
+                private void advance() {
+                    if (backingIt.hasNext()) {
+                        nextElement = backingIt.next();
+                        if (tooHigh(nextElement)) nextElement = null;
+                    } else {
+                        nextElement = null;
+                    }
                 }
-                return lastReturned;
-            }
 
-            @Override
-            public void remove() {
-                if (lastReturned == null) throw new IllegalStateException();
-                if (expectedModCount != AbstractNaryTreeSet.this.modCount) throw new ConcurrentModificationException();
+                @Override
+                public boolean hasNext() {
+                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    return nextElement != null;
+                }
 
-                AbstractNaryTreeSet.this.remove(lastReturned);
-                expectedModCount = AbstractNaryTreeSet.this.modCount;
-                lastReturned = null;
-            }
+                @Override
+                public E next() {
+                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    if (nextElement == null) throw new NoSuchElementException();
+                    lastReturned = nextElement;
+                    advance();
+                    return lastReturned;
+                }
+
+                @Override
+                public void remove() {
+                    if (lastReturned == null) throw new IllegalStateException();
+                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
+                        throw new ConcurrentModificationException();
+                    }
+
+                    AbstractNaryTreeSet.this.remove(lastReturned);
+                    expectedModCount = AbstractNaryTreeSet.this.modCount;
+                    lastReturned = null;
+                    if (nextElement != null) {
+                        backingIt = baseIterator(nextElement, true);
+                        if (backingIt.hasNext()) {
+                            backingIt.next();
+                        }
+                    }
+                }
+            };
+        }
+
+        private Iterator<E> descendingIteratorImpl() {
+            return new Iterator<>() {
+                private Iterator<E> backingIt = baseDescendingIterator(hi, hiInclusive);
+                private E nextElement = null;
+                private E lastReturned = null;
+                private long expectedModCount = AbstractNaryTreeSet.this.modCount;
+
+                { advance(); }
+
+                private void advance() {
+                    if (backingIt.hasNext()) {
+                        nextElement = backingIt.next();
+                        if (tooLow(nextElement)) nextElement = null;
+                    } else {
+                        nextElement = null;
+                    }
+                }
+
+                @Override
+                public boolean hasNext() {
+                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    return nextElement != null;
+                }
+
+                @Override
+                public E next() {
+                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    if (nextElement == null) throw new NoSuchElementException();
+                    lastReturned = nextElement;
+                    advance();
+                    return lastReturned;
+                }
+
+                @Override
+                public void remove() {
+                    if (lastReturned == null) throw new IllegalStateException();
+                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
+                        throw new ConcurrentModificationException();
+                    }
+
+                    AbstractNaryTreeSet.this.remove(lastReturned);
+                    expectedModCount = AbstractNaryTreeSet.this.modCount;
+                    lastReturned = null;
+                    if (nextElement != null) {
+                        backingIt = baseDescendingIterator(nextElement, true);
+                        if (backingIt.hasNext()) {
+                            backingIt.next();
+                        }
+                    }
+                }
+            };
         }
     }
 }
