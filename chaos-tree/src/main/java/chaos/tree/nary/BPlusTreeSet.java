@@ -521,16 +521,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     }
 
     @Override
-    public Iterator<E> descendingIterator() {
-        return new BPlusTreeIterator(false);
-    }
-
-    @Override
-    public Iterator<E> iterator() {
-        return new BPlusTreeIterator(true);
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public E ceiling(E e) {
         if (root == null) return null;
@@ -661,72 +651,78 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         return a;
     }
 
-    private class BPlusTreeIterator implements Iterator<E> {
-        private final boolean ascending;
+    @Override
+    public Iterator<E> iterator() {
+        return baseIterator(null, true);
+    }
+
+    @Override
+    public Iterator<E> descendingIterator() {
+        return baseDescendingIterator(null, true);
+    }
+
+    @Override
+    protected Iterator<E> baseIterator(E startKey, boolean startInclusive) {
+        return new BPlusTreeIterator(startKey, startInclusive);
+    }
+
+    @Override
+    protected Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive) {
+        return new BPlusTreeReverseIterator(startKey, startInclusive);
+    }
+
+    private final class BPlusTreeIterator implements Iterator<E> {
         private BPlusTreeNode<E> currentLeaf;
         private int currentIndex;
         private long expectedModCount;
-
         private E lastReturned = null;
-        private E nextElement = null;
 
-        @SuppressWarnings("unchecked")
-        BPlusTreeIterator(boolean ascending) {
-            this.ascending = ascending;
+        BPlusTreeIterator(E startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
+            if (root == null) return;
 
-            if (root == null) {
-                currentLeaf = null;
-            } else if (ascending) {
+            if (startKey == null) {
                 currentLeaf = root;
                 while (!currentLeaf.isLeaf()) currentLeaf = currentLeaf.child[0];
                 currentIndex = 0;
             } else {
-                currentLeaf = root;
-                while (!currentLeaf.isLeaf()) currentLeaf = currentLeaf.child[currentLeaf.keyCount];
-                currentIndex = currentLeaf.keyCount - 1;
-            }
-
-            if (currentLeaf != null) {
-                nextElement = (E) currentLeaf.keys[currentIndex];
+                BPlusTreeNode<E> curr = root;
+                while (!curr.isLeaf()) {
+                    int idx = searchNode(curr, startKey);
+                    curr = curr.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+                int idx = searchNode(curr, startKey);
+                if (idx >= 0) {
+                    this.currentIndex = startInclusive ? idx : idx + 1;
+                } else {
+                    this.currentIndex = ~idx;
+                }
+                this.currentLeaf = curr;
+                if (this.currentIndex >= this.currentLeaf.keyCount) {
+                    this.currentLeaf = this.currentLeaf.next;
+                    this.currentIndex = 0;
+                }
             }
         }
 
         @Override
         public boolean hasNext() {
-            return currentLeaf != null;
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            return currentLeaf != null && currentIndex < currentLeaf.keyCount;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
-            if (modCount != expectedModCount) throw new ConcurrentModificationException();
-            if (currentLeaf == null) throw new NoSuchElementException();
+            if (!hasNext()) throw new NoSuchElementException();
 
             lastReturned = (E) currentLeaf.keys[currentIndex];
 
-            if (ascending) {
-                currentIndex++;
-                if (currentIndex >= currentLeaf.keyCount) {
-                    currentLeaf = currentLeaf.next;
-                    currentIndex = 0;
-                }
-            } else {
-                currentIndex--;
-                if (currentIndex < 0) {
-                    currentLeaf = currentLeaf.prev;
-                    if (currentLeaf != null) {
-                        currentIndex = currentLeaf.keyCount - 1;
-                    }
-                }
+            currentIndex++;
+            if (currentIndex >= currentLeaf.keyCount) {
+                currentLeaf = currentLeaf.next;
+                currentIndex = 0;
             }
-
-            if (currentLeaf != null) {
-                nextElement = (E) currentLeaf.keys[currentIndex];
-            } else {
-                nextElement = null;
-            }
-
             return lastReturned;
         }
 
@@ -735,19 +731,104 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (lastReturned == null) throw new IllegalStateException();
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
-            BPlusTreeSet.this.remove(lastReturned);
+            @SuppressWarnings("unchecked")
+            E nextTarget = (currentLeaf != null && currentIndex < currentLeaf.keyCount)
+                    ? (E) currentLeaf.keys[currentIndex] : null;
 
+            BPlusTreeSet.this.remove(lastReturned);
             expectedModCount = modCount;
             lastReturned = null;
 
-            if (nextElement != null) {
+            if (nextTarget != null) {
                 currentLeaf = root;
                 while (!currentLeaf.isLeaf()) {
-                    int idx = searchNode(currentLeaf, nextElement);
-                    int childIdx = (idx >= 0) ? idx + 1 : ~idx;
-                    currentLeaf = currentLeaf.child[childIdx];
+                    int idx = searchNode(currentLeaf, nextTarget);
+                    currentLeaf = currentLeaf.child[(idx >= 0) ? idx + 1 : ~idx];
                 }
-                currentIndex = searchNode(currentLeaf, nextElement);
+                currentIndex = searchNode(currentLeaf, nextTarget);
+            } else {
+                currentLeaf = null;
+            }
+        }
+    }
+
+    private final class BPlusTreeReverseIterator implements Iterator<E> {
+        private BPlusTreeNode<E> currentLeaf;
+        private int currentIndex;
+        private long expectedModCount;
+        private E lastReturned = null;
+
+        BPlusTreeReverseIterator(E startKey, boolean startInclusive) {
+            this.expectedModCount = modCount;
+            if (root == null) return;
+
+            if (startKey == null) {
+                currentLeaf = root;
+                while (!currentLeaf.isLeaf()) currentLeaf = currentLeaf.child[currentLeaf.keyCount];
+                currentIndex = currentLeaf.keyCount - 1;
+            } else {
+                BPlusTreeNode<E> curr = root;
+                while (!curr.isLeaf()) {
+                    int idx = searchNode(curr, startKey);
+                    curr = curr.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+                int idx = searchNode(curr, startKey);
+                if (idx >= 0) {
+                    this.currentIndex = startInclusive ? idx : idx - 1;
+                } else {
+                    this.currentIndex = ~idx - 1;
+                }
+                this.currentLeaf = curr;
+                if (this.currentIndex < 0) {
+                    this.currentLeaf = this.currentLeaf.prev;
+                    if (this.currentLeaf != null) {
+                        this.currentIndex = this.currentLeaf.keyCount - 1;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            return currentLeaf != null && currentIndex >= 0;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public E next() {
+            if (!hasNext()) throw new NoSuchElementException();
+
+            lastReturned = (E) currentLeaf.keys[currentIndex];
+
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentLeaf = currentLeaf.prev;
+                if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
+            }
+            return lastReturned;
+        }
+
+        @Override
+        public void remove() {
+            if (lastReturned == null) throw new IllegalStateException();
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
+            @SuppressWarnings("unchecked")
+            E nextTarget = (currentLeaf != null && currentIndex >= 0)
+                    ? (E) currentLeaf.keys[currentIndex] : null;
+
+            BPlusTreeSet.this.remove(lastReturned);
+            expectedModCount = modCount;
+            lastReturned = null;
+
+            if (nextTarget != null) {
+                currentLeaf = root;
+                while (!currentLeaf.isLeaf()) {
+                    int idx = searchNode(currentLeaf, nextTarget);
+                    currentLeaf = currentLeaf.child[(idx >= 0) ? idx + 1 : ~idx];
+                }
+                currentIndex = searchNode(currentLeaf, nextTarget);
             } else {
                 currentLeaf = null;
             }

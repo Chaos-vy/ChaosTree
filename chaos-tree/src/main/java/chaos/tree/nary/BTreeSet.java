@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
-    //TODO: Making a Buider fn
+    //TODO: Making a Builder fn
     /*
      Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
      */
@@ -80,7 +80,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      * I am experimenting with a "wavy-curve" style construction pattern
      * observed while studying SQLite and visualizing the structure myself.
      * I will document the final decisions separately in an ADR as well.
-     * Well SQLite idea was taken I never read any such code. The explaination
+     * Well SQLite idea was taken I never read any such code. The explanation
      * part was done by Jenny's lecture and CLRS book. But the curiosity of making
      * it from sorted data was seen from Official JDK source code. By seeing that
      * the tree now supports clone and Serializable.
@@ -255,11 +255,11 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         buildFromSortedArray(sortedArray, fillFactor);
     }
 
-    private void buildFromSortedArray(Object[] sortedArray, float fillfactor) {
+    @SuppressWarnings("unchecked")
+    private void buildFromSortedArray(Object[] sortedArray, float fillFactor) {
         int maxKeys = (degree << 1) - 1;
-        int targetKeys = Math.max(1, (int) (maxKeys * fillfactor));
+        int targetKeys = Math.max(1, (int) (maxKeys * fillFactor));
 
-        @SuppressWarnings("unchecked")
         BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
         rightEdge[0] = new BTreeNode<>(degree, true);
         this.root = rightEdge[0];
@@ -480,7 +480,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         if (root == null) return false;
 
         BTreeNode<E> current = root;
-        int idx = -1;
+        int idx ;
 
         E e = (E) o;
         while (true) {
@@ -575,15 +575,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         parent.keyCount--;
     }
 
-    @Override
-    public Iterator<E> iterator() {
-        return new BTreeIterator(true);
-    }
-
-    @Override
-    public Iterator<E> descendingIterator() {
-        return new BTreeIterator(false);
-    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -719,65 +710,139 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         }
     }
 
-    private class BTreeIterator implements Iterator<E> {
-        private final boolean ascending;
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        if (size == 0 || root == null) return array;
+        populateArray(root, array, 0);
+        return array;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] a) {
+        if (a.length < size) {
+            a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+        }
+        if (size == 0 || root == null) {
+            if (a.length > size) a[size] = null;
+            return a;
+        }
+        populateArray(root, a, 0);
+        if (a.length > size) a[size] = null;
+        return a;
+    }
+
+
+    private int populateArray(BTreeNode<E> node, Object[] array, int offset) {
+        if (node.isLeaf()) {
+            System.arraycopy(node.keys, 0, array, offset, node.keyCount);
+            return offset + node.keyCount;
+        } else {
+            for (int i = 0; i < node.keyCount; i++) {
+                offset = populateArray(node.child[i], array, offset);
+                array[offset++] = node.keys[i];
+            }
+            return populateArray(node.child[node.keyCount], array, offset);
+        }
+    }
+    @Override
+    public Iterator<E> iterator() {
+        return baseIterator(null, true);
+    }
+
+    @Override
+    public Iterator<E> descendingIterator() {
+        return baseDescendingIterator(null, true);
+    }
+
+    @Override
+    protected Iterator<E> baseIterator(E startKey, boolean startInclusive) {
+        return new BTreeIterator(startKey, startInclusive);
+    }
+
+    @Override
+    protected Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive) {
+        return new BTreeReverseIterator(startKey, startInclusive);
+    }
+
+    private final class BTreeIterator implements Iterator<E> {
         private BTreeNode<E> currentNode;
         private int currentIndex;
         private long expectedModCount;
-
         private E lastReturned = null;
-        private E nextElement = null;
 
-        @SuppressWarnings("unchecked")
-        BTreeIterator(boolean ascending) {
-            this.ascending = ascending;
+        BTreeIterator(E startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
+            if (root == null) return;
 
-            if (root == null) {
-                currentNode = null;
-            } else if (ascending) {
+            if (startKey == null) {
                 currentNode = root;
                 while (!currentNode.isLeaf()) currentNode = currentNode.child[0];
                 currentIndex = 0;
             } else {
-                currentNode = root;
-                while (!currentNode.isLeaf()) currentNode = currentNode.child[currentNode.keyCount];
-                currentIndex = currentNode.keyCount - 1;
-            }
+                BTreeNode<E> curr = root;
+                BTreeNode<E> bestNode = null;
+                int bestIdx = -1;
 
-            if (currentNode != null) nextElement = (E) currentNode.keys[currentIndex];
+                while (curr != null) {
+                    int idx = searchNode(curr, startKey);
+                    if (idx >= 0) {
+                        if (startInclusive) {
+                            bestNode = curr;
+                            bestIdx = idx;
+                            break;
+                        } else {
+                            if (!curr.isLeaf()) {
+                                curr = curr.child[idx + 1];
+                                while (!curr.isLeaf()) curr = curr.child[0];
+                                bestNode = curr;
+                                bestIdx = 0;
+                            } else if (idx + 1 < curr.keyCount) {
+                                bestNode = curr;
+                                bestIdx = idx + 1;
+                            }
+                            break;
+                        }
+                    }
+                    int insertIdx = ~idx;
+                    if (insertIdx < curr.keyCount) {
+                        bestNode = curr;
+                        bestIdx = insertIdx;
+                    }
+                    curr = curr.isLeaf() ? null : curr.child[insertIdx];
+                }
+                this.currentNode = bestNode;
+                this.currentIndex = bestIdx;
+            }
         }
 
         @Override
         public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
-            if (modCount != expectedModCount) throw new ConcurrentModificationException();
-            if (currentNode == null) throw new NoSuchElementException();
-
+            if (!hasNext()) throw new NoSuchElementException();
             lastReturned = (E) currentNode.keys[currentIndex];
 
-            if (ascending) {
-                if (!currentNode.isLeaf()) {
-                    currentNode = currentNode.child[currentIndex + 1];
-                    while (!currentNode.isLeaf()) currentNode = currentNode.child[0];
-                    currentIndex = 0;
-                } else if (currentIndex + 1 < currentNode.keyCount) {
-                    currentIndex++;
-                } else {
+            if (!currentNode.isLeaf()) {
+                currentNode = currentNode.child[currentIndex + 1];
+                while (!currentNode.isLeaf()) currentNode = currentNode.child[0];
+                currentIndex = 0;
+            } else {
+                currentIndex++;
+                if (currentIndex >= currentNode.keyCount) {
                     BTreeNode<E> parent = currentNode.parent;
                     int childIdx = findChildIndex(parent, currentNode);
-
                     while (parent != null && childIdx == parent.keyCount) {
                         currentNode = parent;
                         parent = currentNode.parent;
                         childIdx = findChildIndex(parent, currentNode);
                     }
-
                     if (parent != null) {
                         currentNode = parent;
                         currentIndex = childIdx;
@@ -785,35 +850,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                         currentNode = null;
                     }
                 }
-            } else {
-                if (!currentNode.isLeaf()) {
-                    currentNode = currentNode.child[currentIndex];
-                    while (!currentNode.isLeaf()) currentNode = currentNode.child[currentNode.keyCount];
-                    currentIndex = currentNode.keyCount - 1;
-                } else if (currentIndex - 1 >= 0) {
-                    currentIndex--;
-                } else {
-                    BTreeNode<E> parent = currentNode.parent;
-                    int childIdx = findChildIndex(parent, currentNode);
-
-                    while (parent != null && childIdx == 0) {
-                        currentNode = parent;
-                        parent = currentNode.parent;
-                        childIdx = findChildIndex(parent, currentNode);
-                    }
-
-                    if (parent != null) {
-                        currentNode = parent;
-                        currentIndex = childIdx - 1;
-                    } else {
-                        currentNode = null;
-                    }
-                }
             }
-
-            if (currentNode != null) nextElement = (E) currentNode.keys[currentIndex];
-            else nextElement = null;
-
             return lastReturned;
         }
 
@@ -822,32 +859,138 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             if (lastReturned == null) throw new IllegalStateException();
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
+            E nextTarget = higher(lastReturned);
             BTreeSet.this.remove(lastReturned);
-
             expectedModCount = modCount;
             lastReturned = null;
 
-            if (nextElement != null) {
+            if (nextTarget != null) {
                 currentNode = root;
-                while (true) {
-                    int idx = searchNode(currentNode, nextElement);
+                while (currentNode != null) {
+                    int idx = searchNode(currentNode, nextTarget);
                     if (idx >= 0) {
                         currentIndex = idx;
                         break;
                     }
-                    currentNode = currentNode.child[~idx];
+                    currentNode = currentNode.isLeaf() ? null : currentNode.child[~idx];
                 }
             } else {
                 currentNode = null;
             }
         }
+    }
 
-        private int findChildIndex(BTreeNode<E> parent, BTreeNode<E> child) {
-            if (parent == null) return -1;
-            for (int i = 0; i <= parent.keyCount; i++) {
-                if (parent.child[i] == child) return i;
+    private final class BTreeReverseIterator implements Iterator<E> {
+        private BTreeNode<E> currentNode;
+        private int currentIndex;
+        private long expectedModCount;
+        private E lastReturned = null;
+
+        BTreeReverseIterator(E startKey, boolean startInclusive) {
+            this.expectedModCount = modCount;
+            if (root == null) return;
+
+            if (startKey == null) {
+                this.currentNode = root;
+                while (!this.currentNode.isLeaf()) this.currentNode = this.currentNode.child[this.currentNode.keyCount];
+                this.currentIndex = this.currentNode.keyCount - 1;
+            } else {
+                BTreeNode<E> curr = root;
+                BTreeNode<E> bestNode = null;
+                int bestIdx = -1;
+
+                while (curr != null) {
+                    int idx = searchNode(curr, startKey);
+                    if (idx >= 0) {
+                        if (startInclusive) {
+                            bestNode = curr;
+                            bestIdx = idx;
+                            break;
+                        } else {
+                            if (!curr.isLeaf()) {
+                                curr = curr.child[idx];
+                                while (!curr.isLeaf()) curr = curr.child[curr.keyCount];
+                                bestNode = curr;
+                                bestIdx = curr.keyCount - 1;
+                            } else if (idx > 0) {
+                                bestNode = curr;
+                                bestIdx = idx - 1;
+                            }
+                            break;
+                        }
+                    }
+                    int insertIdx = ~idx;
+                    if (insertIdx > 0) {
+                        bestNode = curr;
+                        bestIdx = insertIdx - 1;
+                    }
+                    curr = curr.isLeaf() ? null : curr.child[insertIdx];
+                }
+                this.currentNode = bestNode;
+                this.currentIndex = bestIdx;
             }
-            return -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            return currentNode != null && currentIndex >= 0;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public E next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            lastReturned = (E) currentNode.keys[currentIndex];
+
+            if (!currentNode.isLeaf()) {
+                currentNode = currentNode.child[currentIndex];
+                while (!currentNode.isLeaf()) currentNode = currentNode.child[currentNode.keyCount];
+                currentIndex = currentNode.keyCount - 1;
+            } else {
+                currentIndex--;
+                if (currentIndex < 0) {
+                    BTreeNode<E> parent = currentNode.parent;
+                    int childIdx = findChildIndex(parent, currentNode);
+                    while (parent != null && childIdx == 0) {
+                        currentNode = parent;
+                        parent = currentNode.parent;
+                        childIdx = findChildIndex(parent, currentNode);
+                    }
+                    if (parent != null) {
+                        currentNode = parent;
+                        currentIndex = childIdx - 1;
+                    } else {
+                        currentNode = null;
+                    }
+                }
+            }
+            return lastReturned;
+        }
+
+        @Override
+        public void remove() {
+            if (lastReturned == null) throw new IllegalStateException();
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
+            E nextTarget = lower(lastReturned);
+            BTreeSet.this.remove(lastReturned);
+            expectedModCount = modCount;
+            lastReturned = null;
+
+            if (nextTarget != null) {
+                currentNode = root;
+                while (currentNode != null) {
+                    int idx = searchNode(currentNode, nextTarget);
+                    if (idx >= 0) {
+                        currentIndex = idx;
+                        break;
+                    }
+                    currentNode = currentNode.isLeaf() ? null : currentNode.child[~idx];
+                }
+            } else {
+                currentNode = null;
+            }
         }
     }
 }
