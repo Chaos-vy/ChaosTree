@@ -19,11 +19,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
      */
     private static final int DEFAULT_DEGREE = 64;
-    /*
-    Yeah, a self varName. As the name suggest this Compaction count only works during deletion
-    case. Only and Only if the key was found to be in route else no!!
-     */
-    private int chaosCompaction = 0; // Tracks ghost routing keys
 
     public BPlusTreeSet() {
         super(DEFAULT_DEGREE, null);
@@ -51,6 +46,72 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         super(degree, comparator);
     }
 
+    /**
+     * Constructs a ChaosTree using a configuration Builder.
+     */
+    public BPlusTreeSet(Builder<E> builder) {
+        super(builder.degree, builder.comparator);
+
+        if (builder.flatArray != null) {
+            buildFromSortedArray(builder.flatArray, builder.factor);
+        } else if (builder.sortedIterator != null) {
+            bulkLoad(builder.sortedIterator, builder.factor);
+        } else if (builder.collection != null) {
+            addAll(builder.collection);
+        }
+    }
+
+    public static final class Builder<E> {
+        private int degree = DEFAULT_DEGREE;
+        private Comparator<? super E> comparator = null;
+        private float factor = 0.9f;
+
+        private Object[] flatArray = null;
+        private Iterator<E> sortedIterator = null;
+        private Collection<? extends E> collection = null;
+
+        private Builder() {}
+
+        public static <E> Builder<E> degree(int degree) {
+            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            }
+            Builder<E> builder = new Builder<>();
+            builder.degree = degree;
+            return builder;
+        }
+
+        public Builder<E> comparator(Comparator<? super E> comparator) {
+            this.comparator = comparator;
+            return this;
+        }
+
+        public Builder<E> factor(float factor) {
+            if (factor < 0.5f || factor > 1.0f) {
+                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+            }
+            this.factor = factor;
+            return this;
+        }
+
+        public Builder<E> importFlatMatrix(Object[] flatArray) {
+            this.flatArray = flatArray;
+            return this;
+        }
+
+        public Builder<E> importSorted(Iterator<E> iterator) {
+            this.sortedIterator = iterator;
+            return this;
+        }
+
+        public Builder<E> importCollection(Collection<? extends E> c) {
+            this.collection = c;
+            return this;
+        }
+        public Builder<E> build() {
+            return this;
+        }
+    }
     /**
      * Streams strictly sorted data directly into the tree in O(N) time.
      * <p>
@@ -81,7 +142,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     }
 
     void buildFromSorted(Iterator<E> it, float fillFactor) {
-        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor)); //This is most important I came to mark it agin
 
         @SuppressWarnings("unchecked")
         BPlusTreeNode<E>[] rightEdge = new BPlusTreeNode[64];
@@ -154,7 +215,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
-     * @param sortedArray An array providing strictly sorted elements.
+     * @param blast An array providing strictly sorted elements.
      * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
      *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
      *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
@@ -162,9 +223,9 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      *                    trigger massive split, and new creation of node.
      *                    Hold the Chaos!!
      */
-    public void bulkLoadArray(Object[] sortedArray, float fillFactor) {
+    public void importFlatMatrix(Object[] blast, float fillFactor) {
 
-        if (sortedArray == null || sortedArray.length == 0) return;
+        if (blast == null || blast.length == 0) return;
 
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
@@ -175,12 +236,12 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         if (fillFactor < 0.5f || fillFactor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
-        buildFromSortedArray(sortedArray, fillFactor);
+        buildFromSortedArray(blast, fillFactor);
     }
 
-    private void buildFromSortedArray(Object[] sortedArray, float factor) {
-        int maxKeys = (degree << 1) - 1;
-        int targetKeys = Math.max(1, (int) (maxKeys * factor));
+    @SuppressWarnings("unchecked")
+    private void buildFromSortedArray(Object[] blast, float factor) {
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * factor)); //came for this fix!!
 
         @SuppressWarnings("unchecked")
         BPlusTreeNode<E>[] rightEdge = (BPlusTreeNode<E>[]) new BPlusTreeNode[32];
@@ -188,17 +249,17 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         this.root = rightEdge[0];
 
         int index = 0;
-        while (index < sortedArray.length) {
+        while (index < blast.length) {
             BPlusTreeNode<E> leaf = rightEdge[0];
-            int chunk = Math.min(targetKeys, sortedArray.length - index);
-            System.arraycopy(sortedArray, index, leaf.keys, 0, chunk);
+            int chunk = Math.min(targetKeys, blast.length - index);
+            System.arraycopy(blast, index, leaf.keys, 0, chunk);
             leaf.keyCount = chunk;
             this.size += chunk;
             index += chunk;
 
-            if (index < sortedArray.length) {
+            if (index < blast.length) {
                 @SuppressWarnings("unchecked")
-                E routingKey = (E) sortedArray[index];
+                E routingKey = (E) blast[index];
 
                 int level = 1;
                 while (true) {
