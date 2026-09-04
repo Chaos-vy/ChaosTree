@@ -35,6 +35,8 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         implements SearchTreeSet<E>, Cloneable, Serializable
         permits AvlTreeSet, RedBlackTreeSet {
 
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
 
     protected final Comparator<? super E> comparator;
     protected transient N root;

@@ -29,6 +29,9 @@ import java.util.SortedSet;
 sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> extends AbstractSet<E>
         implements SearchTreeSet<E>, Serializable, Cloneable permits BPlusTreeSet, BTreeSet {
 
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
+
     protected final int degree;
     protected final int maxKeys;
     protected final int minKeys;

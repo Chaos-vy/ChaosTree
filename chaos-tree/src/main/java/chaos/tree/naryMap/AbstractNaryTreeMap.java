@@ -30,6 +30,9 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
     protected final Comparator<? super K> comparator;
 
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
+
     protected final int degree;
     protected final int maxKeys;
     protected final int minKeys;
@@ -83,7 +86,56 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
     abstract void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor);
 
-    abstract void buildFromSortedArrays(Object[][] blast, float factor);
+    /**
+     * <strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
+     * <p>
+     * This is a high-performance, bare-metal array ingestion engine. It is hungry for raw
+     * array throughput, but it is extremely unforgiving. Use with absolute precision.
+     * <p>
+     * <strong>THE FLAT MATRIX RULES:</strong>
+     * <ul>
+     * <li><strong>Matrix Layout:</strong> The {@code blast} parameter must be exactly 2D: {@code blast[0]} contains the keys, and {@code blast[1]} contains the values.</li>
+     * <li><strong>Array Integrity:</strong> Neither array can be null, and both must be of exactly equal length.</li>
+     * <li><strong>No Null Keys:</strong> A key must never be null. If a value is empty/missing, you must explicitly place {@code null} in the value array at that index.</li>
+     * <li><strong>Strictly Sorted:</strong> The keys array <strong>MUST</strong> be strictly sorted according to the tree's comparator. Feeding unsorted data will instantly and silently corrupt the entire tree structure.</li>
+     * <li><strong>Minimum Degree:</strong> This API relies on chunked array-copying and only services trees with a {@code degree >= 32}.</li>
+     * </ul>
+     * <p>
+     * <strong>FILL FACTOR:</strong>
+     * The {@code factor} determines node occupancy and has strict limits between {@code 0.5f} and {@code 1.0f}.
+     * A factor of {@code 0.9f} is highly recommended for bulk loading. This packs the nodes densely while leaving
+     * exactly enough buffer room to prevent future insertions from triggering massive, cascading split operations.
+     * <p>
+     * Hold the Chaos!!
+     *
+     * @param blast  A 2D array where {@code blast[0]} is the sorted keys and {@code blast[1]} is the mapped values.
+     * @param factor The node fill factor, restricted to the range {@code [0.5, 1.0]}.
+     */
+    abstract void importFlatMatrix(Object[][] blast, float factor);
+
+    /**
+     * <strong>THE MASTER EXPORTER OF CHAOSTREE</strong>
+     * <p>
+     * Rips the entire internal state of the tree into a highly optimized, contiguous 2D array matrix
+     * in strictly sorted order. This bypasses {@code Map.Entry} instantiation entirely by directly
+     * blasting memory into flat arrays.
+     * <p>
+     * <strong>Matrix Layout:</strong>
+     * <ul>
+     * <li>{@code matrix[0]} &rarr; Array of strictly sorted keys.</li>
+     * <li>{@code matrix[1]} &rarr; Array of corresponding values.</li>
+     * </ul>
+     * <p>
+     * Unlike the ingestion engine, this extraction process is universally safe and natively
+     * supports trees of <strong>all degrees</strong> with zero restrictions.
+     * <p>
+     * <strong>Note:</strong> If you intend to reconstruct a tree by feeding this matrix back
+     * into the engine, you must review the strict limitations (such as {@code degree >= 32})
+     * documented in {@link #importFlatMatrix}.
+     *
+     * @return A 2D {@code Object[][]} representing the flat matrix of keys and values.
+     */
+    abstract Object[][] exportFlatMatrix();
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {

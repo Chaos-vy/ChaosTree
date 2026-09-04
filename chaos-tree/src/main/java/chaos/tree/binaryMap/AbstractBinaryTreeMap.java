@@ -31,6 +31,9 @@ import java.util.function.Function;
 sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNode<K, V, N>> extends AbstractMap<K, V>
         implements SearchTreeMap<K, V>, Serializable, Cloneable permits AvlTreeMap, RedBlackTreeMap {
 
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
+
     protected final Comparator<? super K> comparator;
     protected transient Set<K> keySetView;
     protected transient Collection<V> valuesView;

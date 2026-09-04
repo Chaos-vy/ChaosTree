@@ -32,6 +32,7 @@ public class BTreeSetTest extends TestCase {
                         CollectionFeature.RESTRICTS_ELEMENTS,
                         CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
                         CollectionFeature.SERIALIZABLE,
+                        CollectionFeature.ALLOWS_NULL_QUERIES,
                         CollectionSize.ANY
                 )
                 .createTestSuite();

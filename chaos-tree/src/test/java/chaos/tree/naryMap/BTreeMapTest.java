@@ -24,7 +24,7 @@ public class BTreeMapTest extends TestCase {
                         return map;
                     }
                 })
-                .named("ChaosTree Java 21 B+TreeMap Navigable Gauntlet")
+                .named("ChaosTree Java 21 B-TreeMap Navigable Gauntlet")
                 .withFeatures(
                         MapFeature.SUPPORTS_PUT,
                         MapFeature.SUPPORTS_REMOVE,

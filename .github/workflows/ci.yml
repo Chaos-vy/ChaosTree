@@ -1,41 +1,37 @@
 name: ChaosTree Cross-System CI
 
 on:
-#  push:
-#    branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
+
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
     name: Build & Test on ${{ matrix.os }} (Java ${{ matrix.java }})
+
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        java: ['8', '11', '17', '21', '25']
-        exclude:
-          - os: macos-latest
-            java: '8'
+        java: ['21', '25']
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Set up JDK ${{ matrix.java }}
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: 'temurin'
-        cache: maven
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Run ChaosTree Test Suite
-      shell: bash
-      run: |
-        if [ "${{ matrix.java }}" = "21" ] || [ "${{ matrix.java }}" = "25" ]; then
+      - name: Run ChaosTree Test Suite
+        shell: bash
+        run: |
           mvn clean test -B
-        else
-          mvn clean test -pl ct-core -B
-        fi

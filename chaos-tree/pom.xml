@@ -29,7 +29,6 @@
             <version>33.7.1-jre</version>
             <scope>test</scope>
         </dependency>
-        <!-- Align JUnit 5 versions with a BOM to prevent ClassFilter NoClassDefFoundError -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -58,6 +57,8 @@
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <printSummary>false</printSummary>
                 </configuration>
             </plugin>
         </plugins>

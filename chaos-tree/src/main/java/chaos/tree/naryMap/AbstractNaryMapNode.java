@@ -1,6 +1,14 @@
 package chaos.tree.naryMap;
 
-//The dragon of my Chaos-Tree
+/**
+ * The dragons of chaos tree
+ * Don't think this 20 line of code are dragons
+ * But unfortunately yes, Each line here except blank lines LOL, is enough to
+ * break the NaryTreeMap ecosystem.
+ * @param <K> key
+ * @param <V> value
+ * @param <N> parent
+ */
 abstract sealed class AbstractNaryMapNode<K, V, N extends AbstractNaryMapNode<K, V, N>>
         permits BTreeMapNode, BPlusTreeMapNode {
     protected final Object[] keys;
