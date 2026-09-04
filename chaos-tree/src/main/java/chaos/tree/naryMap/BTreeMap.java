@@ -38,6 +38,73 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         super(degree, null);
     }
 
+    /**
+     * Constructs a ChaosTree using a configuration Builder.
+     */
+    public BTreeMap(BTreeMap.Builder<K,V> builder) {
+        super(builder.degree, builder.comparator);
+
+        if (builder.flatMatrix != null) {
+            importFlatMatrix(builder.flatMatrix, builder.factor);
+        } else if (builder.sortedIterator != null) {
+            buildFromSorted(builder.sortedIterator, builder.factor);
+        } else if (builder.map != null) {
+            putAll(builder.map);
+        }
+    }
+
+    public static final class Builder<K,V> {
+        private int degree = DEFAULT_DEGREE;
+        private Comparator<? super K> comparator = null;
+        private float factor = 0.9f;
+
+        private Object[][] flatMatrix = null;
+        Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator= null;
+        private Map<? extends K, ? extends V> map = null;
+
+        private Builder() {}
+
+        public static <K,V> BTreeMap.Builder<K,V> degree(int degree) {
+            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            }
+            BTreeMap.Builder<K,V> builder = new BTreeMap.Builder<>();
+            builder.degree = degree;
+            return builder;
+        }
+
+        public BTreeMap.Builder<K,V> comparator(Comparator<? super K> comparator) {
+            this.comparator = comparator;
+            return this;
+        }
+
+        public BTreeMap.Builder<K,V> factor(float factor) {
+            if (factor < 0.5f || factor > 1.0f) {
+                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+            }
+            this.factor = factor;
+            return this;
+        }
+
+        public BTreeMap.Builder<K,V> importFlatMatrix(Object[][] flatMatrix) {
+            this.flatMatrix = flatMatrix;
+            return this;
+        }
+
+        public BTreeMap.Builder<K,V> importSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
+            this.sortedIterator = iterator;
+            return this;
+        }
+
+        public BTreeMap.Builder<K,V> importCollection(Map<? extends K, ? extends V> map) {
+            this.map = map;
+            return this;
+        }
+        public BTreeMap.Builder<K,V> build() {
+            return this;
+        }
+    }
+
     @Override
     BTreeMapNode<K, V> createNode(int degree, boolean isLeaf) {
         return new BTreeMapNode<>(degree, isLeaf);
@@ -275,7 +342,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         if (root == null) return null;
 
         BTreeMapNode<K, V> current = root;
-        int idx = -1;
+        int idx ;
         K k = (K) key;
         V old_val = null;
         while (true) {
@@ -494,7 +561,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     }
 
     @SuppressWarnings("unchecked")
-    void buildFromSortedArrays(Object[][] blast, float factor) {
+    void importFlatMatrix(Object[][] blast, float factor) {
         Object[] inKeys = blast[0];
         Object[] inValues = blast[1];
         int totalSize = inKeys.length;
@@ -1014,6 +1081,32 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 action.accept((K) node.keys[i], (V) node.values[i]);
             }
             forEachBTree(node.child[node.keyCount], action);
+        }
+    }
+
+    @Override
+    public Object[][] exportFlatMatrix() {
+        Object[] keys = new Object[size];
+        Object[] values = new Object[size];
+        if (size == 0 || root == null) return new Object[][]{keys, values};
+
+        populateFlatMatrix(root, keys, values, 0);
+        return new Object[][]{keys, values};
+    }
+
+    private int populateFlatMatrix(BTreeMapNode<K, V> node, Object[] keys, Object[] values, int offset) {
+        if (node.isLeaf()) {
+            System.arraycopy(node.keys, 0, keys, offset, node.keyCount);
+            System.arraycopy(node.values, 0, values, offset, node.keyCount);
+            return offset + node.keyCount;
+        } else {
+            for (int i = 0; i < node.keyCount; i++) {
+                offset = populateFlatMatrix(node.child[i], keys, values, offset);
+                keys[offset] = node.keys[i];
+                values[offset] = node.values[i];
+                offset++;
+            }
+            return populateFlatMatrix(node.child[node.keyCount], keys, values, offset);
         }
     }
 }
