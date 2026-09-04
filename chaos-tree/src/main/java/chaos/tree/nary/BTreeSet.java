@@ -44,6 +44,73 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     }
 
     /**
+     * Constructs a ChaosTree using a configuration Builder.
+     */
+    public BTreeSet(BTreeSet.Builder<E> builder) {
+        super(builder.degree, builder.comparator);
+
+        if (builder.flatArray != null) {
+            buildFromSortedArray(builder.flatArray, builder.factor);
+        } else if (builder.sortedIterator != null) {
+            bulkLoad(builder.sortedIterator, builder.factor);
+        } else if (builder.collection != null) {
+            addAll(builder.collection);
+        }
+    }
+
+    public static final class Builder<E> {
+        private int degree = DEFAULT_DEGREE;
+        private Comparator<? super E> comparator = null;
+        private float factor = 0.9f;
+
+        private Object[] flatArray = null;
+        private Iterator<E> sortedIterator = null;
+        private Collection<? extends E> collection = null;
+
+        private Builder() {}
+
+        public static <E> BTreeSet.Builder<E> degree(int degree) {
+            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            }
+            BTreeSet.Builder<E> builder = new BTreeSet.Builder<>();
+            builder.degree = degree;
+            return builder;
+        }
+
+        public BTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
+            this.comparator = comparator;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> factor(float factor) {
+            if (factor < 0.5f || factor > 1.0f) {
+                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+            }
+            this.factor = factor;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> importFlatMatrix(Object[] flatArray) {
+            this.flatArray = flatArray;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
+            this.sortedIterator = iterator;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
+            this.collection = c;
+            return this;
+        }
+        public BTreeSet.Builder<E> build() {
+            return this;
+        }
+    }
+
+    /**
      * Streams strictly sorted data directly into the tree in O(N) time.
      * <p>
      * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
@@ -257,8 +324,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
     @SuppressWarnings("unchecked")
     private void buildFromSortedArray(Object[] sortedArray, float fillFactor) {
-        int maxKeys = (degree << 1) - 1;
-        int targetKeys = Math.max(1, (int) (maxKeys * fillFactor));
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor)); //came for this fix
 
         BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
         rightEdge[0] = new BTreeNode<>(degree, true);
