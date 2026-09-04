@@ -22,6 +22,10 @@ package chaos.tree.nary;
  *   <li>Every internal node has between {@code t} and {@code 2t} children.</li>
  * </ul>
  *
+ * <Strong>SideNote:</Strong> This started as experimental to see it can vibe
+ * with this mindset, and yes this finally made the chaos. Map main major
+ * implementation was created from here so it did not take time.
+ *
  */
 abstract sealed class AbstractNaryNode<E, N extends AbstractNaryNode<E, N>> permits BPlusTreeNode, BTreeNode {
 
@@ -32,7 +36,7 @@ abstract sealed class AbstractNaryNode<E, N extends AbstractNaryNode<E, N>> perm
     protected int keyCount;
     protected N parent;
 
-    protected AbstractNaryNode(int degree, boolean isLeaf, N[] child) {
+    protected AbstractNaryNode(int degree, N[] child) {
         int maxKeys = degree << 1;
         this.keys = new Object[maxKeys];
         this.child = child;
