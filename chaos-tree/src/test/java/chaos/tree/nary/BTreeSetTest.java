@@ -17,7 +17,7 @@ public class BTreeSetTest extends TestCase {
                     @Override
                     protected SortedSet<String> create(String[] elements) {
                         BTreeSet<String> set = new BTreeSet<>();
-                        set.addAll(Arrays.asList(elements)); // Uses your O(M) fast-path if sorted!
+                        set.addAll(Arrays.asList(elements));
                         return set;
                     }
                 })
@@ -29,9 +29,9 @@ public class BTreeSetTest extends TestCase {
                         CollectionFeature.KNOWN_ORDER,
                         CollectionFeature.SUBSET_VIEW,
                         CollectionFeature.DESCENDING_VIEW,
-                        CollectionFeature.RESTRICTS_ELEMENTS, // Correct (throws NPE on nulls)
-                        CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION, // Added!
-                        CollectionFeature.SERIALIZABLE, // Added!
+                        CollectionFeature.RESTRICTS_ELEMENTS,
+                        CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
+                        CollectionFeature.SERIALIZABLE,
                         CollectionSize.ANY
                 )
                 .createTestSuite();
