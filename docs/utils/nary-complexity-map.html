@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTree | Exhaustive API Complexity Audit</title>
+    <style>
+        body {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .green {
+            color: #007700;
+            font-weight: bold;
+        }
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+        a {
+            color: #0000ee;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <p><a href="../index.html">← Back to ChaosTree</a></p>
+
+    <h1>Exhaustive N-ary API Complexity Logs</h1>
+
+    <blockquote>
+        This Table is created after the code has been done to see any missing API which has not been optimized. This also demonstrates the architecture little info to see in detail you need to read the code.<br><br>
+        N = Elements in tree. B = Branching factor (Degree).<br>
+        All Auxiliary Space must be O(1) (zero-allocation).
+    </blockquote>
+
+    <h2>1. Map & NavigableMap</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Time Complexity</th>
+                <th>Space Complexity</th>
+                <th>ChaosTree Optimization Implementation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>size()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Reads cached size variable. Instantaneous return.</td>
+            </tr>
+            <tr>
+                <td><code>isEmpty()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Checks <code>size == 0</code>.</td>
+            </tr>
+            <tr>
+                <td><code>containsKey(K key)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Standard B-Tree descent with internal array binary search.</td>
+            </tr>
+            <tr>
+                <td><code>containsValue(V value)</code></td>
+                <td class="green">O(N)</td>
+                <td>O(1)</td>
+                <td>Scans sequentially via optimized leaf pointers, bypassing full tree traversal overhead.</td>
+            </tr>
+            <tr>
+                <td><code>get(K key)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Internal array binary search within nodes.</td>
+            </tr>
+            <tr>
+                <td><code>put(K key, V value)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Node splitting handled in-place with zero-allocation.</td>
+            </tr>
+            <tr>
+                <td><code>remove(K key)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Merging and borrowing handled in-place with zero-allocation.</td>
+            </tr>
+            <tr>
+                <td><code>putAll(Map m)</code></td>
+                <td class="green">O(M log_B N)</td>
+                <td>O(1)</td>
+                <td>Standard iterative insertion. For O(N+M) performance, use Dragon Feed builder.</td>
+            </tr>
+            <tr>
+                <td><code>clear()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Unlinks root and resets size. GC handles cleanup asynchronously.</td>
+            </tr>
+            <tr>
+                <td><code>keySet(), values(), entrySet()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Returns pre-instantiated lightweight view objects. Zero data copied.</td>
+            </tr>
+            <tr>
+                <td><code>firstKey(), firstEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Follows highly optimized left-most path.</td>
+            </tr>
+            <tr>
+                <td><code>lastKey(), lastEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Follows highly optimized right-most path.</td>
+            </tr>
+            <tr>
+                <td><code>lowerKey(), lowerEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Exact nearest-neighbor search.</td>
+            </tr>
+            <tr>
+                <td><code>floorKey(), floorEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Exact nearest-neighbor search.</td>
+            </tr>
+            <tr>
+                <td><code>ceilingKey(), ceilingEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Exact nearest-neighbor search.</td>
+            </tr>
+            <tr>
+                <td><code>higherKey(), higherEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Exact nearest-neighbor search.</td>
+            </tr>
+            <tr>
+                <td><code>pollFirstEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Combines firstEntry() + remove() in optimized pass.</td>
+            </tr>
+            <tr>
+                <td><code>pollLastEntry()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Combines lastEntry() + remove() in optimized pass.</td>
+            </tr>
+            <tr>
+                <td><code>subMap(), headMap(), tailMap()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Constructs a view wrapper instantly. Zero data copied.</td>
+            </tr>
+            <tr>
+                <td><code>descendingMap()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Constructs a view wrapper instantly.</td>
+            </tr>
+            <tr>
+                <td><code>navigableKeySet(), descendingKeySet()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>View wrapper around existing Map views.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Map Default Methods (Java 8+)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Time Complexity</th>
+                <th>Space Complexity</th>
+                <th>ChaosTree Optimization Implementation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>getOrDefault()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single lookup pass.</td>
+            </tr>
+            <tr>
+                <td><code>forEach(BiConsumer)</code></td>
+                <td class="green">O(N)</td>
+                <td>O(1)</td>
+                <td>Iterates natively via leaf links. Avoids Map.Entry allocation overhead.</td>
+            </tr>
+            <tr>
+                <td><code>replaceAll(BiFunction)</code></td>
+                <td class="green">O(N)</td>
+                <td>O(1)</td>
+                <td>Updates values in-place sequentially.</td>
+            </tr>
+            <tr>
+                <td><code>putIfAbsent()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td><b>Optimized:</b> Uses internal single-pass <code>putInternal</code>. Eliminates double traversal.</td>
+            </tr>
+            <tr>
+                <td><code>remove(key, value)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single pass lookup + equality check before removal.</td>
+            </tr>
+            <tr>
+                <td><code>replace(key, value)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single pass.</td>
+            </tr>
+            <tr>
+                <td><code>replace(key, oldV, newV)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single pass.</td>
+            </tr>
+            <tr>
+                <td><code>computeIfAbsent()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td><b>Optimized:</b> Custom single-pass descent. Does not rely on AbstractMap's slow two-pass default.</td>
+            </tr>
+            <tr>
+                <td><code>computeIfPresent()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single pass modification.</td>
+            </tr>
+            <tr>
+                <td><code>compute()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single pass modification.</td>
+            </tr>
+            <tr>
+                <td><code>merge()</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Single pass modification.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Views (SubMaps, KeySets, EntrySets, Values)</h2>
+    <p>Creating a view is always O(1). However, <b>operating</b> on the view has different complexities.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>View Method</th>
+                <th>Time Complexity</th>
+                <th>Space Complexity</th>
+                <th>ChaosTree Optimization Implementation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>SubMap.size()</code></td>
+                <td class="green">O(K)</td>
+                <td>O(1)</td>
+                <td>K = elements in range. Iterates the bounded range to count elements (JDK matching behavior).</td>
+            </tr>
+            <tr>
+                <td><code>SubMap.get(K)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Standard descent + O(1) boundary check.</td>
+            </tr>
+            <tr>
+                <td><code>SubMap.put(K, V)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Standard put + O(1) boundary check. Throws IllegalArgumentException if out of bounds.</td>
+            </tr>
+            <tr>
+                <td><code>GlobalKeySet.size()</code></td>
+                <td class="green">O(1)</td>
+                <td>O(1)</td>
+                <td>Delegates to outer map <code>size()</code>.</td>
+            </tr>
+            <tr>
+                <td><code>GlobalKeySet.contains(K)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Delegates to outer map <code>containsKey()</code>.</td>
+            </tr>
+            <tr>
+                <td><code>ValuesView.contains(V)</code></td>
+                <td class="green">O(N)</td>
+                <td>O(1)</td>
+                <td>Delegates to outer map <code>containsValue()</code>. Scans entire tree sequentially.</td>
+            </tr>
+            <tr>
+                <td><code>EntrySet.contains(Entry)</code></td>
+                <td class="green">O(log_B N)</td>
+                <td>O(1)</td>
+                <td>Looks up key, then checks value equality natively.</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

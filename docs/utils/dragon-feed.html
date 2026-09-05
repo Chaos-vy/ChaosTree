@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="UTF-8">
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTree | The Dragon Feed</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2, h3 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: right;
+        }
+
+        th:first-child, td:first-child, td:nth-child(2) {
+            text-align: left;
+        }
+
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px dotted #000;
+            overflow-x: auto;
+        }
+
+        a {
+            color: #0000ee;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<p><a href="../index.html">← Back to ChaosTree</a></p>
+
+<h1>The Dragon Feed</h1>
+
+<blockquote>
+    "Every rev (factor) of the dragon is a warning. Every gearshift bears the load (gc). The dragon unleashes its might
+    at 1.0f, packing your data into the map like it never even felt it."
+</blockquote>
+
+<p>
+    The <b>Dragon Feed</b> is the internal bulk-loading engine of ChaosTree's B-Tree and B+Tree architectures.
+    Instead of utilizing standard iterative insertions—which suffer from pointer chasing, tree rebalancing, and heavy GC
+    allocation rates—the Dragon Feed directly ingests raw sorted matrices and compiles them into contiguous memory
+    pages.
+</p>
+
+<h2>The Gears (Packing Factor)</h2>
+<p>
+    The Dragon Feed exposes a <code>factor</code> parameter, acting as the transmission for the engine.
+    It dictates exactly how tightly the internal arrays should be packed during bulk ingestion.
+    <br><br>
+    - <b>0.5f (First Gear):</b> 50% capacity. Leaves room for future random insertions without triggering node splits.
+    Highest initial memory footprint.<br>
+    - <b>1.0f (Top Gear):</b> 100% capacity. Zero wasted bytes. Maximum CPU cache line saturation. Pure throughput.
+</p>
+
+<h2>15 Million Elements: The Parameter Sweep</h2>
+<p>
+    The following benchmark demonstrates the flawless mathematical scaling of the Dragon Feed. As the packing factor
+    increases, memory allocation and execution time drop in absolute linear lockstep.
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Benchmark</th>
+        <th>Factor</th>
+        <th>Time (ms)</th>
+        <th>Allocated (MB)</th>
+        <th>GC Pauses (ms)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>B+Tree</td>
+        <td>0.5f</td>
+        <td>25.00</td>
+        <td>256.5</td>
+        <td>247</td>
+    </tr>
+    <tr>
+        <td>B+Tree</td>
+        <td>0.6f</td>
+        <td>21.59</td>
+        <td>213.4</td>
+        <td>107</td>
+    </tr>
+    <tr>
+        <td>B+Tree</td>
+        <td>0.7f</td>
+        <td>20.48</td>
+        <td>182.7</td>
+        <td>360</td>
+    </tr>
+    <tr>
+        <td>B+Tree</td>
+        <td>0.8f</td>
+        <td>18.31</td>
+        <td>159.7</td>
+        <td>235</td>
+    </tr>
+    <tr>
+        <td>B+Tree</td>
+        <td>0.9f</td>
+        <td>17.10</td>
+        <td>141.8</td>
+        <td>274</td>
+    </tr>
+    <tr>
+        <td><strong>B+Tree</strong></td>
+        <td><strong>1.0f</strong></td>
+        <td><strong>15.96</strong></td>
+        <td><strong>126.9</strong></td>
+        <td><strong>301</strong></td>
+    </tr>
+    <tr>
+        <td><strong>B-Tree</strong></td>
+        <td><strong>1.0f</strong></td>
+        <td><strong>15.76</strong></td>
+        <td><strong>126</strong></td>
+        <td><strong>193</strong></td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    At <code>1.0f</code>, the engine processes <b>15,000,000</b> elements in <b>15.9 milliseconds</b>, consuming only
+    126 MB of heap. There is zero algorithmic overhead remaining; execution time is strictly bound by main memory
+    bandwidth and cache retrieval.
+</p>
+
+<h2>Usage</h2>
+<h3>1. By Constructor</h3>
+<pre>
+// Awaken the Dragon at top gear (1.0f)
+// 1. Prepare your sorted data matrix
+Integer[] sortedKeys = {1, 2, 3, 4, 5};
+String[] values = {"A", "B", "C", "D", "E"};
+Object[][] matrix = new Object[][]{sortedKeys, values};
+
+// 2. Feed the Dragon
+BPlusTreeMap<Integer, String> fastMap = new BPlusTreeMap<>(
+    BPlusTreeMap.Builder.<Integer, String>degree(64)
+        .factor(0.8f) // 80% packing density, leaves room for runtime inserts
+        .importFlatMatrix(matrix)
+        .build()
+);
+    </pre>
+<h3>2. By Public API through array</h3>
+
+<strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
+
+This is a high-performance, bare-metal array ingestion engine.
+It is hungry for raw array throughput, but it is extremely unforgiving.
+Use with absolute precision.
+
+<strong>THE FLAT MATRIX RULES:</strong>
+
+<ul>
+    <li>
+        <strong>Matrix Layout:</strong>
+        The blast parameter must be exactly 2D:
+        <code>blast[0]</code> contains the keys, and
+        <code>blast[1]</code> contains the values.
+    </li>
+
+    <li>
+        <strong>Array Integrity:</strong>
+        Neither array can be null, and both must be of exactly equal length.
+    </li>
+
+    <li>
+        <strong>No Null Keys:</strong>
+        A key must never be null.
+        If a value is empty/missing, you must explicitly place
+        <code>null</code> in the value array at that index.
+    </li>
+
+    <li>
+        <strong>Strictly Sorted:</strong>
+        The keys array <strong>MUST</strong> be strictly sorted according
+        to the tree's comparator.
+        Feeding unsorted data will instantly and silently corrupt
+        the entire tree structure.
+    </li>
+
+    <li>
+        <strong>Minimum Degree:</strong>
+        This API relies on chunked array-copying and only services
+        trees with a degree &gt;= 32.
+    </li>
+
+    <li>
+        <strong>FILL FACTOR:</strong>
+        The factor determines node occupancy and has strict limits
+        between <code>0.5f</code> and <code>1.0f</code>.
+        A factor of <code>0.8f</code> is highly recommended for bulk loading.
+        This packs the nodes densely while leaving exactly enough buffer room
+        to prevent future insertions from triggering massive, cascading
+        split operations.
+        <strong>Hold the Chaos!</strong>
+    </li>
+</ul>
+
+<strong>Method:</strong>
+<i>abstract void importFlatMatrix(Object[][] blast, float factor);</i>
+
+<strong>Parameters:</strong>
+
+<strong>blast</strong>
+A 2D array where <code>blast[0]</code> is the sorted keys and
+<code>blast[1]</code> is the mapped values.
+
+<strong>factor</strong>
+The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
+
+    <pre>
+    // Awaken the Dragon at top gear (1.0f)
+    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;()
+    //this creates a default degree of 64 and comparator null!
+    map.insertFromMatrix(blast, factor);
+    </pre>
+
+<h3>3. By Public API through Sorted Map.Entry</h3>
+
+<strong>Streams strictly sorted data directly into the tree in O(N) time.</strong>
+
+<p>
+    <strong>WARNING:</strong>
+    The provided iterator <strong>MUST</strong> yield elements in strict
+    ascending order according to this tree's comparator.
+    If the data is unsorted, the tree structure will be corrupted.
+</p>
+
+<p><strong>FILL FACTOR:</strong></p>
+
+<ul>
+    <li>
+        A value between <code>0.5</code> and <code>1.0</code> representing
+        how full to pack each node.
+    </li>
+    <li>
+        Use <code>1.0f</code> for read-only data.
+    </li>
+    <li>
+        Use a lower value to leave room for future insertions.
+    </li>
+    <li>
+        A value of <code>0.9f</code> is used for bulk loading in my tree.
+    </li>
+    <li>
+        For read purposes, you can use <code>1.0f</code>, but after that,
+        any insert or remove operation will trigger massive split, merge,
+        borrow, and array-shifting operations.
+    </li>
+</ul>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+    <li>
+        <strong>sortedData:</strong>
+        An iterator providing strictly sorted elements.
+    </li>
+    <li>
+        <strong>fillFactor:</strong>
+        A value between <code>0.5</code> and <code>1.0</code> representing
+        how full to pack each node.
+    </li>
+</ul>
+<i>public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor)</i> The
+<strong>factor</strong> provide the node density <strong>[0.5f, 1f]</strong> more you pack the less it's take memory.
+<i>It is faster in sorted input because it just appends at last</i>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTree</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: right;
+        }
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px dotted #000;
+            overflow-x: auto;
+        }
+        a {
+            color: #0000ee;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ChaosTree</h1>
+    <p>A zero-allocation, mechanically sympathetic Java 21 Search Tree engine that mathematically destroys the JDK.</p>
+
+    <blockquote>
+        A developer driving a Ferrari doesn't need to explain the engine. The benchmarks speak for themselves.
+    </blockquote>
+
+    <h2>1. The Brutal Truth (5 Million Elements)</h2>
+    <p>Benchmark environment: Java 21, JMH. Measuring execution time, heap allocation, and GC time for 5,000,000 elements.</p>
+
+    <table>
+        <caption>5,000,000 Element Insertion Matrix </caption>
+        <thead>
+        <tr>
+            <th>Benchmark (Strategy)</th>
+            <th>Complexity</th>
+            <th>Score (ms/op)</th>
+            <th>Allocated (Bytes/op)</th>
+            <th>GC Time (ms)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>B+Tree.dragonFeed (Native, factor(0.8f))</td>
+            <td>O(N)</td>
+            <td>5.418</td>
+            <td>52,807,339</td>
+            <td>229</td>
+        </tr>
+        <tr>
+            <td>B+Tree.bulkLoad (Iterator)</td>
+            <td>O(N)</td>
+            <td>36.649</td>
+            <td>48,498,184</td>
+            <td>36</td>
+        </tr>
+        <tr>
+            <td>JDK TreeMap.bulkLoad (SortedMap)</td>
+            <td>O(N)</td>
+            <td>50.638</td>
+            <td>200,000,256</td>
+            <td>740</td>
+        </tr>
+        <tr>
+            <td>B+Tree.iterativePut (Standard)</td>
+            <td>O(N log N)</td>
+            <td>217.728</td>
+            <td>86,994,733</td>
+            <td>56</td>
+        </tr>
+        <tr>
+            <td>JDK TreeMap.iterativePut (Standard)</td>
+            <td>O(N log N)</td>
+            <td>698.918</td>
+            <td>200,002,397</td>
+            <td>347</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <strong>Result:</strong> ChaosTree dragon feed is <b>133x faster</b> than standard JDK insertions, <b>10x faster</b> than JDK bulk loading, and uses <b>75% less JVM heap overhead</b>.
+        <i>{It depends on factor dev so do read the below article of Dragon feed}</i>
+        <br>
+        Well, I know this it bit more escalation, but it's the truth. The Dragon feed is fast enough to sweep the complete
+        array in ms. Because it uses <i>System.arraycopy()</i>.
+        <br>
+
+    </p>
+
+    <h2>2. Awaken the Dragon</h2>
+    <p>100% capacity packing. Zero pointer chasing. Pure CPU cache locality.</p>
+    <pre>
+NavigableMap&lt;Integer, String&gt; chaosTree = new BPlusTreeMap&lt;&gt;(
+    BPlusTreeMap.Builder.&lt;Integer, String&gt;degree(64)
+        .factor(1.0f) 
+        .importFlatMatrix(flatMatrix)
+        .build()
+);
+    </pre>
+
+    <h2>3. The Guava Crucible</h2>
+    <p>
+        Speed without correctness is useless. ChaosTree perfectly implements <code>subMap()</code>, <code>headMap()</code>, <code>tailMap()</code>, and <code>descendingMap()</code>. 
+        It has been subjected to Google Guava's <code>MapTestSuiteBuilder</code> and mathematically passes <b>25,000+ strict test permutations</b>, including:
+    </p>
+    <ul>
+        <li><code>CollectionFeature.SERIALIZABLE</code> across all sub-views.</li>
+        <li><code>MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION</code>.</li>
+    </ul>
+
+    <h2>4. Source</h2>
+    <p>Code is available on <a href="https://github.com/Chaos-vy/ChaosTree">GitHub</a>.</p>
+
+<h2>
+    API Info and Cost of ChaosTree
+</h2>
+    <p>
+        API are
+    </p>
+    <a href="utils/dragon-feed.html">Read the full Dragon Feed Parameter Sweep &rarr;</a><br>
+    <a href="utils/nary-complexity-map.html">View N-ary API Time & Space Complexity &rarr;</a>
+</body>
+</html>

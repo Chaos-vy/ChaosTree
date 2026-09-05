@@ -14,7 +14,6 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 - Performance improvement
 - Removed enhanced switch expression.
 - New Benchmark data
-[Benchmark Reports](https://github.com/Chaos-vy/ChaosTree/tree/main/BenchmarkReport/Reports)
 
 ---
 ## [1.1.0] - 2026-08-07
@@ -88,12 +87,6 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 * Multiple traversal strategies
 * Tree visualization support
 
-#### Documentation & Benchmarks
-
-* Data-driven N-ary telemetry and micro-architectural analysis: [NaryFamily/Benchmark.md](docs/NaryFamily/Benchmark.md)
-* In-depth CPU Cache physics & degree (t) selection guide: [NaryFamily/DegreeOptimization.md](docs/NaryFamily/DegreeOptimization.md)
-* Added and updated [Architecture Decision Records (ADRs)](ADR/README.md) covering node architecture, recursive vs iterative boundaries, and internal routing.
-* Explicit tracking of benchmark environments (i5, JDK 21).
 
 #### Quality
 
