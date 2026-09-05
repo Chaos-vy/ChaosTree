@@ -5,6 +5,7 @@ package chaos.tree.naryMap;
  * Don't think this 20 line of code are dragons
  * But unfortunately yes, Each line here except blank lines LOL, is enough to
  * break the NaryTreeMap ecosystem.
+ *
  * @param <K> key
  * @param <V> value
  * @param <N> parent

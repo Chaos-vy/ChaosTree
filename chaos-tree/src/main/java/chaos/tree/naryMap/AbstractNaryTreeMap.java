@@ -28,11 +28,15 @@ import java.util.SortedMap;
 abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K, V, N>>
         extends AbstractMap<K, V> implements SearchTreeMap<K, V>, Serializable, Cloneable permits BTreeMap, BPlusTreeMap {
 
-    protected final Comparator<? super K> comparator;
-
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
-
+    private static final String RESET = "\u001B[0m";
+    private static final String KEY = "\u001B[1;38;2;0;229;255m";    // #00E5FF
+    private static final String EQUALS = "\u001B[38;2;176;190;197m";     // #B0BEC5
+    private static final String VALUE = "\u001B[1;38;2;255;121;198m";  // #FF79C6
+    private static final String BRACKET = "\u001B[38;2;84;110;122m";     // #546E7A
+    private static final String BRIGHT_WHITE = "\u001B[97m";
+    protected final Comparator<? super K> comparator;
     protected final int degree;
     protected final int maxKeys;
     protected final int minKeys;
@@ -328,8 +332,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         return e == null ? null : e.getKey();
     }
 
-
-
     protected abstract Iterator<Map.Entry<K, V>> entryIterator(K fromKey, boolean fromInclusive);
 
     protected abstract Iterator<Map.Entry<K, V>> descendingEntryIterator(K fromKey, boolean fromInclusive);
@@ -373,13 +375,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         buildString(sb, root, "", true, style);
         return sb.toString();
     }
-
-    private static final String RESET   = "\u001B[0m";
-    private static final String KEY     = "\u001B[1;38;2;0;229;255m";    // #00E5FF
-    private static final String EQUALS  = "\u001B[38;2;176;190;197m";     // #B0BEC5
-    private static final String VALUE   = "\u001B[1;38;2;255;121;198m";  // #FF79C6
-    private static final String BRACKET = "\u001B[38;2;84;110;122m";     // #546E7A
-    private static final String BRIGHT_WHITE = "\u001B[97m";
 
     private void buildString(StringBuilder sb, N node, String prefix, boolean isTail, Style style) {
         String lastBranch = (style == Style.UNICODE) ? "└── " : "\\-- ";
@@ -520,10 +515,10 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
     final class ChaosEntry implements Map.Entry<K, V> {
         private final K key;
-        private V value;
         private transient final N node;
         private transient final int index;
         private transient final long expectedModCount;
+        private V value;
 
         @SuppressWarnings("unchecked")
         ChaosEntry(N node, int index) {
@@ -895,7 +890,9 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                     private Map.Entry<K, V> nextEntry = null;
                     private Map.Entry<K, V> lastReturned = null;
 
-                    { advance(); }
+                    {
+                        advance();
+                    }
 
                     private void advance() {
                         if (it.hasNext()) {
@@ -911,7 +908,9 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                     }
 
                     @Override
-                    public boolean hasNext() { return nextEntry != null; }
+                    public boolean hasNext() {
+                        return nextEntry != null;
+                    }
 
                     @Override
                     public Map.Entry<K, V> next() {
@@ -974,7 +973,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         }
     }
 
-    private final class ValuesView extends AbstractCollection<V>  {
+    private final class ValuesView extends AbstractCollection<V> {
 
         @Override
         public Iterator<V> iterator() {
@@ -998,8 +997,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     }
 
 
-
-    private final class KeySetView extends AbstractSet<K> implements NavigableSet<K>{
+    private final class KeySetView extends AbstractSet<K> implements NavigableSet<K> {
         private final NavigableMap<K, V> map;
 
         KeySetView(NavigableMap<K, V> map) {
@@ -1013,9 +1011,17 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             }
             final Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
             return new Iterator<>() {
-                public boolean hasNext() { return it.hasNext(); }
-                public K next() { return it.next().getKey(); }
-                public void remove() { it.remove(); }
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                public K next() {
+                    return it.next().getKey();
+                }
+
+                public void remove() {
+                    it.remove();
+                }
             };
         }
 
@@ -1042,7 +1048,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         @SuppressWarnings("unchecked")
         public boolean contains(Object o) {
-            return map.containsKey((K)o);
+            return map.containsKey((K) o);
         }
 
         @Override
@@ -1206,56 +1212,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             return new DescendingEntrySet();
         }
 
-        private final class DescendingEntrySet extends AbstractSet<Map.Entry<K, V>> implements Serializable {
-
-            @Override
-            public Iterator<Map.Entry<K, V>> iterator() {
-                // Calls the outer AbstractNaryTreeMap's descending iterator
-                return descendingEntryIterator(null, true);
-            }
-
-            @Override
-            public int size() {
-                return AbstractNaryTreeMap.this.size();
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                if (!(o instanceof Map.Entry<?, ?> e)) return false;
-                Object key = e.getKey();
-                if (key == null) return false;
-
-                try {
-                    V v = AbstractNaryTreeMap.this.get(key);
-                    return Objects.equals(v, e.getValue()) && (v != null || AbstractNaryTreeMap.this.containsKey(key));
-                } catch (ClassCastException ex) {
-                    return false;
-                }
-            }
-
-            @Override
-            public boolean remove(Object o) {
-                if (!(o instanceof Map.Entry<?, ?> e)) return false;
-                Object key = e.getKey();
-                if (key == null) return false;
-
-                try {
-                    V v = AbstractNaryTreeMap.this.get(key);
-                    if (Objects.equals(v, e.getValue()) && (v != null || AbstractNaryTreeMap.this.containsKey(key))) {
-                        AbstractNaryTreeMap.this.remove(key);
-                        return true;
-                    }
-                    return false;
-                } catch (ClassCastException ex) {
-                    return false;
-                }
-            }
-
-            @Override
-            public void clear() {
-                AbstractNaryTreeMap.this.clear();
-            }
-        }
         public NavigableSet<K> keySet() {
             return navigableKeySet();
         }
@@ -1328,6 +1284,57 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public int size() {
             return AbstractNaryTreeMap.this.size();
+        }
+
+        private final class DescendingEntrySet extends AbstractSet<Map.Entry<K, V>> implements Serializable {
+
+            @Override
+            public Iterator<Map.Entry<K, V>> iterator() {
+                // Calls the outer AbstractNaryTreeMap's descending iterator
+                return descendingEntryIterator(null, true);
+            }
+
+            @Override
+            public int size() {
+                return AbstractNaryTreeMap.this.size();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                if (!(o instanceof Map.Entry<?, ?> e)) return false;
+                Object key = e.getKey();
+                if (key == null) return false;
+
+                try {
+                    V v = AbstractNaryTreeMap.this.get(key);
+                    return Objects.equals(v, e.getValue()) && (v != null || AbstractNaryTreeMap.this.containsKey(key));
+                } catch (ClassCastException ex) {
+                    return false;
+                }
+            }
+
+            @Override
+            public boolean remove(Object o) {
+                if (!(o instanceof Map.Entry<?, ?> e)) return false;
+                Object key = e.getKey();
+                if (key == null) return false;
+
+                try {
+                    V v = AbstractNaryTreeMap.this.get(key);
+                    if (Objects.equals(v, e.getValue()) && (v != null || AbstractNaryTreeMap.this.containsKey(key))) {
+                        AbstractNaryTreeMap.this.remove(key);
+                        return true;
+                    }
+                    return false;
+                } catch (ClassCastException ex) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void clear() {
+                AbstractNaryTreeMap.this.clear();
+            }
         }
     }
 }
