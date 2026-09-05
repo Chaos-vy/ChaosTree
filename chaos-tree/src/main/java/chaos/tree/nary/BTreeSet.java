@@ -57,71 +57,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         }
     }
 
-    public static final class Builder<E> {
-        private int degree = DEFAULT_DEGREE;
-        private Comparator<? super E> comparator = null;
-        private float factor = 0.9f;
-
-        private Object[] flatArray = null;
-        private Iterator<E> sortedIterator = null;
-        private Collection<? extends E> collection = null;
-
-        private Builder() {}
-
-        public static <E> BTreeSet.Builder<E> newBuilder() {
-            return new BTreeSet.Builder<>();
-        }
-
-        public static <E> BTreeSet.Builder<E> degree(int degree) {
-            return BTreeSet.Builder.<E>newBuilder().setDegree(degree);
-        }
-
-        public BTreeSet.Builder<E> setDegree(int degree) {
-            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
-                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
-            }
-            this.degree = degree;
-            return this;
-        }
-
-        public BTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
-            this.comparator = comparator;
-            return this;
-        }
-
-        public BTreeSet.Builder<E> factor(float factor) {
-            if (factor < 0.5f || factor > 1.0f) {
-                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
-            }
-            this.factor = factor;
-            return this;
-        }
-
-        public BTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
-            this.flatArray = flatArray;
-            this.sortedIterator = null;
-            this.collection = null;
-            return this;
-        }
-
-        public BTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
-            this.sortedIterator = iterator;
-            this.flatArray = null;
-            this.collection = null;
-            return this;
-        }
-
-        public BTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
-            this.collection = c;
-            this.flatArray = null;
-            this.sortedIterator = null;
-            return this;
-        }
-        public BTreeSet<E> build() {
-            return new BTreeSet<>(this);
-        }
-    }
-
     /**
      * Streams strictly sorted data directly into the tree in O(N) time.
      * <p>
@@ -310,13 +245,13 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
-     * @param blast An array providing strictly sorted elements.
-     * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
-     *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
-     *                    have it 1.0f but after that any insert or remove information will
-     *                    trigger massive split, merge, borrow, array shifting.
-     *                    Hold the Chaos!!
+     * @param blast      An array providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     *                   Hold the Chaos!!
      */
     public void importFlatMatrix(Object[] blast, float fillFactor) {
 
@@ -569,7 +504,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         }
 
         BTreeNode<E> current = root;
-        int idx ;
+        int idx;
 
         while (true) {
             idx = searchNode(current, e);
@@ -662,7 +597,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
         parent.keyCount--;
     }
-
 
     @Override
     @SuppressWarnings("unchecked")
@@ -821,7 +755,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         return a;
     }
 
-
     private int populateArray(BTreeNode<E> node, Object[] array, int offset) {
         if (node.isLeaf()) {
             System.arraycopy(node.keys, 0, array, offset, node.keyCount);
@@ -834,6 +767,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return populateArray(node.child[node.keyCount], array, offset);
         }
     }
+
     @Override
     public Iterator<E> iterator() {
         return baseIterator(null, true);
@@ -852,6 +786,73 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @Override
     protected Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive) {
         return new BTreeReverseIterator(startKey, startInclusive);
+    }
+
+    public static final class Builder<E> {
+        private int degree = DEFAULT_DEGREE;
+        private Comparator<? super E> comparator = null;
+        private float factor = 0.9f;
+
+        private Object[] flatArray = null;
+        private Iterator<E> sortedIterator = null;
+        private Collection<? extends E> collection = null;
+
+        private Builder() {
+        }
+
+        public static <E> BTreeSet.Builder<E> newBuilder() {
+            return new BTreeSet.Builder<>();
+        }
+
+        public static <E> BTreeSet.Builder<E> degree(int degree) {
+            return BTreeSet.Builder.<E>newBuilder().setDegree(degree);
+        }
+
+        public BTreeSet.Builder<E> setDegree(int degree) {
+            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            }
+            this.degree = degree;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
+            this.comparator = comparator;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> factor(float factor) {
+            if (factor < 0.5f || factor > 1.0f) {
+                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+            }
+            this.factor = factor;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
+            this.flatArray = flatArray;
+            this.sortedIterator = null;
+            this.collection = null;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
+            this.sortedIterator = iterator;
+            this.flatArray = null;
+            this.collection = null;
+            return this;
+        }
+
+        public BTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
+            this.collection = c;
+            this.flatArray = null;
+            this.sortedIterator = null;
+            return this;
+        }
+
+        public BTreeSet<E> build() {
+            return new BTreeSet<>(this);
+        }
     }
 
     private final class BTreeIterator implements Iterator<E> {

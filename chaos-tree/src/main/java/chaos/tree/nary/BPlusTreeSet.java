@@ -55,102 +55,10 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         if (builder.flatArray != null) {
             buildFromSortedArray(builder.flatArray, builder.factor);
         } else if (builder.sortedIterator != null) {
-            bulkLoad(builder.sortedIterator, builder.factor);
+            buildFromSorted(builder.sortedIterator, builder.factor);
         } else if (builder.collection != null) {
             addAll(builder.collection);
         }
-    }
-
-    public static final class Builder<E> {
-        private int degree = DEFAULT_DEGREE;
-        private Comparator<? super E> comparator = null;
-        private float factor = 0.9f;
-
-        private Object[] flatArray = null;
-        private Iterator<E> sortedIterator = null;
-        private Collection<? extends E> collection = null;
-
-        private Builder() {}
-
-        // Allows starting with defaults: BPlusTreeSet.newBuilder().build()
-        public static <E> BPlusTreeSet.Builder<E> newBuilder() {
-            return new BPlusTreeSet.Builder<>();
-        }
-
-        // Convenience start: BPlusTreeSet.Builder.degree(16).build()
-        public static <E> BPlusTreeSet.Builder<E> degree(int degree) {
-            return BPlusTreeSet.Builder.<E>newBuilder().setDegree(degree);
-        }
-
-        public BPlusTreeSet.Builder<E> setDegree(int degree) {
-            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
-                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
-            }
-            this.degree = degree;
-            return this;
-        }
-
-        public BPlusTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
-            this.comparator = comparator;
-            return this;
-        }
-
-        public BPlusTreeSet.Builder<E> factor(float factor) {
-            if (factor < 0.5f || factor > 1.0f) {
-                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
-            }
-            this.factor = factor;
-            return this;
-        }
-
-        public BPlusTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
-            this.flatArray = flatArray;
-            this.sortedIterator = null; // Clear others
-            this.collection = null;
-            return this;
-        }
-
-        public BPlusTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
-            this.sortedIterator = iterator;
-            this.flatArray = null;      // Clear others
-            this.collection = null;
-            return this;
-        }
-
-        public BPlusTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
-            this.collection = c;
-            this.flatArray = null;      // Clear others
-            this.sortedIterator = null;
-            return this;
-        }
-
-        // Return the actual Set!
-        public BPlusTreeSet<E> build() {
-            return new BPlusTreeSet<>(this);
-        }
-    }
-    /**
-     * Streams strictly sorted data directly into the tree in O(N) time.
-     * <p>
-     * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
-     * ascending order according to this tree's comparator. If the data is unsorted,
-     * the tree structure will be corrupted.
-     *
-     * @param sortedData An iterator providing strictly sorted elements.
-     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
-     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
-     *                   have it 1.0f but after that any insert or remove information will
-     *                   trigger massive split, merge, borrow, array shifting.
-     */
-    public void bulkLoad(Iterator<E> sortedData, float fillFactor) {
-        if (!isEmpty()) {
-            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
-        }
-        if (fillFactor < 0.5f || fillFactor > 1.0f) {
-            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
-        }
-        buildFromSorted(sortedData, fillFactor);
     }
 
     @Override
@@ -158,7 +66,28 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         return new BPlusTreeNode<>(degree, isLeaf);
     }
 
-    void buildFromSorted(Iterator<E> it, float fillFactor) {
+    /**
+     * Streams strictly sorted data directly into the tree in O(N) time.
+     * <p>
+     * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
+     * ascending order according to this tree's comparator. If the data is unsorted,
+     * the tree structure will be corrupted.
+     *
+     * @param sorted An iterator providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert or remove information will
+     *                   trigger massive split, merge, borrow, array shifting.
+     */
+    @Override
+    public void buildFromSorted(Iterator<E> sorted, float fillFactor) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
         int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor)); //This is most important I came to mark it agin
 
         @SuppressWarnings("unchecked")
@@ -168,16 +97,16 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         rightEdge[0] = createNode(degree, true);
         root = rightEdge[0];
 
-        while (it.hasNext()) {
+        while (sorted.hasNext()) {
             BPlusTreeNode<E> rightLeaf = rightEdge[0];
 
             if (rightLeaf.keyCount < targetKeys) {//The diff!!
-                rightLeaf.keys[rightLeaf.keyCount++] = it.next();
+                rightLeaf.keys[rightLeaf.keyCount++] = sorted.next();
                 size++;
             } else {
                 // The VERY NEXT element is our routing key.
                 // We need to pull it from the iterator, but we will duplicate it later!
-                E routingKey = it.next();
+                E routingKey = sorted.next();
                 size++;
 
                 int level = 1;
@@ -232,13 +161,13 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
-     * @param blast An array providing strictly sorted elements.
-     * @param fillFactor  A value between 0.5 and 1.0 representing how full to pack each node.
-     *                    Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *                    A use of 0.9f is used for bulk loading in my tree. For read purpose you can
-     *                    have it 1.0f but after that any insert will
-     *                    trigger massive split, and new creation of node.
-     *                    Hold the Chaos!!
+     * @param blast      An array providing strictly sorted elements.
+     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
+     *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
+     *                   have it 1.0f but after that any insert will
+     *                   trigger massive split, and new creation of node.
+     *                   Hold the Chaos!!
      */
     public void importFlatMatrix(Object[] blast, float fillFactor) {
 
@@ -596,7 +525,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
     @Override
     public boolean contains(Object o) {
-        if(root == null || o == null){
+        if (root == null || o == null) {
             return false;
         }
         try {
@@ -701,6 +630,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         }
     }
 
+    //You can use this or identify as exportFlatMatrix();
     @Override
     public Object[] toArray() {
         Object[] array = new Object[size];
@@ -764,6 +694,75 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     @Override
     protected Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive) {
         return new BPlusTreeReverseIterator(startKey, startInclusive);
+    }
+
+    public static final class Builder<E> {
+        private int degree = DEFAULT_DEGREE;
+        private Comparator<? super E> comparator = null;
+        private float factor = 0.9f;
+
+        private Object[] flatArray = null;
+        private Iterator<E> sortedIterator = null;
+        private Collection<? extends E> collection = null;
+
+        private Builder() {
+        }
+
+        // Allows starting with defaults: BPlusTreeSet.newBuilder().build()
+        public static <E> BPlusTreeSet.Builder<E> newBuilder() {
+            return new BPlusTreeSet.Builder<>();
+        }
+
+        // Convenience start: BPlusTreeSet.Builder.degree(16).build()
+        public static <E> BPlusTreeSet.Builder<E> degree(int degree) {
+            return BPlusTreeSet.Builder.<E>newBuilder().setDegree(degree);
+        }
+
+        public BPlusTreeSet.Builder<E> setDegree(int degree) {
+            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            }
+            this.degree = degree;
+            return this;
+        }
+
+        public BPlusTreeSet.Builder<E> comparator(Comparator<? super E> comparator) {
+            this.comparator = comparator;
+            return this;
+        }
+
+        public BPlusTreeSet.Builder<E> factor(float factor) {
+            if (factor < 0.5f || factor > 1.0f) {
+                throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+            }
+            this.factor = factor;
+            return this;
+        }
+
+        public BPlusTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
+            this.flatArray = flatArray;
+            this.sortedIterator = null;
+            this.collection = null;
+            return this;
+        }
+
+        public BPlusTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
+            this.sortedIterator = iterator;
+            this.flatArray = null;
+            this.collection = null;
+            return this;
+        }
+
+        public BPlusTreeSet.Builder<E> importCollection(Collection<? extends E> c) {
+            this.collection = c;
+            this.flatArray = null;
+            this.sortedIterator = null;
+            return this;
+        }
+
+        public BPlusTreeSet<E> build() {
+            return new BPlusTreeSet<>(this);
+        }
     }
 
     private final class BPlusTreeIterator implements Iterator<E> {
