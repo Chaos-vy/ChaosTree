@@ -195,7 +195,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             size--;
             modCount++;
             return true;
-        }catch (ClassCastException | NullPointerException e) {
+        } catch (ClassCastException | NullPointerException e) {
             return false;
         }
     }

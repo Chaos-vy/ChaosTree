@@ -150,8 +150,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 V oldVal = current.value;
                 current.value = value;
                 return oldVal;
-            }
-            else if (cmp < 0) current = current.left;
+            } else if (cmp < 0) current = current.left;
             else current = current.right;
         }
         N newNode = createNode(key, value);

@@ -133,7 +133,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             size--;
             modCount++;
             return true;
-        }catch (ClassCastException | NullPointerException e) {
+        } catch (ClassCastException | NullPointerException e) {
             return false;
         }
 
