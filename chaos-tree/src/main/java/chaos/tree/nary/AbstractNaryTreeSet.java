@@ -24,6 +24,8 @@ import java.util.SortedSet;
 /**
  * Base Engine for B-Tree and B+Tree variants.
  * Fuses CLRS node arithmetic with Lehman & Yao concurrent/bottom-up memory layout.
+ * Well don't think it's concurrent
+ * My self still working on Multithreading (not working learning!!)
  * The add and remove and build from sorted is played by concrete classes.
  */
 sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> extends AbstractSet<E>
@@ -31,7 +33,9 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
-
+    private static final String RESET = "\u001B[0m";
+    private static final String CYAN = "\u001B[1;38;2;0;229;255m";       // #00E5FF
+    private static final String STRUCTURE = "\u001B[38;2;84;110;122m";        // #546E7A
     protected final int degree;
     protected final int maxKeys;
     protected final int minKeys;
@@ -191,6 +195,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     }
 
     protected abstract Iterator<E> baseIterator(E startKey, boolean startInclusive);
+
     protected abstract Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive);
 
     @Override
@@ -309,10 +314,6 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         buildString(sb, root, "", true, style);
         return sb.toString();
     }
-
-    private static final String RESET = "\u001B[0m";
-    private static final String CYAN = "\u001B[1;38;2;0;229;255m";       // #00E5FF
-    private static final String STRUCTURE = "\u001B[38;2;84;110;122m";        // #546E7A
 
     private void buildString(StringBuilder sb, N node, String prefix, boolean isTail, Style style) {
         String lastBranch = (style == Style.UNICODE) ? "└── " : "\\-- ";
@@ -627,7 +628,9 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
                 private E lastReturned = null;
                 private long expectedModCount = AbstractNaryTreeSet.this.modCount;
 
-                { advance(); }
+                {
+                    advance();
+                }
 
                 private void advance() {
                     if (backingIt.hasNext()) {
@@ -684,7 +687,9 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
                 private E lastReturned = null;
                 private long expectedModCount = AbstractNaryTreeSet.this.modCount;
 
-                { advance(); }
+                {
+                    advance();
+                }
 
                 private void advance() {
                     if (backingIt.hasNext()) {
