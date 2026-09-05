@@ -1,0 +1,26 @@
+Benchmark                                                  (factor)   (size)  Mode  Cnt          Score     Error   Units
+WriteHeavyMap.bPlusTreeDragonFeed                              0.8f  5000000  avgt   15          5.305 ±   0.045   ms/op
+WriteHeavyMap.bPlusTreeDragonFeed:gc.alloc.rate                0.8f  5000000  avgt   15       9492.839 ±  80.129  MB/sec
+WriteHeavyMap.bPlusTreeDragonFeed:gc.alloc.rate.norm           0.8f  5000000  avgt   15   52807338.612 ±   0.154    B/op
+WriteHeavyMap.bPlusTreeDragonFeed:gc.count                     0.8f  5000000  avgt   15        235.000            counts
+WriteHeavyMap.bPlusTreeDragonFeed:gc.time                      0.8f  5000000  avgt   15        677.000                ms
+WriteHeavyMap.bPlusTreeMapBulkLoad                             0.8f  5000000  avgt   15         35.857 ±   0.303   ms/op
+WriteHeavyMap.bPlusTreeMapBulkLoad:gc.alloc.rate               0.8f  5000000  avgt   15       1289.788 ±  10.815  MB/sec
+WriteHeavyMap.bPlusTreeMapBulkLoad:gc.alloc.rate.norm          0.8f  5000000  avgt   15   48498181.257 ±   1.813    B/op
+WriteHeavyMap.bPlusTreeMapBulkLoad:gc.count                    0.8f  5000000  avgt   15         36.000            counts
+WriteHeavyMap.bPlusTreeMapBulkLoad:gc.time                     0.8f  5000000  avgt   15        131.000                ms
+WriteHeavyMap.bPlusTreeMapIterativePut                         0.8f  5000000  avgt   15        216.065 ±   2.778   ms/op
+WriteHeavyMap.bPlusTreeMapIterativePut:gc.alloc.rate           0.8f  5000000  avgt   15        383.981 ±   4.897  MB/sec
+WriteHeavyMap.bPlusTreeMapIterativePut:gc.alloc.rate.norm      0.8f  5000000  avgt   15   86994733.493 ±   2.740    B/op
+WriteHeavyMap.bPlusTreeMapIterativePut:gc.count                0.8f  5000000  avgt   15         22.000            counts
+WriteHeavyMap.bPlusTreeMapIterativePut:gc.time                 0.8f  5000000  avgt   15         84.000                ms
+WriteHeavyMap.jdkTreeMapBulkLoad                               0.8f  5000000  avgt   15         49.023 ±   3.829   ms/op
+WriteHeavyMap.jdkTreeMapBulkLoad:gc.alloc.rate                 0.8f  5000000  avgt   15       3907.614 ± 273.920  MB/sec
+WriteHeavyMap.jdkTreeMapBulkLoad:gc.alloc.rate.norm            0.8f  5000000  avgt   15  200000250.375 ±  13.025    B/op
+WriteHeavyMap.jdkTreeMapBulkLoad:gc.count                      0.8f  5000000  avgt   15        139.000            counts
+WriteHeavyMap.jdkTreeMapBulkLoad:gc.time                       0.8f  5000000  avgt   15       1290.000                ms
+WriteHeavyMap.jdkTreeMapIterativePut                           0.8f  5000000  avgt   15        691.179 ±   9.714   ms/op
+WriteHeavyMap.jdkTreeMapIterativePut:gc.alloc.rate             0.8f  5000000  avgt   15        275.966 ±   3.829  MB/sec
+WriteHeavyMap.jdkTreeMapIterativePut:gc.alloc.rate.norm        0.8f  5000000  avgt   15  200002392.178 ±   5.220    B/op
+WriteHeavyMap.jdkTreeMapIterativePut:gc.count                  0.8f  5000000  avgt   15         63.000            counts
+WriteHeavyMap.jdkTreeMapIterativePut:gc.time                   0.8f  5000000  avgt   15        884.000                ms

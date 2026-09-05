@@ -1,0 +1,26 @@
+Benchmark                                                                   (size)  Mode  Cnt          Score    Error   Units
+WriteHeavyMapShuffled.avlTreeMapIterativePutShuffled                       5000000  avgt   15          4.715 ±  0.295    s/op
+WriteHeavyMapShuffled.avlTreeMapIterativePutShuffled:gc.alloc.rate         5000000  avgt   15         56.807 ±  3.347  MB/sec
+WriteHeavyMapShuffled.avlTreeMapIterativePutShuffled:gc.alloc.rate.norm    5000000  avgt   15  280005049.067 ± 17.666    B/op
+WriteHeavyMapShuffled.avlTreeMapIterativePutShuffled:gc.count              5000000  avgt   15         37.000           counts
+WriteHeavyMapShuffled.avlTreeMapIterativePutShuffled:gc.time               5000000  avgt   15       1195.000               ms
+WriteHeavyMapShuffled.bPlusTreeMapIterativePutShuffled                     5000000  avgt   15          4.142 ±  0.088    s/op
+WriteHeavyMapShuffled.bPlusTreeMapIterativePutShuffled:gc.alloc.rate       5000000  avgt   15         32.882 ±  0.698  MB/sec
+WriteHeavyMapShuffled.bPlusTreeMapIterativePutShuffled:gc.alloc.rate.norm  5000000  avgt   15  142783842.133 ±  8.833    B/op
+WriteHeavyMapShuffled.bPlusTreeMapIterativePutShuffled:gc.count            5000000  avgt   15         30.000           counts
+WriteHeavyMapShuffled.bPlusTreeMapIterativePutShuffled:gc.time             5000000  avgt   15        529.000               ms
+WriteHeavyMapShuffled.bTreeMapIterativePutShuffled                         5000000  avgt   15          4.160 ±  0.092    s/op
+WriteHeavyMapShuffled.bTreeMapIterativePutShuffled:gc.alloc.rate           5000000  avgt   15         32.654 ±  0.719  MB/sec
+WriteHeavyMapShuffled.bTreeMapIterativePutShuffled:gc.alloc.rate.norm      5000000  avgt   15  142394364.267 ± 12.037    B/op
+WriteHeavyMapShuffled.bTreeMapIterativePutShuffled:gc.count                5000000  avgt   15         30.000           counts
+WriteHeavyMapShuffled.bTreeMapIterativePutShuffled:gc.time                 5000000  avgt   15        514.000               ms
+WriteHeavyMapShuffled.jdkTreeMapIterativePutShuffled                       5000000  avgt   15          4.413 ±  0.176    s/op
+WriteHeavyMapShuffled.jdkTreeMapIterativePutShuffled:gc.alloc.rate         5000000  avgt   15         60.588 ±  2.348  MB/sec
+WriteHeavyMapShuffled.jdkTreeMapIterativePutShuffled:gc.alloc.rate.norm    5000000  avgt   15  280005030.400 ± 14.164    B/op
+WriteHeavyMapShuffled.jdkTreeMapIterativePutShuffled:gc.count              5000000  avgt   15         37.000           counts
+WriteHeavyMapShuffled.jdkTreeMapIterativePutShuffled:gc.time               5000000  avgt   15       1175.000               ms
+WriteHeavyMapShuffled.rbtTreeMapIterativePutShuffled                       5000000  avgt   15          4.398 ±  0.154    s/op
+WriteHeavyMapShuffled.rbtTreeMapIterativePutShuffled:gc.alloc.rate         5000000  avgt   15         60.778 ±  2.071  MB/sec
+WriteHeavyMapShuffled.rbtTreeMapIterativePutShuffled:gc.alloc.rate.norm    5000000  avgt   15  280005036.267 ± 12.037    B/op
+WriteHeavyMapShuffled.rbtTreeMapIterativePutShuffled:gc.count              5000000  avgt   15         39.000           counts
+WriteHeavyMapShuffled.rbtTreeMapIterativePutShuffled:gc.time               5000000  avgt   15       1230.000               ms
