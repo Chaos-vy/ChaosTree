@@ -631,6 +631,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, leftChild);
+                        leftChild.parent = parent;               // FIX: parent pointer
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -638,11 +639,13 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent.keyCount < targetKeys) {
                         parent.keys[parent.keyCount] = routingKey;
                         parent.setChild(parent.keyCount + 1, rightChild);
+                        rightChild.parent = parent;              // FIX: parent pointer
                         parent.keyCount++;
                         break;
                     } else {
                         BPlusTreeMapNode<K, V> newInternal = createNode(degree, false);
                         newInternal.setChild(0, rightChild);
+                        rightChild.parent = newInternal;         // FIX: parent pointer
                         rightEdge[level] = newInternal;
 
                         leftChild = parent;
@@ -653,6 +656,45 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             }
         }
 
+        int highestLevel = rightEdge.length - 1;
+        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
+
+        for (int level = highestLevel; level >= 1; level--) {
+            BPlusTreeMapNode<K, V> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+                    if (node.child[0] != null) node.child[0].parent = node;
+
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+                    rightEdge[level] = leftSib;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
+            }
+        }
+
+        // FIX: leaf fixup moved below the internal loop
         if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
             BPlusTreeMapNode<K, V> node = rightEdge[0];
             BPlusTreeMapNode<K, V> parent = rightEdge[1];
@@ -679,38 +721,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             }
         }
 
-        for (int level = 1; level < 32; level++) {
-            BPlusTreeMapNode<K, V> node = rightEdge[level];
-            if (node == null) break;
-            if (node.keyCount == 0 && node != this.root) {
-                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
-                int childIdx = parent.keyCount;
-                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
-
-                if (leftSib.keyCount > minKeys) {
-                    node.keys[0] = parent.keys[childIdx - 1];
-                    node.child[1] = node.child[0];
-                    node.child[0] = leftSib.child[leftSib.keyCount];
-                    if (node.child[0] != null) node.child[0].parent = node;
-
-                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                    leftSib.keys[leftSib.keyCount - 1] = null;
-                    leftSib.child[leftSib.keyCount] = null;
-                    leftSib.keyCount--;
-                    node.keyCount++;
-                } else {
-                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
-                    if (leftSib.child[leftSib.keyCount + 1] != null) {
-                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
-                    }
-                    leftSib.keyCount++;
-
-                    parent.keys[childIdx - 1] = null;
-                    parent.child[childIdx] = null;
-                    parent.keyCount--;
-                }
-            }
+        if (root.keyCount == 0 && !root.isLeaf()) {
+            root = root.child[0];
+            root.parent = null;
         }
         this.modCount++;
     }
@@ -752,7 +765,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             i += chunk;
 
             if (i < totalSize) {
-                K routingKey = (K) inKeys[i]; // B+Tree doesn't consume the element
+                K routingKey = (K) inKeys[i];
 
                 int level = 1;
                 while (true) {
@@ -760,6 +773,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level - 1].parent = parent;
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -772,6 +786,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                         for (int d = level - 1; d >= 0; d--) {
                             BPlusTreeMapNode<K, V> newNode = createNode(degree, d == 0);
                             prevInternal.setChild(prevInternal.keyCount, newNode);
+                            newNode.parent = prevInternal;
 
                             if (d == 0) {
                                 rightEdge[0].next = newNode;
@@ -785,6 +800,44 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     } else {
                         level++;
                     }
+                }
+            }
+        }
+
+        int highestLevel = rightEdge.length - 1;
+        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
+
+        for (int level = highestLevel; level >= 1; level--) {
+            BPlusTreeMapNode<K, V> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+                    if (node.child[0] != null) node.child[0].parent = node;
+
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+                    rightEdge[level] = leftSib;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
                 }
             }
         }
@@ -815,40 +868,10 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             }
         }
 
-        for (int level = 1; level < 10; level++) {
-            BPlusTreeMapNode<K, V> node = rightEdge[level];
-            if (node == null) break;
-            if (node.keyCount == 0 && node != this.root) {
-                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
-                int childIdx = parent.keyCount;
-                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
-
-                if (leftSib.keyCount > minKeys) {
-                    node.keys[0] = parent.keys[childIdx - 1];
-                    node.child[1] = node.child[0];
-                    node.child[0] = leftSib.child[leftSib.keyCount];
-                    if (node.child[0] != null) node.child[0].parent = node;
-
-                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                    leftSib.keys[leftSib.keyCount - 1] = null;
-                    leftSib.child[leftSib.keyCount] = null;
-                    leftSib.keyCount--;
-                    node.keyCount++;
-                } else {
-                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
-                    if (leftSib.child[leftSib.keyCount + 1] != null) {
-                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
-                    }
-                    leftSib.keyCount++;
-
-                    parent.keys[childIdx - 1] = null;
-                    parent.child[childIdx] = null;
-                    parent.keyCount--;
-                }
-            }
+        if (root.keyCount == 0 && !root.isLeaf()) {
+            root = root.child[0];
+            root.parent = null;
         }
-
         this.size = totalSize;
         this.modCount++;
     }

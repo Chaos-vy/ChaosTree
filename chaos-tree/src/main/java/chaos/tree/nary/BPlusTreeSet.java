@@ -124,6 +124,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, leftChild);
+                        leftChild.parent = parent;                // FIX
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -131,11 +132,13 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     if (parent.keyCount < targetKeys) {
                         parent.keys[parent.keyCount] = routingKey;
                         parent.setChild(parent.keyCount + 1, rightChild);
+                        rightChild.parent = parent;                // FIX
                         parent.keyCount++;
                         break;
                     } else {
                         BPlusTreeNode<E> newInternal = createNode(degree, false);
                         newInternal.setChild(0, rightChild);
+                        rightChild.parent = newInternal;           // FIX
                         rightEdge[level] = newInternal;
 
                         leftChild = parent;
@@ -146,31 +149,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
 
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BPlusTreeNode<E> node = rightEdge[0];
-            BPlusTreeNode<E> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+        // FIX: top-down, seeded from array length, before the leaf fixup
+        int highestLevel = rightEdge.length - 1;
+        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-                parent.keys[childIdx - 1] = node.keys[0];
-            } else {
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
-
-                leftSib.next = node.next;
-                if (leftSib.next != null) {
-                    leftSib.next.prev = leftSib;
-                }
-            }
-        }
-
-        for (int level = 1; level < 32; level++) {
+        for (int level = highestLevel; level >= 1; level--) {
             BPlusTreeNode<E> node = rightEdge[level];
             if (node == null) break;
             if (node.keyCount == 0 && node != this.root) {
@@ -196,12 +179,43 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                         leftSib.child[leftSib.keyCount + 1].parent = leftSib;
                     }
                     leftSib.keyCount++;
+                    rightEdge[level] = leftSib;                    // FIX
 
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
                 }
             }
+        }
+
+        // FIX: leaf fixup moved after the internal loop
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BPlusTreeNode<E> node = rightEdge[0];
+            BPlusTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+                parent.keys[childIdx - 1] = node.keys[0];
+            } else {
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+
+                leftSib.next = node.next;
+                if (leftSib.next != null) {
+                    leftSib.next.prev = leftSib;
+                }
+            }
+        }
+        // Clean up phantom root if the ghost spine reached the top
+        if (root.keyCount == 0 && !root.isLeaf()) {
+            root = root.child[0];
+            root.parent = null;
         }
         this.modCount++;
     }
@@ -216,31 +230,13 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
      * @param blast      An array providing strictly sorted elements.
-     * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
+     * @param factor A value between 0.5 and 1.0 representing how full to pack each node.
      *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
      *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
      *                   have it 1.0f but after that any insert will
      *                   trigger massive split, and new creation of node.
      *                   Hold the Chaos!!
      */
-    public void importFlatMatrix(Object[] blast, float fillFactor) {
-
-        if (blast == null || blast.length == 0) return;
-
-        if (!isEmpty()) {
-            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
-        }
-
-        if (degree < 32) {
-            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
-        }
-
-        if (fillFactor < 0.5f || fillFactor > 1.0f) {
-            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
-        }
-        buildFromSortedArray(blast, fillFactor);
-    }
-
     @SuppressWarnings("unchecked")
     private void buildFromSortedArray(Object[] blast, float factor) {
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
@@ -268,6 +264,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level - 1].parent = parent;      // FIX
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -280,6 +277,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                         for (int d = level - 1; d >= 0; d--) {
                             BPlusTreeNode<E> newNode = createNode(degree, d == 0);
                             prevInternal.setChild(prevInternal.keyCount, newNode);
+                            newNode.parent = prevInternal;          // FIX
 
                             if (d == 0) {
                                 rightEdge[0].next = newNode;
@@ -297,31 +295,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
 
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BPlusTreeNode<E> node = rightEdge[0];
-            BPlusTreeNode<E> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+        // FIX: top-down, seeded from array length, before the leaf fixup
+        int highestLevel = rightEdge.length - 1;
+        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-                parent.keys[childIdx - 1] = node.keys[0];
-            } else {
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
-
-                leftSib.next = node.next;
-                if (leftSib.next != null) {
-                    leftSib.next.prev = leftSib;
-                }
-            }
-        }
-
-        for (int level = 0; level < 10; level++) {
+        for (int level = highestLevel; level >= 1; level--) {
             BPlusTreeNode<E> node = rightEdge[level];
             if (node == null) break;
             if (node.keyCount == 0 && node != this.root) {
@@ -347,12 +325,42 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                         leftSib.child[leftSib.keyCount + 1].parent = leftSib;
                     }
                     leftSib.keyCount++;
+                    rightEdge[level] = leftSib;                    // FIX
 
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
                 }
             }
+        }
+
+        // FIX: leaf fixup moved after the internal loop
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BPlusTreeNode<E> node = rightEdge[0];
+            BPlusTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+                parent.keys[childIdx - 1] = node.keys[0];
+            } else {
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+
+                leftSib.next = node.next;
+                if (leftSib.next != null) {
+                    leftSib.next.prev = leftSib;
+                }
+            }
+        }
+        if (root.keyCount == 0 && !root.isLeaf()) {
+            root = root.child[0];
+            root.parent = null;
         }
 
         this.size = totalSize;
@@ -733,8 +741,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             current = current.child[0];
         }
         while (current != null) {
-            for (int i = 0; i < current.keyCount; i++) action.accept((E) current.keys[i]);
-            if (expectedModCount != modCount) throw new ConcurrentModificationException();
+            for (int i = 0; i < current.keyCount; i++)
+            {
+                action.accept((E) current.keys[i]);
+                if (expectedModCount != modCount) throw new ConcurrentModificationException();
+            }
             current = current.next;
         }
     }

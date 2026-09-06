@@ -1,11 +1,13 @@
 package chaos.tree.nary;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.function.Consumer;
 
@@ -243,7 +245,10 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             }
         }
 
-        for (int level = 1; level < 32; level++) {
+        int highestLevel = 31;
+        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
+
+        for (int level = highestLevel; level >= 1; level--) {
             BTreeNode<E> node = rightEdge[level];
             if (node == null) break;
             if (node.keyCount == 0 && node != this.root) {
@@ -269,12 +274,37 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                         leftSib.child[leftSib.keyCount + 1].parent = leftSib;
                     }
                     leftSib.keyCount++;
+                    rightEdge[level] = leftSib;
 
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
                 }
             }
+        }
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+        if (root.keyCount == 0 && !root.isLeaf()) {
+            root = root.child[0];
+            root.parent = null;
         }
         this.modCount++;
     }
@@ -366,28 +396,10 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             }
         }
 
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BTreeNode<E> node = rightEdge[0];
-            BTreeNode<E> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+        int highestLevel = 9;
+        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = parent.keys[childIdx - 1];
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-            } else {
-                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                leftSib.keyCount++;
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
-            }
-        }
-
-        for (int level = 1; level < 10; level++) {
+        for (int level = highestLevel; level >= 1; level--) {
             BTreeNode<E> node = rightEdge[level];
             if (node == null) break;
             if (node.keyCount == 0 && node != this.root) {
@@ -413,6 +425,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                         leftSib.child[leftSib.keyCount + 1].parent = leftSib;
                     }
                     leftSib.keyCount++;
+                    rightEdge[level] = leftSib;
 
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
@@ -420,7 +433,30 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 }
             }
         }
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeNode<E> leftSib = parent.child[childIdx - 1];
 
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+        if (root.keyCount == 0 && !root.isLeaf()) {
+            root = root.child[0];
+            root.parent = null;
+        }
         this.size = totalSize;
         this.modCount++;
     }
@@ -787,7 +823,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @Override
     @SuppressWarnings("unchecked")
     public void forEach(Consumer<? super E> action) {
-        java.util.Objects.requireNonNull(action);
+        Objects.requireNonNull(action);
         long expectedModCount = modCount;
 
         if (root == null) return;
@@ -802,7 +838,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             action.accept((E) current.keys[index]);
 
             if (expectedModCount != modCount) {
-                throw new java.util.ConcurrentModificationException();
+                throw new ConcurrentModificationException();
             }
             if (!current.isLeaf()) {
                 current = current.child[index + 1];
@@ -843,7 +879,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         if (a.length < size) {
-            a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+            a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
         }
         if (size == 0 || root == null) {
             if (a.length > size) a[size] = null;
