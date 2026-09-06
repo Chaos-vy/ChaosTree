@@ -525,7 +525,6 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor) {
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
         BTreeMapNode<K, V>[] rightEdge = (BTreeMapNode<K, V>[]) new BTreeMapNode[32];
-
         rightEdge[0] = createNode(degree, true);
         this.root = rightEdge[0];
 
@@ -546,11 +545,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 int level = 1;
                 while (true) {
                     BTreeMapNode<K, V> parent = rightEdge[level];
-
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, rightEdge[level - 1]);
-                        rightEdge[level - 1].parent = parent;
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -564,8 +561,6 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                         for (int d = level - 1; d >= 0; d--) {
                             BTreeMapNode<K, V> newNode = createNode(degree, d == 0);
                             prevInternal.setChild(prevInternal.keyCount, newNode);
-                            newNode.parent = prevInternal;
-
                             rightEdge[d] = newNode;
                             prevInternal = newNode;
                         }
@@ -576,8 +571,33 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 }
             }
         }
+
+        for (int level = 1; level < 32; level++) {
+            BTreeMapNode<K, V> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BTreeMapNode<K, V> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+                node.keys[0] = parent.keys[childIdx - 1];
+                node.values[0] = parent.values[childIdx - 1];
+                node.child[1] = node.child[0];
+                node.child[0] = leftSib.child[leftSib.keyCount];
+                if (node.child[0] != null) node.child[0].parent = node;
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
+                leftSib.child[leftSib.keyCount] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            }
+        }
+        while (!this.root.isLeaf() && this.root.keyCount == 0) {
+            this.root = this.root.child[0];
+            this.root.parent = null;
+        }
         this.modCount++;
     }
+
 
     @SuppressWarnings("unchecked")
     public void importFlatMatrix(Object[][] blast, float factor) {
@@ -652,6 +672,33 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     }
                 }
             }
+        }
+        for (int level = 1; level < 32; level++) {
+            BTreeMapNode<K, V> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BTreeMapNode<K, V> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+                node.keys[0] = parent.keys[childIdx - 1];
+                node.values[0] = parent.values[childIdx - 1]; // Swap value!
+
+                node.child[1] = node.child[0];
+                node.child[0] = leftSib.child[leftSib.keyCount];
+                if (node.child[0] != null) node.child[0].parent = node;
+
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1]; // Swap value!
+
+                leftSib.child[leftSib.keyCount] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            }
+        }
+        while (!this.root.isLeaf() && this.root.keyCount == 0) {
+            this.root = this.root.child[0];
+            this.root.parent = null;
         }
         this.size = totalSize;
         this.modCount++;
