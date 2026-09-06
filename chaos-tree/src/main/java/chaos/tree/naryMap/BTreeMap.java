@@ -572,6 +572,32 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             }
         }
 
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeMapNode<K, V> node = rightEdge[0];
+            BTreeMapNode<K, V> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                node.values[0] = parent.values[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.values[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.values[leftSib.keyCount] = parent.values[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.values[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+
         for (int level = 1; level < 32; level++) {
             BTreeMapNode<K, V> node = rightEdge[level];
             if (node == null) break;
@@ -579,21 +605,36 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 BTreeMapNode<K, V> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
                 BTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
-                node.keys[0] = parent.keys[childIdx - 1];
-                node.values[0] = parent.values[childIdx - 1];
-                node.child[1] = node.child[0];
-                node.child[0] = leftSib.child[leftSib.keyCount];
-                if (node.child[0] != null) node.child[0].parent = node;
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
-                leftSib.child[leftSib.keyCount] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.values[0] = parent.values[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+                    if (node.child[0] != null) node.child[0].parent = node;
+
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.values[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.values[leftSib.keyCount] = parent.values[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.values[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
             }
-        }
-        while (!this.root.isLeaf() && this.root.keyCount == 0) {
-            this.root = this.root.child[0];
-            this.root.parent = null;
         }
         this.modCount++;
     }
@@ -623,7 +664,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         if (totalSize == 0) return;
 
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
-        BTreeMapNode<K, V>[] rightEdge = (BTreeMapNode<K, V>[]) new BTreeMapNode[32];
+        BTreeMapNode<K, V>[] rightEdge = (BTreeMapNode<K, V>[]) new BTreeMapNode[10];
 
         rightEdge[0] = createNode(degree, true);
         this.root = rightEdge[0];
@@ -673,7 +714,32 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 }
             }
         }
-        for (int level = 1; level < 32; level++) {
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeMapNode<K, V> node = rightEdge[0];
+            BTreeMapNode<K, V> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                node.values[0] = parent.values[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.values[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.values[leftSib.keyCount] = parent.values[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.values[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+        for (int level = 1; level < 10; level++) {
             BTreeMapNode<K, V> node = rightEdge[level];
             if (node == null) break;
             if (node.keyCount == 0 && node != this.root) {
@@ -681,24 +747,35 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 int childIdx = parent.keyCount;
                 BTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
 
-                node.keys[0] = parent.keys[childIdx - 1];
-                node.values[0] = parent.values[childIdx - 1]; // Swap value!
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.values[0] = parent.values[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+                    if (node.child[0] != null) node.child[0].parent = node;
 
-                node.child[1] = node.child[0];
-                node.child[0] = leftSib.child[leftSib.keyCount];
-                if (node.child[0] != null) node.child[0].parent = node;
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.values[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.values[leftSib.keyCount] = parent.values[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
 
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1]; // Swap value!
-
-                leftSib.child[leftSib.keyCount] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
+                    parent.keys[childIdx - 1] = null;
+                    parent.values[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
             }
-        }
-        while (!this.root.isLeaf() && this.root.keyCount == 0) {
-            this.root = this.root.child[0];
-            this.root.parent = null;
         }
         this.size = totalSize;
         this.modCount++;

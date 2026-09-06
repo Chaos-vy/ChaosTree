@@ -222,6 +222,26 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 }
             }
         }
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
 
         for (int level = 1; level < 32; level++) {
             BTreeNode<E> node = rightEdge[level];
@@ -230,19 +250,31 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 BTreeNode<E> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
                 BTreeNode<E> leftSib = parent.child[childIdx - 1];
-                node.keys[0] = parent.keys[childIdx - 1];
-                node.child[1] = node.child[0];
-                node.child[0] = leftSib.child[leftSib.keyCount];
-                if (node.child[0] != null) node.child[0].parent = node;
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.child[leftSib.keyCount] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+
+                    if (node.child[0] != null) node.child[0].parent = node;
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
             }
-        }
-        while (!this.root.isLeaf() && this.root.keyCount == 0) {
-            this.root = this.root.child[0];
-            this.root.parent = null;
         }
         this.modCount++;
     }
@@ -289,7 +321,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         int totalSize = sortedArray.length;
         if (totalSize == 0) return;
 
-        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
+        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[10];
         rightEdge[0] = createNode(degree, true);
         this.root = rightEdge[0];
 
@@ -334,7 +366,28 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             }
         }
 
-        for (int level = 1; level < 32; level++) {
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+
+        for (int level = 1; level < 10; level++) {
             BTreeNode<E> node = rightEdge[level];
             if (node == null) break;
             if (node.keyCount == 0 && node != this.root) {
@@ -342,20 +395,30 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 int childIdx = parent.keyCount;
                 BTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-                node.keys[0] = parent.keys[childIdx - 1];
-                node.child[1] = node.child[0];
-                node.child[0] = leftSib.child[leftSib.keyCount];
-                node.child[0].parent = node;
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
 
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.child[leftSib.keyCount] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
+                    if (node.child[0] != null) node.child[0].parent = node;
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
             }
-        }
-        while (!this.root.isLeaf() && this.root.keyCount == 0) {
-            this.root = this.root.child[0];
-            this.root.parent = null;
         }
 
         this.size = totalSize;
