@@ -8,7 +8,7 @@ import org.openjdk.jmh.infra.Blackhole;
 /**
  * If you feel this is bias I did with TreeMap with array then bring a library which is does support like this!!
  * focus on benchmark
- * Default GC-> G1CC
+ * Default GC
  */
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +24,7 @@ public class WriteHeavyMap {
     @Param({"5000000"})
     public int size;
 
-    @Param({"0.8f"})
+    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
     public float factor;
 //    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
 // For benchmarkers just replace this benchmark and run the DragonFeed to show how density affects the node mapping.
@@ -86,7 +86,7 @@ public class WriteHeavyMap {
     @Benchmark
     public void bPlusTreeDragonFeed(Blackhole bh) {
         BTreeMap<Integer, String> map =
-                BTreeMap.Builder.<Integer, String>degree(96)
+                BTreeMap.Builder.<Integer, String>degree(64)
                         .factor(factor)
                         .importFlatMatrix(flatMatrix)
                         .build();
