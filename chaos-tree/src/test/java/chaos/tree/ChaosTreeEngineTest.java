@@ -21,23 +21,30 @@ public class ChaosTreeValidator {
         }
 
         Object[][] flatMatrix = new Object[][]{keys, values};
-        BPlusTreeMap<Integer, String> chaosTree =
-                BPlusTreeMap.Builder.<Integer, String>degree(64)
-                        .factor(1.0f) //full packing is used 1f 100% node are filled except last one.
-                        .importFlatMatrix(flatMatrix)
-                        .build();
 
-        boolean passed = true;
+        for(int degree = 32; degree <= 200;degree++){
+            float f = 0.5f;
+            for(int i =0;i<5;i++){
+                f += 0.1f;
+                if(f>1f) f = 1f;
+                BPlusTreeMap<Integer, String> chaosTree =
+                        BPlusTreeMap.Builder.<Integer, String>degree(degree)
+                                .factor(f) //full packing is used 1f 100% node are filled except last one.
+                                .importFlatMatrix(flatMatrix)
+                                .build();
+                boolean passed = true;
 
-        passed &= verifySize(truthMap, chaosTree);
-        passed &= verifyExactGets(truthMap, chaosTree, keys);
-        passed &= verifyIteration(truthMap, chaosTree);
-        passed &= verifyRandomDeletionGauntlet(chaosTree,keys);
+                passed &= verifySize(truthMap, chaosTree);
+                passed &= verifyExactGets(truthMap, chaosTree, keys);
+                passed &= verifyIteration(truthMap, chaosTree);
+                passed &= verifyRandomDeletionGauntlet(chaosTree,keys);
 
-        if (passed) {
-            System.out.println("SUCCESS: ChaosTree is structurally sound and mathematically identical to JDK TreeMap.");
-        } else {
-            System.err.println("Doomed by the way: ChaosTree has data corruption or invariant violations thanks by the way :(");
+                if (passed) {
+                    System.out.println("SUCCESS: ChaosTree is structurally sound and mathematically identical to JDK TreeMap.");
+                } else {
+                    System.err.println("Doomed by the way: ChaosTree has data corruption or invariant violations thanks by the way :(");
+                }
+            }
         }
     }
 

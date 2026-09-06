@@ -174,65 +174,109 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      * turn the observation into a deterministic construction strategy.
      * </pre>
      */
-    void buildFromSorted(Iterator<E> it, float fillFactor) {
-        // Calculate the future mighty chaos target (e.g., 0.75 * 63 = 47 keys per node)
-        /*
-        Well lemme explain it. If I banged with 100% node capacity there will a tremendous trigger of merge and split node LOL
-         */
-        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
-        // Track the right-most path of the tree (index 0 is the Leaf layer)
-        @SuppressWarnings("unchecked")
-        BTreeNode<E>[] rightEdge = new BTreeNode[64]; // 64 2,3,4 trees structure rest will never touch that depth LOL
-
-        int height = 0;
+    @Override
+    @SuppressWarnings("unchecked")
+    void buildFromSorted(Iterator<? extends E> it, float factor) {
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
+        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
         rightEdge[0] = createNode(degree, true);
-        root = rightEdge[0];
+        this.root = rightEdge[0];
 
         while (it.hasNext()) {
-            BTreeNode<E> rightLeaf = rightEdge[0];
+            BTreeNode<E> leaf = rightEdge[0];
+            while (leaf.keyCount < targetKeys && it.hasNext()) {
+                leaf.keys[leaf.keyCount] = it.next();
+                leaf.keyCount++;
+                this.size++;
+            }
 
-            if (rightLeaf.keyCount < targetKeys) {
-                // 1. FAST APPEND: Shove the data into the leaf!
-                rightLeaf.keys[rightLeaf.keyCount++] = it.next();
-                size++;
-            } else {
-                // The VERY NEXT element acts as the routing key up above!
-                E routingKey = it.next();
-                size++;
+            if (it.hasNext()) {
+                E sepKey = it.next();
+                this.size++;
 
-                // Find the lowest level on the right edge that has room for the routing key
                 int level = 1;
-                while (level <= height && rightEdge[level].keyCount == targetKeys) {
-                    level++;
-                }
-                // If I ran out of height grow the tree upwards! (New Root)
-                if (level > height) {
-                    height++;
-                    BTreeNode<E> newRoot = createNode(degree, false);
-                    newRoot.child[0] = rightEdge[height - 1]; // Link old root
-                    rightEdge[height - 1].parent = newRoot;      // Set parent pointer!
+                while (true) {
+                    BTreeNode<E> parent = rightEdge[level];
+                    if (parent == null) {
+                        parent = createNode(degree, false);
+                        parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level] = parent;
+                        this.root = parent;
+                    }
 
-                    rightEdge[height] = newRoot;
-                    root = newRoot;
-                }
-                // Insert the routing key into the target level
-                BTreeNode<E> targetNode = rightEdge[level];
-                targetNode.keys[targetNode.keyCount++] = routingKey;
-                // 3. REBUILD DOWNWARD: Create a fresh empty path down to the leaf layer
-                for (int i = level - 1; i >= 0; i--) {
-                    BTreeNode<E> newNode = createNode(degree, i == 0);
-                    // Link it to the parent above it
-                    rightEdge[i + 1].child[rightEdge[i + 1].keyCount] = newNode;
-                    newNode.parent = rightEdge[i + 1]; // Set parent pointer!
-                    // Update tracking array
-                    rightEdge[i] = newNode;
+                    if (parent.keyCount < targetKeys) {
+                        parent.keys[parent.keyCount] = sepKey;
+                        parent.keyCount++;
+
+                        BTreeNode<E> prevInternal = parent;
+                        for (int d = level - 1; d >= 0; d--) {
+                            BTreeNode<E> newNode = createNode(degree, d == 0);
+                            prevInternal.setChild(prevInternal.keyCount, newNode);
+                            rightEdge[d] = newNode;
+                            prevInternal = newNode;
+                        }
+                        break;
+                    } else {
+                        level++;
+                    }
                 }
             }
         }
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-        // Optional: If the very last leaf didn't reach minKeys, the B-Tree rules technically
-        // allow the right-most edge to be underfull immediately after a bulk load.
-        // Future inserts will naturally fix it!
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+
+        for (int level = 1; level < 32; level++) {
+            BTreeNode<E> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BTreeNode<E> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+
+                    if (node.child[0] != null) node.child[0].parent = node;
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
+            }
+        }
+        this.modCount++;
     }
 
     /**
@@ -273,60 +317,114 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
     @SuppressWarnings("unchecked")
     private void buildFromSortedArray(Object[] sortedArray, float fillFactor) {
-        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor)); //came for this fix
+        int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
+        int totalSize = sortedArray.length;
+        if (totalSize == 0) return;
 
-        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
-        rightEdge[0] = new BTreeNode<>(degree, true);
+        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[10];
+        rightEdge[0] = createNode(degree, true);
         this.root = rightEdge[0];
 
-        int index = 0;
-        while (index < sortedArray.length) {
+        int i = 0;
+        while (i < totalSize) {
             BTreeNode<E> leaf = rightEdge[0];
-            int chunk = Math.min(targetKeys, sortedArray.length - index);
-            System.arraycopy(sortedArray, index, leaf.keys, 0, chunk);
-            leaf.keyCount = chunk;
-            this.size += chunk;
-            index += chunk;
+            int chunk = Math.min(targetKeys - leaf.keyCount, totalSize - i);
+            System.arraycopy(sortedArray, i, leaf.keys, leaf.keyCount, chunk);
+            leaf.keyCount += chunk;
+            i += chunk;
 
-            if (index < sortedArray.length) {
-                @SuppressWarnings("unchecked")
-                E routingKey = (E) sortedArray[index++];
-                this.size++;
+            if (i < totalSize) {
+                E sepKey = (E) sortedArray[i];
+                i++;
 
                 int level = 1;
                 while (true) {
-                    if (rightEdge[level] == null) {
-                        BTreeNode<E> newRoot = new BTreeNode<>(degree, false);
-                        newRoot.setChild(0, rightEdge[level - 1]);
-                        rightEdge[level] = newRoot;
-                        this.root = newRoot;
+                    BTreeNode<E> parent = rightEdge[level];
+                    if (parent == null) {
+                        parent = createNode(degree, false);
+                        parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level] = parent;
+                        this.root = parent;
                     }
 
-                    BTreeNode<E> targetNode = rightEdge[level];
-                    targetNode.keys[targetNode.keyCount++] = routingKey;
+                    if (parent.keyCount < targetKeys) {
+                        parent.keys[parent.keyCount] = sepKey;
+                        parent.keyCount++;
 
-                    BTreeNode<E> nextRight = new BTreeNode<>(degree, (level - 1) == 0);
-                    targetNode.setChild(targetNode.keyCount, nextRight);
-                    rightEdge[level - 1] = nextRight;
-
-                    if (targetNode.keyCount < targetKeys) {
-                        for (int i = level - 2; i >= 0; i--) {
-                            BTreeNode<E> fillNode = new BTreeNode<>(degree, i == 0);
-                            rightEdge[i + 1].setChild(0, fillNode);
-                            rightEdge[i] = fillNode;
+                        BTreeNode<E> prevInternal = parent;
+                        for (int d = level - 1; d >= 0; d--) {
+                            BTreeNode<E> newNode = createNode(degree, d == 0);
+                            prevInternal.setChild(prevInternal.keyCount, newNode);
+                            rightEdge[d] = newNode;
+                            prevInternal = newNode;
                         }
                         break;
+                    } else {
+                        level++;
                     }
-
-                    routingKey = (E) targetNode.keys[targetNode.keyCount - 1];
-                    targetNode.keys[targetNode.keyCount - 1] = null;
-                    targetNode.keyCount--;
-                    level++;
                 }
             }
         }
+
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            } else {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+            }
+        }
+
+        for (int level = 1; level < 10; level++) {
+            BTreeNode<E> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BTreeNode<E> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+
+                    if (node.child[0] != null) node.child[0].parent = node;
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
+            }
+        }
+
+        this.size = totalSize;
         this.modCount++;
     }
+
 
     @Override
     BTreeNode<E> createNode(int degree, boolean isLeaf) {
@@ -551,6 +649,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 // Must Merge (Smasher)
                 if (leftSibling != null) {
                     mergeNodes(parent, childIdx - 1, leftSibling, current);
+                    current = parent; //You fool I will remember you :(=  Ahhh....10hr wasted on this day 5sep!!
                 } else {
                     mergeNodes(parent, childIdx, current, rightSibling);
                     // The parent lost a key, so underflow bubbles UP!
@@ -829,7 +928,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return this;
         }
 
-        public BTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
+        public BTreeSet.Builder<E> importFlatMatrix(Object[] flatArray) {
             this.flatArray = flatArray;
             this.sortedIterator = null;
             this.collection = null;
