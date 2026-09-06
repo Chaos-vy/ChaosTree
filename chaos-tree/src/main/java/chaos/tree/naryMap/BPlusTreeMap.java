@@ -585,7 +585,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     @Override
     @SuppressWarnings("unchecked")
     public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor) {
-
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
@@ -619,8 +618,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 newLeaf.keyCount = 1;
                 this.size++;
 
-                K routingKey;
-                routingKey = key;
+                K routingKey = key;
                 BPlusTreeMapNode<K, V> leftChild = leaf;
                 BPlusTreeMapNode<K, V> rightChild = newLeaf;
 
@@ -633,8 +631,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, leftChild);
-                        leftChild.parent = parent;
-
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -642,20 +638,77 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent.keyCount < targetKeys) {
                         parent.keys[parent.keyCount] = routingKey;
                         parent.setChild(parent.keyCount + 1, rightChild);
-                        rightChild.parent = parent;
                         parent.keyCount++;
                         break;
                     } else {
                         BPlusTreeMapNode<K, V> newInternal = createNode(degree, false);
                         newInternal.setChild(0, rightChild);
-                        rightChild.parent = newInternal;
-
                         rightEdge[level] = newInternal;
 
                         leftChild = parent;
                         rightChild = newInternal;
                         level++;
                     }
+                }
+            }
+        }
+
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BPlusTreeMapNode<K, V> node = rightEdge[0];
+            BPlusTreeMapNode<K, V> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
+                node.values[0] = leftSib.values[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.values[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+                parent.keys[childIdx - 1] = node.keys[0];
+            } else {
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+
+                leftSib.next = node.next;
+                if (leftSib.next != null) {
+                    leftSib.next.prev = leftSib;
+                }
+            }
+        }
+
+        for (int level = 1; level < 32; level++) {
+            BPlusTreeMapNode<K, V> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+                    if (node.child[0] != null) node.child[0].parent = node;
+
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
                 }
             }
         }
@@ -666,82 +719,134 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     @SuppressWarnings("unchecked")
     public void importFlatMatrix(Object[][] blast, float factor) {
         if (blast == null || blast.length == 0) return;
-
         if (blast.length < 2 || blast[0].length != blast[1].length) {
             throw new IllegalArgumentException("Key and value size mismatch");
         }
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
-
         if (degree < 32) {
             throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
         }
-
         if (factor < 0.5f || factor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
+
         Object[] inKeys = blast[0];
         Object[] inValues = blast[1];
         int totalSize = inKeys.length;
-
         if (totalSize == 0) return;
 
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
-        BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[32];
+        BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[10];
+        rightEdge[0] = createNode(degree, true);
+        this.root = rightEdge[0];
 
         int i = 0;
         while (i < totalSize) {
-            int chunk = Math.min(targetKeys, totalSize - i);
-            BPlusTreeMapNode<K, V> leaf = createNode(degree, true);
-            System.arraycopy(inKeys, i, leaf.keys, 0, chunk);
-            System.arraycopy(inValues, i, leaf.values, 0, chunk);
-            leaf.keyCount = chunk;
+            BPlusTreeMapNode<K, V> leaf = rightEdge[0];
+            int chunk = Math.min(targetKeys - leaf.keyCount, totalSize - i);
+            System.arraycopy(inKeys, i, leaf.keys, leaf.keyCount, chunk);
+            System.arraycopy(inValues, i, leaf.values, leaf.keyCount, chunk);
+            leaf.keyCount += chunk;
+            i += chunk;
 
-            if (i == 0) {
-                rightEdge[0] = leaf;
-                this.root = leaf;
-            } else {
-                BPlusTreeMapNode<K, V> prevLeaf = rightEdge[0];
-                prevLeaf.next = leaf;
-                leaf.prev = prevLeaf;
-                K routingKey = (K) inKeys[i];
-                BPlusTreeMapNode<K, V> leftChild = prevLeaf;
-                BPlusTreeMapNode<K, V> rightChild = leaf;
-
-                rightEdge[0] = leaf;
+            if (i < totalSize) {
+                K routingKey = (K) inKeys[i]; // B+Tree doesn't consume the element
 
                 int level = 1;
                 while (true) {
                     BPlusTreeMapNode<K, V> parent = rightEdge[level];
-
                     if (parent == null) {
                         parent = createNode(degree, false);
-                        parent.setChild(0, leftChild);
-                        leftChild.parent = parent;
+                        parent.setChild(0, rightEdge[level - 1]);
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
 
                     if (parent.keyCount < targetKeys) {
                         parent.keys[parent.keyCount] = routingKey;
-                        parent.setChild(parent.keyCount + 1, rightChild);
-                        rightChild.parent = parent;
                         parent.keyCount++;
+
+                        BPlusTreeMapNode<K, V> prevInternal = parent;
+                        for (int d = level - 1; d >= 0; d--) {
+                            BPlusTreeMapNode<K, V> newNode = createNode(degree, d == 0);
+                            prevInternal.setChild(prevInternal.keyCount, newNode);
+
+                            if (d == 0) {
+                                rightEdge[0].next = newNode;
+                                newNode.prev = rightEdge[0];
+                            }
+
+                            rightEdge[d] = newNode;
+                            prevInternal = newNode;
+                        }
                         break;
                     } else {
-                        BPlusTreeMapNode<K, V> newInternal = createNode(degree, false);
-                        newInternal.setChild(0, rightChild);
-                        rightChild.parent = newInternal;
-                        rightEdge[level] = newInternal;
-
-                        leftChild = parent;
-                        rightChild = newInternal;
                         level++;
                     }
                 }
             }
-            i += chunk;
+        }
+
+        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
+            BPlusTreeMapNode<K, V> node = rightEdge[0];
+            BPlusTreeMapNode<K, V> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+            if (leftSib.keyCount > minKeys) {
+                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
+                node.values[0] = leftSib.values[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.values[leftSib.keyCount - 1] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+                parent.keys[childIdx - 1] = node.keys[0];
+            } else {
+                parent.keys[childIdx - 1] = null;
+                parent.child[childIdx] = null;
+                parent.keyCount--;
+
+                leftSib.next = node.next;
+                if (leftSib.next != null) {
+                    leftSib.next.prev = leftSib;
+                }
+            }
+        }
+
+        for (int level = 1; level < 10; level++) {
+            BPlusTreeMapNode<K, V> node = rightEdge[level];
+            if (node == null) break;
+            if (node.keyCount == 0 && node != this.root) {
+                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
+                int childIdx = parent.keyCount;
+                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
+
+                if (leftSib.keyCount > minKeys) {
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    node.child[1] = node.child[0];
+                    node.child[0] = leftSib.child[leftSib.keyCount];
+                    if (node.child[0] != null) node.child[0].parent = node;
+
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.child[leftSib.keyCount] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                } else {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
+                    if (leftSib.child[leftSib.keyCount + 1] != null) {
+                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
+                    }
+                    leftSib.keyCount++;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                }
+            }
         }
 
         this.size = totalSize;

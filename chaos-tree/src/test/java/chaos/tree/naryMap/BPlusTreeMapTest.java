@@ -7,10 +7,11 @@ import com.google.common.collect.testing.features.CollectionSize;
 import com.google.common.collect.testing.features.MapFeature;
 import junit.framework.Test;
 import junit.framework.TestCase;
+import org.junit.runner.RunWith;
 
 import java.util.Map;
 import java.util.SortedMap;
-
+@RunWith(org.junit.runners.AllTests.class)
 public class BPlusTreeMapTest extends TestCase {
 
     public static Test suite() {
@@ -33,6 +34,8 @@ public class BPlusTreeMapTest extends TestCase {
                         MapFeature.RESTRICTS_KEYS,
                         CollectionFeature.SUPPORTS_ITERATOR_REMOVE,
                         CollectionFeature.KNOWN_ORDER,
+                        CollectionFeature.SUBSET_VIEW,
+                        CollectionFeature.DESCENDING_VIEW,
                         CollectionSize.ANY,
                         CollectionFeature.SERIALIZABLE,
                         MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION
