@@ -72,7 +72,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
      *                   have it 1.0f but after that any insert or remove information will
      *                   trigger massive split, merge, borrow, array shifting.
-     *                   Hold the Chaos!!
      */
     public void bulkLoad(Iterator<E> sortedData, float fillFactor) {
         if (!isEmpty()) {
@@ -178,7 +177,10 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    void buildFromSorted(Iterator<? extends E> it, float factor) {
+    public void buildFromSorted(Iterator<? extends E> it, float factor) {
+        if (!it.hasNext()) {
+            return;
+        }
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
         BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
         rightEdge[0] = createNode(degree, true);
@@ -202,6 +204,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level - 1].parent = parent;              // FIX
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -214,6 +217,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                         for (int d = level - 1; d >= 0; d--) {
                             BTreeNode<E> newNode = createNode(degree, d == 0);
                             prevInternal.setChild(prevInternal.keyCount, newNode);
+                            newNode.parent = prevInternal;                 // FIX
                             rightEdge[d] = newNode;
                             prevInternal = newNode;
                         }
@@ -224,33 +228,17 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 }
             }
         }
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BTreeNode<E> node = rightEdge[0];
-            BTreeNode<E> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BTreeNode<E> leftSib = parent.child[childIdx - 1];
-
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = parent.keys[childIdx - 1];
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-            } else {
-                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                leftSib.keyCount++;
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
-            }
-        }
-
-        int highestLevel = 31;
+        // Phase 1: Top-Down Internal Cleanup with cascade handling
+        int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        for (int level = highestLevel; level >= 1; level--) {
+        int level = highestLevel;
+        while (level >= 1) {
             BTreeNode<E> node = rightEdge[level];
-            if (node == null) break;
+            if (node == null) {
+                level--;
+                continue;
+            }
             if (node.keyCount == 0 && node != this.root) {
                 BTreeNode<E> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
@@ -267,6 +255,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     leftSib.child[leftSib.keyCount] = null;
                     leftSib.keyCount--;
                     node.keyCount++;
+                    level--;
                 } else {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.child[leftSib.keyCount + 1] = node.child[0];
@@ -279,9 +268,19 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
+
+                    if (parent.keyCount == 0 && parent != this.root) {
+                        level++;
+                    } else {
+                        level--;
+                    }
                 }
+            } else {
+                level--;
             }
         }
+
+        // Phase 2: Leaf Cleanup
         if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
             BTreeNode<E> node = rightEdge[0];
             BTreeNode<E> parent = rightEdge[1];
@@ -300,11 +299,47 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 parent.keys[childIdx - 1] = null;
                 parent.child[childIdx] = null;
                 parent.keyCount--;
+
+                // Phase 2.5: Bottom-up cascade
+                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
+                    BTreeNode<E> n = rightEdge[cascadeLevel];
+                    if (n == null || n == this.root || n.keyCount > 0) break;
+                    BTreeNode<E> p = rightEdge[cascadeLevel + 1];
+                    int ci = p.keyCount;
+                    BTreeNode<E> ls = p.child[ci - 1];
+
+                    if (ls.keyCount > minKeys) {
+                        n.keys[0] = p.keys[ci - 1];
+                        n.child[1] = n.child[0];
+                        n.child[0] = ls.child[ls.keyCount];
+                        if (n.child[0] != null) n.child[0].parent = n;
+                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
+                        ls.keys[ls.keyCount - 1] = null;
+                        ls.child[ls.keyCount] = null;
+                        ls.keyCount--;
+                        n.keyCount++;
+                        break;
+                    } else {
+                        ls.keys[ls.keyCount] = p.keys[ci - 1];
+                        ls.child[ls.keyCount + 1] = n.child[0];
+                        if (ls.child[ls.keyCount + 1] != null) {
+                            ls.child[ls.keyCount + 1].parent = ls;
+                        }
+                        ls.keyCount++;
+                        rightEdge[cascadeLevel] = ls;
+
+                        p.keys[ci - 1] = null;
+                        p.child[ci] = null;
+                        p.keyCount--;
+                    }
+                }
             }
         }
-        if (root.keyCount == 0 && !root.isLeaf()) {
-            root = root.child[0];
-            root.parent = null;
+
+        // Phase 3: Root Demotion
+        if (this.root.keyCount == 0 && !this.root.isLeaf()) {
+            this.root = this.root.child[0];
+            this.root.parent = null;
         }
         this.modCount++;
     }
@@ -319,17 +354,16 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
      * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
      * would be less meaning to have this. Internally it uses native System.arraycopy for fast building.
      *
-     * @param blast      An array providing strictly sorted elements.
+     * @param flatArray  An array providing strictly sorted elements.
      * @param fillFactor A value between 0.5 and 1.0 representing how full to pack each node.
      *                   Use 1.0 for read-only data, or lower to leave room for future insertions.
      *                   A use of 0.9f is used for bulk loading in my tree. For read purpose you can
      *                   have it 1.0f but after that any insert or remove information will
      *                   trigger massive split, merge, borrow, array shifting.
-     *                   Hold the Chaos!!
      */
-    public void importFlatMatrix(Object[] blast, float fillFactor) {
+    public void importFlatArray(Object[] flatArray, float fillFactor) {
 
-        if (blast == null || blast.length == 0) return;
+        if (flatArray == null || flatArray.length == 0) return;
 
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
@@ -342,16 +376,19 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         if (fillFactor < 0.5f || fillFactor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
-        buildFromSortedArray(blast, fillFactor);
+        buildFromSortedArray(flatArray, fillFactor);
     }
 
     @SuppressWarnings("unchecked")
     private void buildFromSortedArray(Object[] sortedArray, float fillFactor) {
+        if (sortedArray.length == 0) {
+            return;
+        }
+
         int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
         int totalSize = sortedArray.length;
-        if (totalSize == 0) return;
 
-        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[10];
+        BTreeNode<E>[] rightEdge = (BTreeNode<E>[]) new BTreeNode[32];
         rightEdge[0] = createNode(degree, true);
         this.root = rightEdge[0];
 
@@ -373,6 +410,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, rightEdge[level - 1]);
+                        rightEdge[level - 1].parent = parent;              // FIX
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -385,6 +423,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                         for (int d = level - 1; d >= 0; d--) {
                             BTreeNode<E> newNode = createNode(degree, d == 0);
                             prevInternal.setChild(prevInternal.keyCount, newNode);
+                            newNode.parent = prevInternal;                 // FIX
                             rightEdge[d] = newNode;
                             prevInternal = newNode;
                         }
@@ -395,13 +434,16 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 }
             }
         }
-
-        int highestLevel = 9;
+        int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        for (int level = highestLevel; level >= 1; level--) {
+        int level = highestLevel;
+        while (level >= 1) {
             BTreeNode<E> node = rightEdge[level];
-            if (node == null) break;
+            if (node == null) {
+                level--;
+                continue;
+            }
             if (node.keyCount == 0 && node != this.root) {
                 BTreeNode<E> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
@@ -418,6 +460,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     leftSib.child[leftSib.keyCount] = null;
                     leftSib.keyCount--;
                     node.keyCount++;
+                    level--;
                 } else {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.child[leftSib.keyCount + 1] = node.child[0];
@@ -430,7 +473,15 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
+
+                    if (parent.keyCount == 0 && parent != this.root) {
+                        level++;
+                    } else {
+                        level--;
+                    }
                 }
+            } else {
+                level--;
             }
         }
         if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
@@ -451,6 +502,40 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 parent.keys[childIdx - 1] = null;
                 parent.child[childIdx] = null;
                 parent.keyCount--;
+
+                // Phase 2.5: Bottom-up cascade
+                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
+                    BTreeNode<E> n = rightEdge[cascadeLevel];
+                    if (n == null || n == this.root || n.keyCount > 0) break;
+                    BTreeNode<E> p = rightEdge[cascadeLevel + 1];
+                    int ci = p.keyCount;
+                    BTreeNode<E> ls = p.child[ci - 1];
+
+                    if (ls.keyCount > minKeys) {
+                        n.keys[0] = p.keys[ci - 1];
+                        n.child[1] = n.child[0];
+                        n.child[0] = ls.child[ls.keyCount];
+                        if (n.child[0] != null) n.child[0].parent = n;
+                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
+                        ls.keys[ls.keyCount - 1] = null;
+                        ls.child[ls.keyCount] = null;
+                        ls.keyCount--;
+                        n.keyCount++;
+                        break;
+                    } else {
+                        ls.keys[ls.keyCount] = p.keys[ci - 1];
+                        ls.child[ls.keyCount + 1] = n.child[0];
+                        if (ls.child[ls.keyCount + 1] != null) {
+                            ls.child[ls.keyCount + 1].parent = ls;
+                        }
+                        ls.keyCount++;
+                        rightEdge[cascadeLevel] = ls;
+
+                        p.keys[ci - 1] = null;
+                        p.child[ci] = null;
+                        p.keyCount--;
+                    }
+                }
             }
         }
         if (root.keyCount == 0 && !root.isLeaf()) {
@@ -685,7 +770,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 // Must Merge (Smasher)
                 if (leftSibling != null) {
                     mergeNodes(parent, childIdx - 1, leftSibling, current);
-                    current = parent; //You fool I will remember you :(=  Ahhh....10hr wasted on this day 5sep!!
+                    current = parent; 
                 } else {
                     mergeNodes(parent, childIdx, current, rightSibling);
                     // The parent lost a key, so underflow bubbles UP!
@@ -926,7 +1011,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     public static final class Builder<E> {
         private int degree = DEFAULT_DEGREE;
         private Comparator<? super E> comparator = null;
-        private float factor = 0.9f;
+        private float factor = 0.75f;
 
         private Object[] flatArray = null;
         private Iterator<E> sortedIterator = null;
@@ -939,11 +1024,11 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return new BTreeSet.Builder<>();
         }
 
-        public static <E> BTreeSet.Builder<E> degree(int degree) {
-            return BTreeSet.Builder.<E>newBuilder().setDegree(degree);
+        public static <E> BTreeSet.Builder<E> create(int degree) {
+            return BTreeSet.Builder.<E>newBuilder().degree(degree);
         }
 
-        public BTreeSet.Builder<E> setDegree(int degree) {
+        public BTreeSet.Builder<E> degree(int degree) {
             if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
                 throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
             }
@@ -964,7 +1049,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return this;
         }
 
-        public BTreeSet.Builder<E> importFlatMatrix(Object[] flatArray) {
+        public BTreeSet.Builder<E> importFlatArray(Object[] flatArray) {
             this.flatArray = flatArray;
             this.sortedIterator = null;
             this.collection = null;

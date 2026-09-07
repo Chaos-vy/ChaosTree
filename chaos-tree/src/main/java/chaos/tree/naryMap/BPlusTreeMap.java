@@ -591,6 +591,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         if (factor < 0.5f || factor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
+        if (!it.hasNext()) {
+            return;
+        }
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
         BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[32];
         rightEdge[0] = createNode(degree, true);
@@ -631,7 +634,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, leftChild);
-                        leftChild.parent = parent;               // FIX: parent pointer
+                        leftChild.parent = parent;
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -639,13 +642,13 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (parent.keyCount < targetKeys) {
                         parent.keys[parent.keyCount] = routingKey;
                         parent.setChild(parent.keyCount + 1, rightChild);
-                        rightChild.parent = parent;              // FIX: parent pointer
+                        rightChild.parent = parent;
                         parent.keyCount++;
                         break;
                     } else {
                         BPlusTreeMapNode<K, V> newInternal = createNode(degree, false);
                         newInternal.setChild(0, rightChild);
-                        rightChild.parent = newInternal;         // FIX: parent pointer
+                        rightChild.parent = newInternal;
                         rightEdge[level] = newInternal;
 
                         leftChild = parent;
@@ -659,9 +662,13 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        for (int level = highestLevel; level >= 1; level--) {
+        int level = highestLevel;
+        while (level >= 1) {
             BPlusTreeMapNode<K, V> node = rightEdge[level];
-            if (node == null) break;
+            if (node == null) {
+                level--;
+                continue;
+            }
             if (node.keyCount == 0 && node != this.root) {
                 BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
@@ -678,6 +685,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     leftSib.child[leftSib.keyCount] = null;
                     leftSib.keyCount--;
                     node.keyCount++;
+                    level--;
                 } else {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.child[leftSib.keyCount + 1] = node.child[0];
@@ -690,11 +698,18 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
+
+                    if (parent.keyCount == 0 && parent != this.root) {
+                        level++;
+                    } else {
+                        level--;
+                    }
                 }
+            } else {
+                level--;
             }
         }
 
-        // FIX: leaf fixup moved below the internal loop
         if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
             BPlusTreeMapNode<K, V> node = rightEdge[0];
             BPlusTreeMapNode<K, V> parent = rightEdge[1];
@@ -718,6 +733,40 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 if (leftSib.next != null) {
                     leftSib.next.prev = leftSib;
                 }
+                rightEdge[0] = leftSib;
+
+                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
+                    BPlusTreeMapNode<K, V> n = rightEdge[cascadeLevel];
+                    if (n == null || n == this.root || n.keyCount > 0) break;
+                    BPlusTreeMapNode<K, V> p = rightEdge[cascadeLevel + 1];
+                    int ci = p.keyCount;
+                    BPlusTreeMapNode<K, V> ls = p.child[ci - 1];
+
+                    if (ls.keyCount > minKeys) {
+                        n.keys[0] = p.keys[ci - 1];
+                        n.child[1] = n.child[0];
+                        n.child[0] = ls.child[ls.keyCount];
+                        if (n.child[0] != null) n.child[0].parent = n;
+                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
+                        ls.keys[ls.keyCount - 1] = null;
+                        ls.child[ls.keyCount] = null;
+                        ls.keyCount--;
+                        n.keyCount++;
+                        break;
+                    } else {
+                        ls.keys[ls.keyCount] = p.keys[ci - 1];
+                        ls.child[ls.keyCount + 1] = n.child[0];
+                        if (ls.child[ls.keyCount + 1] != null) {
+                            ls.child[ls.keyCount + 1].parent = ls;
+                        }
+                        ls.keyCount++;
+                        rightEdge[cascadeLevel] = ls;
+
+                        p.keys[ci - 1] = null;
+                        p.child[ci] = null;
+                        p.keyCount--;
+                    }
+                }
             }
         }
 
@@ -730,13 +779,16 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
     @Override
     @SuppressWarnings("unchecked")
-    public void importFlatMatrix(Object[][] blast, float factor) {
-        if (blast == null || blast.length == 0) return;
-        if (blast.length < 2 || blast[0].length != blast[1].length) {
+    public void importFlatMatrix(Object[][] flatMatrix, float factor) {
+        if (flatMatrix == null || flatMatrix.length == 0) return;
+        if (flatMatrix.length < 2 || flatMatrix[0].length != flatMatrix[1].length) {
             throw new IllegalArgumentException("Key and value size mismatch");
         }
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (flatMatrix[0].length == 0) {
+            return;
         }
         if (degree < 32) {
             throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
@@ -745,9 +797,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
         }
 
-        Object[] inKeys = blast[0];
-        Object[] inValues = blast[1];
-        int totalSize = inKeys.length;
+        Object[] flatKeys = flatMatrix[0];
+        Object[] flatValues = flatMatrix[1];
+        int totalSize = flatKeys.length;
         if (totalSize == 0) return;
 
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
@@ -759,13 +811,13 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         while (i < totalSize) {
             BPlusTreeMapNode<K, V> leaf = rightEdge[0];
             int chunk = Math.min(targetKeys - leaf.keyCount, totalSize - i);
-            System.arraycopy(inKeys, i, leaf.keys, leaf.keyCount, chunk);
-            System.arraycopy(inValues, i, leaf.values, leaf.keyCount, chunk);
+            System.arraycopy(flatKeys, i, leaf.keys, leaf.keyCount, chunk);
+            System.arraycopy(flatValues, i, leaf.values, leaf.keyCount, chunk);
             leaf.keyCount += chunk;
             i += chunk;
 
             if (i < totalSize) {
-                K routingKey = (K) inKeys[i];
+                K routingKey = (K) flatKeys[i];
 
                 int level = 1;
                 while (true) {
@@ -807,9 +859,13 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        for (int level = highestLevel; level >= 1; level--) {
+        int level = highestLevel;
+        while (level >= 1) {
             BPlusTreeMapNode<K, V> node = rightEdge[level];
-            if (node == null) break;
+            if (node == null) {
+                level--;
+                continue;
+            }
             if (node.keyCount == 0 && node != this.root) {
                 BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
@@ -826,6 +882,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     leftSib.child[leftSib.keyCount] = null;
                     leftSib.keyCount--;
                     node.keyCount++;
+                    level--;
                 } else {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.child[leftSib.keyCount + 1] = node.child[0];
@@ -838,7 +895,15 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
+
+                    if (parent.keyCount == 0 && parent != this.root) {
+                        level++;
+                    } else {
+                        level--;
+                    }
                 }
+            } else {
+                level--;
             }
         }
 
@@ -864,6 +929,40 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 leftSib.next = node.next;
                 if (leftSib.next != null) {
                     leftSib.next.prev = leftSib;
+                }
+                rightEdge[0] = leftSib;
+
+                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
+                    BPlusTreeMapNode<K, V> n = rightEdge[cascadeLevel];
+                    if (n == null || n == this.root || n.keyCount > 0) break;
+                    BPlusTreeMapNode<K, V> p = rightEdge[cascadeLevel + 1];
+                    int ci = p.keyCount;
+                    BPlusTreeMapNode<K, V> ls = p.child[ci - 1];
+
+                    if (ls.keyCount > minKeys) {
+                        n.keys[0] = p.keys[ci - 1];
+                        n.child[1] = n.child[0];
+                        n.child[0] = ls.child[ls.keyCount];
+                        if (n.child[0] != null) n.child[0].parent = n;
+                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
+                        ls.keys[ls.keyCount - 1] = null;
+                        ls.child[ls.keyCount] = null;
+                        ls.keyCount--;
+                        n.keyCount++;
+                        break;
+                    } else {
+                        ls.keys[ls.keyCount] = p.keys[ci - 1];
+                        ls.child[ls.keyCount + 1] = n.child[0];
+                        if (ls.child[ls.keyCount + 1] != null) {
+                            ls.child[ls.keyCount + 1].parent = ls;
+                        }
+                        ls.keyCount++;
+                        rightEdge[cascadeLevel] = ls;
+
+                        p.keys[ci - 1] = null;
+                        p.child[ci] = null;
+                        p.keyCount--;
+                    }
                 }
             }
         }
@@ -1055,7 +1154,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     public static final class Builder<K, V> {
         private int degree = DEFAULT_DEGREE;
         private Comparator<? super K> comparator = null;
-        private float factor = 0.9f;
+        private float factor = 0.75f;
 
         private Object[][] flatMatrix = null;
         private Iterator<? extends Map.Entry<? extends K, ? extends V>> sortedIterator = null;
@@ -1068,11 +1167,11 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             return new BPlusTreeMap.Builder<>();
         }
 
-        public static <K, V> BPlusTreeMap.Builder<K, V> degree(int degree) {
-            return BPlusTreeMap.Builder.<K, V>newBuilder().setDegree(degree);
+        public static <K, V> BPlusTreeMap.Builder<K, V> create(int degree) {
+            return BPlusTreeMap.Builder.<K, V>newBuilder().degree(degree);
         }
 
-        public BPlusTreeMap.Builder<K, V> setDegree(int degree) {
+        public BPlusTreeMap.Builder<K, V> degree(int degree) {
             if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
                 throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
             }
@@ -1107,7 +1206,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             return this;
         }
 
-        public BPlusTreeMap.Builder<K, V> importCollection(Map<? extends K, ? extends V> map) {
+        public BPlusTreeMap.Builder<K, V> importMap(Map<? extends K, ? extends V> map) {
             this.map = map;
             this.flatMatrix = null;
             this.sortedIterator = null;

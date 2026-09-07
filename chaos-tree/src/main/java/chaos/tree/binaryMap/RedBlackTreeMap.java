@@ -115,19 +115,19 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
             x.setPair(successor.getKey(), successor.getValue());
             x = successor;
         }
-        RbtMapNode<K, V> node_replacer = x.left != null ? x.left : x.right;
+        RbtMapNode<K, V> nodeReplacer = x.left != null ? x.left : x.right;
         boolean deletedNodeWasBlack = x.isBlack();
-        if (node_replacer != null) {
-            node_replacer.parent = x.parent;
+        if (nodeReplacer != null) {
+            nodeReplacer.parent = x.parent;
             if (x.parent == null) {
-                root = node_replacer;
+                root = nodeReplacer;
             } else if (x == x.parent.left) {
-                x.parent.left = node_replacer;
+                x.parent.left = nodeReplacer;
             } else {
-                x.parent.right = node_replacer;
+                x.parent.right = nodeReplacer;
             }
             if (deletedNodeWasBlack) {
-                fixDoubleBlack(node_replacer);
+                fixDoubleBlack(nodeReplacer);
             }
         } else if (x.parent == null) {
             root = null; // The tree is now empty

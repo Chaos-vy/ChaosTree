@@ -29,7 +29,6 @@ import java.util.stream.Stream;
  * The core engine for all Binary Trees.
  * I used F-Form polymorphism to avoid unwanted casting
  * It is commonly known as CRTP in C++
- * For people wondering no docs it's just that these API work same as of like Java Tree behaves.
  */
 sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>> extends AbstractSet<E>
         implements SearchTreeSet<E>, Cloneable, Serializable
@@ -160,7 +159,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         }
     }
 
-    //Prior to work of NPE must be done
     protected N nodeFinder(E val) {
         if (root == null) return null;
         N current = root;

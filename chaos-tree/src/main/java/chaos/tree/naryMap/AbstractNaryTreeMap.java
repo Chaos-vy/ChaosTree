@@ -98,7 +98,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
      * <p>
      * <strong>THE FLAT MATRIX RULES:</strong>
      * <ul>
-     * <li><strong>Matrix Layout:</strong> The {@code blast} parameter must be exactly 2D: {@code blast[0]} contains the keys, and {@code blast[1]} contains the values.</li>
+     * <li><strong>Matrix Layout:</strong> The {@code flatMatrix} parameter must be exactly 2D: {@code flatMatrix[0]} contains the keys, and {@code flatMatrix[1]} contains the values.</li>
      * <li><strong>Array Integrity:</strong> Neither array can be null, and both must be of exactly equal length.</li>
      * <li><strong>No Null Keys:</strong> A key must never be null. If a value is empty/missing, you must explicitly place {@code null} in the value array at that index.</li>
      * <li><strong>Strictly Sorted:</strong> The keys array <strong>MUST</strong> be strictly sorted according to the tree's comparator. Feeding unsorted data will instantly and silently corrupt the entire tree structure.</li>
@@ -110,19 +110,18 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
      * A factor of {@code 0.9f} is highly recommended for bulk loading. This packs the nodes densely while leaving
      * exactly enough buffer room to prevent future insertions from triggering massive, cascading split operations.
      * <p>
-     * Hold the Chaos!!
      *
-     * @param blast  A 2D array where {@code blast[0]} is the sorted keys and {@code blast[1]} is the mapped values.
-     * @param factor The node fill factor, restricted to the range {@code [0.5, 1.0]}.
+     * @param flatMatrix A 2D array where {@code flatMatrix[0]} is the sorted keys and {@code flatMatrix[1]} is the mapped values.
+     * @param factor     The node fill factor, restricted to the range {@code [0.5, 1.0]}.
      */
-    abstract void importFlatMatrix(Object[][] blast, float factor);
+    abstract void importFlatMatrix(Object[][] flatMatrix, float factor);
 
     /**
      * <strong>THE MASTER EXPORTER OF CHAOSTREE</strong>
      * <p>
      * Rips the entire internal state of the tree into a highly optimized, contiguous 2D array matrix
      * in strictly sorted order. This bypasses {@code Map.Entry} instantiation entirely by directly
-     * blasting memory into flat arrays.
+     * flatMatrixing memory into flat arrays.
      * <p>
      * <strong>Matrix Layout:</strong>
      * <ul>
@@ -144,7 +143,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         if (size == 0 && m instanceof SortedMap && ((SortedMap<?, ?>) m).comparator() == comparator) {
-            buildFromSorted(m.entrySet().iterator(), 0.9f);
+            buildFromSorted(m.entrySet().iterator(), 0.75f);
             return;
         }
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {

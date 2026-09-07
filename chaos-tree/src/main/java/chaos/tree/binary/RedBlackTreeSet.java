@@ -71,13 +71,13 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         } else {
             p.right = newNode;
         }
-        fix_Up_from_bottom_Insertion(newNode);
+        fixUpFromBottom_Insertion(newNode);
         size++;
         modCount++;
         return true;
     }
 
-    private void fix_Up_from_bottom_Insertion(RbtNode<E> x) {
+    private void fixUpFromBottom_Insertion(RbtNode<E> x) {
         // I need to only care if the parent is also RED (a Red-Red violation!)
         while (x != null && x != root && x.parent.isRed()) {
             RbtNode<E> parent = x.parent;
@@ -152,22 +152,22 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             }
 
             //Guaranteed one child or none
-            RbtNode<E> node_replacer = x.left != null ? x.left : x.right;
+            RbtNode<E> nodeReplacer = x.left != null ? x.left : x.right;
             boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
 
-            if (node_replacer != null) {
-                node_replacer.parent = x.parent;
+            if (nodeReplacer != null) {
+                nodeReplacer.parent = x.parent;
                 if (x.parent == null) {
-                    root = node_replacer;
+                    root = nodeReplacer;
                 } else if (x == x.parent.left) {
-                    x.parent.left = node_replacer;
+                    x.parent.left = nodeReplacer;
                 } else {
-                    x.parent.right = node_replacer;
+                    x.parent.right = nodeReplacer;
                 }
 
                 // If the deleted node was Black, the tree lost a black weight. Fix it!
                 if (deletedNodeWasBlack) {
-                    fixDoubleBlack(node_replacer);
+                    fixDoubleBlack(nodeReplacer);
                 }
             } else if (x.parent == null) {
                 root = null; // The tree is now empty
@@ -184,10 +184,10 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                 x.parent = null;
             }
 
-            //just clearing GC but do I need let me guess
-            x.left = null; //since I already removed all attachment to x to reach to x
-            x.right = null; //JVM GC is smart enough it will collect in GC
-            x.parent = null; //Don't think JVM won't do. it will, even though it has reference
+            
+            x.left = null; 
+            x.right = null; 
+            x.parent = null; 
             //L,R,P because x has become part of garbage.
             /*
             The lesson I got here we need to do because of iterator Stability

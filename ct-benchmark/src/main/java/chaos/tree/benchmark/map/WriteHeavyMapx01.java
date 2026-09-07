@@ -13,6 +13,23 @@ import org.openjdk.jmh.infra.Blackhole;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * <pre>
+ *      * <pre>
+ *  *
+ *  * Benchmark                                                  (size)  Mode  Cnt   Score   Error  Units
+ *  * BulkLoadSetBenchmark.chaosTree_DragonFeedArrayLoad        1000000  avgt   15   0.417 ± 0.010  ms/op
+ *  * BulkLoadSetBenchmark.chaosTree_DragonFeedArrayLoad        5000000  avgt   15   2.724 ± 0.031  ms/op
+ *  * BulkLoadSetBenchmark.chaosTree_IteratorLoad               1000000  avgt   15   2.543 ± 0.110  ms/op
+ *  * BulkLoadSetBenchmark.chaosTree_IteratorLoad               5000000  avgt   15  12.111 ± 0.129  ms/op
+ *  * BulkLoadSetBenchmark.chaosTree_LoadedFromTreeSetIterator  1000000  avgt   15   6.147 ± 0.014  ms/op
+ *  * BulkLoadSetBenchmark.chaosTree_LoadedFromTreeSetIterator  5000000  avgt   15  30.333 ± 0.179  ms/op
+ *  * BulkLoadSetBenchmark.treeSet_JdkStandard                  1000000  avgt   15   8.036 ± 0.065  ms/op
+ *  * BulkLoadSetBenchmark.treeSet_JdkStandard                  5000000  avgt   15  46.369 ± 6.892  ms/op
+ *  * </pre>
+ *  *
+ * </pre>
+ */
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -24,7 +41,7 @@ public class WriteHeavyMap {
     @Param({"5000000"})
     public int size;
 
-    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
+    @Param({"0.8f"})
     public float factor;
 //    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
 // For benchmarkers just replace this benchmark and run the DragonFeed to show how density affects the node mapping.

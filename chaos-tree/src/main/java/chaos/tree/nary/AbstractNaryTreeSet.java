@@ -205,7 +205,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         Objects.requireNonNull(collection);
         if (this.size == 0 && !collection.isEmpty() && collection instanceof SortedSet<?> ss) {
             if (Objects.equals(this.comparator(), ss.comparator())) {
-                buildFromSorted((Iterator<E>) collection.iterator(), 0.9f);
+                buildFromSorted((Iterator<E>) collection.iterator(), 0.75f);
                 return true;
             }
         }

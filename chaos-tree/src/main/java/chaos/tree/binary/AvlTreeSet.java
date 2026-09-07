@@ -65,7 +65,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         } else {
             p.right = newNode;
         }
-        fix_Up_from_bottom(p);
+        fixUpFromBottom(p);
         size++;
         modCount++;
         return true;
@@ -79,7 +79,6 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             E val = (E) o;
             AvlNode<E> x = nodeFinder(val);
             if (x == null) return false;
-            //Just delete from here no tension haha LOL I feel like playing here node very much fun.
             //Just to be aware of optimization I need to add comment
             if (x.right != null && x.left != null) {
                 AvlNode<E> successor = x.right; // Yes I do delete by successor method
@@ -107,7 +106,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
                 } else {
                     x.parent.right = replacement;
                 }
-                fix_Up_from_bottom(replacement.parent);
+                fixUpFromBottom(replacement.parent);
 
             } else if (x.parent == null) { // when the little node has direct reach to root
                 root = null;
@@ -119,13 +118,13 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
                     parent.right = null;
                 }
                 //Lemme think do I
-                fix_Up_from_bottom(parent);
+                fixUpFromBottom(parent);
             }
 
-            //just clearing GC but do I need let me guess
-            x.left = null; //since I already removed all attachment to x to reach to x
-            x.right = null; //JVM GC is smart enough it will collect in GC
-            x.parent = null; //Don't think JVM won't do. it will, even though it has reference
+            
+            x.left = null; 
+            x.right = null; 
+            x.parent = null; 
             //L,R,P because x has become part of garbage.
             /*
             The lesson I got here we need to do because iterator Stability
@@ -139,7 +138,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
 
     }
 
-    private void fix_Up_from_bottom(AvlNode<E> node) {
+    private void fixUpFromBottom(AvlNode<E> node) {
         while (node != null) {
             int oldHeight = node.height;
             updateHeight(node);
