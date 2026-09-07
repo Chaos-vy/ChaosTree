@@ -4,7 +4,18 @@ import chaos.tree.binaryMap.AvlTreeMap;
 import chaos.tree.binaryMap.RedBlackTreeMap;
 import chaos.tree.naryMap.BPlusTreeMap;
 import chaos.tree.naryMap.BTreeMap;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.TreeMap;
@@ -13,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This benchmark is different from others it does use Fischer yate shuffle data setup at trial
  * and then put() is used
- * Well my system config is 5.8GB default heap!!
+ * My system config is 5.8GB default heap
  * 1MB default stack
  */
 
@@ -25,13 +36,11 @@ import java.util.concurrent.TimeUnit;
 @Fork(3)
 public class WriteHeavyMapShuffled {
 
-    @Param({"5000000"})
-    public int size;
-
     // Fixed seed: both benchmark methods, every fork, every iteration must
     // see the identical shuffled order, or the comparison stops being paired.
     private static final long SHUFFLE_SEED = 42L;
-
+    @Param({"5000000"})
+    public int size;
     private Integer[] shuffledKeys;
     private String[] valuesByKey;
 

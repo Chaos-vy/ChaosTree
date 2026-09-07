@@ -2,33 +2,42 @@ package chaos.tree.benchmark.map;
 
 import chaos.tree.naryMap.BPlusTreeMap;
 import chaos.tree.naryMap.BTreeMap;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
+
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * If you feel this is bias I did with TreeMap with array then bring a library which is does support like this!!
  * focus on benchmark
  * Default GC
  */
-import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <pre>
- *      * <pre>
- *  *
- *  * Benchmark                                                  (size)  Mode  Cnt   Score   Error  Units
- *  * BulkLoadSetBenchmark.chaosTree_DragonFeedArrayLoad        1000000  avgt   15   0.417 ± 0.010  ms/op
- *  * BulkLoadSetBenchmark.chaosTree_DragonFeedArrayLoad        5000000  avgt   15   2.724 ± 0.031  ms/op
- *  * BulkLoadSetBenchmark.chaosTree_IteratorLoad               1000000  avgt   15   2.543 ± 0.110  ms/op
- *  * BulkLoadSetBenchmark.chaosTree_IteratorLoad               5000000  avgt   15  12.111 ± 0.129  ms/op
- *  * BulkLoadSetBenchmark.chaosTree_LoadedFromTreeSetIterator  1000000  avgt   15   6.147 ± 0.014  ms/op
- *  * BulkLoadSetBenchmark.chaosTree_LoadedFromTreeSetIterator  5000000  avgt   15  30.333 ± 0.179  ms/op
- *  * BulkLoadSetBenchmark.treeSet_JdkStandard                  1000000  avgt   15   8.036 ± 0.065  ms/op
- *  * BulkLoadSetBenchmark.treeSet_JdkStandard                  5000000  avgt   15  46.369 ± 6.892  ms/op
- *  * </pre>
- *  *
+ *
+ * Benchmark                                  (factor)   (size)  Mode  Cnt    Score    Error  Units
+ * WriteHeavyMapx01.bPlusTreeDragonFeed           0.8f  5000000  avgt   15    5.548 ±  0.024  ms/op
+ * WriteHeavyMapx01.bPlusTreeMapBulkLoad          0.8f  5000000  avgt   15   37.379 ±  0.422  ms/op
+ * WriteHeavyMapx01.bPlusTreeMapIterativePut      0.8f  5000000  avgt   15  211.627 ±  1.998  ms/op
+ * WriteHeavyMapx01.jdkTreeMapBulkLoad            0.8f  5000000  avgt   15   44.202 ±  2.487  ms/op
+ * WriteHeavyMapx01.jdkTreeMapIterativePut        0.8f  5000000  avgt   15  778.044 ± 18.889  ms/op
  * </pre>
+ * //do ignore that factor tag I used that factor tag to jsut build the benchmark of
+ * factor x memory
+ * more the factor less the memory and vice-versa.
  */
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -36,14 +45,14 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 3, time = 2)
 @Measurement(iterations = 5, time = 2)
 @Fork(3)
-public class WriteHeavyMap {
+public class WriteHeavyMapx01 {
 
     @Param({"5000000"})
     public int size;
 
     @Param({"0.8f"})
     public float factor;
-//    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
+    //    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
 // For benchmarkers just replace this benchmark and run the DragonFeed to show how density affects the node mapping.
     private Object[][] flatMatrix;
     private TreeMap<Integer, String> preBuiltSortedMap;
@@ -84,6 +93,7 @@ public class WriteHeavyMap {
         }
         bh.consume(map);
     }
+
     // 2. JDK O(N) BULK LOAD (Apples-to-Apples)
     @Benchmark
     public void jdkTreeMapBulkLoad(Blackhole bh) {
@@ -94,8 +104,8 @@ public class WriteHeavyMap {
     }
 
     @Benchmark
-    public void bPlusTreeMapBulkLoad(Blackhole bh){
-        BPlusTreeMap<Integer,String> map = new BPlusTreeMap<>(preBuiltSortedMap);
+    public void bPlusTreeMapBulkLoad(Blackhole bh) {
+        BPlusTreeMap<Integer, String> map = new BPlusTreeMap<>(preBuiltSortedMap);
         bh.consume(map);
     }
 
@@ -103,7 +113,7 @@ public class WriteHeavyMap {
     @Benchmark
     public void bPlusTreeDragonFeed(Blackhole bh) {
         BTreeMap<Integer, String> map =
-                BTreeMap.Builder.<Integer, String>degree(64)
+                BTreeMap.Builder.<Integer, String>create(64)
                         .factor(factor)
                         .importFlatMatrix(flatMatrix)
                         .build();

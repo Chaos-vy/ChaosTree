@@ -4,13 +4,29 @@ import chaos.tree.binaryMap.AvlTreeMap;
 import chaos.tree.binaryMap.RedBlackTreeMap;
 import chaos.tree.naryMap.BPlusTreeMap;
 import chaos.tree.naryMap.BTreeMap;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Random;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 
@@ -23,6 +39,7 @@ import java.util.stream.IntStream;
  * The workload and benchmark structure are derived from OpenJDK's
  * TreeMapUpdate benchmark and adapted to compare multiple NavigableMap
  * implementations.
+ *
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -32,13 +49,13 @@ import java.util.stream.IntStream;
 @State(Scope.Thread)
 public class ChaosTreeMapUpdateBenchmark {
 
-    @Param({"JavaTreeMap",  "BPlusTreeMap"})
+    @Param({"JavaTreeMap", "BPlusTreeMap"})
     public String mapType;
 
     @Param({"TreeMap"})
     public String mode;
 
-    @Param({ "100000"})
+    @Param({"100000"})
     public int size;
 
     @Param({"true", "false"})
@@ -58,7 +75,7 @@ public class ChaosTreeMapUpdateBenchmark {
 
     @Setup
     public void setUp() {
-        switch(mode) {
+        switch (mode) {
             case "TreeMap":
                 transformer = map -> map;
                 break;
@@ -76,30 +93,30 @@ public class ChaosTreeMapUpdateBenchmark {
 
         if (comparator) {
             baseSupplier = switch (mapType) {
-                case "JavaTreeMap"      -> () -> new TreeMap<>(Comparator.reverseOrder());
-                case "AvlTreeMap"       -> () -> new AvlTreeMap<>(Comparator.reverseOrder());
-                case "RedBlackTreeMap"  -> () -> new RedBlackTreeMap<>(Comparator.reverseOrder());
-                case "BTreeMap"         -> () -> new BTreeMap<>(Comparator.reverseOrder());
-                case "BPlusTreeMap"     -> () -> new BPlusTreeMap<>(Comparator.reverseOrder());
+                case "JavaTreeMap" -> () -> new TreeMap<>(Comparator.reverseOrder());
+                case "AvlTreeMap" -> () -> new AvlTreeMap<>(Comparator.reverseOrder());
+                case "RedBlackTreeMap" -> () -> new RedBlackTreeMap<>(Comparator.reverseOrder());
+                case "BTreeMap" -> () -> new BTreeMap<>(Comparator.reverseOrder());
+                case "BPlusTreeMap" -> () -> new BPlusTreeMap<>(Comparator.reverseOrder());
                 default -> throw new IllegalStateException(mapType);
             };
         } else {
             baseSupplier = switch (mapType) {
-                case "JavaTreeMap"      -> TreeMap::new;
-                case "AvlTreeMap"       -> AvlTreeMap::new;
-                case "RedBlackTreeMap"  -> RedBlackTreeMap::new;
-                case "BTreeMap"         -> BTreeMap::new;
-                case "BPlusTreeMap"     -> BPlusTreeMap::new;
+                case "JavaTreeMap" -> TreeMap::new;
+                case "AvlTreeMap" -> AvlTreeMap::new;
+                case "RedBlackTreeMap" -> RedBlackTreeMap::new;
+                case "BTreeMap" -> BTreeMap::new;
+                case "BPlusTreeMap" -> BPlusTreeMap::new;
                 default -> throw new IllegalStateException(mapType);
             };
         }
-        
+
         supplier = baseSupplier;
-        
+
         keys = IntStream.range(0, size).boxed().toArray(Integer[]::new);
         Random rnd = seed == 0 ? new Random() : new Random(seed);
         Collections.shuffle(Arrays.asList(keys), rnd);
-        
+
         if (preFill) {
             NavigableMap<Integer, Integer> template = baseSupplier.get();
             for (Integer k : keys) {
