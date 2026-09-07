@@ -232,112 +232,129 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        int level = highestLevel;
-        while (level >= 1) {
+        for (int level = highestLevel; level >= 1; level--) {
             BTreeNode<E> node = rightEdge[level];
-            if (node == null) {
-                level--;
-                continue;
-            }
-            if (node.keyCount == 0 && node != this.root) {
+            if (node == null || node == this.root) continue;
+
+            if (node.keyCount < minKeys) {
                 BTreeNode<E> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
+                if (childIdx == 0) continue; 
+
                 BTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-                if (leftSib.keyCount > minKeys) {
+                while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
+                    System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+                    System.arraycopy(node.child, 0, node.child, 1, node.keyCount + 1);
+                    
                     node.keys[0] = parent.keys[childIdx - 1];
-                    node.child[1] = node.child[0];
-                    node.child[0] = leftSib.child[leftSib.keyCount];
-
-                    if (node.child[0] != null) node.child[0].parent = node;
                     parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
                     leftSib.keys[leftSib.keyCount - 1] = null;
+                    
+                    node.child[0] = leftSib.child[leftSib.keyCount];
                     leftSib.child[leftSib.keyCount] = null;
+                    if (node.child[0] != null) node.child[0].parent = node;
+                    
                     leftSib.keyCount--;
                     node.keyCount++;
-                    level--;
-                } else {
+                }
+
+                if (node.keyCount < minKeys) {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
-                    if (leftSib.child[leftSib.keyCount + 1] != null) {
-                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
-                    }
                     leftSib.keyCount++;
+                    
+                    System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
+                    System.arraycopy(node.child, 0, leftSib.child, leftSib.keyCount, node.keyCount + 1);
+                    for (int j = 0; j <= node.keyCount; j++) {
+                        if (leftSib.child[leftSib.keyCount + j] != null) {
+                            leftSib.child[leftSib.keyCount + j].parent = leftSib;
+                        }
+                    }
+                    leftSib.keyCount += node.keyCount;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                    
                     rightEdge[level] = leftSib;
+                }
+            }
+        }
+
+        if (rightEdge[0] != null && rightEdge[0].keyCount < minKeys && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            if (childIdx > 0) {
+                BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+                while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
+                    System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                }
+
+                if (node.keyCount < minKeys) {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.keyCount++;
+                    System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
+                    leftSib.keyCount += node.keyCount;
 
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
 
-                    if (parent.keyCount == 0 && parent != this.root) {
-                        level++;
-                    } else {
-                        level--;
-                    }
-                }
-            } else {
-                level--;
-            }
-        }
+                    for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
+                        BTreeNode<E> n = rightEdge[cascadeLevel];
+                        if (n == null || n == this.root || n.keyCount >= minKeys) break;
+                        BTreeNode<E> p = rightEdge[cascadeLevel + 1];
+                        int ci = p.keyCount;
+                        if (ci == 0) break;
+                        BTreeNode<E> ls = p.child[ci - 1];
 
-        // Phase 2: Leaf Cleanup
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BTreeNode<E> node = rightEdge[0];
-            BTreeNode<E> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+                        if (ls.keyCount > minKeys) {
+                            System.arraycopy(n.keys, 0, n.keys, 1, n.keyCount);
+                            System.arraycopy(n.child, 0, n.child, 1, n.keyCount + 1);
+                            
+                            n.keys[0] = p.keys[ci - 1];
+                            p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
+                            ls.keys[ls.keyCount - 1] = null;
+                            
+                            n.child[0] = ls.child[ls.keyCount];
+                            ls.child[ls.keyCount] = null;
+                            if (n.child[0] != null) n.child[0].parent = n;
+                            
+                            ls.keyCount--;
+                            n.keyCount++;
+                            break;
+                        } else {
+                            ls.keys[ls.keyCount] = p.keys[ci - 1];
+                            ls.keyCount++;
+                            
+                            System.arraycopy(n.keys, 0, ls.keys, ls.keyCount, n.keyCount);
+                            System.arraycopy(n.child, 0, ls.child, ls.keyCount, n.keyCount + 1);
+                            for (int j = 0; j <= n.keyCount; j++) {
+                                if (ls.child[ls.keyCount + j] != null) {
+                                    ls.child[ls.keyCount + j].parent = ls;
+                                }
+                            }
+                            ls.keyCount += n.keyCount;
 
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = parent.keys[childIdx - 1];
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-            } else {
-                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                leftSib.keyCount++;
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
-
-                // Phase 2.5: Bottom-up cascade
-                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
-                    BTreeNode<E> n = rightEdge[cascadeLevel];
-                    if (n == null || n == this.root || n.keyCount > 0) break;
-                    BTreeNode<E> p = rightEdge[cascadeLevel + 1];
-                    int ci = p.keyCount;
-                    BTreeNode<E> ls = p.child[ci - 1];
-
-                    if (ls.keyCount > minKeys) {
-                        n.keys[0] = p.keys[ci - 1];
-                        n.child[1] = n.child[0];
-                        n.child[0] = ls.child[ls.keyCount];
-                        if (n.child[0] != null) n.child[0].parent = n;
-                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
-                        ls.keys[ls.keyCount - 1] = null;
-                        ls.child[ls.keyCount] = null;
-                        ls.keyCount--;
-                        n.keyCount++;
-                        break;
-                    } else {
-                        ls.keys[ls.keyCount] = p.keys[ci - 1];
-                        ls.child[ls.keyCount + 1] = n.child[0];
-                        if (ls.child[ls.keyCount + 1] != null) {
-                            ls.child[ls.keyCount + 1].parent = ls;
+                            p.keys[ci - 1] = null;
+                            p.child[ci] = null;
+                            p.keyCount--;
+                            
+                            rightEdge[cascadeLevel] = ls;
                         }
-                        ls.keyCount++;
-                        rightEdge[cascadeLevel] = ls;
-
-                        p.keys[ci - 1] = null;
-                        p.child[ci] = null;
-                        p.keyCount--;
                     }
                 }
             }
         }
 
-        // Phase 3: Root Demotion
-        if (this.root.keyCount == 0 && !this.root.isLeaf()) {
+        while (this.root.keyCount == 0 && !this.root.isLeaf()) {
             this.root = this.root.child[0];
             this.root.parent = null;
         }
@@ -437,110 +454,131 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        int level = highestLevel;
-        while (level >= 1) {
+        for (int level = highestLevel; level >= 1; level--) {
             BTreeNode<E> node = rightEdge[level];
-            if (node == null) {
-                level--;
-                continue;
-            }
-            if (node.keyCount == 0 && node != this.root) {
+            if (node == null || node == this.root) continue;
+
+            if (node.keyCount < minKeys) {
                 BTreeNode<E> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
+                if (childIdx == 0) continue; 
+
                 BTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-                if (leftSib.keyCount > minKeys) {
+                while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
+                    System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+                    System.arraycopy(node.child, 0, node.child, 1, node.keyCount + 1);
+                    
                     node.keys[0] = parent.keys[childIdx - 1];
-                    node.child[1] = node.child[0];
-                    node.child[0] = leftSib.child[leftSib.keyCount];
-
-                    if (node.child[0] != null) node.child[0].parent = node;
                     parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
                     leftSib.keys[leftSib.keyCount - 1] = null;
+                    
+                    node.child[0] = leftSib.child[leftSib.keyCount];
                     leftSib.child[leftSib.keyCount] = null;
+                    if (node.child[0] != null) node.child[0].parent = node;
+                    
                     leftSib.keyCount--;
                     node.keyCount++;
-                    level--;
-                } else {
+                }
+
+                if (node.keyCount < minKeys) {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
-                    if (leftSib.child[leftSib.keyCount + 1] != null) {
-                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
-                    }
                     leftSib.keyCount++;
+                    
+                    System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
+                    System.arraycopy(node.child, 0, leftSib.child, leftSib.keyCount, node.keyCount + 1);
+                    for (int j = 0; j <= node.keyCount; j++) {
+                        if (leftSib.child[leftSib.keyCount + j] != null) {
+                            leftSib.child[leftSib.keyCount + j].parent = leftSib;
+                        }
+                    }
+                    leftSib.keyCount += node.keyCount;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+                    
                     rightEdge[level] = leftSib;
+                }
+            }
+        }
+
+        if (rightEdge[0] != null && rightEdge[0].keyCount < minKeys && rightEdge[0] != this.root) {
+            BTreeNode<E> node = rightEdge[0];
+            BTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            if (childIdx > 0) {
+                BTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+                while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
+                    System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+                    node.keys[0] = parent.keys[childIdx - 1];
+                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                }
+
+                if (node.keyCount < minKeys) {
+                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                    leftSib.keyCount++;
+                    System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
+                    leftSib.keyCount += node.keyCount;
 
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
 
-                    if (parent.keyCount == 0 && parent != this.root) {
-                        level++;
-                    } else {
-                        level--;
-                    }
-                }
-            } else {
-                level--;
-            }
-        }
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BTreeNode<E> node = rightEdge[0];
-            BTreeNode<E> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BTreeNode<E> leftSib = parent.child[childIdx - 1];
+                    for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
+                        BTreeNode<E> n = rightEdge[cascadeLevel];
+                        if (n == null || n == this.root || n.keyCount >= minKeys) break;
+                        BTreeNode<E> p = rightEdge[cascadeLevel + 1];
+                        int ci = p.keyCount;
+                        if (ci == 0) break;
+                        BTreeNode<E> ls = p.child[ci - 1];
 
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = parent.keys[childIdx - 1];
-                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-            } else {
-                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                leftSib.keyCount++;
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
+                        if (ls.keyCount > minKeys) {
+                            System.arraycopy(n.keys, 0, n.keys, 1, n.keyCount);
+                            System.arraycopy(n.child, 0, n.child, 1, n.keyCount + 1);
+                            
+                            n.keys[0] = p.keys[ci - 1];
+                            p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
+                            ls.keys[ls.keyCount - 1] = null;
+                            
+                            n.child[0] = ls.child[ls.keyCount];
+                            ls.child[ls.keyCount] = null;
+                            if (n.child[0] != null) n.child[0].parent = n;
+                            
+                            ls.keyCount--;
+                            n.keyCount++;
+                            break;
+                        } else {
+                            ls.keys[ls.keyCount] = p.keys[ci - 1];
+                            ls.keyCount++;
+                            
+                            System.arraycopy(n.keys, 0, ls.keys, ls.keyCount, n.keyCount);
+                            System.arraycopy(n.child, 0, ls.child, ls.keyCount, n.keyCount + 1);
+                            for (int j = 0; j <= n.keyCount; j++) {
+                                if (ls.child[ls.keyCount + j] != null) {
+                                    ls.child[ls.keyCount + j].parent = ls;
+                                }
+                            }
+                            ls.keyCount += n.keyCount;
 
-                // Phase 2.5: Bottom-up cascade
-                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
-                    BTreeNode<E> n = rightEdge[cascadeLevel];
-                    if (n == null || n == this.root || n.keyCount > 0) break;
-                    BTreeNode<E> p = rightEdge[cascadeLevel + 1];
-                    int ci = p.keyCount;
-                    BTreeNode<E> ls = p.child[ci - 1];
-
-                    if (ls.keyCount > minKeys) {
-                        n.keys[0] = p.keys[ci - 1];
-                        n.child[1] = n.child[0];
-                        n.child[0] = ls.child[ls.keyCount];
-                        if (n.child[0] != null) n.child[0].parent = n;
-                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
-                        ls.keys[ls.keyCount - 1] = null;
-                        ls.child[ls.keyCount] = null;
-                        ls.keyCount--;
-                        n.keyCount++;
-                        break;
-                    } else {
-                        ls.keys[ls.keyCount] = p.keys[ci - 1];
-                        ls.child[ls.keyCount + 1] = n.child[0];
-                        if (ls.child[ls.keyCount + 1] != null) {
-                            ls.child[ls.keyCount + 1].parent = ls;
+                            p.keys[ci - 1] = null;
+                            p.child[ci] = null;
+                            p.keyCount--;
+                            
+                            rightEdge[cascadeLevel] = ls;
                         }
-                        ls.keyCount++;
-                        rightEdge[cascadeLevel] = ls;
-
-                        p.keys[ci - 1] = null;
-                        p.child[ci] = null;
-                        p.keyCount--;
                     }
                 }
             }
         }
-        if (root.keyCount == 0 && !root.isLeaf()) {
-            root = root.child[0];
-            root.parent = null;
+
+        while (this.root.keyCount == 0 && !this.root.isLeaf()) {
+            this.root = this.root.child[0];
+            this.root.parent = null;
         }
         this.size = totalSize;
         this.modCount++;

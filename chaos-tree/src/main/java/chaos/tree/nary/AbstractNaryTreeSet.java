@@ -33,10 +33,6 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
-    private static final String RESET = "\u001B[0m";
-    private static final String CYAN = "\u001B[1;38;2;0;229;255m";       // #00E5FF
-    private static final String STRUCTURE = "\u001B[38;2;84;110;122m";        // #546E7A
-    private static final String BRIGHT_WHITE = "\u001B[97m";
     protected final int degree;
     protected final int maxKeys;
     protected final int minKeys;
@@ -323,15 +319,15 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         sb.append(prefix).append(isTail ? lastBranch : crossBranch);
 
-        sb.append(BRIGHT_WHITE).append("[").append(RESET);
+        sb.append("[");
 
         for (int i = 0; i < node.keyCount; i++) {
-            sb.append(CYAN).append(node.keys[i]).append(RESET);
+            sb.append(node.keys[i]);
             if (i < node.keyCount - 1) {
-                sb.append(STRUCTURE).append(", ").append(RESET);
+                sb.append(", ");
             }
         }
-        sb.append(BRIGHT_WHITE).append("]").append(RESET).append("\n");
+        sb.append("]").append("\n");
 
         if (!node.isLeaf()) {
             int numChildren = node.keyCount + 1;

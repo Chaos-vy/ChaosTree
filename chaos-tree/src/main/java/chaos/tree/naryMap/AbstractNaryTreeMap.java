@@ -30,12 +30,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
-    private static final String RESET = "\u001B[0m";
-    private static final String KEY = "\u001B[1;38;2;0;229;255m";    // #00E5FF
-    private static final String EQUALS = "\u001B[38;2;176;190;197m";     // #B0BEC5
-    private static final String VALUE = "\u001B[1;38;2;255;121;198m";  // #FF79C6
-    private static final String BRACKET = "\u001B[38;2;84;110;122m";     // #546E7A
-    private static final String BRIGHT_WHITE = "\u001B[97m";
     protected final Comparator<? super K> comparator;
     protected final int degree;
     protected final int maxKeys;
@@ -382,24 +376,24 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
         sb.append(prefix).append(isTail ? lastBranch : crossBranch);
 
-        sb.append(BRIGHT_WHITE).append("[").append(RESET);
+        sb.append("[");
 
         for (int i = 0; i < node.keyCount; i++) {
 
-            sb.append(BRACKET).append("[").append(RESET);
-            sb.append(KEY).append(node.keys[i]).append(RESET);
+            sb.append("[");
+            sb.append(node.keys[i]);
             if (node.values != null) {
-                sb.append(EQUALS).append("=").append(RESET);
-                sb.append(VALUE).append(node.values[i]).append(RESET);
+                sb.append("=");
+                sb.append(node.values[i]);
             }
 
-            sb.append(BRACKET).append("]").append(RESET);
+            sb.append("]");
             if (i < node.keyCount - 1) {
-                sb.append(BRACKET).append(", ").append(RESET);
+                sb.append(", ");
             }
         }
 
-        sb.append(BRIGHT_WHITE).append("]").append(RESET).append("\n");
+        sb.append("]").append("\n");
 
         if (!node.isLeaf()) {
             int numChildren = node.keyCount + 1;
