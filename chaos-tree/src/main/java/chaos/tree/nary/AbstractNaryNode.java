@@ -1,7 +1,7 @@
 package chaos.tree.nary;
 
 /**
- * Hybrid B+Tree node design combining Lehman &amp; Yao's B-link technique
+ * Hybrid B+Tree node design combining structural B-Link pointers
  * with CLRS's structural invariants.
  *
  * <p>Design features:

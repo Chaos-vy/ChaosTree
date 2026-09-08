@@ -470,10 +470,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         return getLast();
     }
 
-    public Stream<E> rangeStream(E fromElement, E toElement) {
-        return subSet(fromElement, true, toElement, true).stream();
-    }
-
     @Override
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
         return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, false);
@@ -620,7 +616,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         s.defaultReadObject();
         int setSize = s.readInt();
         if (setSize > 0) {
-            Iterator<E> it = new Iterator<E>() {
+            Iterator<E> it = new Iterator<>() {
                 int count = 0;
 
                 @Override
@@ -790,7 +786,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         }
 
         private Iterator<E> descendingIteratorImpl() {
-            return new Iterator<E>() {
+            return new Iterator<>() {
                 private N nextNode = getEndNode();
                 private E val = null;
                 private long expectedModCount = modCount;
@@ -876,7 +872,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         @Override
         public int size() {
             int count = 0;
-            for (E e : this) {
+            for (E ignored : this) {
                 count++;
             }
             return count;

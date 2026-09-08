@@ -775,7 +775,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void importFlatMatrix(Object[][] flatMatrix, float factor) {
         if (flatMatrix == null || flatMatrix.length == 0) return;
         if (flatMatrix.length < 2 || flatMatrix[0].length != flatMatrix[1].length) {
@@ -784,9 +783,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         if (!isEmpty()) {
             throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
         }
-        if (flatMatrix[0].length == 0) {
-            return;
-        }
+        if (flatMatrix[0].length == 0) return;
         if (degree < 32) {
             throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
         }
@@ -796,180 +793,83 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
         Object[] flatKeys = flatMatrix[0];
         Object[] flatValues = flatMatrix[1];
-        int totalSize = flatKeys.length;
-        if (totalSize == 0) return;
+        int N = flatKeys.length;
 
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
-        BPlusTreeMapNode<K, V>[] rightEdge = (BPlusTreeMapNode<K, V>[]) new BPlusTreeMapNode[10];
-        rightEdge[0] = createNode(degree, true);
-        this.root = rightEdge[0];
 
-        int i = 0;
-        while (i < totalSize) {
-            BPlusTreeMapNode<K, V> leaf = rightEdge[0];
-            int chunk = Math.min(targetKeys - leaf.keyCount, totalSize - i);
-            System.arraycopy(flatKeys, i, leaf.keys, leaf.keyCount, chunk);
-            System.arraycopy(flatValues, i, leaf.values, leaf.keyCount, chunk);
-            leaf.keyCount += chunk;
-            i += chunk;
-
-            if (i < totalSize) {
-                K routingKey = (K) flatKeys[i];
-
-                int level = 1;
-                while (true) {
-                    BPlusTreeMapNode<K, V> parent = rightEdge[level];
-                    if (parent == null) {
-                        parent = createNode(degree, false);
-                        parent.setChild(0, rightEdge[level - 1]);
-                        rightEdge[level - 1].parent = parent;
-                        rightEdge[level] = parent;
-                        this.root = parent;
-                    }
-
-                    if (parent.keyCount < targetKeys) {
-                        parent.keys[parent.keyCount] = routingKey;
-                        parent.keyCount++;
-
-                        BPlusTreeMapNode<K, V> prevInternal = parent;
-                        for (int d = level - 1; d >= 0; d--) {
-                            BPlusTreeMapNode<K, V> newNode = createNode(degree, d == 0);
-                            prevInternal.setChild(prevInternal.keyCount, newNode);
-                            newNode.parent = prevInternal;
-
-                            if (d == 0) {
-                                rightEdge[0].next = newNode;
-                                newNode.prev = rightEdge[0];
-                            }
-
-                            rightEdge[d] = newNode;
-                            prevInternal = newNode;
-                        }
-                        break;
-                    } else {
-                        level++;
-                    }
-                }
-            }
+        int minChild = minKeys + 1;
+        int maxChild = maxKeys + 1;
+        int H = 0;
+        
+        while (true) {
+            double maxAtH = (double) maxKeys * Math.pow(maxChild, H);
+            if (N <= maxAtH) break;
+            H++;
         }
 
-        int highestLevel = rightEdge.length - 1;
-        while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
-
-        int level = highestLevel;
-        while (level >= 1) {
-            BPlusTreeMapNode<K, V> node = rightEdge[level];
-            if (node == null) {
-                level--;
-                continue;
-            }
-            if (node.keyCount == 0 && node != this.root) {
-                BPlusTreeMapNode<K, V> parent = rightEdge[level + 1];
-                int childIdx = parent.keyCount;
-                BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
-
-                if (leftSib.keyCount > minKeys) {
-                    node.keys[0] = parent.keys[childIdx - 1];
-                    node.child[1] = node.child[0];
-                    node.child[0] = leftSib.child[leftSib.keyCount];
-                    if (node.child[0] != null) node.child[0].parent = node;
-
-                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                    leftSib.keys[leftSib.keyCount - 1] = null;
-                    leftSib.child[leftSib.keyCount] = null;
-                    leftSib.keyCount--;
-                    node.keyCount++;
-                    level--;
-                } else {
-                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
-                    if (leftSib.child[leftSib.keyCount + 1] != null) {
-                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
-                    }
-                    leftSib.keyCount++;
-                    rightEdge[level] = leftSib;
-
-                    parent.keys[childIdx - 1] = null;
-                    parent.child[childIdx] = null;
-                    parent.keyCount--;
-
-                    if (parent.keyCount == 0 && parent != this.root) {
-                        level++;
-                    } else {
-                        level--;
-                    }
-                }
-            } else {
-                level--;
-            }
-        }
-
-        if (rightEdge[0] != null && rightEdge[0].keyCount == 0 && rightEdge[0] != this.root) {
-            BPlusTreeMapNode<K, V> node = rightEdge[0];
-            BPlusTreeMapNode<K, V> parent = rightEdge[1];
-            int childIdx = parent.keyCount;
-            BPlusTreeMapNode<K, V> leftSib = parent.child[childIdx - 1];
-
-            if (leftSib.keyCount > minKeys) {
-                node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
-                node.values[0] = leftSib.values[leftSib.keyCount - 1];
-                leftSib.keys[leftSib.keyCount - 1] = null;
-                leftSib.values[leftSib.keyCount - 1] = null;
-                leftSib.keyCount--;
-                node.keyCount++;
-                parent.keys[childIdx - 1] = node.keys[0];
-            } else {
-                parent.keys[childIdx - 1] = null;
-                parent.child[childIdx] = null;
-                parent.keyCount--;
-
-                leftSib.next = node.next;
-                if (leftSib.next != null) {
-                    leftSib.next.prev = leftSib;
-                }
-                rightEdge[0] = leftSib;
-
-                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
-                    BPlusTreeMapNode<K, V> n = rightEdge[cascadeLevel];
-                    if (n == null || n == this.root || n.keyCount > 0) break;
-                    BPlusTreeMapNode<K, V> p = rightEdge[cascadeLevel + 1];
-                    int ci = p.keyCount;
-                    BPlusTreeMapNode<K, V> ls = p.child[ci - 1];
-
-                    if (ls.keyCount > minKeys) {
-                        n.keys[0] = p.keys[ci - 1];
-                        n.child[1] = n.child[0];
-                        n.child[0] = ls.child[ls.keyCount];
-                        if (n.child[0] != null) n.child[0].parent = n;
-                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
-                        ls.keys[ls.keyCount - 1] = null;
-                        ls.child[ls.keyCount] = null;
-                        ls.keyCount--;
-                        n.keyCount++;
-                        break;
-                    } else {
-                        ls.keys[ls.keyCount] = p.keys[ci - 1];
-                        ls.child[ls.keyCount + 1] = n.child[0];
-                        if (ls.child[ls.keyCount + 1] != null) {
-                            ls.child[ls.keyCount + 1].parent = ls;
-                        }
-                        ls.keyCount++;
-                        rightEdge[cascadeLevel] = ls;
-
-                        p.keys[ci - 1] = null;
-                        p.child[ci] = null;
-                        p.keyCount--;
-                    }
-                }
-            }
-        }
-
-        if (root.keyCount == 0 && !root.isLeaf()) {
-            root = root.child[0];
-            root.parent = null;
-        }
-        this.size = totalSize;
+        this.builderPrevLeaf = null;
+        this.root = buildSubtree(flatKeys, flatValues, 0, N - 1, H, true, targetKeys, minChild, maxChild);
+        this.size = N;
         this.modCount++;
+    }
+
+    private BPlusTreeMapNode<K, V> builderPrevLeaf;
+
+    private BPlusTreeMapNode<K, V> buildSubtree(Object[] keys, Object[] values, int start, int end, int h, boolean isRoot, int targetKeys, int minChild, int maxChild) {
+        int numKeys = end - start + 1;
+        
+        if (h == 0) {
+            BPlusTreeMapNode<K, V> leaf = createNode(degree, true);
+            System.arraycopy(keys, start, leaf.keys, 0, numKeys);
+            System.arraycopy(values, start, leaf.values, 0, numKeys);
+            leaf.keyCount = numKeys;
+            
+            if (builderPrevLeaf != null) {
+                builderPrevLeaf.next = leaf;
+                leaf.prev = builderPrevLeaf;
+            }
+            builderPrevLeaf = leaf;
+            return leaf;
+        }
+
+        double maxSubtree = (double) maxKeys * Math.pow(maxChild, h - 1);
+        double minSubtree = (double) minKeys * Math.pow(minChild, h - 1);
+        
+        int minAllowedChild = (int) Math.ceil(numKeys / maxSubtree);
+        int maxAllowedChild = (int) Math.floor(numKeys / minSubtree);
+        
+        int minChildLimit = isRoot ? 2 : minChild;
+        minAllowedChild = Math.max(minAllowedChild, minChildLimit);
+        maxAllowedChild = Math.min(maxAllowedChild, maxChild);
+
+        double targetSubtree = (double) targetKeys * Math.pow(targetKeys + 1, h - 1);
+        int bestChild = (int) Math.round(numKeys / targetSubtree);
+        int C = Math.clamp(bestChild, minAllowedChild, maxAllowedChild);
+
+        int baseSize = numKeys / C;
+        int remainder = numKeys % C;
+
+        BPlusTreeMapNode<K, V> node = createNode(degree, false);
+        int currStart = start;
+
+        for (int i = 0; i < C; i++) {
+            int childTotalKeys = baseSize + (i < remainder ? 1 : 0);
+            
+            BPlusTreeMapNode<K, V> child = buildSubtree(keys, values, currStart, currStart + childTotalKeys - 1, h - 1, false, targetKeys, minChild, maxChild);
+            node.child[i] = child;
+            child.parent = node;
+            
+            if (i > 0) {
+                BPlusTreeMapNode<K, V> leftmost = child;
+                while (!leftmost.isLeaf()) {
+                    leftmost = leftmost.child[0];
+                }
+                node.keys[i - 1] = leftmost.keys[0];
+                node.keyCount++;
+            }
+            currStart += childTotalKeys;
+        }
+        return node;
     }
 
     @Override
