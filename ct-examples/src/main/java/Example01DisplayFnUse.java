@@ -9,21 +9,23 @@ import chaos.tree.naryMap.BPlusTreeMap;
  *
  * <p><strong>Points to be noted:</strong></p>
  * <ol>
- *     <li>Binary Tree renders Tree like structure without ANSI.</li>
- *     <li>Nary Tree supports ANSI for Tree like structure.</li>
+ *     <li>Binary Tree renders Tree like structure</li>
+ *     <li>Nary Tree also renders Tree like structure.</li>
  *     <li>It does demonstrate the exact picture of the Tree at that snapshot.</li>
  *     <li>
  *         The {@code display()} fn default load is {@link Style#UNICODE}, so
  *         if a user renders something like ??? in their terminal, don't worry,
  *         it just means you have a bad laptop!! Well, jokes apart, it means
- *         your terminal does not support UNICODE. LOL!!
+ *         your terminal does not support UNICODE.
  *     </li>
  * </ol>
  *
  * <p><strong>Solution:</strong> Just use {@code display(Style.ASCII)}.
  * It's that simple!!</p>
+ * This fn was came into consideration for study purpose it's does not provide
+ * any Syntax like json export or any other file.
  */
-public class Example_01_display_fn_use {
+public class Example01DisplayFnUse {
     public static void main(String[] args) {
         AvlTreeSet<Integer> tree0 = new AvlTreeSet<>((e1, e2) -> e2 - e1);
         AvlTreeMap<Integer, Character> tree1 = new AvlTreeMap<>();
@@ -123,7 +125,7 @@ public class Example_01_display_fn_use {
         System.out.println(tree3.display());
 
         /**
-         * Suppose My dev did this don't worry you are gonna pay for the toString generator cost.
+         * If dev does only print "tree3" it's just print like jdk
          */
         System.out.println(tree3);
         /**

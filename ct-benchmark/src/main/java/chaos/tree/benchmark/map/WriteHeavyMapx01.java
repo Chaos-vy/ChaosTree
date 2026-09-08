@@ -94,11 +94,8 @@ public class WriteHeavyMapx01 {
         bh.consume(map);
     }
 
-    // 2. JDK O(N) BULK LOAD (Apples-to-Apples)
     @Benchmark
     public void jdkTreeMapBulkLoad(Blackhole bh) {
-        // Passing a SortedMap into the constructor triggers the JDK's
-        // internal O(N) buildFromSorted loop.
         TreeMap<Integer, String> map = new TreeMap<>(preBuiltSortedMap);
         bh.consume(map);
     }
