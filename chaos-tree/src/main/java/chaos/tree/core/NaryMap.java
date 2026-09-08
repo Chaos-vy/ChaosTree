@@ -6,19 +6,20 @@ import java.util.Map;
 /**
  * Interface defining the bulk-loading contract for all N-ary Maps
  * (e.g., BTreeMap, BPlusTreeMap).
- *
+ * <p>
  * Provides O(N) operations to build and reconstruct the tree from 2D Matrices
  * and Iterators. Uses PECS (Producer Extends) for iterators to maximize
  * generic compatibility.
  *
  * <p>
- *     <strong>
- *         It must be noted that ChaosTree NaryTree are build in one sweep
- *         unlike textbook of DBMS, ChaosTree Build are different it uses a single sweep
- *         then rebalances top to down and down to up to fully,
- *         support correct buildup in O(N) time.
- *     </strong>
- *</p>
+ * <strong>
+ * It must be noted that ChaosTree NaryTree are build in one sweep
+ * unlike textbook of DBMS, ChaosTree Build are different it uses a single sweep
+ * then rebalances top to down and down to up to fully,
+ * support correct buildup in O(N) time.
+ * </strong>
+ * </p>
+ *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
@@ -30,7 +31,8 @@ public interface NaryMap<K, V> extends SearchTreeMap<K, V> {
      * <strong>WARNING: Sorted iterated must be passed. it was not designed
      * to check whether the iterator passed is sorted or not, It's your responsibility for
      * data feed. Having a check in build, decreases the speed</strong>
-     * @param it an iterator providing entries in sorted key order (Producer Extends)
+     *
+     * @param it     an iterator providing entries in sorted key order (Producer Extends)
      * @param factor the fill factor for the nodes
      */
     void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor);

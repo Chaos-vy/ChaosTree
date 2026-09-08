@@ -17,6 +17,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
 
     private static final int DEFAULT_DEGREE = 64;
+    private BPlusTreeMapNode<K, V> builderPrevLeaf;
 
     public BPlusTreeMap() {
         super(DEFAULT_DEGREE, null);
@@ -800,7 +801,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         int minChild = minKeys + 1;
         int maxChild = maxKeys + 1;
         int H = 0;
-        
+
         while (true) {
             double maxAtH = (double) maxKeys * Math.pow(maxChild, H);
             if (N <= maxAtH) break;
@@ -813,17 +814,15 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         this.modCount++;
     }
 
-    private BPlusTreeMapNode<K, V> builderPrevLeaf;
-
     private BPlusTreeMapNode<K, V> buildSubtree(Object[] keys, Object[] values, int start, int end, int h, boolean isRoot, int targetKeys, int minChild, int maxChild) {
         int numKeys = end - start + 1;
-        
+
         if (h == 0) {
             BPlusTreeMapNode<K, V> leaf = createNode(degree, true);
             System.arraycopy(keys, start, leaf.keys, 0, numKeys);
             System.arraycopy(values, start, leaf.values, 0, numKeys);
             leaf.keyCount = numKeys;
-            
+
             if (builderPrevLeaf != null) {
                 builderPrevLeaf.next = leaf;
                 leaf.prev = builderPrevLeaf;
@@ -834,10 +833,10 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
         double maxSubtree = (double) maxKeys * Math.pow(maxChild, h - 1);
         double minSubtree = (double) minKeys * Math.pow(minChild, h - 1);
-        
+
         int minAllowedChild = (int) Math.ceil(numKeys / maxSubtree);
         int maxAllowedChild = (int) Math.floor(numKeys / minSubtree);
-        
+
         int minChildLimit = isRoot ? 2 : minChild;
         minAllowedChild = Math.max(minAllowedChild, minChildLimit);
         maxAllowedChild = Math.min(maxAllowedChild, maxChild);
@@ -854,11 +853,11 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
         for (int i = 0; i < C; i++) {
             int childTotalKeys = baseSize + (i < remainder ? 1 : 0);
-            
+
             BPlusTreeMapNode<K, V> child = buildSubtree(keys, values, currStart, currStart + childTotalKeys - 1, h - 1, false, targetKeys, minChild, maxChild);
             node.child[i] = child;
             child.parent = node;
-            
+
             if (i > 0) {
                 BPlusTreeMapNode<K, V> leftmost = child;
                 while (!leftmost.isLeaf()) {

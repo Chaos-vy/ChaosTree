@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<E>> {
 
     private static final int DEFAULT_DEGREE = 64;
+    private BPlusTreeNode<E> builderPrevLeaf;
 
     public BPlusTreeSet() {
         super(DEFAULT_DEGREE, null);
@@ -172,13 +173,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
                     if (parent.keyCount == 0 && parent != this.root) {
                         level++;
-                    }
-                    else {
+                    } else {
                         level--;
                     }
                 }
-            }
-            else {
+            } else {
                 level--;
             }
         }
@@ -228,8 +227,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                         ls.keyCount--;
                         n.keyCount++;
                         break;
-                    }
-                    else {
+                    } else {
                         ls.keys[ls.keyCount] = p.keys[ci - 1];
                         ls.child[ls.keyCount + 1] = n.child[0];
                         if (ls.child[ls.keyCount + 1] != null) {
@@ -252,8 +250,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         this.modCount++;
     }
 
-
-
     @Override
     protected void buildFromSortedArray(Object[] flatArray, float factor) {
         if (flatArray == null || flatArray.length == 0) return;
@@ -273,7 +269,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         int minChild = minKeys + 1;
         int maxChild = maxKeys + 1;
         int H = 0;
-        
+
         while (true) {
             double maxAtH = (double) maxKeys * Math.pow(maxChild, H);
             if (N <= maxAtH) break;
@@ -286,16 +282,14 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         this.modCount++;
     }
 
-    private BPlusTreeNode<E> builderPrevLeaf;
-
     private BPlusTreeNode<E> buildSubtree(Object[] keys, int start, int end, int h, boolean isRoot, int targetKeys, int minChild, int maxChild) {
         int numKeys = end - start + 1;
-        
+
         if (h == 0) {
             BPlusTreeNode<E> leaf = createNode(degree, true);
             System.arraycopy(keys, start, leaf.keys, 0, numKeys);
             leaf.keyCount = numKeys;
-            
+
             if (builderPrevLeaf != null) {
                 builderPrevLeaf.next = leaf;
                 leaf.prev = builderPrevLeaf;
@@ -306,10 +300,10 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
         double maxSubtree = (double) maxKeys * Math.pow(maxChild, h - 1);
         double minSubtree = (double) minKeys * Math.pow(minChild, h - 1);
-        
+
         int minAllowedChild = (int) Math.ceil(numKeys / maxSubtree);
         int maxAllowedChild = (int) Math.floor(numKeys / minSubtree);
-        
+
         int minChildLimit = isRoot ? 2 : minChild;
         minAllowedChild = Math.max(minAllowedChild, minChildLimit);
         maxAllowedChild = Math.min(maxAllowedChild, maxChild);
@@ -326,11 +320,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
         for (int i = 0; i < C; i++) {
             int childTotalKeys = baseSize + (i < remainder ? 1 : 0);
-            
+
             BPlusTreeNode<E> child = buildSubtree(keys, currStart, currStart + childTotalKeys - 1, h - 1, false, targetKeys, minChild, maxChild);
             node.child[i] = child;
             child.parent = node;
-            
+
             if (i > 0) {
                 BPlusTreeNode<E> leftmost = child;
                 while (!leftmost.isLeaf()) {
@@ -522,8 +516,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (rightNext != null) {
                 rightNext.prev = left;
             }
-        }
-        else {
+        } else {
 
             left.keys[left.keyCount] = parent.keys[childIdx];
             left.keyCount++;

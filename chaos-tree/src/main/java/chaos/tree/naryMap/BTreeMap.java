@@ -596,18 +596,18 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
                     System.arraycopy(node.values, 0, node.values, 1, node.keyCount);
                     System.arraycopy(node.child, 0, node.child, 1, node.keyCount + 1);
-                    
+
                     node.keys[0] = parent.keys[childIdx - 1];
                     node.values[0] = parent.values[childIdx - 1];
                     parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
                     parent.values[childIdx - 1] = leftSib.values[leftSib.keyCount - 1];
                     leftSib.keys[leftSib.keyCount - 1] = null;
                     leftSib.values[leftSib.keyCount - 1] = null;
-                    
+
                     node.child[0] = leftSib.child[leftSib.keyCount];
                     leftSib.child[leftSib.keyCount] = null;
                     if (node.child[0] != null) node.child[0].parent = node;
-                    
+
                     leftSib.keyCount--;
                     node.keyCount++;
                 }
@@ -616,7 +616,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.values[leftSib.keyCount] = parent.values[childIdx - 1];
                     leftSib.keyCount++;
-                    
+
                     System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
                     System.arraycopy(node.values, 0, leftSib.values, leftSib.keyCount, node.keyCount);
                     System.arraycopy(node.child, 0, leftSib.child, leftSib.keyCount, node.keyCount + 1);
@@ -631,7 +631,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     parent.values[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
-                    
+
                     rightEdge[level] = leftSib;
                 }
             }
@@ -682,18 +682,18 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                             System.arraycopy(n.keys, 0, n.keys, 1, n.keyCount);
                             System.arraycopy(n.values, 0, n.values, 1, n.keyCount);
                             System.arraycopy(n.child, 0, n.child, 1, n.keyCount + 1);
-                            
+
                             n.keys[0] = p.keys[ci - 1];
                             n.values[0] = p.values[ci - 1];
                             p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
                             p.values[ci - 1] = ls.values[ls.keyCount - 1];
                             ls.keys[ls.keyCount - 1] = null;
                             ls.values[ls.keyCount - 1] = null;
-                            
+
                             n.child[0] = ls.child[ls.keyCount];
                             ls.child[ls.keyCount] = null;
                             if (n.child[0] != null) n.child[0].parent = n;
-                            
+
                             ls.keyCount--;
                             n.keyCount++;
                             break;
@@ -701,7 +701,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                             ls.keys[ls.keyCount] = p.keys[ci - 1];
                             ls.values[ls.keyCount] = p.values[ci - 1];
                             ls.keyCount++;
-                            
+
                             System.arraycopy(n.keys, 0, ls.keys, ls.keyCount, n.keyCount);
                             System.arraycopy(n.values, 0, ls.values, ls.keyCount, n.keyCount);
                             System.arraycopy(n.child, 0, ls.child, ls.keyCount, n.keyCount + 1);
@@ -716,7 +716,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                             p.values[ci - 1] = null;
                             p.child[ci] = null;
                             p.keyCount--;
-                            
+
                             rightEdge[cascadeLevel] = ls;
                         }
                     }
@@ -758,11 +758,11 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         int N = flatKeys.length;
 
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
-        
+
         int minChild = minKeys + 1;
         int maxChild = maxKeys + 1;
         int H = 0;
-        
+
         while (N > Math.pow(maxChild, H + 1) - 1) {
             H++;
         }
@@ -774,7 +774,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
     private BTreeMapNode<K, V> buildSubtree(Object[] keys, Object[] values, int start, int end, int h, boolean isRoot, int targetKeys, int minChild, int maxChild) {
         int numKeys = end - start + 1;
-        
+
         if (h == 0) {
             BTreeMapNode<K, V> leaf = createNode(degree, true);
             System.arraycopy(keys, start, leaf.keys, 0, numKeys);
@@ -785,10 +785,10 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
         double maxChild_h = Math.pow(maxChild, h);
         double minChild_h = Math.pow(minChild, h);
-        
+
         int minAllowedChild = (int) Math.ceil((numKeys + 1) / maxChild_h);
         int maxAllowedChild = (int) Math.floor((numKeys + 1) / minChild_h);
-        
+
         int minChildLimit = isRoot ? 2 : minChild;
         minAllowedChild = Math.max(minAllowedChild, minChildLimit);
         maxAllowedChild = Math.min(maxAllowedChild, maxChild);
@@ -806,7 +806,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
         for (int i = 0; i < C; i++) {
             int childTotalKeys = baseSize + (i < remainder ? 1 : 0);
-            
+
             BTreeMapNode<K, V> child = buildSubtree(keys, values, currStart, currStart + childTotalKeys - 1, h - 1, false, targetKeys, minChild, maxChild);
             node.child[i] = child;
             child.parent = node;

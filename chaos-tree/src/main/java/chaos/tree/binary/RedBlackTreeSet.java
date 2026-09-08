@@ -172,10 +172,10 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                 x.parent = null;
             }
 
-            
-            x.left = null; 
-            x.right = null; 
-            x.parent = null; 
+
+            x.left = null;
+            x.right = null;
+            x.parent = null;
 
             size--;
             modCount++;

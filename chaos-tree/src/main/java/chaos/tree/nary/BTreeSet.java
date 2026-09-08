@@ -100,8 +100,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                             prevInternal = newNode;
                         }
                         break;
-                    }
-                    else {
+                    } else {
                         level++;
                     }
                 }
@@ -117,22 +116,22 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             if (node.keyCount < minKeys) {
                 BTreeNode<E> parent = rightEdge[level + 1];
                 int childIdx = parent.keyCount;
-                if (childIdx == 0) continue; 
+                if (childIdx == 0) continue;
 
                 BTreeNode<E> leftSib = parent.child[childIdx - 1];
 
                 while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
                     System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
                     System.arraycopy(node.child, 0, node.child, 1, node.keyCount + 1);
-                    
+
                     node.keys[0] = parent.keys[childIdx - 1];
                     parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
                     leftSib.keys[leftSib.keyCount - 1] = null;
-                    
+
                     node.child[0] = leftSib.child[leftSib.keyCount];
                     leftSib.child[leftSib.keyCount] = null;
                     if (node.child[0] != null) node.child[0].parent = node;
-                    
+
                     leftSib.keyCount--;
                     node.keyCount++;
                 }
@@ -140,7 +139,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 if (node.keyCount < minKeys) {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.keyCount++;
-                    
+
                     System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
                     System.arraycopy(node.child, 0, leftSib.child, leftSib.keyCount, node.keyCount + 1);
                     for (int j = 0; j <= node.keyCount; j++) {
@@ -153,7 +152,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     parent.keys[childIdx - 1] = null;
                     parent.child[childIdx] = null;
                     parent.keyCount--;
-                    
+
                     rightEdge[level] = leftSib;
                 }
             }
@@ -196,22 +195,22 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                         if (ls.keyCount > minKeys) {
                             System.arraycopy(n.keys, 0, n.keys, 1, n.keyCount);
                             System.arraycopy(n.child, 0, n.child, 1, n.keyCount + 1);
-                            
+
                             n.keys[0] = p.keys[ci - 1];
                             p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
                             ls.keys[ls.keyCount - 1] = null;
-                            
+
                             n.child[0] = ls.child[ls.keyCount];
                             ls.child[ls.keyCount] = null;
                             if (n.child[0] != null) n.child[0].parent = n;
-                            
+
                             ls.keyCount--;
                             n.keyCount++;
                             break;
                         } else {
                             ls.keys[ls.keyCount] = p.keys[ci - 1];
                             ls.keyCount++;
-                            
+
                             System.arraycopy(n.keys, 0, ls.keys, ls.keyCount, n.keyCount);
                             System.arraycopy(n.child, 0, ls.child, ls.keyCount, n.keyCount + 1);
                             for (int j = 0; j <= n.keyCount; j++) {
@@ -224,7 +223,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                             p.keys[ci - 1] = null;
                             p.child[ci] = null;
                             p.keyCount--;
-                            
+
                             rightEdge[cascadeLevel] = ls;
                         }
                     }
@@ -255,11 +254,11 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
         int N = sortedArray.length;
         int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
-        
+
         int minChild = minKeys + 1;
         int maxChild = maxKeys + 1;
         int H = 0;
-        
+
         while (N > Math.pow(maxChild, H + 1) - 1) {
             H++;
         }
@@ -271,7 +270,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
     private BTreeNode<E> buildSubtree(Object[] keys, int start, int end, int h, boolean isRoot, int targetKeys, int minChild, int maxChild) {
         int numKeys = end - start + 1;
-        
+
         if (h == 0) {
             BTreeNode<E> leaf = createNode(degree, true);
             System.arraycopy(keys, start, leaf.keys, 0, numKeys);
@@ -281,10 +280,10 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
         double maxChild_h = Math.pow(maxChild, h);
         double minChild_h = Math.pow(minChild, h);
-        
+
         int minAllowedChild = (int) Math.ceil((numKeys + 1) / maxChild_h);
         int maxAllowedChild = (int) Math.floor((numKeys + 1) / minChild_h);
-        
+
         int minChildLimit = isRoot ? 2 : minChild;
         minAllowedChild = Math.max(minAllowedChild, minChildLimit);
         maxAllowedChild = Math.min(maxAllowedChild, maxChild);
@@ -302,7 +301,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
         for (int i = 0; i < C; i++) {
             int childTotalKeys = baseSize + (i < remainder ? 1 : 0);
-            
+
             BTreeNode<E> child = buildSubtree(keys, currStart, currStart + childTotalKeys - 1, h - 1, false, targetKeys, minChild, maxChild);
             node.child[i] = child;
             child.parent = node;
@@ -514,11 +513,10 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             } else if (rightSibling != null && rightSibling.keyCount > minKeys) {
                 borrowRight(parent, childIdx, current, rightSibling);
                 break;
-            }
-            else {
+            } else {
                 if (leftSibling != null) {
                     mergeNodes(parent, childIdx - 1, leftSibling, current);
-                    current = parent; 
+                    current = parent;
                 } else {
                     mergeNodes(parent, childIdx, current, rightSibling);
                     current = parent;
@@ -528,8 +526,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         if (root.keyCount == 0) {
             if (root.isLeaf()) {
                 root = null;
-            }
-            else {
+            } else {
                 root = root.child[0];
                 root.parent = null;
             }
@@ -1040,8 +1037,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                     }
                     currentNode = currentNode.isLeaf() ? null : currentNode.child[~idx];
                 }
-            }
-            else {
+            } else {
                 currentNode = null;
             }
         }

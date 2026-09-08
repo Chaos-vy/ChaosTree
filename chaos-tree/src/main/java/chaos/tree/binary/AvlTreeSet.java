@@ -112,9 +112,9 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
                 fixUpFromBottom(parent);
             }
 
-            
-            x.left = null; 
-            x.right = null; 
+
+            x.left = null;
+            x.right = null;
             x.parent = null;
             size--;
             modCount++;

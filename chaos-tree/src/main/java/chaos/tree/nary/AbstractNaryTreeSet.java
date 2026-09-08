@@ -368,6 +368,23 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         return new NarySubSet(null, true, null, true, true);
     }
 
+    abstract protected void buildFromSortedArray(Object[] flatArray, float factor);
+
+    @Override
+    public void importFlatArray(Object[] flatArray, float fillFactor) {
+        if (flatArray == null || flatArray.length == 0) return;
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (degree < 32) {
+            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSortedArray(flatArray, fillFactor);
+    }
+
     private final class NarySubSet extends AbstractSet<E> implements NavigableSet<E>, Serializable {
         private final E lo;
         private final boolean loInclusive;
@@ -724,22 +741,5 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
                 }
             };
         }
-    }
-
-    abstract protected void buildFromSortedArray(Object[] flatArray, float factor);
-
-    @Override
-    public void importFlatArray(Object[] flatArray, float fillFactor) {
-        if (flatArray == null || flatArray.length == 0) return;
-        if (!isEmpty()) {
-            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
-        }
-        if (degree < 32) {
-            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
-        }
-        if (fillFactor < 0.5f || fillFactor > 1.0f) {
-            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
-        }
-        buildFromSortedArray(flatArray, fillFactor);
     }
 }
