@@ -25,11 +25,6 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-/**
- * The core engine for all Binary Trees.
- * I used F-Form polymorphism to avoid unwanted casting
- * It is commonly known as CRTP in C++
- */
 sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N>> extends AbstractSet<E>
         implements SearchTreeSet<E>, Cloneable, Serializable
         permits AvlTreeSet, RedBlackTreeSet {
@@ -856,7 +851,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public boolean remove(Object o) {
-            if (!contains(o)) return false; // Out of bounds or not found
+            if (!contains(o)) return false;
             return AbstractBinaryTreeSet.this.remove(o);
         }
 
@@ -963,5 +958,4 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             return tailSet(fromElement, true);
         }
     }
-    //Play with it, destroy with it, LOL!!
 }

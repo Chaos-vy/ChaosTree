@@ -3,8 +3,10 @@ package chaos.tree.naryMap;
 /**
  * The dragons of chaos tree
  * Don't think this 20 line of code are dragons
- * But unfortunately yes, Each line here except blank lines LOL, is enough to
+ * But unfortunately yes, Each line here except blank lines is enough to
  * break the NaryTreeMap ecosystem.
+ * The key capacity are 2t means +1 key rather than CLRS 2t-1 same goes for Child[] array.
+ * It uses SoA (Structure of Arrays)
  *
  * @param <K> key
  * @param <V> value

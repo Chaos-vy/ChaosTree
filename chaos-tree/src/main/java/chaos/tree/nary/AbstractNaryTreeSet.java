@@ -1,6 +1,6 @@
 package chaos.tree.nary;
 
-import chaos.tree.core.SearchTreeSet;
+import chaos.tree.core.NarySet;
 import chaos.tree.core.Style;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.SortedSet;
  * The add and remove and build from sorted is played by concrete classes.
  */
 sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> extends AbstractSet<E>
-        implements SearchTreeSet<E>, Serializable, Cloneable permits BPlusTreeSet, BTreeSet {
+        implements NarySet<E>, Serializable, Cloneable permits BPlusTreeSet, BTreeSet {
 
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
@@ -41,9 +41,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     protected transient int size;
     protected transient long modCount;
 
-    /*
-    Here You just need to know that this is just a boundary I created for CLRS system.
-     */
+
     protected AbstractNaryTreeSet(int degree, Comparator<? super E> comparator) {
         this.comparator = comparator;
         if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
@@ -54,7 +52,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         this.minKeys = degree - 1;
     }
 
-    abstract void buildFromSorted(Iterator<? extends E> it, float f);
+    public abstract void buildFromSorted(Iterator<? extends E> it, float f);
 
     @SuppressWarnings("unchecked")
     protected int compare(E e1, E e2) {
@@ -71,21 +69,16 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     abstract N createNode(int degree, boolean isLeaf);
 
-    /*
-    This needed to be put in ADR as well might be no or yes
-    TODO: ADR of this
-     */
     @SuppressWarnings("unchecked")
     protected int searchNode(N node, E key) {
-        if (node.keyCount < 12) { //actually faster.
+        if (node.keyCount < 12) {
             for (int i = 0; i < node.keyCount; i++) {
                 int cmp = compare((E) node.keys[i], key);
-                if (cmp == 0) return i;// Match found
-                if (cmp > 0) return ~i;// Not found, insertion point is 'i' (Bitwise NOT to make it negative)
+                if (cmp == 0) return i;
+                if (cmp > 0) return ~i;
             }
-            return ~node.keyCount;// Not found, belongs at the very end
+            return ~node.keyCount;
         }
-        // Arrays.binarySearch already returns ~insertionPoint for missing elements
         return Arrays.binarySearch((E[]) node.keys, 0, node.keyCount, key, comparator);
     }
 
@@ -196,12 +189,11 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     protected abstract Iterator<E> baseDescendingIterator(E startKey, boolean startInclusive);
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean addAll(Collection<? extends E> collection) {
         Objects.requireNonNull(collection);
         if (this.size == 0 && !collection.isEmpty() && collection instanceof SortedSet<?> ss) {
             if (Objects.equals(this.comparator(), ss.comparator())) {
-                buildFromSorted((Iterator<E>) collection.iterator(), 0.75f);
+                buildFromSorted(collection.iterator(), 0.75f);
                 return true;
             }
         }
@@ -241,7 +233,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             clone.size = 0;
             clone.modCount = 0;
             if (this.size > 0) {
-                clone.buildFromSorted(this.iterator(), 0.9f); //90% of node filled
+                clone.buildFromSorted(this.iterator(), 0.75f);
             }
             return clone;
         } catch (CloneNotSupportedException e) {
@@ -284,7 +276,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
                     }
                 }
             };
-            buildFromSorted(it, 0.9f); // Pack to 90% on load!
+            buildFromSorted(it, 0.75f);
         }
     }
 
@@ -414,18 +406,16 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             return !tooLow(key) && !tooHigh(key);
         }
 
-        private boolean inClosedRange(Object key) {
-            boolean lowPass = (lo == null);
-            if (!lowPass) {
+        private boolean outOfBounds(Object key) {
+            if (lo != null) {
                 @SuppressWarnings("unchecked") int c = compare((E) key, lo);
-                lowPass = (c >= 0);
+                if (c < 0) return true;
             }
-            boolean highPass = (hi == null);
-            if (!highPass) {
+            if (hi != null) {
                 @SuppressWarnings("unchecked") int c = compare((E) key, hi);
-                highPass = (c <= 0);
+                return c > 0;
             }
-            return lowPass && highPass;
+            return false;
         }
 
         @Override
@@ -569,7 +559,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-            if (!inClosedRange(fromElement) || !inClosedRange(toElement))
+            if (outOfBounds(fromElement) || outOfBounds(toElement))
                 throw new IllegalArgumentException("Requested bounds out of range");
 
             if (descending) return new NarySubSet(toElement, toInclusive, fromElement, fromInclusive, true);
@@ -578,7 +568,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-            if (!inClosedRange(toElement)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (outOfBounds(toElement)) throw new IllegalArgumentException("Requested bounds out of range");
 
             if (descending) return new NarySubSet(lo, loInclusive, toElement, inclusive, true);
             return new NarySubSet(lo, loInclusive, toElement, inclusive, false);
@@ -586,7 +576,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-            if (!inClosedRange(fromElement)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (outOfBounds(fromElement)) throw new IllegalArgumentException("Requested bounds out of range");
 
             if (descending) return new NarySubSet(fromElement, inclusive, hi, hiInclusive, true);
             return new NarySubSet(fromElement, inclusive, hi, hiInclusive, false);
@@ -734,5 +724,22 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
                 }
             };
         }
+    }
+
+    abstract protected void buildFromSortedArray(Object[] flatArray, float factor);
+
+    @Override
+    public void importFlatArray(Object[] flatArray, float fillFactor) {
+        if (flatArray == null || flatArray.length == 0) return;
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (degree < 32) {
+            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
+        }
+        if (fillFactor < 0.5f || fillFactor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
+        buildFromSortedArray(flatArray, fillFactor);
     }
 }

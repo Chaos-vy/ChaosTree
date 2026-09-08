@@ -1,6 +1,6 @@
 package chaos.tree.naryMap;
 
-import chaos.tree.core.SearchTreeMap;
+import chaos.tree.core.NaryMap;
 import chaos.tree.core.Style;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K, V, N>>
-        extends AbstractMap<K, V> implements SearchTreeMap<K, V>, Serializable, Cloneable permits BTreeMap, BPlusTreeMap {
+        extends AbstractMap<K, V> implements NaryMap<K, V>, Serializable, Cloneable permits BTreeMap, BPlusTreeMap {
 
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
@@ -82,57 +82,13 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
     abstract N createNode(int degree, boolean isLeaf);
 
-    abstract void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor);
+    public abstract void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor);
 
-    /**
-     * <strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
-     * <p>
-     * This is a high-performance, bare-metal array ingestion engine. It is hungry for raw
-     * array throughput, but it is extremely unforgiving. Use with absolute precision.
-     * <p>
-     * <strong>THE FLAT MATRIX RULES:</strong>
-     * <ul>
-     * <li><strong>Matrix Layout:</strong> The {@code flatMatrix} parameter must be exactly 2D: {@code flatMatrix[0]} contains the keys, and {@code flatMatrix[1]} contains the values.</li>
-     * <li><strong>Array Integrity:</strong> Neither array can be null, and both must be of exactly equal length.</li>
-     * <li><strong>No Null Keys:</strong> A key must never be null. If a value is empty/missing, you must explicitly place {@code null} in the value array at that index.</li>
-     * <li><strong>Strictly Sorted:</strong> The keys array <strong>MUST</strong> be strictly sorted according to the tree's comparator. Feeding unsorted data will instantly and silently corrupt the entire tree structure.</li>
-     * <li><strong>Minimum Degree:</strong> This API relies on chunked array-copying and only services trees with a {@code degree >= 32}.</li>
-     * </ul>
-     * <p>
-     * <strong>FILL FACTOR:</strong>
-     * The {@code factor} determines node occupancy and has strict limits between {@code 0.5f} and {@code 1.0f}.
-     * A factor of {@code 0.9f} is highly recommended for bulk loading. This packs the nodes densely while leaving
-     * exactly enough buffer room to prevent future insertions from triggering massive, cascading split operations.
-     * <p>
-     *
-     * @param flatMatrix A 2D array where {@code flatMatrix[0]} is the sorted keys and {@code flatMatrix[1]} is the mapped values.
-     * @param factor     The node fill factor, restricted to the range {@code [0.5, 1.0]}.
-     */
-    abstract void importFlatMatrix(Object[][] flatMatrix, float factor);
+    @Override
+    public abstract void importFlatMatrix(Object[][] flatMatrix, float factor);
 
-    /**
-     * <strong>THE MASTER EXPORTER OF CHAOSTREE</strong>
-     * <p>
-     * Rips the entire internal state of the tree into a highly optimized, contiguous 2D array matrix
-     * in strictly sorted order. This bypasses {@code Map.Entry} instantiation entirely by directly
-     * flatMatrixing memory into flat arrays.
-     * <p>
-     * <strong>Matrix Layout:</strong>
-     * <ul>
-     * <li>{@code matrix[0]} &rarr; Array of strictly sorted keys.</li>
-     * <li>{@code matrix[1]} &rarr; Array of corresponding values.</li>
-     * </ul>
-     * <p>
-     * Unlike the ingestion engine, this extraction process is universally safe and natively
-     * supports trees of <strong>all degrees</strong> with zero restrictions.
-     * <p>
-     * <strong>Note:</strong> If you intend to reconstruct a tree by feeding this matrix back
-     * into the engine, you must review the strict limitations (such as {@code degree >= 32})
-     * documented in {@link #importFlatMatrix}.
-     *
-     * @return A 2D {@code Object[][]} representing the flat matrix of keys and values.
-     */
-    abstract Object[][] exportFlatMatrix();
+    @Override
+    public abstract Object[][] exportFlatMatrix();
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
@@ -162,21 +118,15 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         if (root == null) return null;
         K k = (K) key;
         N current = root;
-        //These comment are part of insight so that I do not forget it.
-        //It was done to ensure heavy lifting and miscellaneous API here.
         while (current != null) {
             int idx = searchNodeMap(current, k);
 
             if (idx >= 0) {
-                // the chaos TRICK:
-                // If values != null, it's either a B-Tree node or a B+Tree leaf. Data is here!
                 if (current.values != null) {
                     return (V) current.values[idx];
                 }
-                // It's a B+Tree internal routing node. Route to the right child!
                 current = current.child[idx + 1];
             } else {
-                // Key not found in this node. Drop down the left-side child pointer.
                 if (current.isLeaf()) return null;
                 current = current.child[~idx];
             }
@@ -450,7 +400,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             clone.descendingMapView = null;
 
             if (this.size > 0) {
-                clone.buildFromSorted(this.entrySet().iterator(), 1.0f);
+                clone.buildFromSorted(this.entrySet().iterator(), 0.75f);
             }
 
             return clone;
@@ -498,7 +448,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                     }
                 }
             };
-            buildFromSorted(streamIterator, 1.0f);
+            buildFromSorted(streamIterator, 0.75f);
         }
     }
 
@@ -1283,7 +1233,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
             @Override
             public Iterator<Map.Entry<K, V>> iterator() {
-                // Calls the outer AbstractNaryTreeMap's descending iterator
                 return descendingEntryIterator(null, true);
             }
 

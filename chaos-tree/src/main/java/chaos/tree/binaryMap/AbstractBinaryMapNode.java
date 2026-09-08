@@ -48,7 +48,7 @@ sealed abstract class AbstractBinaryMapNode<K, V, N extends AbstractBinaryMapNod
 
     @Override
     public String toString() {
-        return key + "=" + value; // Standard Java Map formatting
+        return key + "=" + value;
     }
 
     protected void setPair(K key, V value) {

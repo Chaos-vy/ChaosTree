@@ -10,13 +10,8 @@ import java.util.Objects;
 import java.util.SortedSet;
 import java.util.function.Consumer;
 
-/*
-I prioritize mostly DOD over OOD
- */
 public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<E>> {
-    /*
-     Equivalent to maximum of ~127 keys per node and a minimum of ~63 keys
-     */
+
     private static final int DEFAULT_DEGREE = 64;
 
     public BPlusTreeSet() {
@@ -45,9 +40,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         super(degree, comparator);
     }
 
-    /**
-     * Constructs a ChaosTree using a configuration Builder.
-     */
     public BPlusTreeSet(BPlusTreeSet.Builder<E> builder) {
         super(builder.degree, builder.comparator);
 
@@ -65,20 +57,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         return new BPlusTreeNode<>(degree, isLeaf);
     }
 
-    /**
-     * Streams strictly sorted data directly into the tree in O(N) time.
-     * <p>
-     * <strong>WARNING:</strong> The provided iterator MUST yield elements in strict
-     * ascending order according to this tree's comparator. If the data is unsorted,
-     * the tree structure will be corrupted.
-     *
-     * @param it     An iterator providing strictly sorted elements.
-     * @param factor A value between 0.5 and 1.0 representing how full to pack each node.
-     *               Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *               A use of 0.75f is used for bulk loading in my tree. For read purpose you can
-     *               have it 1.0f but after that any insert or remove information will
-     *               trigger massive split, merge, borrow, array shifting.
-     */
     @Override
     @SuppressWarnings("unchecked")
     public void buildFromSorted(Iterator<? extends E> it, float factor) {
@@ -127,7 +105,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     if (parent == null) {
                         parent = createNode(degree, false);
                         parent.setChild(0, leftChild);
-                        leftChild.parent = parent;                // FIX
+                        leftChild.parent = parent;
                         rightEdge[level] = parent;
                         this.root = parent;
                     }
@@ -135,13 +113,13 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     if (parent.keyCount < targetKeys) {
                         parent.keys[parent.keyCount] = routingKey;
                         parent.setChild(parent.keyCount + 1, rightChild);
-                        rightChild.parent = parent;                // FIX
+                        rightChild.parent = parent;
                         parent.keyCount++;
                         break;
                     } else {
                         BPlusTreeNode<E> newInternal = createNode(degree, false);
                         newInternal.setChild(0, rightChild);
-                        rightChild.parent = newInternal;           // FIX
+                        rightChild.parent = newInternal;
                         rightEdge[level] = newInternal;
 
                         leftChild = parent;
@@ -152,11 +130,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
 
-        // Phase 1: Top-Down Internal Cleanup with cascade handling.
-        // After a merge at level L, the parent at L+1 loses a key. If that parent
-        // was already processed and now has 0 keys, we must re-process it.
-        // We scan down; whenever a merge at level L reduces rightEdge[L+1].keyCount to 0,
-        // we restart from L+1 before continuing downward.
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
@@ -173,7 +146,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                 BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
 
                 if (leftSib.keyCount > minKeys) {
-                    // Borrow
                     node.keys[0] = parent.keys[childIdx - 1];
                     node.child[1] = node.child[0];
                     node.child[0] = leftSib.child[leftSib.keyCount];
@@ -186,7 +158,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     node.keyCount++;
                     level--;
                 } else {
-                    // Merge
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.child[leftSib.keyCount + 1] = node.child[0];
                     if (leftSib.child[leftSib.keyCount + 1] != null) {
@@ -199,29 +170,24 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     parent.child[childIdx] = null;
                     parent.keyCount--;
 
-                    // Merge reduced parent.keyCount. If parent now has 0 keys and
-                    // isn't root, we must re-process that level before continuing down.
                     if (parent.keyCount == 0 && parent != this.root) {
-                        level++; // go back UP to re-process parent
-                    } else {
+                        level++;
+                    }
+                    else {
                         level--;
                     }
                 }
-            } else {
+            }
+            else {
                 level--;
             }
         }
-
-        // Phase 2: Leaf Cleanup — B+Tree semantics (< minKeys, not == 0)
-        // In B+Tree, every element goes to a leaf, so the rightmost leaf always has >= 1 key.
-        // But it can have < minKeys keys, which the == 0 check misses entirely.
         if (rightEdge[0] != null && rightEdge[0].keyCount < minKeys && rightEdge[0] != this.root) {
             BPlusTreeNode<E> node = rightEdge[0];
             BPlusTreeNode<E> parent = rightEdge[1];
             int childIdx = parent.keyCount;
             BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-            // B+Tree leaf borrow: move actual keys (not separators), update routing key
             while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
                 System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
                 node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
@@ -231,7 +197,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                 parent.keys[childIdx - 1] = node.keys[0];
             }
 
-            // B+Tree leaf merge: move all keys to leftSib, fix linked list
             if (node.keyCount < minKeys) {
                 System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
                 leftSib.keyCount += node.keyCount;
@@ -245,18 +210,14 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     leftSib.next.prev = leftSib;
                 }
 
-                // Phase 2.5: Bottom-up cascade — leaf merge reduced parent.keyCount,
-                // which may cascade upward through nodes that Phase 1 already resolved.
                 for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
                     BPlusTreeNode<E> n = rightEdge[cascadeLevel];
                     if (n == null || n == this.root || n.keyCount > 0) break;
-                    // n.keyCount == 0, not root — must resolve
                     BPlusTreeNode<E> p = rightEdge[cascadeLevel + 1];
                     int ci = p.keyCount;
                     BPlusTreeNode<E> ls = p.child[ci - 1];
 
                     if (ls.keyCount > minKeys) {
-                        // Internal borrow
                         n.keys[0] = p.keys[ci - 1];
                         n.child[1] = n.child[0];
                         n.child[0] = ls.child[ls.keyCount];
@@ -266,9 +227,9 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                         ls.child[ls.keyCount] = null;
                         ls.keyCount--;
                         n.keyCount++;
-                        break; // borrow doesn't reduce parent, cascade stops
-                    } else {
-                        // Internal merge
+                        break;
+                    }
+                    else {
                         ls.keys[ls.keyCount] = p.keys[ci - 1];
                         ls.child[ls.keyCount + 1] = n.child[0];
                         if (ls.child[ls.keyCount + 1] != null) {
@@ -280,13 +241,10 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                         p.keys[ci - 1] = null;
                         p.child[ci] = null;
                         p.keyCount--;
-                        // cascade continues to next level
                     }
                 }
             }
         }
-
-        // Phase 3: Root Demotion
         while (this.root.keyCount == 0 && !this.root.isLeaf()) {
             this.root = this.root.child[0];
             this.root.parent = null;
@@ -294,26 +252,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         this.modCount++;
     }
 
-    /**
-     * Strictly sorted array data directly into the tree in O(N) time.
-     * <p>
-     * <strong>WARNING:</strong> The provided array MUST yield elements in strict
-     * ascending order according to this tree's comparator. If the data is unsorted,
-     * the tree structure will be corrupted.
-     * <strong>Dragon Feed is it's another name</strong>
-     * <p>
-     * <strong>IMPORTANT:</strong> The API only works for <strong>degree > 32</strong> because below that there
-     * would be less optimized. Internally it uses native System.arraycopy for fast building.
-     *
-     * @param flatArray An array providing strictly sorted elements.
-     * @param factor    A value between 0.5 and 1.0 representing how full to pack each node.
-     *                  Use 1.0 for read-only data, or lower to leave room for future insertions.
-     *                  A use of 0.75f is used for bulk loading in my tree. For read purpose you can
-     *                  have it 1.0f but after that any insert will
-     *                  trigger massive split, and new creation of node.
-     */
+
+
+    @Override
     @SuppressWarnings("unchecked")
-    private void buildFromSortedArray(Object[] flatArray, float factor) {
+    protected void buildFromSortedArray(Object[] flatArray, float factor) {
         if (flatArray.length == 0) {
             return;
         }
@@ -373,7 +316,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
 
-        // Phase 1: Top-Down Internal Cleanup with cascade handling.
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
@@ -401,7 +343,8 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     leftSib.keyCount--;
                     node.keyCount++;
                     level--;
-                } else {
+                }
+                else {
                     leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
                     leftSib.child[leftSib.keyCount + 1] = node.child[0];
                     if (leftSib.child[leftSib.keyCount + 1] != null) {
@@ -416,24 +359,24 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
                     if (parent.keyCount == 0 && parent != this.root) {
                         level++;
-                    } else {
+                    }
+                    else {
                         level--;
                     }
                 }
-            } else {
+            }
+            else {
                 level--;
             }
         }
 
 
-        // Phase 2: Leaf Cleanup — B+Tree semantics (< minKeys, not == 0)
         if (rightEdge[0] != null && rightEdge[0].keyCount < minKeys && rightEdge[0] != this.root) {
             BPlusTreeNode<E> node = rightEdge[0];
             BPlusTreeNode<E> parent = rightEdge[1];
             int childIdx = parent.keyCount;
             BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-            // B+Tree leaf borrow
             while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
                 System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
                 node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
@@ -443,7 +386,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                 parent.keys[childIdx - 1] = node.keys[0];
             }
 
-            // B+Tree leaf merge
             if (node.keyCount < minKeys) {
                 System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
                 leftSib.keyCount += node.keyCount;
@@ -457,7 +399,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     leftSib.next.prev = leftSib;
                 }
 
-                // Phase 2.5: Bottom-up cascade
                 for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
                     BPlusTreeNode<E> n = rightEdge[cascadeLevel];
                     if (n == null || n == this.root || n.keyCount > 0) break;
@@ -493,7 +434,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
 
-        // Phase 3: Root Demotion
         while (this.root.keyCount == 0 && !this.root.isLeaf()) {
             this.root = this.root.child[0];
             this.root.parent = null;
@@ -523,7 +463,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             int idx = searchNode(current, e);
 
             if (current.isLeaf()) {
-                // B+TREE RULE: Only reject duplicates if we are physically at the Leaf!
                 if (idx >= 0) return false;
 
                 int insertIdx = ~idx;
@@ -546,13 +485,10 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     idx = searchNode(parent, (E) current.keys[0]);
                     int childIdx = (idx >= 0) ? idx + 1 : ~idx;
                     splitNode(parent, childIdx, current);
-                    current = parent;  // Move UP
+                    current = parent;
                 }
                 return true;
             }
-
-            // ROUTE DOWN
-            // If it's an exact match in an internal node (idx >= 0), follow the right child (idx + 1)
             int childIdx = (idx >= 0) ? idx + 1 : ~idx;
             current = current.child[childIdx];
         }
@@ -562,24 +498,22 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         BPlusTreeNode<E> sibling = createNode(degree, child.isLeaf());
         if (child.isLeaf()) {
             sibling.keyCount = degree;
-            // Shift right-half keys (degree keys) to sibling
             System.arraycopy(child.keys, degree, sibling.keys, 0, degree);
-            // GC Cleanup
             Arrays.fill(child.keys, degree, child.keyCount, null);
             child.keyCount = degree;
-            //  Wire up the next and prev pointer!!
+
             BPlusTreeNode<E> childNext = child.next;
             sibling.next = childNext;
-            if (childNext != null) {
-                childNext.prev = sibling;
-            }
-            sibling.prev = child; // Sibling points back to child
-            child.next = sibling; // Child points forward to sibling
-            //  Shift parent arrays
+
+            if (childNext != null) childNext.prev = sibling;
+
+            sibling.prev = child;
+            child.next = sibling;
+
             System.arraycopy(parent.child, childIdx + 1, parent.child, childIdx + 2, parent.keyCount - childIdx);
             parent.setChild(childIdx + 1, sibling);
             System.arraycopy(parent.keys, childIdx, parent.keys, childIdx + 1, parent.keyCount - childIdx);
-            // Push a COPY of the sibling's first key up as the Routing Key!
+
             parent.keys[childIdx] = sibling.keys[0];
 
         } else {
@@ -590,7 +524,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             for (int i = 0; i <= degree; i++) {
                 if (sibling.child[i] != null) sibling.child[i].parent = sibling;
             }
-            //clearing GC!!
+
             Arrays.fill(child.child, degree, child.keyCount + 1, null);
             Arrays.fill(child.keys, degree, child.keyCount, null);
 
@@ -600,7 +534,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             parent.setChild(childIdx + 1, sibling);
 
             System.arraycopy(parent.keys, childIdx, parent.keys, childIdx + 1, parent.keyCount - childIdx);
-            // Push middle key UP and DELETE it from the child!
+
             parent.keys[childIdx] = child.keys[degree - 1];
             child.keys[degree - 1] = null;
 
@@ -629,22 +563,15 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             current = current.child[childIdx];
         }
 
-        //SEARCH THE LEAF
         int idx = searchNode(current, e);
         if (idx < 0) return false; // Key does not exist
 
-        /*
-        Standard B+Tree routing key retention
-        means I do not go up traversing deleting the route key.
-         */
         System.arraycopy(current.keys, idx + 1, current.keys, idx, current.keyCount - idx - 1);
         current.keys[current.keyCount - 1] = null;
         current.keyCount--;
         size--;
         modCount++;
 
-
-        // 4. REBALANCE PHASE (Bottom-Up)
         while (current != root && current.keyCount < minKeys) {
             BPlusTreeNode<E> parent = current.parent;
 
@@ -686,21 +613,18 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
     private void mergeNodes(BPlusTreeNode<E> parent, int childIdx, BPlusTreeNode<E> left, BPlusTreeNode<E> right) {
         if (left.isLeaf()) {
-            // LEAF MERGE
+
             System.arraycopy(right.keys, 0, left.keys, left.keyCount, right.keyCount);
             left.keyCount += right.keyCount;
 
-            // SAFELY REPAIR THE DOUBLY-LINKED LIST!
             BPlusTreeNode<E> rightNext = right.next;
             left.next = rightNext;
             if (rightNext != null) {
                 rightNext.prev = left;
             }
+        }
+        else {
 
-            // Shift parent arrays left to delete the routing key
-
-        } else {
-            // INTERNAL NODE MERGE (Exactly like B-Tree)
             left.keys[left.keyCount] = parent.keys[childIdx];
             left.keyCount++;
 
@@ -895,7 +819,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             current = current.child[0];
         }
 
-        //Blasting the chunks directly into the array via native memory copy
         int offset = 0;
         while (current != null) {
             System.arraycopy(current.keys, 0, array, offset, current.keyCount);
@@ -920,7 +843,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             current = current.child[0];
         }
 
-        // Blasting the chunks directly into the array via native memory copy
         int offset = 0;
         while (current != null) {
             System.arraycopy(current.keys, 0, a, offset, current.keyCount);
@@ -957,18 +879,16 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         private float factor = 0.75f;
 
         private Object[] flatArray = null;
-        private Iterator<E> sortedIterator = null;
+        private Iterator<? extends E> sortedIterator = null;
         private Collection<? extends E> collection = null;
 
         private Builder() {
         }
 
-        // Allows starting with defaults: BPlusTreeSet.newBuilder().build()
         public static <E> BPlusTreeSet.Builder<E> newBuilder() {
             return new BPlusTreeSet.Builder<>();
         }
 
-        // Convenience start: BPlusTreeSet.Builder.degree(16).build()
         public static <E> BPlusTreeSet.Builder<E> create(int degree) {
             return BPlusTreeSet.Builder.<E>newBuilder().degree(degree);
         }
@@ -1001,7 +921,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             return this;
         }
 
-        public BPlusTreeSet.Builder<E> importSorted(Iterator<E> iterator) {
+        public BPlusTreeSet.Builder<E> importSorted(Iterator<? extends E> iterator) {
             this.sortedIterator = iterator;
             this.flatArray = null;
             this.collection = null;

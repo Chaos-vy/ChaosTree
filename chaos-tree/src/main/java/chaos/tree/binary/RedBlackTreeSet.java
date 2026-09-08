@@ -48,7 +48,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         if (root == null) {
             compare(val, val);
             root = new RbtNode<>(val);
-            root.setBlack();//A RBT rule must be Obeyed So I put the definition of RBT for not to forget.
+            root.setBlack();
             size++;
             modCount++;
             return true;
@@ -63,7 +63,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             else if (cmp < 0) curr = curr.left;
             else curr = curr.right;
         }
-        //Remember every node in RBT I made its default color is RED... true.... RED.....
         RbtNode<E> newNode = new RbtNode<>(val);
         newNode.parent = p;
         if (cmp < 0) {
@@ -78,35 +77,28 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
     }
 
     private void fixUpFromBottom_Insertion(RbtNode<E> x) {
-        // I need to only care if the parent is also RED (a Red-Red violation!)
         while (x != null && x != root && x.parent.isRed()) {
             RbtNode<E> parent = x.parent;
-            // Grandparent is mathematically guaranteed to exist because parent is RED (root is always black)
             RbtNode<E> grandParent = parent.parent;
-            //Left Symmetry
             if (parent == grandParent.left) {
                 RbtNode<E> uncle = grandParent.right;
-                // Case 1: Uncle is RED (The Recolor Case)
                 if (uncle != null && uncle.isRed()) {
                     parent.setBlack();
                     uncle.setBlack();
                     grandParent.setRed();
-                    x = grandParent; // Push the red violation up the tree and loop again!
+                    x = grandParent;
                 } else {
-                    // Case 2: Uncle is BLACK (The Triangle Case)
                     if (x == parent.right) {
                         x = parent;
                         super.rotateLeft(x);
                         parent = x.parent;
                     }
-                    // Case 3: Uncle is BLACK (The Line Case)
                     parent.setBlack();
                     grandParent.setRed();
                     super.rotateRight(grandParent);
                     break;
                 }
             } else {
-                // Symmetrical cases for the Right side
                 RbtNode<E> uncle = grandParent.left;
 
                 if (uncle != null && uncle.isRed()) {
@@ -127,7 +119,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                 }
             }
         }
-        //Everything ends with this guy.
         root.setBlack();
     }
 
@@ -135,7 +126,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
     public boolean remove(Object o) {
         if (root == null || o == null) return false;
         try {
-            //I am approaching the same way as of AVL tree delete. Reference: CLRS or take the AVL tree.
             if (isEmpty()) return false;
             @SuppressWarnings("unchecked")
             E val = (E) o;
@@ -151,7 +141,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                 x = successor;
             }
 
-            //Guaranteed one child or none
             RbtNode<E> nodeReplacer = x.left != null ? x.left : x.right;
             boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
 
@@ -165,12 +154,11 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                     x.parent.right = nodeReplacer;
                 }
 
-                // If the deleted node was Black, the tree lost a black weight. Fix it!
                 if (deletedNodeWasBlack) {
                     fixDoubleBlack(nodeReplacer);
                 }
             } else if (x.parent == null) {
-                root = null; // The tree is now empty
+                root = null;
             } else {
                 if (deletedNodeWasBlack) {
                     fixDoubleBlack(x);
@@ -188,10 +176,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
             x.left = null; 
             x.right = null; 
             x.parent = null; 
-            //L,R,P because x has become part of garbage.
-            /*
-            The lesson I got here we need to do because of iterator Stability
-            */
+
             size--;
             modCount++;
             return true;
@@ -209,28 +194,23 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
     }
 
     private void fixDoubleBlack(RbtNode<E> x) {
-        // Bubble the "Phantom Black" weight up until we hit a Red node or the Root
         while (x != root && isBlack(x)) {
             RbtNode<E> parent = x.parent;
 
             if (x == parent.left) {
                 RbtNode<E> sibling = parent.right;
 
-                // Case 1: Sibling is RED
-                // We rotate to force the sibling to be BLACK, which pushes us into Case 2, 3, or 4
                 if (isRed(sibling)) {
                     sibling.setBlack();
                     parent.setRed();
                     super.rotateLeft(parent);
-                    sibling = parent.right; // Update sibling after rotation
+                    sibling = parent.right;
                 }
 
-                // Case 2: Both of the sibling's children (nephews) are BLACK
                 if (isBlack(sibling.left) && isBlack(sibling.right)) {
                     sibling.setRed();
-                    x = parent; // Push the Double-Black weight up to the parent!
+                    x = parent;
                 } else {
-                    // Case 3: Sibling is BLACK, Right nephew is BLACK (Left nephew is RED)
                     if (isBlack(sibling.right)) {
                         if (sibling.left != null) sibling.left.setBlack();
                         sibling.setRed();
@@ -238,8 +218,6 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                         sibling = parent.right; // Update sibling
                     }
 
-                    // Case 4: Sibling is BLACK, Right nephew is RED
-                    // This is the TERMINAL CASE. We need to fix the tree and instantly BREAK!
                     if (parent.isRed()) sibling.setRed();
                     else sibling.setBlack();
 
@@ -247,10 +225,9 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                     if (sibling.right != null) sibling.right.setBlack();
                     super.rotateLeft(parent);
 
-                    break; // EARLY EXIT!
+                    break;
                 }
             } else {
-                // Symmetrical cases for when 'x' is the Right child
                 RbtNode<E> sibling = parent.left;
 
                 if (isRed(sibling)) {
@@ -278,7 +255,7 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
                     if (sibling.left != null) sibling.left.setBlack();
                     super.rotateRight(parent);
 
-                    break; // EARLY EXIT!
+                    break;
                 }
             }
         }

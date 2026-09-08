@@ -3,7 +3,7 @@ package chaos.tree.binary;
 final class RbtNode<E> extends AbstractBinaryNode<E, RbtNode<E>> {
 
     /*
-    Removed ENUM for Object header with simple boolean hack
+    Removed ENUM for Object header with simple boolean
     RED === True === RED
     BLACK === False === BLACK
     Every New Node is default == RED ==

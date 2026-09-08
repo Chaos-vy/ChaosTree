@@ -38,7 +38,7 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
     @Override
     public boolean add(E val) {
         if (root == null) {
-            compare(val, val); // JDK Semantic: Type (and possibly null) check!
+            compare(val, val);
             root = new AvlNode<>(val);
             size++;
             modCount++;
@@ -79,27 +79,19 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
             E val = (E) o;
             AvlNode<E> x = nodeFinder(val);
             if (x == null) return false;
-            //Just to be aware of optimization I need to add comment
             if (x.right != null && x.left != null) {
-                AvlNode<E> successor = x.right; // Yes I do delete by successor method
-                while (successor.left != null) { //because it's optimized for iterator purpose
+                AvlNode<E> successor = x.right;
+                while (successor.left != null) {
                     successor = successor.left;
                 }
                 x.value = successor.value;
-                x = successor; //Now guaranteed this little node in the tree will be alone to one or none hehe LOL
+                x = successor;
             }
-        /*
-          I need to remember this of little chaos cases in future use.
-          1: if all L and R are null
-          2: if L is null -> part of right node to be attached and markup of parent!
-          3: if R is null -> part of left node to be attached and markup of parent!
-         */
             AvlNode<E> replacement = x.left != null ? x.left : x.right;
 
-            //This block is for part when case 2 and case 3 falls
             if (replacement != null) {
                 replacement.parent = x.parent;
-                if (x.parent == null) {//most critical one
+                if (x.parent == null) {
                     root = replacement;
                 } else if (x == x.parent.left) {
                     x.parent.left = replacement;
@@ -108,27 +100,22 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
                 }
                 fixUpFromBottom(replacement.parent);
 
-            } else if (x.parent == null) { // when the little node has direct reach to root
+            } else if (x.parent == null) {
                 root = null;
-            } else { // when the little node is left with no L and R
+            } else {
                 AvlNode<E> parent = x.parent;
                 if (x == parent.left) {
                     parent.left = null;
                 } else {
                     parent.right = null;
                 }
-                //Lemme think do I
                 fixUpFromBottom(parent);
             }
 
             
             x.left = null; 
             x.right = null; 
-            x.parent = null; 
-            //L,R,P because x has become part of garbage.
-            /*
-            The lesson I got here we need to do because iterator Stability
-             */
+            x.parent = null;
             size--;
             modCount++;
             return true;
@@ -165,8 +152,6 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         }
     }
 
-    // --- AVL-Specific Rotation Wrappers --- These are main parts.
-
     private AvlNode<E> rotateRightAVL(AvlNode<E> p) {
         AvlNode<E> newRoot = p.left;
         super.rotateRight(p);
@@ -190,5 +175,4 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
     private int nodeHeight(AvlNode<E> node) {
         return node == null ? -1 : node.height;
     }
-
 }

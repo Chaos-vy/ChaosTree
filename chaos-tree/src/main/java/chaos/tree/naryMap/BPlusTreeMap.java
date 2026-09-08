@@ -18,7 +18,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
     private static final int DEFAULT_DEGREE = 64;
 
-    // this was something that Guava testlib to be survived
     public BPlusTreeMap() {
         super(DEFAULT_DEGREE, null);
     }
@@ -37,14 +36,14 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         buildFromSorted(m.entrySet().iterator(), 0.9f);
     }
 
-    // for simple playground
     public BPlusTreeMap(int degree) {
         super(degree, null);
     }
 
-    /**
-     * Constructs a ChaosTree using a configuration Builder.
-     */
+    public BPlusTreeMap(int degree, Comparator<? super K> comparator) {
+        super(degree, comparator);
+    }
+
     public BPlusTreeMap(BPlusTreeMap.Builder<K, V> builder) {
         super(builder.degree, builder.comparator);
 
@@ -187,9 +186,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 if (idx >= 0) {
                     V oldValue = (V) curr.values[idx];
                     if (oldValue != null) {
-                        return oldValue; // Fast exit: Key exists and is not null
+                        return oldValue;
                     } else {
-                        // Key exists but is mapped to null, replace it
                         V newValue = mappingFunction.apply(key);
                         if (newValue != null) {
                             curr.values[idx] = newValue;
@@ -435,7 +433,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         idx = searchNodeMap(curr, key);
         if (idx < 0) return null;
 
-        //Ghost deletion in leaf only
         V val = (V) curr.values[idx];
         System.arraycopy(curr.keys, idx + 1, curr.keys, idx, curr.keyCount - idx - 1);
         System.arraycopy(curr.values, idx + 1, curr.values, idx, curr.keyCount - idx - 1);
@@ -1141,7 +1138,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
         int offset = 0;
         while (current != null) {
-            // Blast both arrays simultaneously
             System.arraycopy(current.keys, 0, keys, offset, current.keyCount);
             System.arraycopy(current.values, 0, values, offset, current.keyCount);
             offset += current.keyCount;
@@ -1395,7 +1391,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         protected final void advanceReverse() {
             currentIndex--;
             if (currentIndex < 0) {
-                currentLeaf = currentLeaf.prev; // Lightning fast reverse jump!
+                currentLeaf = currentLeaf.prev;
                 if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
             }
         }

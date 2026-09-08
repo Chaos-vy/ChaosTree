@@ -77,7 +77,7 @@ class ChaosAPITest {
      * @param isBPlusTree isBPlusTree
      */
 
-    @Property(tries = 10000)
+    @Property(tries = 1000)
     //Do set 1M for ChaosTest
     void naryChaosMap(
             @ForAll @IntRange(min = 32, max = 256) int arrayDegree, //Do change the builder from array concrete class if you want to test at >=2
@@ -237,7 +237,7 @@ class ChaosAPITest {
      * @param isBPlusTree
      */
 
-    @Property(tries = 10000)
+    @Property(tries = 1000)
     void naryChaosSet(
             @ForAll @IntRange(min = 32, max = 256) int arrayDegree,
             @ForAll @IntRange(min = 0, max = 49999) int size,

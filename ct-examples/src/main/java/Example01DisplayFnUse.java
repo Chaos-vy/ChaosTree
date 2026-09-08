@@ -25,13 +25,13 @@ import chaos.tree.naryMap.BPlusTreeMap;
  */
 public class Example_01_display_fn_use {
     public static void main(String[] args) {
-        AvlTreeSet<Integer> tree0 = new AvlTreeSet<>((e1,e2)->e2-e1);
+        AvlTreeSet<Integer> tree0 = new AvlTreeSet<>((e1, e2) -> e2 - e1);
         AvlTreeMap<Integer, Character> tree1 = new AvlTreeMap<>();
         BPlusTreeSet<Integer> tree2 = new BPlusTreeSet<>(4);
-        BPlusTreeMap<Integer,Character> tree3 = new BPlusTreeMap<>(4);
+        BPlusTreeMap<Integer, Character> tree3 = new BPlusTreeMap<>(4);
         for (int i = 0; i < 26; i++) {
             tree0.add(i);
-            tree1.put(i, (char)(i+'a'));
+            tree1.put(i, (char) (i + 'a'));
         }
         tree2.addAll(tree0);
         tree3.putAll(tree1);

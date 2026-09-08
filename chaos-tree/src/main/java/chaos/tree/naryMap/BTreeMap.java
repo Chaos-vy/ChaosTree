@@ -39,9 +39,10 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         super(degree, null);
     }
 
-    /**
-     * Constructs a ChaosTree using a configuration Builder.
-     */
+    public BTreeMap(int degree, Comparator<? super K> comparator) {
+        super(degree, comparator);
+    }
+
     public BTreeMap(BTreeMap.Builder<K, V> builder) {
         super(builder.degree, builder.comparator);
 
@@ -522,7 +523,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
     @Override
     @SuppressWarnings("unchecked")
-    void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor) {
+    public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor) {
         if (!it.hasNext()) {
             return;
         }
@@ -755,7 +756,6 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         Object[] flatKeys = flatMatrix[0];
         Object[] flatValues = flatMatrix[1];
         int totalSize = flatKeys.length;
-        if (totalSize == 0) return;
 
         int targetKeys = Math.max(minKeys, (int) (maxKeys * factor));
         BTreeMapNode<K, V>[] rightEdge = (BTreeMapNode<K, V>[]) new BTreeMapNode[10];

@@ -38,7 +38,7 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     @Override
     void afterInsert(AvlMapNode<K, V> node) {
         if (node != null) {
-            node = node.parent; // Skip the newly inserted leaf to allow optimization!
+            node = node.parent;
         }
         balanceNode(node);
     }
@@ -64,7 +64,7 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
                 }
             }
             if (oldHeight == node.height) {
-                break; // Safe early exit restored!
+                break;
             }
             node = node.parent;
         }
@@ -111,7 +111,6 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
             x = successor;
         }
 
-        // Guaranteed one child or none
         AvlMapNode<K, V> nodeReplacer = x.left != null ? x.left : x.right;
         AvlMapNode<K, V> parentOfDeleted = x.parent;
 
@@ -143,8 +142,6 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     }
 
     private void fixUpFromBottom(AvlMapNode<K, V> parentOfDeleted) {
-        // Same bottom-up fix-up logic as insertion; this method only provides
-        // the deletion-specific semantic name.
         balanceNode(parentOfDeleted);
     }
 }
