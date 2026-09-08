@@ -764,9 +764,29 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                     if (val == null) {
                         throw new IllegalStateException();
                     }
+                    
+                    // Capture next value before remove because the physical node might shift
+                    E nextVal = (nextNode != null) ? nextNode.value : null;
+                    
                     AbstractBinaryTreeSet.this.remove(val);
                     val = null;
                     expectedModCount = modCount;
+                    
+                    // Re-find the next node based on value, in case tree structure changed
+                    if (nextVal != null) {
+                        nextNode = root;
+                        N bestMatch = null;
+                        while (nextNode != null) {
+                            int cmp = compare(nextVal, nextNode.value);
+                            if (cmp < 0 || cmp == 0) {
+                                bestMatch = nextNode;
+                                nextNode = nextNode.left;
+                            } else {
+                                nextNode = nextNode.right;
+                            }
+                        }
+                        nextNode = bestMatch;
+                    }
                 }
 
                 @Override
@@ -819,9 +839,27 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                     if (val == null) {
                         throw new IllegalStateException();
                     }
+                    
+                    E nextVal = (nextNode != null) ? nextNode.value : null;
+                    
                     AbstractBinaryTreeSet.this.remove(val);
                     val = null;
                     expectedModCount = modCount;
+                    
+                    if (nextVal != null) {
+                        nextNode = root;
+                        N match = null;
+                        while (nextNode != null) {
+                            int cmp = compare(nextVal, nextNode.value);
+                            if (cmp > 0 || cmp == 0) {
+                                match = nextNode;
+                                nextNode = nextNode.right;
+                            } else {
+                                nextNode = nextNode.left;
+                            }
+                        }
+                        nextNode = match;
+                    }
                 }
 
                 @Override
@@ -922,21 +960,34 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+            if (descending) {
+                if (!inRange(fromElement) || !inRange(toElement))
+                    throw new IllegalArgumentException("Requested bounds are outside current window");
+                return new TreeSubSet(toElement, toInclusive, fromElement, fromInclusive, true);
+            }
             if (!inRange(fromElement) || !inRange(toElement))
                 throw new IllegalArgumentException("Requested bounds are outside current window");
-            return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, descending);
+            return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, false);
         }
 
         @Override
         public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+            if (descending) {
+                if (!inRange(toElement)) throw new IllegalArgumentException("Requested bound is outside current window");
+                return new TreeSubSet(toElement, inclusive, hi, hiInclusive, true);
+            }
             if (!inRange(toElement)) throw new IllegalArgumentException("Requested bound is outside current window");
-            return new TreeSubSet(lo, loInclusive, toElement, inclusive, descending);
+            return new TreeSubSet(lo, loInclusive, toElement, inclusive, false);
         }
 
         @Override
         public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+            if (descending) {
+                if (!inRange(fromElement)) throw new IllegalArgumentException("Requested bound is outside current window");
+                return new TreeSubSet(lo, loInclusive, fromElement, inclusive, true);
+            }
             if (!inRange(fromElement)) throw new IllegalArgumentException("Requested bound is outside current window");
-            return new TreeSubSet(fromElement, inclusive, hi, hiInclusive, descending);
+            return new TreeSubSet(fromElement, inclusive, hi, hiInclusive, false);
         }
 
         @Override
