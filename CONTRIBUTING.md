@@ -1,44 +1,49 @@
-## August 25th onward there till the repo get's the balance it will not have any contribution it may be week or a month thanks for your patience.
-
 # Contributing to ChaosTree
 
-Thanks for your interest in ChaosTree! I'm excited to have you here. This document outlines how I build things, what kind of help I'm looking for, and how you can get your code merged smoothly.
+Thanks for your interest in ChaosTree! I'm excited to have you here. This document outlines how I build things, what
+kind of help I'm looking for, and how you can get your code merged smoothly.
 
 ---
 
-## Project Philosophy
+## Project rules
 
-ChaosTree is built from first principles:
+ChaosTree is built on zero dependency:
 
-- **Zero external dependencies** — no third-party libraries, no wrappers
-- **Every decision is evidence-backed** — performance claims require benchmark data or hardware counter evidence
-- **Architecture is documented** — significant decisions have ADRs in `Docs/ADR/`
+- **Zero external dependencies** — no third-party libraries, no wrappers, no IntelliJ annotations are used here.
+- **Every decision is evidence-backed** — performance claims require benchmark data or hardware counter evidence - it's
+  tiring ofcourse but for a library I do need the benchmark. you just need the benchmark to be done of specific change
+  old and new result must be pasted then it will taken into consideration.
+- **Architecture is documented** — significant decisions have ADRs - (These are old parts of chaos tree) I am currently
+  in progress to buildup new ADR thanks for your patience.
 
-I stick to these principles pretty strictly. If a pull request conflicts with them, I'll likely have to ask for changes or respectfully close it.
+I stick to these principles pretty strictly. If a pull request conflicts with them, I'll likely have to ask for changes
+or respectfully close it.
 
 ---
 
 ## What I Need Help With
 
-Because the core mathematical architecture of ChaosTree is considered feature-complete and highly sensitive, I am strictly limiting outside contributions to the following areas:
+Because the core mathematical architecture of ChaosTree is considered feature-complete and highly sensitive, I am
+strictly limiting outside contributions to the following areas:
 
+- **Bugs from buildFromSorted() iterative load** is currently top most priority I do hold, for that only minimum degree I moved to >=3.
 - Bug reports with a clear reproduction case
 - Documentation corrections, expansions, or improvements
 - Benchmark results and profiling data on different hardware architectures
-- Typo fixes in Javadoc or markdown files
+- Typo fixes in Javadoc or markdown files (This one need a proper discussion currently in 2.0.0, I am not publishing
+  docs) there is explicit html table for API drafted.
 
 ---
 
-## Things I Do Not Accept
+## Things I Do Not Accept But can be a point of Discussion
 
 Please save your valuable time! I will respectfully close PRs that attempt to introduce the following:
 
-- **Any core architectural changes** to the `binary/`, `nary/`, or `core/` packages
-- New tree algorithms or data structures
-- External dependencies of any kind
-- Implementations copied from textbooks or other libraries
-- Performance claims without benchmark evidence
-- API changes or modifications to existing interfaces
+- **Any core architectural changes** to the buildFromSorted/Matrix () fn, discussion can be done ;).
+- New tree algorithms or data structures not accepted now.
+- External dependencies of any kind - never!
+- Performance claims without benchmark evidence -most important (**Reason** I also did benchmark so I found out many old fn so I override them to make to single pass or optimized one)
+- API changes or modifications to existing interfaces can be discussed.
 
 ---
 
@@ -46,80 +51,37 @@ Please save your valuable time! I will respectfully close PRs that attempt to in
 
 For **bug fixes, documentation, or benchmark results**: feel free to open a PR directly.
 
-For **anything involving Java code changes**: please open an issue first. Be aware that unless it is a mathematically proven bug fix, PRs modifying the core tree engines will not be merged. I want to avoid you spending hours writing code that I cannot accept!
+For **anything involving Java code changes**: please open an issue first. Be aware that unless it is a mathematically
+proven bug fix, PRs modifying the core tree engines will not be merged. I want to avoid you spending hours writing code
+that I cannot accept! yes It kills devs time please do think of this lone dev :(
+**Important** It is highly needed that you provide the stack trace :( Before I literally know eht the problem is **AIOOBE, NPE, CCE or any other Exception**
 
 ---
 
 ## Setup
 
 **Requirements:**
-- JDK 17 minimum
+
+- JDK 21 minimum
 - Maven 3.8+
 
 **Run tests:**
+
 ```bash
 mvn clean test
 ```
 
-Please make sure all tests pass on JDK 21 before opening a PR. I also verify the project against JDK 17, 21, 25, and 26. Regressions on any supported JDK are treated as bugs, so keeping the build green is important.
+Please make sure all tests pass on JDK 21 before opening a PR. I also verify the project against JDK 21, 25. Regressions
+on any supported JDK are treated as bugs, so keeping the build green is important. The test cases are GuavaTestLib and
+myCustom PBT
 
-Performance benchmarks are maintained separately. Because different subsystems use different JMH configurations and profiling methodologies (GC, Linux `perf`, allocation profiling, etc.), there is no single benchmark command contributors are expected to run. If your pull request makes a performance claim, please describe how it was measured and include the relevant benchmark output.
-
----
-
-## How I Write Code
-
-- No `var` — explicit types only
-- Package structure: follow existing `binary/` and `nary/` organization
-- Keep internal classes hidden — users shouldn't be able to touch the `core/` package directly
-- Conventional commits: `fix:`, `feat:`, `docs:`, `test:`, `perf:`
-- New public API requires Javadoc with `@since` tag
-- New functionality requires tests; new performance claims require benchmark evidence
+Performance benchmarks are maintained separately. Because different subsystems use different JMH configurations and
+profiling methodologies (GC, Linux `perf`, allocation profiling, etc.), there is no single benchmark command
+contributors are expected to run. If your pull request makes a performance claim, please describe how it was measured
+and include the relevant benchmark output. If you feel you can end up writing a good benchmark please dev come your PR
+is welcome but can you explain me I am also studying :)
 
 ---
 
-## ADR Reference
-
-The `Docs/ADR/` directory contains the architectural history of the project. These are for historical context and educational purposes. **I am not currently accepting PRs that attempt to rewrite or alter these established decisions.**
-
-|                                ADR                                | Title                                                                    |
-|:-----------------------------------------------------------------:|:-------------------------------------------------------------------------|
-|         **[ADR-001](ADR/ADR-001-DeleteResult-Record.md)**         | `DeleteResult` Record over `boolean[]`                                   |
-|          **[ADR-002](ADR/ADR-002-modCount-as-long.md)**           | Modification Count (`modCount`) as `long`                                |
-|            **[ADR-003](ADR/ADR-003-CRTP-Pattern.md)**             | CRTP Pattern (`BiNode<T, N extends BiNode<T,N>>`)                        |
-|         **[ADR-004](ADR/ADR-004-Leaf-children-null.md)**          | Leaf `children = null` (N-ary Node Memory Paradox)                       |
-|     **[ADR-005](ADR/ADR-005-Object-Array-over-ArrayList.md)**     | `Object[]` over `ArrayList` in N-ary Engine                              |
-| **[ADR-006](ADR/ADR-006-Rejecting-the-FlatTree-Architecture.md)** | `flatTree` Retired                                                       |
-|  **[ADR-007](ADR/ADR-007-Stream-Traversal-API-Segregation.md)**   | Stream & Traversal API Segregation                                       |
-|    **[ADR-008](ADR/ADR-008-BiNode-vs-ParentBiNode-Split.md)**     | `BiNode` vs `ParentBiNode` Split (Parent Pointer Separation)             |
-|    **[ADR-009](ADR/ADR-009-SearchResult-NodeSearchResult.md)**    | `SearchResult` & `NodeSearchResult` — Single-Pass Traversal Records      |
-|        **[ADR-010](ADR/ADR-011-Value-Store-over-Map.md)**         | Value-Store vs Key-Value Map API                                         |
-
----
-
-## Reporting Bugs
-
-Open a GitHub issue with:
-
-1. JDK version and OS
-2. Minimal reproduction case
-3. Expected behaviour vs actual behaviour
-4. Stack trace if applicable
-
-For performance regressions, include JMH output.
-
----
-
-## Hardware Benchmark Contributions
-
-If you run the benchmark suite on different hardware and want to contribute results:
-
-- Include full environment: CPU, RAM, JDK version, OS, heap flags
-- Raw JMH output preferred over summarized numbers
-- LinuxPerfNormProfiler output is welcome if available
-
-These contributions are incredibly helpful to me because they validate that ChaosTree's performance characteristics hold up across different architectures!
-
----
-
-*ChaosTree prioritizes correctness first, performance second, API consistency third.*
+This time I am making my second time simple HTML and Css Github page to put ADR and documentation hope you all like it.
+I don't need a AI to devlop it. It's not because of any reason it's just that I am able to maintain it that's why.
