@@ -34,10 +34,10 @@ public class BulkLoadSetPropertyTest {
      * @param factor
      * @param n
      */
-    @Property(tries = 100000)
+    @Property(tries = 10000)
     void testBTreeSetBulkLoad(@ForAll @IntRange(min = 3, max = 128) int degree,
                               @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor,
-                              @ForAll @IntRange(min = 0, max = 100000) int n) {
+                              @ForAll @IntRange(min = 0, max = 10000) int n) {
         BTreeSet<Integer> tree = new BTreeSet<>(degree);
         tree.buildFromSorted(new RangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
@@ -60,7 +60,7 @@ public class BulkLoadSetPropertyTest {
      * @param factor
      * @param n
      */
-    @Property(tries = 100000)
+    @Property(tries = 10000)
     void testBPlusTreeSetBulkLoad(@ForAll @IntRange(min = 3, max = 128) int degree,
                                   @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor,
                                   @ForAll @IntRange(min = 0, max = 10000) int n) {

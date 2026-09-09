@@ -34,7 +34,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
 
     public BPlusTreeMap(SortedMap<K, ? extends V> m) {
         super(DEFAULT_DEGREE, null);
-        buildFromSorted(m.entrySet().iterator(), 0.9f);
+        buildFromSorted(m.entrySet().iterator(), 0.75f);
     }
 
     public BPlusTreeMap(int degree) {

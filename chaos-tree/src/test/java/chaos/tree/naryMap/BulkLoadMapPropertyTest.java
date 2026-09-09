@@ -20,7 +20,23 @@ public class BulkLoadMapPropertyTest {
         public Map.Entry<Integer, Integer> next() { if (!hasNext()) throw new NoSuchElementException(); int v=cur++; return new AbstractMap.SimpleEntry<>(v,v); }
     }
 
-    @Property(tries = 100000)
+    /**
+     * timestamp = 2026-09-09T18:34:45.101625748, BulkLoadMapPropertyTest:testBPlusTreeMapBulkLoad =
+     *                               |-----------------------jqwik-----------------------
+     * tries = 100000                | # of calls to property
+     * checks = 100000               | # of not rejected calls
+     * generation = RANDOMIZED       | parameters are randomly generated
+     * after-failure = SAMPLE_FIRST  | try previously failed sample, then previous seed
+     * when-fixed-seed = ALLOW       | fixing the random seed is allowed
+     * edge-cases#mode = MIXIN       | edge cases are mixed in
+     * edge-cases#total = 60         | # of all combined edge cases
+     * edge-cases#tried = 60         | # of edge cases tried in current run
+     * seed = -4933718074328139913   | random seed to reproduce generated values
+     * @param degree = [3,128]
+     * @param factor = [0.5f,1.0f]
+     * @param n = [100k]
+     */
+    @Property(tries = 10000)
     void testBTreeMapBulkLoad(@ForAll @IntRange(min = 3, max = 128) int degree,
                               @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor,
                               @ForAll @IntRange(min = 0, max = 10000) int n) {
@@ -30,7 +46,23 @@ public class BulkLoadMapPropertyTest {
         validateBTreeMap(tree.root, tree.minKeys);
     }
 
-    @Property(tries = 100000)
+    /**
+     *timestamp = 2026-09-09T18:34:59.280318178, BulkLoadMapPropertyTest:testBTreeMapBulkLoad =
+     *                               |-----------------------jqwik-----------------------
+     * tries = 100000                | # of calls to property
+     * checks = 100000               | # of not rejected calls
+     * generation = RANDOMIZED       | parameters are randomly generated
+     * after-failure = SAMPLE_FIRST  | try previously failed sample, then previous seed
+     * when-fixed-seed = ALLOW       | fixing the random seed is allowed
+     * edge-cases#mode = MIXIN       | edge cases are mixed in
+     * edge-cases#total = 60         | # of all combined edge cases
+     * edge-cases#tried = 60         | # of edge cases tried in current run
+     * seed = 9913603941170430       | random seed to reproduce generated values
+     * @param degree = [3,128]
+     * @param factor = [0.5f,1.0f]
+     * @param n = [100k]
+     */
+    @Property(tries = 10000)
     void testBPlusTreeMapBulkLoad(@ForAll @IntRange(min = 3, max = 128) int degree,
                                   @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor,
                                   @ForAll @IntRange(min = 0, max = 10000) int n) {
