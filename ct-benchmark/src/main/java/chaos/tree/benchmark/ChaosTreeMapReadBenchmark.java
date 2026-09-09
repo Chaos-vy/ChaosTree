@@ -43,6 +43,7 @@ public class ChaosTreeMapReadBenchmark {
     @Param({"100000", "1000000"})
     public int size;
 
+    //@Param({"JavaTreeMap","BPlusTreeMap"})
     @Param({"JavaTreeMap", "BTreeMap", "BPlusTreeMap", "RedBlackTreeMap", "AvlTreeMap"})
     public String mapType;
 
