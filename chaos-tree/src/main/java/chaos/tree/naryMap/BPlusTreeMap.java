@@ -1009,6 +1009,16 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     }
 
     @Override
+    protected Iterator<K> descendingKeyIterator(K fromKey, boolean fromInclusive) {
+        return new ReverseKeyIterator(fromKey, fromInclusive);
+    }
+
+    @Override
+    protected Iterator<V> descendingValueIterator(K fromKey, boolean fromInclusive) {
+        return new ReverseValueIterator(fromKey, fromInclusive);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void forEach(BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
@@ -1166,7 +1176,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             return currentLeaf != null && currentIndex < currentLeaf.keyCount;
         }
 
-        protected final void advance() {
+        protected final void advanceReverse() {
             currentIndex++;
             if (currentIndex >= currentLeaf.keyCount) {
                 currentLeaf = currentLeaf.next;
@@ -1211,7 +1221,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentLeaf.keys[currentIndex];
             Map.Entry<K, V> entry = new ChaosEntry(currentLeaf, currentIndex);
-            advance();
+            advanceReverse();
             return entry;
         }
     }
@@ -1227,7 +1237,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (!hasNext()) throw new NoSuchElementException();
             K key = (K) currentLeaf.keys[currentIndex];
             lastReturnedKey = key;
-            advance();
+            advanceReverse();
             return key;
         }
     }
@@ -1243,7 +1253,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentLeaf.keys[currentIndex];
             V value = (V) currentLeaf.values[currentIndex];
-            advance();
+            advanceReverse();
             return value;
         }
     }
@@ -1324,6 +1334,38 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                 currentLeaf = curr;
                 currentIndex = searchNodeMap(curr, nextTarget.getKey());
             }
+        }
+    }
+
+    private final class ReverseKeyIterator extends BPlusTreeReverseBaseIterator<K> {
+        ReverseKeyIterator(K startKey, boolean startInclusive) {
+            super(startKey, startInclusive);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public K next() {
+            if (!hasNext()) throw new java.util.NoSuchElementException();
+            lastReturnedKey = (K) currentLeaf.keys[currentIndex];
+            K key = lastReturnedKey;
+            advanceReverse();
+            return key;
+        }
+    }
+
+    private final class ReverseValueIterator extends BPlusTreeReverseBaseIterator<V> {
+        ReverseValueIterator(K startKey, boolean startInclusive) {
+            super(startKey, startInclusive);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public V next() {
+            if (!hasNext()) throw new java.util.NoSuchElementException();
+            lastReturnedKey = (K) currentLeaf.keys[currentIndex];
+            V val = (V) currentLeaf.values[currentIndex];
+            advanceReverse();
+            return val;
         }
     }
 

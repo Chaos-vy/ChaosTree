@@ -453,8 +453,10 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     }
 
     protected abstract Iterator<K> keyIterator(K fromKey, boolean fromInclusive);
+    protected abstract Iterator<K> descendingKeyIterator(K fromKey, boolean fromInclusive);
 
     protected abstract Iterator<V> valueIterator(K fromKey, boolean fromInclusive);
+    protected abstract Iterator<V> descendingValueIterator(K fromKey, boolean fromInclusive);
 
     final class ChaosEntry implements Map.Entry<K, V> {
         private final K key;
@@ -614,6 +616,36 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         public V put(K key, V value) {
             if (!inRange(key)) throw new IllegalArgumentException("Key out of range");
             return AbstractNaryTreeMap.this.put(key, value);
+        }
+
+        @Override
+        public V putIfAbsent(K key, V value) {
+            if (!inRange(key)) throw new IllegalArgumentException("Key out of range");
+            return AbstractNaryTreeMap.this.putIfAbsent(key, value);
+        }
+
+        @Override
+        public V computeIfAbsent(K key, java.util.function.Function<? super K, ? extends V> mappingFunction) {
+            if (!inRange(key)) throw new IllegalArgumentException("Key out of range");
+            return AbstractNaryTreeMap.this.computeIfAbsent(key, mappingFunction);
+        }
+
+        @Override
+        public V computeIfPresent(K key, java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+            if (!inRange(key)) return null;
+            return AbstractNaryTreeMap.this.computeIfPresent(key, remappingFunction);
+        }
+
+        @Override
+        public V compute(K key, java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+            if (!inRange(key)) throw new IllegalArgumentException("Key out of range");
+            return AbstractNaryTreeMap.this.compute(key, remappingFunction);
+        }
+
+        @Override
+        public V merge(K key, V value, java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+            if (!inRange(key)) throw new IllegalArgumentException("Key out of range");
+            return AbstractNaryTreeMap.this.merge(key, value, remappingFunction);
         }
 
         @Override
@@ -822,6 +854,47 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             return new SubMapEntrySet();
         }
 
+        public Iterator<K> keyIterator() {
+            return new Iterator<K>() {
+                private Iterator<K> it = descending
+                        ? descendingKeyIterator(toEnd ? null : hi, hiInclusive)
+                        : AbstractNaryTreeMap.this.keyIterator(fromStart ? null : lo, loInclusive);
+                private K nextKey = null;
+                private K lastReturned = null;
+
+                { advance(); }
+
+                private void advance() {
+                    if (it.hasNext()) {
+                        nextKey = it.next();
+                        if (descending) {
+                            if (!fromStart && tooLow(nextKey)) nextKey = null;
+                        } else {
+                            if (!toEnd && tooHigh(nextKey)) nextKey = null;
+                        }
+                    } else { nextKey = null; }
+                }
+
+                public boolean hasNext() { return nextKey != null; }
+                public K next() {
+                    if (nextKey == null) throw new java.util.NoSuchElementException();
+                    lastReturned = nextKey;
+                    advance();
+                    return lastReturned;
+                }
+                public void remove() { 
+                    if (lastReturned == null) throw new IllegalStateException();
+                    SubNaryMap.this.remove(lastReturned); 
+                    lastReturned = null;
+                    if (nextKey != null) {
+                        it = descending ? descendingKeyIterator(nextKey, true)
+                                        : AbstractNaryTreeMap.this.keyIterator(nextKey, true);
+                        advance();
+                    }
+                }
+            };
+        }
+
         private final class SubMapEntrySet extends AbstractSet<Map.Entry<K, V>> {
 
             @Override
@@ -951,6 +1024,12 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         public Iterator<K> iterator() {
             if (map == AbstractNaryTreeMap.this) {
                 return keyIterator(null, true);
+            }
+            if (map instanceof AbstractNaryTreeMap.SubNaryMap) {
+                return ((AbstractNaryTreeMap<K, V, N>.SubNaryMap) map).keyIterator();
+            }
+            if (map instanceof AbstractNaryTreeMap.DescendingMapFacade) {
+                return ((AbstractNaryTreeMap<K, V, N>.DescendingMapFacade) map).keyIterator();
             }
             final Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
             return new Iterator<>() {
@@ -1207,6 +1286,35 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public V put(K key, V value) {
             return AbstractNaryTreeMap.this.put(key, value);
+        }
+
+        @Override
+        public V putIfAbsent(K key, V value) {
+            return AbstractNaryTreeMap.this.putIfAbsent(key, value);
+        }
+
+        @Override
+        public V computeIfAbsent(K key, java.util.function.Function<? super K, ? extends V> mappingFunction) {
+            return AbstractNaryTreeMap.this.computeIfAbsent(key, mappingFunction);
+        }
+
+        @Override
+        public V computeIfPresent(K key, java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+            return AbstractNaryTreeMap.this.computeIfPresent(key, remappingFunction);
+        }
+
+        @Override
+        public V compute(K key, java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+            return AbstractNaryTreeMap.this.compute(key, remappingFunction);
+        }
+
+        @Override
+        public V merge(K key, V value, java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+            return AbstractNaryTreeMap.this.merge(key, value, remappingFunction);
+        }
+
+        public Iterator<K> keyIterator() {
+            return AbstractNaryTreeMap.this.descendingKeyIterator(null, true);
         }
 
         @Override

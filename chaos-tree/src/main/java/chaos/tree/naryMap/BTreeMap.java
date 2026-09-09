@@ -956,6 +956,16 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     }
 
     @Override
+    protected Iterator<K> descendingKeyIterator(K fromKey, boolean fromInclusive) {
+        return new ReverseKeyIterator(fromKey, fromInclusive);
+    }
+
+    @Override
+    protected Iterator<V> descendingValueIterator(K fromKey, boolean fromInclusive) {
+        return new ReverseValueIterator(fromKey, fromInclusive);
+    }
+
+    @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
         long expectedModCount = modCount;
@@ -1133,7 +1143,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
 
-        protected final void advance() {
+        protected final void advanceReverse() {
             if (!currentNode.isLeaf()) {
                 currentNode = currentNode.child[currentIndex + 1];
                 while (!currentNode.isLeaf()) {
@@ -1204,7 +1214,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentNode.keys[currentIndex];
             Map.Entry<K, V> entry = new ChaosEntry(currentNode, currentIndex);
-            advance();
+            advanceReverse();
             return entry;
         }
     }
@@ -1220,7 +1230,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (!hasNext()) throw new NoSuchElementException();
             K key = (K) currentNode.keys[currentIndex];
             lastReturnedKey = key;
-            advance();
+            advanceReverse();
             return key;
         }
     }
@@ -1236,7 +1246,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentNode.keys[currentIndex];
             V value = (V) currentNode.values[currentIndex];
-            advance();
+            advanceReverse();
             return value;
         }
     }
@@ -1356,6 +1366,38 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     curr = curr.isLeaf() ? null : curr.child[~idx];
                 }
             }
+        }
+    }
+
+    private final class ReverseKeyIterator extends BTreeReverseBaseIterator<K> {
+        ReverseKeyIterator(K startKey, boolean startInclusive) {
+            super(startKey, startInclusive);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public K next() {
+            if (!hasNext()) throw new java.util.NoSuchElementException();
+            lastReturnedKey = (K) currentNode.keys[currentIndex];
+            K key = lastReturnedKey;
+            advanceReverse();
+            return key;
+        }
+    }
+
+    private final class ReverseValueIterator extends BTreeReverseBaseIterator<V> {
+        ReverseValueIterator(K startKey, boolean startInclusive) {
+            super(startKey, startInclusive);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public V next() {
+            if (!hasNext()) throw new java.util.NoSuchElementException();
+            lastReturnedKey = (K) currentNode.keys[currentIndex];
+            V val = (V) currentNode.values[currentIndex];
+            advanceReverse();
+            return val;
         }
     }
 
