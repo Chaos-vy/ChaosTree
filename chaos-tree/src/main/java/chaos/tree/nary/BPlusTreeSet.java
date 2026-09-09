@@ -134,113 +134,111 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         int highestLevel = rightEdge.length - 1;
         while (highestLevel >= 1 && rightEdge[highestLevel] == null) highestLevel--;
 
-        int level = highestLevel;
-        while (level >= 1) {
+        for (int level = highestLevel; level >= 0; level--) {
             BPlusTreeNode<E> node = rightEdge[level];
-            if (node == null) {
-                level--;
-                continue;
-            }
-            if (node.keyCount == 0 && node != this.root) {
-                BPlusTreeNode<E> parent = rightEdge[level + 1];
-                int childIdx = parent.keyCount;
-                BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+            if (node == null || node == this.root || node.keyCount > 0) continue;
 
-                if (leftSib.keyCount > minKeys) {
-                    node.keys[0] = parent.keys[childIdx - 1];
-                    node.child[1] = node.child[0];
-                    node.child[0] = leftSib.child[leftSib.keyCount];
-                    if (node.child[0] != null) node.child[0].parent = node;
-
-                    parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
-                    leftSib.keys[leftSib.keyCount - 1] = null;
-                    leftSib.child[leftSib.keyCount] = null;
-                    leftSib.keyCount--;
-                    node.keyCount++;
-                    level--;
-                } else {
-                    leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
-                    leftSib.child[leftSib.keyCount + 1] = node.child[0];
-                    if (leftSib.child[leftSib.keyCount + 1] != null) {
-                        leftSib.child[leftSib.keyCount + 1].parent = leftSib;
-                    }
-                    leftSib.keyCount++;
-                    rightEdge[level] = leftSib;
-
-                    parent.keys[childIdx - 1] = null;
-                    parent.child[childIdx] = null;
-                    parent.keyCount--;
-
-                    if (parent.keyCount == 0 && parent != this.root) {
-                        level++;
-                    } else {
-                        level--;
-                    }
-                }
-            } else {
-                level--;
-            }
-        }
-        if (rightEdge[0] != null && rightEdge[0].keyCount < minKeys && rightEdge[0] != this.root) {
-            BPlusTreeNode<E> node = rightEdge[0];
-            BPlusTreeNode<E> parent = rightEdge[1];
+            BPlusTreeNode<E> parent = rightEdge[level + 1];
             int childIdx = parent.keyCount;
+            if (childIdx == 0) continue;
             BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
 
-            while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
-                System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+            if (level == 0) {
                 node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
                 leftSib.keys[leftSib.keyCount - 1] = null;
                 leftSib.keyCount--;
                 node.keyCount++;
                 parent.keys[childIdx - 1] = node.keys[0];
+            } else {
+                node.keys[0] = parent.keys[childIdx - 1];
+                node.child[1] = node.child[0];
+                node.child[0] = leftSib.child[leftSib.keyCount];
+                if (node.child[0] != null) node.child[0].parent = node;
+
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+                leftSib.child[leftSib.keyCount] = null;
+                leftSib.keyCount--;
+                node.keyCount++;
+            }
+        }
+
+        if (rightEdge[0] != null && rightEdge[0] != this.root && rightEdge[0].keyCount < minKeys) {
+            BPlusTreeNode<E> node = rightEdge[0];
+            BPlusTreeNode<E> parent = rightEdge[1];
+            int childIdx = parent.keyCount;
+            if (childIdx > 0) {
+                BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+                while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
+                    System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+                    node.keys[0] = leftSib.keys[leftSib.keyCount - 1];
+                    leftSib.keys[leftSib.keyCount - 1] = null;
+                    leftSib.keyCount--;
+                    node.keyCount++;
+                    parent.keys[childIdx - 1] = node.keys[0];
+                }
+
+                if (node.keyCount < minKeys) {
+                    System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
+                    leftSib.keyCount += node.keyCount;
+
+                    leftSib.next = node.next;
+                    if (node.next != null) node.next.prev = leftSib;
+
+                    parent.keys[childIdx - 1] = null;
+                    parent.child[childIdx] = null;
+                    parent.keyCount--;
+
+                    rightEdge[0] = leftSib;
+                }
+            }
+        }
+
+        for (int level = 1; level <= highestLevel; level++) {
+            BPlusTreeNode<E> node = rightEdge[level];
+            if (node == null || node == this.root || node.keyCount >= minKeys) continue;
+
+            BPlusTreeNode<E> parent = rightEdge[level + 1];
+            if (parent == null) break;
+            int childIdx = parent.keyCount;
+            if (childIdx == 0) continue;
+            BPlusTreeNode<E> leftSib = parent.child[childIdx - 1];
+
+            while (node.keyCount < minKeys && leftSib.keyCount > minKeys) {
+                System.arraycopy(node.keys, 0, node.keys, 1, node.keyCount);
+                System.arraycopy(node.child, 0, node.child, 1, node.keyCount + 1);
+
+                node.keys[0] = parent.keys[childIdx - 1];
+                parent.keys[childIdx - 1] = leftSib.keys[leftSib.keyCount - 1];
+                leftSib.keys[leftSib.keyCount - 1] = null;
+
+                node.child[0] = leftSib.child[leftSib.keyCount];
+                leftSib.child[leftSib.keyCount] = null;
+                if (node.child[0] != null) node.child[0].parent = node;
+
+                leftSib.keyCount--;
+                node.keyCount++;
             }
 
             if (node.keyCount < minKeys) {
+                leftSib.keys[leftSib.keyCount] = parent.keys[childIdx - 1];
+                leftSib.keyCount++;
+
                 System.arraycopy(node.keys, 0, leftSib.keys, leftSib.keyCount, node.keyCount);
+                System.arraycopy(node.child, 0, leftSib.child, leftSib.keyCount, node.keyCount + 1);
+                for (int j = 0; j <= node.keyCount; j++) {
+                    if (leftSib.child[leftSib.keyCount + j] != null) {
+                        leftSib.child[leftSib.keyCount + j].parent = leftSib;
+                    }
+                }
                 leftSib.keyCount += node.keyCount;
 
                 parent.keys[childIdx - 1] = null;
                 parent.child[childIdx] = null;
                 parent.keyCount--;
 
-                leftSib.next = node.next;
-                if (leftSib.next != null) {
-                    leftSib.next.prev = leftSib;
-                }
-
-                for (int cascadeLevel = 1; cascadeLevel < rightEdge.length; cascadeLevel++) {
-                    BPlusTreeNode<E> n = rightEdge[cascadeLevel];
-                    if (n == null || n == this.root || n.keyCount > 0) break;
-                    BPlusTreeNode<E> p = rightEdge[cascadeLevel + 1];
-                    int ci = p.keyCount;
-                    BPlusTreeNode<E> ls = p.child[ci - 1];
-
-                    if (ls.keyCount > minKeys) {
-                        n.keys[0] = p.keys[ci - 1];
-                        n.child[1] = n.child[0];
-                        n.child[0] = ls.child[ls.keyCount];
-                        if (n.child[0] != null) n.child[0].parent = n;
-                        p.keys[ci - 1] = ls.keys[ls.keyCount - 1];
-                        ls.keys[ls.keyCount - 1] = null;
-                        ls.child[ls.keyCount] = null;
-                        ls.keyCount--;
-                        n.keyCount++;
-                        break;
-                    } else {
-                        ls.keys[ls.keyCount] = p.keys[ci - 1];
-                        ls.child[ls.keyCount + 1] = n.child[0];
-                        if (ls.child[ls.keyCount + 1] != null) {
-                            ls.child[ls.keyCount + 1].parent = ls;
-                        }
-                        ls.keyCount++;
-                        rightEdge[cascadeLevel] = ls;
-
-                        p.keys[ci - 1] = null;
-                        p.child[ci] = null;
-                        p.keyCount--;
-                    }
-                }
+                rightEdge[level] = leftSib;
             }
         }
         while (this.root.keyCount == 0 && !this.root.isLeaf()) {

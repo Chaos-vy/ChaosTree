@@ -44,8 +44,8 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     protected AbstractNaryTreeSet(int degree, Comparator<? super E> comparator) {
         this.comparator = comparator;
-        if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
-            throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+        if (degree < 3 || degree > Integer.MAX_VALUE / 2) {
+            throw new IllegalArgumentException("Degree must be at least 3 and less than Integer.MAX_VALUE/2");
         }
         this.degree = degree;
         this.maxKeys = (degree << 1) - 1;
