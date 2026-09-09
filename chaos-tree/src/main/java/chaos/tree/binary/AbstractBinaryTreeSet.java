@@ -476,11 +476,13 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
     @Override
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+        compare(toElement, toElement);
         return new TreeSubSet(null, false, toElement, inclusive, false);
     }
 
     @Override
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+        compare(fromElement, fromElement);
         return new TreeSubSet(fromElement, inclusive, null, false, false);
     }
 

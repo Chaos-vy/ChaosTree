@@ -136,6 +136,10 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
             fixUpFromBottom(parentOfDeleted);
         }
 
+        x.left = null;
+        x.right = null;
+        x.parent = null;
+
         size--;
         modCount++;
         return oldValue;
