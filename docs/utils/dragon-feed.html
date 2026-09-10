@@ -313,4 +313,19 @@ The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
     map.buildFromSorted(iterator, factor);
     </pre>
 </body>
+<p>
+    Nary set and map at glance
+</p>
+<blockquote>
+    void buildFromSorted(Iterator<? extends E> it, float factor);<br>
+    void importFlatArray(Object[] flatArray, float fillFactor);<br>
+    // Note: Object[] toArray() is inherited from java.util.Collection acting as exportFlastArray()<br>
+    I have also mentioned in code "You can treat it as exportFlatArray()"
+</blockquote>
+<blockquote>
+    Map Specific <br>
+    void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor);<br>
+    void importFlatMatrix(Object[][] flatMatrix, float factor);<br>
+    Object[][] exportFlatMatrix();
+</blockquote>
 </html>

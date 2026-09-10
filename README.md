@@ -2,32 +2,50 @@
 [![GitHub release](https://img.shields.io/github/v/release/Chaos-vy/ChaosTree)](https://github.com/Chaos-vy/ChaosTree/releases)
 [![License](https://img.shields.io/github/license/Chaos-vy/ChaosTree)](LICENSE)
 
-ChaosTree is a from-scratch, high-performance data structure library for Java 21+. 
-It provides highly optimized Binary and especially N-ary search trees (including B-Trees and B+Trees) 
-designed to minimize memory overhead, maximize L1/L2 CPU cache locality, and completely minimize the G Stop the world C.. pauses that problems standard Java collections at scale.
+## What is ChaosTree?
 
-## Why ChaosTree?
+**ChaosTree is a Java Sorted Set/Map library built around multiple search-tree data structures, including AVL Trees, Red-Black Trees, B-Trees, and B+ Trees.**
 
-* **GC Zero-Trash Guarantee:** Eliminates `Map.Entry` object churn entirely. At 1 million elements, JDK `TreeMap` suffers 82ms "Stop-The-World" GC pauses; `BPlusTreeMap` maxes out at a 200µs JVM safepoint sync. **Note: It was caught in 1/30 measurement rest were all okay**
+The library provides both **Set and Map implementations**, with APIs designed around the semantics of the JDK's `NavigableSet`, `NavigableMap`, `SequencedSet`, and `SequencedMap` contracts.
+
+In addition to the standard collection APIs, ChaosTree provides specialized construction APIs for users who want direct control over the initial structure of N-ary trees, Do read 
+
+* `buildFromSorted(Iterator, factor)`
+* `importFlatMatrix(Object[][], factor)`
+
+These APIs allow users to control the target node occupancy through a configurable `factor` in the supported range **[0.5, 1.0]**, while maintaining the structural invariants required by the underlying B-Tree/B+Tree design.
+
+### Correctness & Validation
+
+ChaosTree is validated through multiple layers of testing:
+
+* **Guava Testlib** compatibility testing
+* **jqwik** property-based testing
+* Randomized differential testing against reference collections
+* White-box structural validation of tree nodes
+* Direct validation of B-Tree/B+Tree structural invariants
+* Exception and iterator-contract testing
+* Serialization and cloning tests
+
+The structural tests inspect the internal tree representation rather than relying solely on externally observable behavior. This provides an additional layer of validation for node occupancy, ordering, topology, and balancing invariants.
+
+Performance claims are backed by reproducible JMH benchmark configurations. If a referenced benchmark source is missing from the repository due to project cleanup, it can be restored or replaced with an updated benchmark.
+
+### Why ChaosTree?
+
 * **Cache-Locality First:** The N-ary engine packs data tightly into pre-allocated exact-capacity arrays, drastically improving L1/L2 CPU cache hit rates and memory load stalls by nearly 40% during large range scans.
 * **Strictly Compatible:** Leverages the new JDK 21 `SequencedCollection`, `SequencedSet`, and `SequencedMap` interfaces. It passes the Guava Testlib (214,000+ tests) to enforce identical semantics to `java.util.TreeMap` and `TreeSet`.
 * **Public Bulk Load:** I do explicitly provide two powerful API through which user is allowed to build the N-ary tree family, It only works at empty tree. Need sorted data. Verified tested.
 * **Serializable & Cloneable** Each tree supports Serialization **(Bulk load O(N))** as well as Cloneable.
 
-### Project status
 
-The latest release is **ChaosTree 2.0.0** (Java 21 baseline). 
-
-ChaosTree 2.0.0 is available from Maven Central and GitHub Releases.
-
-See the [`CHANGELOG.md`](CHANGELOG.md) for the release details and compatibility changes.
-
-### Requirements
+## Requirements
 
 - **Minimum JDK: 0xCAFEBABE 0000 0041 | JDK 21+**
 - **Build Tool: Maven 3.8+** 
 
-**Details about ChaosTree:** https://chaos-vy.github.io/ChaosTree/index.html
+**Details about ChaosTree:** https://chaos-vy.github.io/ChaosTree/index.html 
+
 
 *(Note: As strictly sorted structures, `addFirst()` and `addLast()` are unsupported and fail-fast).*
 
@@ -78,23 +96,23 @@ public class Main {
 
 ChaosTree is split into two foundational engines:
 
-* **The N-ary Family (Sets & Maps):** `BTree`, `BPlusTree`. Built for maximum read throughput, large-scale range scans, and zero GC churn. The `BPlusTree` pushes all real data to a contiguous linked-list at the bottom layer, allowing the hardware pre-fetcher to anticipate memory accesses perfectly.
+* **The N-ary Family (Sets & Maps):** `BTree`, `BPlusTree`. Built for maximum read throughput, large-scale range scans, and zero GC churn. The `BPlusTree` pushes all real data to a contiguous double linked-list at the bottom layer, allowing high read through put.
 * **The Binary Family (Sets):** `AVL`, `RBT`, . Built for fast point-queries and everyday data storage where the extreme caching of the N-ary engine is not required.
 
 ## Testing & Thread-Safety
 
-I wanted ChaosTree to be correct just as much as I wanted it to be fast. It is validated by a relentless testing suite:
+I wanted ChaosTree to be correct just as much as I wanted it to be fast. It is validated by these following testing suite:
 
-* **Guava Testlib:** ChaosTree passes 214,000+ generated test cases validating exact `java.util.NavigableMap` and `NavigableSet` conformance.
-* **The Fuzz Test:** Trees are subjected to hundreds of thousands of completely randomized property tests via `jqwik` to verify structural invariants against a source-of-truth (`java.util.TreeMap`).
+* **Guava Testlib:** ChaosTree passes 214,000+ generated test cases validating exact `java.util.NavigableMap` and `NavigableSet` for all tree.
+* **The Fuzz Test:** Trees are subjected to hundreds of thousands of completely randomized property tests via `jqwik` to verify structural invariants against a source-of-truth (`java.util.TreeMap`). Due to Nary API node structure of 32 the new node never got created in Guava So I explicitly designed the verify API which verify explicitly for that.
 * **Strict Contracts:** Enforces fail-fast `ConcurrentModificationException` iterator semantics, exact size counting, and strict Null-Pointer guards on custom Comparators.
 
 ## Documentation
 
-* **Architecture Decision Records:** [`docs/ADR.html`](docs/ADR.html)
-* **JMH GC Profiling & The 82ms Pause:** [`docs/utils/JMH-Report.html`](docs/utils/JMH-Report.html)
-* **Throughput & CPU Benchmarks:** [`docs/Benchmark_Analysis.html`](docs/Benchmark_Analysis.html)
-* **The Testing Journey:** [`docs/Test_Journey.html`](docs/Test_Journey.html)
+* **Architecture Decision Records:** [`docs/ADR.html`](https://chaos-vy.github.io/ChaosTree/utils/ADR.html)
+* **JMH GC Profiling & The 82ms Pause:** [`docs/utils/JMH-Report.html`](https://chaos-vy.github.io/ChaosTree/utils/JMH-Report.html)
+* **Throughput & CPU Benchmarks:** [`docs/Benchmark_Analysis.html`](https://chaos-vy.github.io/ChaosTree/utils/Benchmark_Analysis.html)
+* **The Testing Journey:** [`docs/Test_Journey.html`](https://chaos-vy.github.io/ChaosTree/utils/build/Test_Journey.html)
 * **Release history:** [`CHANGELOG.md`](CHANGELOG.md)
 * **Contributing guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
