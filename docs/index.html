@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>ChaosTree</title>
@@ -13,142 +13,300 @@
             color: #000;
             background-color: #fff;
         }
+
         h1, h2 {
             border-bottom: 1px solid #000;
             padding-bottom: 5px;
         }
+
         table {
             border-collapse: collapse;
             margin-bottom: 20px;
         }
+
         th, td {
             border: 1px solid #000;
             padding: 8px 15px;
             text-align: right;
         }
+
         th:first-child, td:first-child {
             text-align: left;
         }
+
         blockquote {
             border-left: 3px solid #000;
             margin: 20px 0;
             padding-left: 15px;
             font-style: italic;
         }
+
         pre {
             background-color: #f4f4f4;
             padding: 15px;
             border: 1px dotted #000;
             overflow-x: auto;
         }
+
         a {
             color: #0000ee;
         }
+
+        .bold {
+            font-weight: 700;
+        }
+        table td ul {
+            text-align: left;
+            margin: 0;
+            padding-left: 20px;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>ChaosTree</h1>
-    <p>A zero-allocation, mechanically sympathetic Java 21 Search Tree engine that mathematically destroys the JDK.</p>
+<h1>ChaosTree</h1>
+<h4>v2.0.0</h4>
+<p class="bold">A zero-dependency, cache-aware NavigableSet and NavigableMap engine for Java 21+.
+    v2.0.0 tore out the old custom API in favor of full NavigableSet/Map and SequencedSet/Map compliance &mdash;
+    verified against 214,680 Guava testlib permutations and jqwik property tests run at 1M tries.
+    Built for bulk ingestion at scale, without the GC overhead of the JDK's own trees.</p>
+<blockquote>
+    <p>GitHub repo link: <a href="https://github.com/Chaos-vy/ChaosTree">https://github.com/Chaos-vy/ChaosTree</a>.</p>
 
-    <blockquote>
-        A developer driving a Ferrari doesn't need to explain the engine. The benchmarks speak for themselves.
-    </blockquote>
-
-    <h2>1. The Brutal Truth (5 Million Elements)</h2>
-    <p>Benchmark environment: Java 21, JMH. Measuring execution time, heap allocation, and GC time for 5,000,000 elements.</p>
-
-    <table>
-        <caption>5,000,000 Element Insertion Matrix </caption>
-        <thead>
-        <tr>
-            <th>Benchmark (Strategy)</th>
-            <th>Complexity</th>
-            <th>Score (ms/op)</th>
-            <th>Allocated (Bytes/op)</th>
-            <th>GC Time (ms)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>B+Tree.dragonFeed (Native, factor(0.8f))</td>
-            <td>O(N)</td>
-            <td>5.418</td>
-            <td>52,807,339</td>
-            <td>229</td>
-        </tr>
-        <tr>
-            <td>B+Tree.bulkLoad (Iterator)</td>
-            <td>O(N)</td>
-            <td>36.649</td>
-            <td>48,498,184</td>
-            <td>36</td>
-        </tr>
-        <tr>
-            <td>JDK TreeMap.bulkLoad (SortedMap)</td>
-            <td>O(N)</td>
-            <td>50.638</td>
-            <td>200,000,256</td>
-            <td>740</td>
-        </tr>
-        <tr>
-            <td>B+Tree.iterativePut (Standard)</td>
-            <td>O(N log N)</td>
-            <td>217.728</td>
-            <td>86,994,733</td>
-            <td>56</td>
-        </tr>
-        <tr>
-            <td>JDK TreeMap.iterativePut (Standard)</td>
-            <td>O(N log N)</td>
-            <td>698.918</td>
-            <td>200,002,397</td>
-            <td>347</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <p>
-        <strong>Result:</strong> ChaosTree dragon feed is <b>133x faster</b> than standard JDK insertions, <b>10x faster</b> than JDK bulk loading, and uses <b>75% less JVM heap overhead</b>.
-        <i>{It depends on factor dev so do read the below article of Dragon feed}</i>
-        <br>
-        Well, I know this it bit more escalation, but it's the truth. The Dragon feed is fast enough to sweep the complete
-        array in ms. Because it uses <i>System.arraycopy()</i>.
-        <br>
-
+    <p>A zero-allocation, mechanically sympathetic Java 21 Search Tree engine that mathematically respects the JDK.</p>
+    <p>Minimum JDK Requirement :<i>0xCAFEBABE 0000 0041 |</i>
+        <i class="bold">JDK 21+</i>
     </p>
+</blockquote>
 
-    <h2>2. Awaken the Dragon</h2>
-    <p>100% capacity packing. Zero pointer chasing. Pure CPU cache locality.</p>
-    <pre>
-NavigableMap&lt;Integer, String&gt; chaosTree = new BPlusTreeMap&lt;&gt;(
-    BPlusTreeMap.Builder.&lt;Integer, String&gt;degree(64)
-        .factor(1.0f) 
-        .importFlatMatrix(flatMatrix)
-        .build()
-);
-    </pre>
+<table>
+    <caption>Supported Data Structures</caption>
+    <thead>
+    <tr>
+        <th>Set</th>
+        <th>Map</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Avl Tree Set</td>
+        <td>Avl Tree Map</td>
+    </tr>
+    <tr>
+        <td>Red Black Tree Set</td>
+        <td>Red Black Tree Map</td>
+    </tr>
+    <tr>
+        <td>B-Tree Set</td>
+        <td>B-Tree Map</td>
+    </tr>
+    <tr>
+        <td>B+Tree Set</td>
+        <td>B+Tree Map</td>
+    </tr>
+    </tbody>
+</table>
 
-    <h2>3. The Guava Crucible</h2>
-    <p>
-        Speed without correctness is useless. ChaosTree perfectly implements <code>subMap()</code>, <code>headMap()</code>, <code>tailMap()</code>, and <code>descendingMap()</code>. 
-        It has been subjected to Google Guava's <code>MapTestSuiteBuilder</code> and mathematically passes <b>25,000+ strict test permutations</b>, including:
-    </p>
-    <ul>
-        <li><code>CollectionFeature.SERIALIZABLE</code> across all sub-views.</li>
-        <li><code>MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION</code>.</li>
-    </ul>
+<p>
+    The engine stands on equal footing with the JDK—and for bulk ingestion, it is 10x+ faster.
+    The custom API surface is strictly minimal. But every custom method unleashes Chaos.
+</p>
 
-    <h2>4. Source</h2>
-    <p>Code is available on <a href="https://github.com/Chaos-vy/ChaosTree">GitHub</a>.</p>
 
-<h2>
-    API Info and Cost of ChaosTree
-</h2>
-    <p>
-        API are
-    </p>
-    <a href="utils/dragon-feed.html">Read the full Dragon Feed Parameter Sweep &rarr;</a><br>
+<ul>
+    <li>display() & display(Style.ASCII/UNICODE)</li>
+    <li>importFlatMatrix(matrix, factor)</li>
+    <li>exportFlatMatrix()</li>
+    <li>buildFromSorted(Iterator, factor)</li>
+</ul>
+<p>The last <b>3</b> API are <b>Nary-Tree</b> Specific.</p>
+
+<blockquote>
+    <a href="utils/ChaosTree_Architecture.html">Read the full Node Structure &rarr;</a>
+    <a href="utils/ADR.html">Read Some covered ADR (Architectural Decision Record)</a>
     <a href="utils/nary-complexity-map.html">View N-ary API Time & Space Complexity &rarr;</a>
+</blockquote>
+<h2>1. The Guava testlib</h2>
+<p>
+    Speed without correctness is useless. ChaosTree perfectly implements <code>subMap()</code>, <code>headMap()</code>,
+    <code>tailMap()</code>, and <code>descendingMap()</code>.
+    It has been subjected to Google Guava's <code>NavigableSetTestBuilder</code> and <code>NavigableMapTestSuiteBuilder</code> mathematically passes all strict
+    test permutations including:
+</p>
+<table>
+    <caption>Set and Map Test configuration</caption>
+    <thead>
+    <tr>
+        <th>NavigableSetTestBuilder</th>
+        <th>NavigableMapTestBuilder</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            <ul>
+                <li>CollectionFeature.SUPPORTS_ADD</li>
+                <li>CollectionFeature.SUPPORTS_REMOVE</li>
+                <li>CollectionFeature.SUPPORTS_ITERATOR_REMOVE</li>
+                <li>CollectionFeature.KNOWN_ORDER</li>
+                <li>CollectionFeature.SUBSET_VIEW</li>
+                <li>CollectionFeature.DESCENDING_VIEW</li>
+                <li>CollectionFeature.RESTRICTS_ELEMENTS</li>
+                <li>CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION</li>
+                <li>CollectionFeature.SERIALIZABLE</li>
+                <li>CollectionFeature.ALLOWS_NULL_QUERIES</li>
+                <li>CollectionSize.ANY</li>
+            </ul>
+            <b>permutation count: 526</b>
+        </td>
+
+        <td>
+            <ul>
+                <li>MapFeature.SUPPORTS_PUT</li>
+                <li>MapFeature.SUPPORTS_REMOVE</li>
+                <li>MapFeature.ALLOWS_NULL_VALUES</li>
+                <li>MapFeature.RESTRICTS_KEYS</li>
+                <li>CollectionFeature.SUPPORTS_ITERATOR_REMOVE</li>
+                <li>CollectionFeature.KNOWN_ORDER</li>
+                <li>CollectionFeature.SUBSET_VIEW</li>
+                <li>CollectionFeature.DESCENDING_VIEW</li>
+                <li>CollectionSize.ANY</li>
+                <li>CollectionFeature.SERIALIZABLE</li>
+                <li>MapFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION</li>
+            </ul>
+            <b>permutation count: 53144</b>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p>I have currently <b>4 set</b> and <b>4 map</b> which accounts total of </p>
+<pre>
+    [INFO] Results:
+    [INFO]
+    [INFO] Tests run: 214680, Failures: 0, Errors: 0, Skipped: 0
+</pre>
+
+<blockquote>
+    <b>Point to be noted:</b> Every work is done 2x here!. There is no wrapping of set in Map interface. Set work on
+    <b>AbstractBinarySet and AbstractNarySet Engine</b> and Map works on <b>AbstractBinaryMap and AbstractNaryMap Engine</b>.
+</blockquote>
+
+<p>
+    When I first tested it with Guava it throws many error, but the point was every massive error was simple bug, a
+    line and missing execution.
+</p>
+
+<ul>
+    <li>Sometime missing Hibbard deletion cases</li>
+    <li>The missing implement keyword</li>
+    <li>Class visibility weaken issue</li>
+    <li>Missing to store the old deletion value in put</li>
+    <li>Most importantly the ClassCastException which I never thought would be the bottleneck even after using
+        F-form polymorphism.</li>
+</ul>
+
+
+<p>
+    These test maybe a bottleneck for any library but they do make ensure and highlight many missing cases.
+    A big thanks to Guava testlib <3;
+</p>
+<blockquote>
+    <a href="utils/build/Test_Journey.html">Read the full story of the Testing Journey &rarr;</a>
+</blockquote>
+
+<p>
+    I have currently tested my bulk load testing<i> Dragon feed </i> against TreeMap rigorous testing randomized suite
+    so that it holds true for my by NaryTree and eventually it passed.
+    <b>The test claims are true and further test and bug report are welcome through opening an issue or PR to
+        /test branch</b>
+</p>
+
+
+<h2>1. The Truth (10x+)</h2>
+<p>Benchmark environment: Java 21, JMH. Measuring execution time, heap allocation, and GC time for 5,000,000
+    elements.</p>
+
+<table>
+    <caption>5,000,000 Element Insertion Matrix</caption>
+    <thead>
+    <tr>
+        <th>Benchmark (Strategy)</th>
+        <th>Complexity</th>
+        <th>Score (ms/op)</th>
+        <th>Allocated (Bytes/op)</th>
+        <th>GC Time (ms)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>B+Tree.dragonFeed (Native, factor(0.8f))</td>
+        <td>O(N)</td>
+        <td>5.418</td>
+        <td>52,807,339</td>
+        <td>229</td>
+    </tr>
+    <tr>
+        <td>B+Tree.bulkLoad (Iterator)</td>
+        <td>O(N)</td>
+        <td>36.649</td>
+        <td>48,498,184</td>
+        <td>36</td>
+    </tr>
+    <tr>
+        <td>JDK TreeMap.bulkLoad (SortedMap)</td>
+        <td>O(N)</td>
+        <td>50.638</td>
+        <td>200,000,256</td>
+        <td>740</td>
+    </tr>
+    <tr>
+        <td>B+Tree.iterativePut (Standard)</td>
+        <td>O(N log N)</td>
+        <td>217.728</td>
+        <td>86,994,733</td>
+        <td>56</td>
+    </tr>
+    <tr>
+        <td>JDK TreeMap.iterativePut (Standard)</td>
+        <td>O(N log N)</td>
+        <td>698.918</td>
+        <td>200,002,397</td>
+        <td>347</td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Result:</strong> ChaosTree dragon feed is <b>129x faster</b> than standard JDK insertions, <b>10x faster</b>
+    than JDK bulk loading, and uses <b>74% less JVM heap overhead</b>.
+    <i>{It depends on factor dev so do read the below article of Dragon feed}</i>
+    <br>
+    Well, I know this it bit more escalation, but it's the truth. The Dragon feed is fast enough to sweep the complete
+    array in <strong>Milliseconds.</strong> Because it uses <i>System.arraycopy()</i>.
+    <br>
+    <a href="utils/dragon-feed.html">Read the full Dragon Feed Parameter Sweep &rarr;</a><br>
+
+
+<blockquote>
+    <a href="utils/build/array-build-proof.html">The running math behind it &rarr;</a><br>
+    <a href="utils/Benchmark_Analysis.html">Read the Explicit Benchmark Document &rarr;</a>
+</blockquote>
+
+<blockquote>
+    The reason behind this simple frontend was easy maintenance, because I can maintain this level of frontend.
+</blockquote>
+
+<div style="text-align: center; margin: 40px 0;">
+    <h3>Always Pushing the Limits</h3>
+    <p>
+        <i>This library was built through relentless benchmarking and intense mechanical sympathy. If anyone finds further optimizations or edge-case bottlenecks, you are encouraged to open a PR or Issue. I am always ready to make it faster!</i>
+    </p>
+    <p class="bold" style="margin-top: 20px; font-size: 1.1em;">
+        &#9889; Not built on caffeine, but on Phonk !! &#9889;
+    </p>
+</div>
+
 </body>
 </html>

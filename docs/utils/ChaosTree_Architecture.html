@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTree: Architectural Mathematics & Node Structure</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: left;
+        }
+
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #000;
+            overflow-x: auto;
+        }
+        
+        .bold {
+            font-weight: bold;
+        }
+        
+        .diagram-container {
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid #000;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>ChaosTree: Node Architecture & Mathematics</h1>
+<p class="bold">
+    ChaosTree diverges from textbook CLRS (Cormen, Leiserson, Rivest, and Stein) implementations to extract maximum mechanical sympathy from the Java Virtual Machine (JVM). This document details the array capacity mathematics, the Structure-of-Arrays (SoA) layout, and the crucial differences between the BTreeMap and BPlusTreeMap engines.
+</p>
+
+<div class="diagram-container">
+    <img src="build/ChaosTreeNaryNode.svg" alt="ChaosTree N-ary Node Structure Diagram">
+</div>
+
+<h2>1. The 2t Capacity Math & The Overflow Slot</h2>
+<p>
+    Standard B-Tree and B+-Tree literature defines a node capacity based on a degree parameter <i>t</i> (where <i>t &ge; 2</i>). 
+    Textbook CLRS defines the maximum number of keys in a node as <code>maxKeys = 2t - 1</code>.
+</p>
+<p>
+    In ChaosTree, <code>maxKeys</code> is indeed <code>2t - 1</code>, <b>but the physical arrays are allocated to size 2t</b>.
+</p>
+<pre>
+int maxKeys = degree &lt;&lt; 1; // 2t physical slots allocated
+this.keys = new Object[maxKeys]; 
+</pre>
+<p>
+    This creates a <b>dummy slot</b> (or overflow slot) as illustrated in the SVG diagram above. By allocating one extra slot beyond the legal mathematical maximum, ChaosTree can use an <i>insert-then-split</i> architecture instead of the traditional <i>split-then-insert</i>. 
+</p>
+<blockquote>
+    <b>Traditional (Preemptive):</b> If node is full (2t-1), split it. Then figure out which half the new key belongs to, and insert it.<br>
+    <br>
+    <b>ChaosTree (Overflow):</b> Unconditionally insert the key. The node temporarily holds 2t keys. Then, <code>while (current.keyCount &gt; maxKeys)</code>, split the node and push the separator up.
+</blockquote>
+<p>
+    This completely eliminates the need to branch or reason about pending keys during a split, removing complex control flow from the JIT hot-path.
+</p>
+
+<h2>2. Structure of Arrays (SoA) for L2 Cache Locality</h2>
+<p>
+    Standard Java implementations like <code>java.util.TreeMap</code> use a Structure-of-Objects layout. Every node is an <code>Entry&lt;K,V&gt;</code> that holds pointers to left, right, parent, color, key, and value. Binary searching forces the CPU to drag values and node pointers through the CPU cache line.
+</p>
+<p>
+    ChaosTree uses <b>Structure of Arrays (SoA)</b>:
+</p>
+<pre>
+protected final Object[] keys;
+protected final Object[] values;
+protected final N[] child;
+</pre>
+<p>
+    When ChaosTree searches a node, it runs a binary search <i>exclusively</i> over the <code>keys[]</code> array. The CPU can fetch consecutive keys in a single L2 cache line without touching a single value or child pointer.
+</p>
+
+<h2>3. BTreeMap vs BPlusTreeMap: The GC Null Discriminator</h2>
+<p>
+    A classical <b>B-Tree</b> stores values in both internal routing nodes and leaf nodes. A <b>B+-Tree</b> pushes all values down to the leaf nodes, leaving internal nodes strictly as a routing index.
+</p>
+<p>
+    ChaosTree leverages this mathematical distinction to ruthlessly optimize Garbage Collection retention:
+</p>
+<table>
+    <caption>Array allocations by node type</caption>
+    <thead>
+        <tr>
+            <th>Tree Type</th>
+            <th>Leaf Node Arrays</th>
+            <th>Internal Node Arrays</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><b>BTreeMap</b></td>
+            <td><code>keys[]</code>, <code>values[]</code></td>
+            <td><code>keys[]</code>, <code>values[]</code>, <code>child[]</code></td>
+        </tr>
+        <tr>
+            <td><b>BPlusTreeMap</b></td>
+            <td><code>keys[]</code>, <code>values[]</code></td>
+            <td><code>keys[]</code>, <i>null</i>, <code>child[]</code></td>
+        </tr>
+    </tbody>
+</table>
+<pre>
+boolean needsValues = isLeaf || (this instanceof BTreeMapNode);
+this.values = needsValues ? new Object[maxKeys] : null;
+</pre>
+<p>
+    Because internal nodes account for roughly <code>1/t</code> of the total tree volume, dropping the <code>values[]</code> array entirely in <code>BPlusTreeMap</code> saves a massive amount of heap space. During a top-down bulk load of 10,000 elements, this GC optimization causes <code>BPlusTreeMap</code> to generate just <b>119 KB</b> of allocation compared to <code>BTreeMap</code>'s <b>519 KB</b>.
+</p>
+
+<h2>4. The Top-Down Bulk Loader Arithmetic</h2>
+<p>
+    ChaosTree's <code>buildFromSorted</code> eliminates the "Phase 2" repair pass found in standard database bulk-loaders by computing exact capacity windows <i>before</i> descending.
+</p>
+<blockquote>
+    <b>B-Tree capacity bound:</b> (numKeys + 1) / maxChild<sup>h</sup> &le; Children &le; (numKeys + 1) / minChild<sup>h</sup><br>
+    <b>B+-Tree capacity bound:</b> maxSubtree = maxKeys * maxChild<sup>h-1</sup>
+</blockquote>
+<p>
+    By proving that <i>C</i> (the chosen number of children) fits within the clamped window, ChaosTree guarantees every child will land inside its legal <code>[minKeys, maxKeys]</code> boundary before the recursion even reaches it. The remainder is smeared uniformly (1 per child) to bound the worst-case sibling imbalance at exactly 1 key. This makes underflow mathematically impossible and fully eliminates the need for a secondary tree-repair traversal.
+</p>
+
+<p>
+    <a href="../index.html">&larr; Back to ChaosTree Home</a>
+</p>
+
+</body>
+</html>

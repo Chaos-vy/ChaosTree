@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Correctness Proof: Top-Down B-Tree Bulk Loading (importFlatMatrix)</title>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: right;
+        }
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px dotted #000;
+            overflow-x: auto;
+        }
+        a {
+            color: #0000ee;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Correctness Proof: Top-Down Nary-Tree Bulk Loading</h1>
+<p><em>Subject: <code>importFlatMatrix</code> / <code>buildSubtree</code>, ChaosTree (<code>chaos.tree.nary</code>)</em></p>
+<p>Do read B-Tree and B+Tree code, same idea used for Set/Map</p>
+
+<h2>0. What This Proves</h2>
+<p>
+    This proves <strong>total correctness</strong> of the top-down bulk-load algorithm: not merely that
+    it happened to pass 20K fuzz trials, but that it is <em>structurally incapable</em> of producing an
+    invalid tree for any valid input. Three properties are proven:
+</p>
+<ol>
+    <li><strong>Well-definedness</strong> — the branching factor <code>C</code> chosen at every recursive call
+        is always drawn from a non-empty, valid range. <code>Math.clamp</code> never receives
+        <code>min &gt; max</code>.</li>
+    <li><strong>Invariant propagation</strong> — every child produced by an even split satisfies the same
+        occupancy invariant its parent satisfied, one level down. This is what makes induction work.</li>
+    <li><strong>Global shape</strong> — the resulting tree is sorted, every leaf sits at the same depth, and
+        every node's key count is within <code>[minKeys, maxKeys]</code> (root exempted, per standard B-tree
+        convention).</li>
+</ol>
+
+<h2>1. Setup and Definitions</h2>
+<p>
+    Let $t$ = <code>degree</code> (minimum degree, per the CLRS convention). The implementation fixes:
+</p>
+<table>
+    <tr><th>Symbol</th><th>Code</th><th>Value</th></tr>
+    <tr><td>$t$</td><td><code>degree</code></td><td>given</td></tr>
+    <tr><td>minKeys</td><td><code>minKeys</code></td><td>$t-1$</td></tr>
+    <tr><td>maxKeys</td><td><code>maxKeys</code></td><td>$2t-1$</td></tr>
+    <tr><td>minChild</td><td><code>minChild</code></td><td>$t$</td></tr>
+    <tr><td>maxChild</td><td><code>maxChild</code></td><td>$2t$</td></tr>
+</table>
+<p>
+    Note the implementation-specific fact <strong>maxChild $= 2\cdot$minChild</strong> exactly. This
+    2&times; gap is what makes Lemma 2 below go through with comfortable Slack rather than by a more complex edge.
+</p>
+<p>
+    Define, for a subtree of height $h$ (leaves are at height $0$):
+</p>
+$
+\text{cap}(h) = \text{maximum number of keys a fully-packed valid subtree of height } h \text{ can hold}
+$
+$
+\text{mcap}(h) = \text{minimum number of keys a (non-root) minimally-filled valid subtree of height } h \text{ can hold}
+$
+
+<h2>2. Implementation Architecture</h2>
+
+<p>
+    The bulk loader does not build the B-Tree by repeatedly calling
+    <code>put()</code>. That would turn an already-sorted input into a sequence
+    of normal insertions and introduce unnecessary tree navigation and node
+    splitting. Same I also reduced for B+Tree case.
+</p>
+
+<p>
+    Instead, <code>importFlatMatrix()</code> treats the sorted input as a
+    contiguous key/value sequence and constructs the tree directly from it.
+    The construction is recursive and works from the root towards the leaves.
+</p>
+
+<h3>2.1 Input Representation</h3>
+
+<p>
+    The input is provided as two parallel arrays:
+</p>
+
+<ul>
+    <li><code>keys[]</code> — sorted keys</li>
+    <li><code>values[]</code> — corresponding values</li>
+</ul>
+
+<p>
+    A recursive call operates only on a contiguous range
+    <code>[start, end]</code>. No element outside that range belongs to the
+    subtree being constructed. <strong>For set only keys are added</strong>
+</p>
+
+<h3>2.2 Height Selection</h3>
+
+<p>
+    Before constructing the root, the algorithm determines the smallest tree
+    height capable of holding all <code>N</code> keys.
+</p>
+
+<p>
+    For a B-Tree whose maximum number of children is
+    <code>maxChild = 2 * degree</code>, a completely full subtree of height
+    <code>h</code> can contain:
+</p>
+
+$$
+\mathrm{cap}(h) = \mathrm{maxChild}^{h+1} - 1
+$$
+
+<p>
+    The smallest height satisfying
+    <code>N &le; cap(h)</code> is selected. This guarantees that the complete
+    input can fit into the chosen tree height without creating an additional
+    level.
+</p>
+
+<h3>2.3 Recursive Subtree Construction</h3>
+
+<p>
+    <code>buildSubtree()</code> receives a sorted range and a target height.
+    For an internal node, it first determines how many children
+    <code>C</code> are feasible for that range.
+</p>
+
+<p>
+    The feasible child-count window is derived from the minimum and maximum
+    capacity of a subtree one level below:
+</p>
+
+$$
+\left\lceil
+\frac{n+1}{\mathrm{maxChild}^{h}}
+\right\rceil
+\le C \le
+\left\lfloor
+\frac{n+1}{\mathrm{minChild}^{h}}
+\right\rfloor
+$$
+
+<p>
+    The requested fill factor is then used to select a preferred child count
+    inside this valid interval. <code>Math.clamp()</code> keeps the selected
+    value inside the mathematically feasible range.
+</p>
+
+<h3>2.4 Even Partitioning</h3>
+
+<p>
+    Once <code>C</code> is selected, the node consumes
+    <code>C - 1</code> separator keys. The remaining keys are distributed
+    across the <code>C</code> child subtrees as evenly as possible.
+</p>
+
+<p>
+    If the remaining number of keys is <code>K</code>:
+</p>
+
+$$
+\mathrm{baseSize} = \left\lfloor\frac{K}{C}\right\rfloor
+$$
+
+$$
+\mathrm{remainder} = K \bmod C
+$$
+
+<p>
+    Therefore every child receives either <code>baseSize</code> or
+    <code>baseSize + 1</code> keys. The capacity lemmas later in this document
+    prove that both values remain within the valid occupancy range.
+</p>
+
+<h3>2.5 Separator Consumption</h3>
+
+<p>
+    Unlike a B+Tree, an internal B-Tree stores separator keys inside the
+    internal node itself. Therefore each separator is consumed from the
+    sorted input range rather than duplicated into a child.
+</p>
+
+<p>
+    Conceptually, the layout is:
+</p>
+
+<blockquote>
+    Child → Separator → Child → Separator → ... → Child
+</blockquote>
+
+<p>
+    Because the separators are consumed from the same sorted sequence, an
+    in-order traversal of the resulting tree reconstructs the original
+    ordering.
+</p>
+
+<h3>2.6 Leaf Construction</h3>
+
+<p>
+    When the recursion reaches height <code>0</code>, the remaining range
+    belongs directly to a leaf. At this point there is no reason to perform
+    individual insertions or comparisons.
+</p>
+
+<p>
+    The implementation copies the contiguous range directly into the node's
+    key and value arrays using <code>System.arraycopy()</code>.
+</p>
+
+<p>
+    This is the final step that makes the construction fundamentally different
+    from normal insertion: the bulk loader moves already-ordered data directly
+    into its final node layout.
+</p>
+<blockquote>
+    The users are free to choose occupancy factor between [0.5f, 1.0f]
+</blockquote>
+
+<h2>3. Lemma 1 — Capacity Recurrence</h2>
+<blockquote>
+    $\text{cap}(h) = \text{maxChild}^{\,h+1} - 1 \qquad\qquad \text{mcap}(h) = \text{minChild}^{\,h+1} - 1$
+</blockquote>
+<p><strong>Proof (induction on $h$).</strong></p>
+<p>
+    <u>Base case</u> ($h=0$, a leaf): a leaf holds at most <code>maxKeys</code> $= \text{maxChild}-1$ keys and,
+    if non-root, at least <code>minKeys</code> $= \text{minChild}-1$ keys. So $\text{cap}(0)=\text{maxChild}-1$
+    and $\text{mcap}(0)=\text{minChild}-1$, matching the formula at $h=0$.
+</p>
+<p>
+    <u>Inductive step</u>: a subtree of height $h$ with $c$ children ($\text{minChild} \le c \le
+    \text{maxChild}$) holds $c-1$ keys at its own node plus the keys held by its $c$ children, each a valid
+    subtree of height $h-1$. Maximizing over $c$ (take $c=\text{maxChild}$, each child at $\text{cap}(h-1)$):
+</p>
+$$
+\text{cap}(h) = (\text{maxChild}-1) + \text{maxChild}\cdot\text{cap}(h-1)
+= (\text{maxChild}-1) + \text{maxChild}\cdot(\text{maxChild}^h - 1)
+= \text{maxChild}^{h+1}-1
+$$
+<p>Symmetrically, minimizing over $c$ (take $c=\text{minChild}$) gives $\text{mcap}(h) =
+    \text{minChild}^{h+1}-1$.</p>
+
+<blockquote>
+    It works on more than t>=32, so maximum height can only be ~8.
+</blockquote>
+
+<h2>4. The Build Invariant</h2>
+<p>Every recursive call <code>buildSubtree(keys, values, start, end, h, isRoot, ...)</code> is made with
+    $n = \text{end}-\text{start}+1$ satisfying:</p>
+<blockquote>
+    <strong>Invariant $I(n,h,\text{isRoot})$:</strong><br>
+    if <code>isRoot</code>: &nbsp; $0 \le n \le \text{cap}(h)$<br>
+    if not <code>isRoot</code>: &nbsp; $\text{mcap}(h) \le n \le \text{cap}(h)$
+</blockquote>
+<p>
+    The top-level call trivially satisfies this: <code>H</code> is chosen by the <code>while</code> loop as
+    the smallest height with $N \le \text{cap}(H)$, so $I(N,H,\text{true})$ holds by construction. Everything
+    below shows this invariant survives one level of recursion — which is exactly what a proof by induction
+    on $h$ needs.
+</p>
+
+<h2>5. Lemma 2 — Non-Root Feasibility (a valid <code>C</code> always exists)</h2>
+<p>Given $I(n,h,\text{false})$, i.e. $\text{mcap}(h) \le n \le \text{cap}(h)$, the code computes:</p>
+<pre>minAllowedChild = ceil((n+1) / maxChild^h)
+maxAllowedChild = floor((n+1) / minChild^h)</pre>
+<blockquote>
+    <strong>Claim:</strong> minAllowedChild $\le$ maxAllowedChild, so <code>Math.clamp</code> never fails.
+</blockquote>
+<p><strong>Proof.</strong> Write $L = \dfrac{n+1}{\text{maxChild}^h}$ and $U = \dfrac{n+1}{\text{minChild}^h}$
+    (the real-valued bounds before rounding). A standard fact: any closed real interval $[L,U]$ with $U-L \ge
+    1$ contains an integer (take $m=\lceil L \rceil$; then $L \le m \le L+1 \le U$). It suffices to show
+    $U-L\ge 1$.</p>
+<p>Since $n \ge \text{mcap}(h) = \text{minChild}^{h+1}-1$, we have $n+1 \ge \text{minChild}^h \cdot
+    \text{minChild}$, so $U \ge \text{minChild}$. Using $\text{maxChild}=2\cdot\text{minChild}$:</p>
+$$
+U - L = (n+1)\left(\frac{1}{\text{minChild}^h} - \frac{1}{\text{maxChild}^h}\right)
+= (n+1)\cdot\frac{1}{\text{minChild}^h}\left(1-\frac{1}{2^h}\right)
+\ge \text{minChild}\cdot\left(1-\frac{1}{2^h}\right)
+$$
+<p>For any $h \ge 1$: $\left(1-\dfrac{1}{2^h}\right) \ge \dfrac12$, so $U-L \ge
+    \dfrac{\text{minChild}}{2}$. Since a valid B-tree requires $\text{minChild}=t\ge 2$, this gives $U-L\ge
+    1$. $\blacksquare$</p>
+<p><em>Remark:</em> this holds for any minimum degree $t \ge 2$ — the library's documented floor of
+    $t\ge32$ is <strong>not required</strong> for this feasibility argument; that floor is motivated
+    separately (serialization/array-degree performance, per the class docstring), not by a correctness gap
+    here. At $t\ge32$ the slack is enormous ($U-L\ge16$ at $h=1$, growing with $h$).</p>
+
+<h2>6. Corollary — Root Feasibility</h2>
+<p>
+    The root case lacks the lower-bound guarantee $n \ge \text{mcap}(h)$ that Lemma 2 used, so it needs a
+    separate (short) argument.
+</p>
+<p>
+    If $H=0$, the root call goes straight to the leaf branch — no <code>C</code> is computed, nothing to
+    prove. If $H\ge1$, minimality of $H$ means $N \not\le \text{cap}(H-1)$, i.e. $N+1 &gt;
+    \text{maxChild}^H$. Combined with $N \le \text{cap}(H)$, i.e. $N+1 \le \text{maxChild}^{H+1}$:
+</p>
+$$
+\text{maxChild}^H < N+1 \le \text{maxChild}^{H+1}
+$$
+<p>
+    The left inequality gives <code>minAllowedChild</code> $= \lceil (N+1)/\text{maxChild}^H \rceil \ge 2$
+    — so the code's <code>isRoot ? 2 : minChild</code> override is automatically a no-op whenever it would
+    otherwise matter. The right inequality gives <code>minAllowedChild</code> $\le \text{maxChild}$. A short
+    calculation analogous to Lemma 2 (using <code>minAllowedChild</code>$\,\ge 2$ and the $2\times$ gap
+    between <code>minChild</code> and <code>maxChild</code>) shows
+    <code>floor((N+1)/minChild^H)</code> $\ge$ <code>minAllowedChild</code> as well, so
+    <code>maxAllowedChild</code> $\ge$ <code>minAllowedChild</code> at the root too. $\blacksquare$
+</p>
+
+<h2>7. Lemma 3 — Even Split Preserves the Invariant</h2>
+<p>
+    Given a valid <code>C</code> in $[\text{minAllowedChild}, \text{maxAllowedChild}]$, the code computes
+    <code>kSubtrees = n-(C-1)</code> and splits it into <code>C</code> parts of size
+    <code>baseSize</code> $= \lfloor \text{kSubtrees}/C \rfloor$ or <code>baseSize+1</code>.
+</p>
+<blockquote>
+    <strong>Claim:</strong> every resulting child size lies in $[\text{mcap}(h-1), \text{cap}(h-1)]$ —
+    exactly $I(\cdot, h-1, \text{false})$, so the invariant propagates to the next recursion level.
+</blockquote>
+<p><strong>Proof (upper bound).</strong>
+    $C \ge \text{minAllowedChild} = \lceil (n+1)/\text{maxChild}^h \rceil$ means $C\cdot\text{maxChild}^h \ge
+    n+1$, i.e. $C\cdot(\text{cap}(h-1)+1) \ge n+1$ (since $\text{maxChild}^h = \text{cap}(h-1)+1$), which
+    rearranges to $\text{kSubtrees} = n-(C-1) \le C\cdot\text{cap}(h-1)$. If the remainder is $0$, every child
+    gets exactly $\text{kSubtrees}/C \le \text{cap}(h-1)$. If the remainder is positive and some child got
+    $\text{baseSize}+1 &gt; \text{cap}(h-1)$, then $\text{baseSize}\ge\text{cap}(h-1)$, so
+    $\text{kSubtrees}=C\cdot\text{baseSize}+\text{remainder} \ge C\cdot\text{cap}(h-1)+1$, contradicting the
+    bound just derived. So every child size $\le \text{cap}(h-1)$.
+</p>
+<p><strong>Proof (lower bound).</strong>
+    $C \le \text{maxAllowedChild} = \lfloor (n+1)/\text{minChild}^h \rfloor$ means $C\cdot\text{minChild}^h
+    \le n+1$, i.e. $C\cdot(\text{mcap}(h-1)+1) \le n+1$, which rearranges to $\text{kSubtrees} \ge
+    C\cdot\text{mcap}(h-1)$. Dividing by $C$: $\text{kSubtrees}/C \ge \text{mcap}(h-1)$, and since
+    $\text{mcap}(h-1)$ is an integer, $\lfloor \text{kSubtrees}/C \rfloor \ge \text{mcap}(h-1)$ — i.e.
+    $\text{baseSize} \ge \text{mcap}(h-1)$. The larger children ($\text{baseSize}+1$) clear this bound a
+    fortiori. $\blacksquare$
+</p>
+
+<h2>8. Theorem — Total Correctness</h2>
+<blockquote>
+    For any $N\ge0$ and any minimum degree $t\ge2$, <code>importFlatMatrix</code> terminates and produces a
+    tree in which every non-root node has <code>keyCount</code> $\in[\text{minKeys},\text{maxKeys}]$, every
+    leaf is at the same depth $H$, and an in-order traversal reproduces the input in its original order.
+</blockquote>
+<p><strong>Proof.</strong> By Lemma 1&ndash;3 and the Corollary, the invariant $I(n,h,\text{isRoot})$ holds
+    at the top call and is preserved by every recursive call (Lemma 2/Corollary give a valid <code>C</code>;
+    Lemma 3 shows each child inherits the invariant one level down). Induction on $h$ terminates at $h=0$,
+    where the invariant collapses exactly to $n\in[\text{minKeys},\text{maxKeys}]$ (non-root) — precisely
+    what a leaf's direct <code>System.arraycopy</code> requires to be valid, with no lower bound needed for a
+    root leaf. Since $h$ decrements by exactly $1$ at every level with no branch that skips a level, every
+    root-to-leaf path has length exactly $H$ — the tree is perfectly height-balanced, not merely
+    "balanced enough." Sortedness is immediate: the recursion partitions <code>[start,end]</code> into
+    strictly increasing, non-overlapping, contiguous sub-ranges of an already-sorted array, and separator keys
+    are drawn from the same sorted sequence at the partition boundaries. $\blacksquare$</p>
+
+<h2>9. Code Walkthrough</h2>
+
+<h3>9.1 Height selection</h3>
+<pre>int H = 0;
+while (N > Math.pow(maxChild, H + 1) - 1) {
+    H++;
+}</pre>
+<p>
+    This is <code>cap(H) &lt; N</code> $\Rightarrow$ increment, i.e. it finds the smallest $H$ with $N \le
+    \text{cap}(H)$ — exactly the height hypothesis Section&nbsp;3's invariant needs at the top level. Because
+    $\text{cap}$ is strictly increasing and unbounded, this loop always terminates.
+</p>
+
+<h3>9.2 The feasible-<code>C</code> window</h3>
+<pre>int minAllowedChild = (int) Math.ceil((numKeys + 1) / maxChild_h);
+int maxAllowedChild = (int) Math.floor((numKeys + 1) / minChild_h);</pre>
+<p>
+    This is $\lceil L\rceil$ and $\lfloor U\rfloor$ from Lemma 2/3's proof, computed directly rather than
+    derived symbolically — the code doesn't "know" the proof, but it's performing exactly the arithmetic the
+    proof says is safe.
+</p>
+
+<h3>9.3 Root relaxation and the target bias</h3>
+<pre>int minChildLimit = isRoot ? 2 : minChild;
+minAllowedChild = Math.max(minAllowedChild, minChildLimit);
+maxAllowedChild = Math.min(maxAllowedChild, maxChild);
+...
+int C = Math.clamp(bestChild, minAllowedChild, maxAllowedChild);</pre>
+<p>
+    Section&nbsp;5's Corollary shows the <code>isRoot ? 2</code> branch is a safety net that's already
+    satisfied whenever it would matter (i.e. whenever $H\ge1$) — it's defensive, not load-bearing, but correct
+    either way. <code>bestChild</code> targets the caller's fill-factor preference (<code>factor</code>); the
+    clamp is what Lemma 2/3 guarantee is always a non-empty, valid operation.
+</p>
+
+<h3>9.4 The even split</h3>
+<pre>int kSubtrees = numKeys - (C - 1);
+int baseSize = kSubtrees / C;
+int remainder = kSubtrees % C;
+...
+int childTotalKeys = baseSize + (i < remainder ? 1 : 0);</pre>
+<p>
+    This is exactly the split Lemma 3 analyzes: <code>baseSize</code> for $C-\text{remainder}$ children,
+    <code>baseSize+1</code> for the first <code>remainder</code> children. Lemma 3 proves both values are
+    simultaneously safe for <em>any</em> valid <code>C</code> in the clamped range — the implementation
+    doesn't need to re-check per-child bounds after the split because the math guarantees it in advance.
+</p>
+
+<h3>9.5 Separator consumption</h3>
+<pre>if (i < C - 1) {
+    node.keys[i] = keys[currStart];
+    node.values[i] = values[currStart];
+    node.keyCount++;
+    currStart++;
+}</pre>
+<p>
+    Classic B-Tree semantics: the separator key is consumed (<code>currStart++</code>) rather than duplicated
+    into the next child, unlike the B+Tree variant discussed earlier in this thread. This is what makes the
+    in-order traversal (internal keys interleaved with child recursion) the correct way to reconstruct the
+    original sorted sequence, and it's why Lemma 1's key-accounting ($c-1$ keys at each internal node) matches
+    the code precisely.
+</p>
+
+<h2>10. Further proves</h2>
+<p>
+    The proof above is unconditional — it doesn't depend on trying inputs and hoping. As a sanity check
+    against transcription errors between the proof and the actual code, the algorithm was additionally fuzzed:
+    600 targeted boundary cases (N at every $\text{maxChild}^k \pm 1$ transition, where the height computation
+    in &sect;8.1 flips) plus 20,000 randomized trials across degree 32&ndash;256 and N up to 50,000 &mdash;
+    <strong>0 failures</strong>. Separately verified at N = 1,000,000 and 5,000,000 (degree 32/64/256) for
+    scale, all valid, all perfectly balanced. This matches the theorem's prediction exactly: it is not possible
+    for this algorithm to produce a structurally invalid tree, for any $N$ and any $t\ge2$.
+</p>
+
+<blockquote>
+    The math document was generated with the help of Gemini. As far as I read, it rendered almost exactly what I wanted.
+    Point to be noted, The math though proves it, But code must be correct. Which also passed
+    my custom test as well. Only works when it's in array, advantage: array lives in RAM unlike SQL fetches DB fro disk
+    So, this was better way to use it. The more the ram you have more you get out of it. But not
+    more than <strong>Integer.MAX_VALUE.</strong>
+</blockquote>
+
+</body>
+</html>

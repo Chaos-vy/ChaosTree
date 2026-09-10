@@ -67,7 +67,7 @@
 <h1>The Dragon Feed</h1>
 
 <blockquote>
-    "Every rev (factor) of the dragon is a warning. Every gearshift bears the load (gc). The dragon unleashes its might
+    "Every rev (factor) of the dragon is a warning. Every gearshift bears the load (memory). The dragon unleashes its might
     at 1.0f, packing your data into the map like it never even felt it."
 </blockquote>
 
@@ -166,7 +166,8 @@
 <h2>Usage</h2>
 <h3>1. By Constructor</h3>
 <pre>
-// Awaken the Dragon at top gear (1.0f)
+// Use the Dragon at top gear (1.0f)
+// It is advised to leave a space for future operation.
 // 1. Prepare your sorted data matrix
 Integer[] sortedKeys = {1, 2, 3, 4, 5};
 String[] values = {"A", "B", "C", "D", "E"};
@@ -228,7 +229,7 @@ Use with absolute precision.
         <strong>FILL FACTOR:</strong>
         The factor determines node occupancy and has strict limits
         between <code>0.5f</code> and <code>1.0f</code>.
-        A factor of <code>0.8f</code> is highly recommended for bulk loading.
+        A factor of <code>0.75f</code> is highly recommended for bulk loading.
         This packs the nodes densely while leaving exactly enough buffer room
         to prevent future insertions from triggering massive, cascading
         split operations.
@@ -248,7 +249,7 @@ A 2D array where <code>blast[0]</code> is the sorted keys and
 <strong>factor</strong>
 The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
 
-    <pre>
+<pre>
     // Awaken the Dragon at top gear (1.0f)
     BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;()
     //this creates a default degree of 64 and comparator null!
@@ -304,7 +305,12 @@ The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
 </ul>
 <i>public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor)</i> The
 <strong>factor</strong> provide the node density <strong>[0.5f, 1f]</strong> more you pack the less it's take memory.
-<i>It is faster in sorted input because it just appends at last</i>
-
+<i>Internally used in Serialization at a factor of <strong>0.75f.</strong></i>
+<pre>
+    // Use the Dragon at top gear (1.0f)
+    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;()
+    //this creates a default degree of 64 and comparator null!
+    map.buildFromSorted(iterator, factor);
+    </pre>
 </body>
 </html>
