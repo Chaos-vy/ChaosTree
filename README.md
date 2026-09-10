@@ -27,7 +27,7 @@ See the [`CHANGELOG.md`](CHANGELOG.md) for the release details and compatibility
 - **Minimum JDK: 0xCAFEBABE 0000 0041 | JDK 21+**
 - **Build Tool: Maven 3.8+** 
 
-**Do Read from website:** https://chaos-vy.github.io/ChaosTree/index.html
+**Details about ChaosTree:** https://chaos-vy.github.io/ChaosTree/index.html
 
 *(Note: As strictly sorted structures, `addFirst()` and `addLast()` are unsupported and fail-fast).*
 
