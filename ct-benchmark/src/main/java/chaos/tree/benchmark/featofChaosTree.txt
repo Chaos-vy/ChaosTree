@@ -1,0 +1,1109 @@
+Benchmark                                                        (comparator)     (mapType)         (mode)  (preFill)  (seed)  (size)  Mode  Cnt       Score      Error   Units
+ChaosTreeMapUpdateBenchmark.baseline                                     true   JavaTreeMap        TreeMap       true       0   10000  avgt   30   97663.168 ± 1182.765   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true   JavaTreeMap        TreeMap       true       0   10000  avgt   30    3905.911 ±   45.418  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true   JavaTreeMap        TreeMap       true       0   10000  avgt   30  400081.353 ±    0.017    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     168.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     104.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true   JavaTreeMap        TreeMap      false       0   10000  avgt   30       4.306 ±    0.065   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true   JavaTreeMap        TreeMap      false       0   10000  avgt   30   10630.298 ±  156.858  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      48.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     287.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     193.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true   JavaTreeMap  descendingMap       true       0   10000  avgt   30   91086.606 ± 2599.100   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true   JavaTreeMap  descendingMap       true       0   10000  avgt   30    4195.026 ±  118.223  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true   JavaTreeMap  descendingMap       true       0   10000  avgt   30  400137.261 ±    0.036    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     190.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     128.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true   JavaTreeMap  descendingMap      false       0   10000  avgt   30       9.359 ±    0.035   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true   JavaTreeMap  descendingMap      false       0   10000  avgt   30   10592.215 ±   39.360  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     104.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     272.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     188.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true   JavaTreeMap         subMap       true       0   10000  avgt   30   97048.843 ±  368.090   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true   JavaTreeMap         subMap       true       0   10000  avgt   30    3930.525 ±   14.860  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true   JavaTreeMap         subMap       true       0   10000  avgt   30  400129.344 ±    0.006    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true   JavaTreeMap         subMap       true       0   10000  avgt   30     176.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true   JavaTreeMap         subMap       true       0   10000  avgt   30     107.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true   JavaTreeMap         subMap      false       0   10000  avgt   30       9.510 ±    0.175   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true   JavaTreeMap         subMap      false       0   10000  avgt   30    9629.674 ±  167.738  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true   JavaTreeMap         subMap      false       0   10000  avgt   30      96.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true   JavaTreeMap         subMap      false       0   10000  avgt   30     290.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true   JavaTreeMap         subMap      false       0   10000  avgt   30     176.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30   72464.530 ±  409.673   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30    1575.368 ±    8.864  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30  119745.004 ±    0.006    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      91.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      58.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.336 ±    0.083   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30   10834.503 ±  137.064  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      72.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     287.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     206.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30   72107.689 ±  385.182   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30    1583.394 ±    8.443  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30  119768.998 ±    0.006    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      91.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      58.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       9.180 ±    0.252   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30    9982.837 ±  243.374  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      96.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     284.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     173.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true  BPlusTreeMap         subMap       true       0   10000  avgt   30   71764.327 ±  261.918   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true  BPlusTreeMap         subMap       true       0   10000  avgt   30    1591.157 ±    5.784  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true  BPlusTreeMap         subMap       true       0   10000  avgt   30  119784.995 ±    0.004    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true  BPlusTreeMap         subMap       true       0   10000  avgt   30      91.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true  BPlusTreeMap         subMap       true       0   10000  avgt   30      57.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true  BPlusTreeMap         subMap      false       0   10000  avgt   30      11.015 ±    0.199   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true  BPlusTreeMap         subMap      false       0   10000  avgt   30    9698.686 ±  171.607  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true  BPlusTreeMap         subMap      false       0   10000  avgt   30     112.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true  BPlusTreeMap         subMap      false       0   10000  avgt   30     283.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true  BPlusTreeMap         subMap      false       0   10000  avgt   30     182.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true      BTreeMap        TreeMap       true       0   10000  avgt   30  104954.401 ±  381.154   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true      BTreeMap        TreeMap       true       0   10000  avgt   30    4717.461 ±   17.086  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true      BTreeMap        TreeMap       true       0   10000  avgt   30  519369.454 ±    0.005    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true      BTreeMap        TreeMap       true       0   10000  avgt   30     212.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true      BTreeMap        TreeMap       true       0   10000  avgt   30     129.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true      BTreeMap        TreeMap      false       0   10000  avgt   30       6.417 ±    0.095   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true      BTreeMap        TreeMap      false       0   10000  avgt   30   10701.557 ±  157.161  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true      BTreeMap        TreeMap      false       0   10000  avgt   30      72.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true      BTreeMap        TreeMap      false       0   10000  avgt   30     290.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true      BTreeMap        TreeMap      false       0   10000  avgt   30     188.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true      BTreeMap  descendingMap       true       0   10000  avgt   30  105237.282 ± 1046.687   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true      BTreeMap  descendingMap       true       0   10000  avgt   30    4705.696 ±   44.773  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true      BTreeMap  descendingMap       true       0   10000  avgt   30  519393.458 ±    0.015    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true      BTreeMap  descendingMap       true       0   10000  avgt   30     202.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true      BTreeMap  descendingMap       true       0   10000  avgt   30     132.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true      BTreeMap  descendingMap      false       0   10000  avgt   30       9.052 ±    0.122   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true      BTreeMap  descendingMap      false       0   10000  avgt   30   10113.452 ±  131.029  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true      BTreeMap  descendingMap      false       0   10000  avgt   30      96.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true      BTreeMap  descendingMap      false       0   10000  avgt   30     285.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true      BTreeMap  descendingMap      false       0   10000  avgt   30     192.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true      BTreeMap         subMap       true       0   10000  avgt   30  105404.147 ±  959.439   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true      BTreeMap         subMap       true       0   10000  avgt   30    4698.346 ±   41.776  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true      BTreeMap         subMap       true       0   10000  avgt   30  519409.460 ±    0.014    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true      BTreeMap         subMap       true       0   10000  avgt   30     219.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true      BTreeMap         subMap       true       0   10000  avgt   30     129.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                     true      BTreeMap         subMap      false       0   10000  avgt   30      10.882 ±    0.141   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                       true      BTreeMap         subMap      false       0   10000  avgt   30    9814.188 ±  126.669  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                  true      BTreeMap         subMap      false       0   10000  avgt   30     112.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                            true      BTreeMap         subMap      false       0   10000  avgt   30     294.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                             true      BTreeMap         subMap      false       0   10000  avgt   30     194.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false   JavaTreeMap        TreeMap       true       0   10000  avgt   30   90986.275 ± 2233.302   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false   JavaTreeMap        TreeMap       true       0   10000  avgt   30    4197.119 ±  102.333  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false   JavaTreeMap        TreeMap       true       0   10000  avgt   30  400081.260 ±    0.031    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     188.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     115.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false   JavaTreeMap        TreeMap      false       0   10000  avgt   30       4.322 ±    0.058   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false   JavaTreeMap        TreeMap      false       0   10000  avgt   30   10590.656 ±  138.154  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      48.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     299.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     209.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false   JavaTreeMap  descendingMap       true       0   10000  avgt   30   93014.402 ± 2806.975   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false   JavaTreeMap  descendingMap       true       0   10000  avgt   30    4109.179 ±  128.195  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false   JavaTreeMap  descendingMap       true       0   10000  avgt   30  400137.294 ±    0.037    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     181.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     113.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false   JavaTreeMap  descendingMap      false       0   10000  avgt   30       9.614 ±    0.337   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false   JavaTreeMap  descendingMap      false       0   10000  avgt   30   10336.551 ±  327.494  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     104.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     299.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     202.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false   JavaTreeMap         subMap       true       0   10000  avgt   30   90191.114 ± 4026.641   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false   JavaTreeMap         subMap       true       0   10000  avgt   30    4246.862 ±  184.221  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false   JavaTreeMap         subMap       true       0   10000  avgt   30  400129.255 ±    0.057    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false   JavaTreeMap         subMap       true       0   10000  avgt   30     189.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false   JavaTreeMap         subMap       true       0   10000  avgt   30     121.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false   JavaTreeMap         subMap      false       0   10000  avgt   30       9.449 ±    0.429   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false   JavaTreeMap         subMap      false       0   10000  avgt   30    9718.271 ±  344.223  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false   JavaTreeMap         subMap      false       0   10000  avgt   30      96.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false   JavaTreeMap         subMap      false       0   10000  avgt   30     282.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false   JavaTreeMap         subMap      false       0   10000  avgt   30     206.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30   71989.323 ±  426.503   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30    1585.690 ±    9.398  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30  119744.997 ±    0.006    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      92.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      59.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.317 ±    0.250   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30   10899.406 ±  395.723  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      72.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     299.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     181.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30   73970.054 ± 1874.982   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30    1545.516 ±   36.837  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30  119769.025 ±    0.026    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      94.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      63.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       9.020 ±    0.201   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30   10156.075 ±  209.741  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      96.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     315.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     168.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false  BPlusTreeMap         subMap       true       0   10000  avgt   30   72665.463 ±  347.418   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false  BPlusTreeMap         subMap       true       0   10000  avgt   30    1571.582 ±    7.465  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false  BPlusTreeMap         subMap       true       0   10000  avgt   30  119785.008 ±    0.005    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false  BPlusTreeMap         subMap       true       0   10000  avgt   30      97.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false  BPlusTreeMap         subMap       true       0   10000  avgt   30      45.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false  BPlusTreeMap         subMap      false       0   10000  avgt   30      11.370 ±    0.438   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false  BPlusTreeMap         subMap      false       0   10000  avgt   30    9417.792 ±  340.729  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false  BPlusTreeMap         subMap      false       0   10000  avgt   30     112.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false  BPlusTreeMap         subMap      false       0   10000  avgt   30     306.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false  BPlusTreeMap         subMap      false       0   10000  avgt   30     188.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false      BTreeMap        TreeMap       true       0   10000  avgt   30  104500.690 ±  558.454   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false      BTreeMap        TreeMap       true       0   10000  avgt   30    4737.837 ±   25.131  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false      BTreeMap        TreeMap       true       0   10000  avgt   30  519369.447 ±    0.008    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false      BTreeMap        TreeMap       true       0   10000  avgt   30     225.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false      BTreeMap        TreeMap       true       0   10000  avgt   30     140.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false      BTreeMap        TreeMap      false       0   10000  avgt   30       6.278 ±    0.268   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false      BTreeMap        TreeMap      false       0   10000  avgt   30   10969.793 ±  417.190  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false      BTreeMap        TreeMap      false       0   10000  avgt   30      72.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false      BTreeMap        TreeMap      false       0   10000  avgt   30     309.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false      BTreeMap        TreeMap      false       0   10000  avgt   30     189.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false      BTreeMap  descendingMap       true       0   10000  avgt   30  106032.150 ± 1170.416   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false      BTreeMap  descendingMap       true       0   10000  avgt   30    4670.587 ±   49.698  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false      BTreeMap  descendingMap       true       0   10000  avgt   30  519393.469 ±    0.016    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false      BTreeMap  descendingMap       true       0   10000  avgt   30     218.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false      BTreeMap  descendingMap       true       0   10000  avgt   30     145.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false      BTreeMap  descendingMap      false       0   10000  avgt   30       8.846 ±    0.140   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false      BTreeMap  descendingMap      false       0   10000  avgt   30   10349.987 ±  156.758  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false      BTreeMap  descendingMap      false       0   10000  avgt   30      96.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false      BTreeMap  descendingMap      false       0   10000  avgt   30     310.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false      BTreeMap  descendingMap      false       0   10000  avgt   30     196.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false      BTreeMap         subMap       true       0   10000  avgt   30  107132.913 ± 2907.387   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false      BTreeMap         subMap       true       0   10000  avgt   30    4628.551 ±  116.527  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false      BTreeMap         subMap       true       0   10000  avgt   30  519409.485 ±    0.041    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false      BTreeMap         subMap       true       0   10000  avgt   30     219.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false      BTreeMap         subMap       true       0   10000  avgt   30     124.000                 ms
+ChaosTreeMapUpdateBenchmark.baseline                                    false      BTreeMap         subMap      false       0   10000  avgt   30      11.143 ±    0.379   ns/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate                      false      BTreeMap         subMap      false       0   10000  avgt   30    9604.317 ±  312.654  MB/sec
+ChaosTreeMapUpdateBenchmark.baseline:gc.alloc.rate.norm                 false      BTreeMap         subMap      false       0   10000  avgt   30     112.000 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.baseline:gc.count                           false      BTreeMap         subMap      false       0   10000  avgt   30     309.000             counts
+ChaosTreeMapUpdateBenchmark.baseline:gc.time                            false      BTreeMap         subMap      false       0   10000  avgt   30     188.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     125.299 ±    1.008   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     304.406 ±    2.425  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     121.495 ±    0.960   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     313.881 ±    2.436  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     128.169 ±    0.893   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     297.622 ±    2.035  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     122.388 ±    1.762   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     311.766 ±    4.414  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     110.102 ±    1.661   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     103.728 ±    1.487  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     145.790 ±    1.295   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      85.343 ±    1.124  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.052 ±    0.161    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     110.121 ±    0.424   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     103.688 ±    0.398  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      15.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     146.318 ±    1.051   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      86.479 ±    1.797  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      13.274 ±    0.265    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true      BTreeMap        TreeMap       true       0   10000  avgt   30     111.241 ±    0.427   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true      BTreeMap        TreeMap       true       0   10000  avgt   30     445.075 ±    1.695  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true      BTreeMap        TreeMap       true       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true      BTreeMap        TreeMap       true       0   10000  avgt   30      41.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true      BTreeMap        TreeMap      false       0   10000  avgt   30     149.000 ±    1.416   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true      BTreeMap        TreeMap      false       0   10000  avgt   30      81.410 ±    2.953  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true      BTreeMap        TreeMap      false       0   10000  avgt   30      12.720 ±    0.402    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true      BTreeMap        TreeMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true      BTreeMap  descendingMap       true       0   10000  avgt   30     114.526 ±    1.659   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true      BTreeMap  descendingMap       true       0   10000  avgt   30     432.488 ±    5.886  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true      BTreeMap  descendingMap       true       0   10000  avgt   30      30.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true      BTreeMap  descendingMap       true       0   10000  avgt   30      49.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                      true      BTreeMap  descendingMap      false       0   10000  avgt   30     152.857 ±    2.002   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                        true      BTreeMap  descendingMap      false       0   10000  avgt   30      79.348 ±    1.150  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                   true      BTreeMap  descendingMap      false       0   10000  avgt   30      12.722 ±    0.184    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                             true      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                              true      BTreeMap  descendingMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     132.567 ±    1.911   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     287.750 ±    4.160  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      19.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      34.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     122.690 ±    2.049   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     310.938 ±    5.097  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      31.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     127.221 ±    1.235   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     299.858 ±    2.856  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      22.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     122.000 ±    0.818   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     312.671 ±    2.097  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      23.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false   JavaTreeMap         subMap       true       0   10000  avgt   30     128.151 ±    1.892   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false   JavaTreeMap         subMap       true       0   10000  avgt   30     297.767 ±    4.323  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false   JavaTreeMap         subMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false   JavaTreeMap         subMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false   JavaTreeMap         subMap       true       0   10000  avgt   30      23.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false   JavaTreeMap         subMap      false       0   10000  avgt   30     120.968 ±    1.021   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false   JavaTreeMap         subMap      false       0   10000  avgt   30     315.332 ±    2.628  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false   JavaTreeMap         subMap      false       0   10000  avgt   30      40.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false   JavaTreeMap         subMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false   JavaTreeMap         subMap      false       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     108.804 ±    2.249   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     104.984 ±    2.209  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     151.702 ±    2.065   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      82.014 ±    1.988  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.052 ±    0.339    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     109.784 ±    1.229   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     104.025 ±    1.118  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     149.246 ±    1.150   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      79.877 ±    3.249  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      12.507 ±    0.520    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false  BPlusTreeMap         subMap       true       0   10000  avgt   30     109.985 ±    0.437   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false  BPlusTreeMap         subMap       true       0   10000  avgt   30     103.831 ±    0.416  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.980 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false  BPlusTreeMap         subMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false  BPlusTreeMap         subMap       true       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false  BPlusTreeMap         subMap      false       0   10000  avgt   30     146.853 ±    1.796   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false  BPlusTreeMap         subMap      false       0   10000  avgt   30      84.787 ±    1.627  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false  BPlusTreeMap         subMap      false       0   10000  avgt   30      13.056 ±    0.105    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false  BPlusTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false  BPlusTreeMap         subMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false      BTreeMap        TreeMap       true       0   10000  avgt   30     137.504 ±    0.910   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false      BTreeMap        TreeMap       true       0   10000  avgt   30     360.078 ±    2.381  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false      BTreeMap        TreeMap       true       0   10000  avgt   30      51.939 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false      BTreeMap        TreeMap       true       0   10000  avgt   30      27.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false      BTreeMap        TreeMap       true       0   10000  avgt   30      37.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false      BTreeMap        TreeMap      false       0   10000  avgt   30     148.300 ±    2.150   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false      BTreeMap        TreeMap      false       0   10000  avgt   30      82.744 ±    2.131  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false      BTreeMap        TreeMap      false       0   10000  avgt   30      12.865 ±    0.229    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false      BTreeMap        TreeMap      false       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false      BTreeMap  descendingMap       true       0   10000  avgt   30     121.090 ±    7.922   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false      BTreeMap  descendingMap       true       0   10000  avgt   30     412.473 ±   25.272  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false      BTreeMap  descendingMap       true       0   10000  avgt   30      30.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false      BTreeMap  descendingMap       true       0   10000  avgt   30      36.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false      BTreeMap  descendingMap      false       0   10000  avgt   30     151.649 ±    1.886   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false      BTreeMap  descendingMap      false       0   10000  avgt   30      81.140 ±    1.638  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false      BTreeMap  descendingMap      false       0   10000  avgt   30      12.904 ±    0.121    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false      BTreeMap  descendingMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false      BTreeMap         subMap       true       0   10000  avgt   30     132.247 ±    6.684   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false      BTreeMap         subMap       true       0   10000  avgt   30     376.502 ±   19.208  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false      BTreeMap         subMap       true       0   10000  avgt   30      51.943 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false      BTreeMap         subMap       true       0   10000  avgt   30      26.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false      BTreeMap         subMap       true       0   10000  avgt   30      30.000                 ms
+ChaosTreeMapUpdateBenchmark.compute                                     false      BTreeMap         subMap      false       0   10000  avgt   30     157.509 ±    4.207   ns/op
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate                       false      BTreeMap         subMap      false       0   10000  avgt   30      79.788 ±    3.057  MB/sec
+ChaosTreeMapUpdateBenchmark.compute:gc.alloc.rate.norm                  false      BTreeMap         subMap      false       0   10000  avgt   30      13.159 ±    0.251    B/op
+ChaosTreeMapUpdateBenchmark.compute:gc.count                            false      BTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.compute:gc.time                             false      BTreeMap         subMap      false       0   10000  avgt   30      21.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     126.045 ±    2.730   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     302.887 ±    6.374  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      29.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     121.071 ±    0.503   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     315.005 ±    1.303  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      21.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     122.893 ±    0.808   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     310.413 ±    2.033  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      29.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     122.232 ±    1.033   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     312.067 ±    2.631  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      23.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     104.132 ±    0.277   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     109.625 ±    0.292  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     147.628 ±    2.082   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      83.566 ±    0.837  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      12.943 ±    0.105    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      17.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     105.459 ±    1.740   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     108.337 ±    1.785  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      14.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     148.360 ±    3.380   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      82.541 ±    1.763  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      12.836 ±    0.161    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true      BTreeMap        TreeMap       true       0   10000  avgt   30     111.436 ±    0.366   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true      BTreeMap        TreeMap       true       0   10000  avgt   30     444.276 ±    1.467  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true      BTreeMap        TreeMap       true       0   10000  avgt   30      32.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true      BTreeMap        TreeMap       true       0   10000  avgt   30      38.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true      BTreeMap        TreeMap      false       0   10000  avgt   30     147.513 ±    1.498   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true      BTreeMap        TreeMap      false       0   10000  avgt   30      80.547 ±    1.713  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true      BTreeMap        TreeMap      false       0   10000  avgt   30      12.466 ±    0.277    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true      BTreeMap        TreeMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true      BTreeMap  descendingMap       true       0   10000  avgt   30     111.663 ±    0.896   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true      BTreeMap  descendingMap       true       0   10000  avgt   30     443.439 ±    3.540  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true      BTreeMap  descendingMap       true       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true      BTreeMap  descendingMap       true       0   10000  avgt   30      35.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                              true      BTreeMap  descendingMap      false       0   10000  avgt   30     148.515 ±    1.517   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate                true      BTreeMap  descendingMap      false       0   10000  avgt   30      81.901 ±    1.943  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm           true      BTreeMap  descendingMap      false       0   10000  avgt   30      12.759 ±    0.285    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                     true      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                      true      BTreeMap  descendingMap      false       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     130.135 ±    1.851   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     293.198 ±    4.192  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      20.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     123.862 ±    2.163   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     307.990 ±    5.245  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      35.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     124.144 ±    2.279   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     307.453 ±    5.531  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      29.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     124.627 ±    1.658   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     306.130 ±    4.095  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      34.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false   JavaTreeMap         subMap       true       0   10000  avgt   30     123.987 ±    0.642   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false   JavaTreeMap         subMap       true       0   10000  avgt   30     307.651 ±    1.599  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false   JavaTreeMap         subMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false   JavaTreeMap         subMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false   JavaTreeMap         subMap       true       0   10000  avgt   30      29.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false   JavaTreeMap         subMap      false       0   10000  avgt   30     119.607 ±    0.347   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false   JavaTreeMap         subMap      false       0   10000  avgt   30     318.875 ±    0.918  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false   JavaTreeMap         subMap      false       0   10000  avgt   30      40.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false   JavaTreeMap         subMap      false       0   10000  avgt   30      22.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false   JavaTreeMap         subMap      false       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     120.632 ±    0.459   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      94.640 ±    0.358  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     147.925 ±    1.527   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      84.325 ±    2.218  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.089 ±    0.396    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     116.762 ±    4.477   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      98.110 ±    3.915  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       7.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     150.857 ±    2.276   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      80.923 ±    1.795  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      12.799 ±    0.127    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      12.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false  BPlusTreeMap         subMap       true       0   10000  avgt   30     111.032 ±    1.328   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false  BPlusTreeMap         subMap       true       0   10000  avgt   30     102.876 ±    1.229  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.980 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false  BPlusTreeMap         subMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false  BPlusTreeMap         subMap       true       0   10000  avgt   30      15.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false  BPlusTreeMap         subMap      false       0   10000  avgt   30     151.289 ±    1.975   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false  BPlusTreeMap         subMap      false       0   10000  avgt   30      81.362 ±    1.084  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false  BPlusTreeMap         subMap      false       0   10000  avgt   30      12.910 ±    0.127    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false  BPlusTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false  BPlusTreeMap         subMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false      BTreeMap        TreeMap       true       0   10000  avgt   30     124.169 ±    2.940   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false      BTreeMap        TreeMap       true       0   10000  avgt   30     399.018 ±    9.241  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false      BTreeMap        TreeMap       true       0   10000  avgt   30      51.939 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false      BTreeMap        TreeMap       true       0   10000  avgt   30      28.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false      BTreeMap        TreeMap       true       0   10000  avgt   30      52.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false      BTreeMap        TreeMap      false       0   10000  avgt   30     152.597 ±    3.490   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false      BTreeMap        TreeMap      false       0   10000  avgt   30      78.657 ±    2.582  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false      BTreeMap        TreeMap      false       0   10000  avgt   30      12.575 ±    0.218    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false      BTreeMap        TreeMap      false       0   10000  avgt   30      15.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false      BTreeMap  descendingMap       true       0   10000  avgt   30     116.059 ±    5.399   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false      BTreeMap  descendingMap       true       0   10000  avgt   30     428.513 ±   19.083  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false      BTreeMap  descendingMap       true       0   10000  avgt   30      30.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false      BTreeMap  descendingMap       true       0   10000  avgt   30      40.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false      BTreeMap  descendingMap      false       0   10000  avgt   30     147.944 ±    1.073   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false      BTreeMap  descendingMap      false       0   10000  avgt   30      83.137 ±    1.377  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false      BTreeMap  descendingMap      false       0   10000  avgt   30      12.904 ±    0.209    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false      BTreeMap  descendingMap      false       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false      BTreeMap         subMap       true       0   10000  avgt   30     110.726 ±    1.073   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false      BTreeMap         subMap       true       0   10000  avgt   30     447.182 ±    4.252  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false      BTreeMap         subMap       true       0   10000  avgt   30      51.942 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false      BTreeMap         subMap       true       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false      BTreeMap         subMap       true       0   10000  avgt   30      37.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfAbsent                             false      BTreeMap         subMap      false       0   10000  avgt   30     152.519 ±    2.374   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate               false      BTreeMap         subMap      false       0   10000  avgt   30      81.585 ±    1.141  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.alloc.rate.norm          false      BTreeMap         subMap      false       0   10000  avgt   30      13.050 ±    0.070    B/op
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.count                    false      BTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfAbsent:gc.time                     false      BTreeMap         subMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     122.227 ±    1.044   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     312.060 ±    2.621  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true   JavaTreeMap        TreeMap      false       0   10000  avgt   30       0.403 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      11.355 ±    0.030  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true   JavaTreeMap        TreeMap      false       0   10000  avgt   30       0.005 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true   JavaTreeMap        TreeMap      false       0   10000  avgt   30         ≈ 0             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     125.475 ±    1.403   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     304.075 ±    3.309  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      29.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true   JavaTreeMap  descendingMap      false       0   10000  avgt   30       0.701 ±    0.011   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      14.157 ±    0.230  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true   JavaTreeMap  descendingMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true   JavaTreeMap  descendingMap      false       0   10000  avgt   30       2.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true   JavaTreeMap  descendingMap      false       0   10000  avgt   30       4.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true   JavaTreeMap         subMap       true       0   10000  avgt   30      10.201 ±    0.370   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true   JavaTreeMap         subMap       true       0   10000  avgt   30    3749.457 ±  131.076  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true   JavaTreeMap         subMap       true       0   10000  avgt   30      40.013 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true   JavaTreeMap         subMap       true       0   10000  avgt   30     170.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true   JavaTreeMap         subMap       true       0   10000  avgt   30     107.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true   JavaTreeMap         subMap      false       0   10000  avgt   30       1.207 ±    0.004   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true   JavaTreeMap         subMap      false       0   10000  avgt   30       7.594 ±    0.028  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true   JavaTreeMap         subMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true   JavaTreeMap         subMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true   JavaTreeMap         subMap      false       0   10000  avgt   30       5.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     103.346 ±    0.875   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     110.477 ±    0.933  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       8.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       0.160 ±    0.003   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      42.803 ±    0.727  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       0.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       3.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     111.024 ±    2.253   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     102.905 ±    2.027  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       0.154 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      59.428 ±    0.427  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true  BPlusTreeMap         subMap       true       0   10000  avgt   30       8.345 ±    0.118   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true  BPlusTreeMap         subMap       true       0   10000  avgt   30    1368.855 ±   17.890  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.979 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true  BPlusTreeMap         subMap       true       0   10000  avgt   30      79.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true  BPlusTreeMap         subMap       true       0   10000  avgt   30      53.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true  BPlusTreeMap         subMap      false       0   10000  avgt   30       0.958 ±    0.011   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true  BPlusTreeMap         subMap      false       0   10000  avgt   30      11.157 ±    0.123  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true  BPlusTreeMap         subMap      false       0   10000  avgt   30       0.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true  BPlusTreeMap         subMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true  BPlusTreeMap         subMap      false       0   10000  avgt   30       4.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true      BTreeMap        TreeMap       true       0   10000  avgt   30     203.358 ±    2.750   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true      BTreeMap        TreeMap       true       0   10000  avgt   30     243.557 ±    3.278  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true      BTreeMap        TreeMap       true       0   10000  avgt   30      51.940 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true      BTreeMap        TreeMap       true       0   10000  avgt   30      18.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true      BTreeMap        TreeMap       true       0   10000  avgt   30      18.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true      BTreeMap        TreeMap      false       0   10000  avgt   30       0.019 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true      BTreeMap        TreeMap      false       0   10000  avgt   30     361.506 ±    3.664  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true      BTreeMap        TreeMap      false       0   10000  avgt   30       0.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true      BTreeMap        TreeMap      false       0   10000  avgt   30      26.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true      BTreeMap        TreeMap      false       0   10000  avgt   30      43.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true      BTreeMap  descendingMap       true       0   10000  avgt   30     209.182 ±    0.943   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true      BTreeMap  descendingMap       true       0   10000  avgt   30     236.700 ±    1.072  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true      BTreeMap  descendingMap       true       0   10000  avgt   30      51.942 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true      BTreeMap  descendingMap       true       0   10000  avgt   30      16.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true      BTreeMap  descendingMap       true       0   10000  avgt   30      20.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true      BTreeMap  descendingMap      false       0   10000  avgt   30       0.019 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true      BTreeMap  descendingMap      false       0   10000  avgt   30     487.385 ±    0.676  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true      BTreeMap  descendingMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true      BTreeMap  descendingMap      false       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true      BTreeMap  descendingMap      false       0   10000  avgt   30      34.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true      BTreeMap         subMap       true       0   10000  avgt   30      11.690 ±    0.114   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true      BTreeMap         subMap       true       0   10000  avgt   30    4236.362 ±   38.900  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true      BTreeMap         subMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true      BTreeMap         subMap       true       0   10000  avgt   30     201.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true      BTreeMap         subMap       true       0   10000  avgt   30     118.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                             true      BTreeMap         subMap      false       0   10000  avgt   30       0.957 ±    0.008   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate               true      BTreeMap         subMap      false       0   10000  avgt   30      11.169 ±    0.091  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm          true      BTreeMap         subMap      false       0   10000  avgt   30       0.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                    true      BTreeMap         subMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                     true      BTreeMap         subMap      false       0   10000  avgt   30       4.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     129.783 ±    2.161   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     293.972 ±    4.869  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      30.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false   JavaTreeMap        TreeMap      false       0   10000  avgt   30       0.676 ±    0.014   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false   JavaTreeMap        TreeMap      false       0   10000  avgt   30       6.783 ±    0.125  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false   JavaTreeMap        TreeMap      false       0   10000  avgt   30       0.005 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false   JavaTreeMap        TreeMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false   JavaTreeMap        TreeMap      false       0   10000  avgt   30       3.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     126.353 ±    0.627   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     301.892 ±    1.499  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false   JavaTreeMap  descendingMap      false       0   10000  avgt   30       0.809 ±    0.002   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      12.273 ±    0.025  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false   JavaTreeMap  descendingMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false   JavaTreeMap  descendingMap      false       0   10000  avgt   30         ≈ 0             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false   JavaTreeMap         subMap       true       0   10000  avgt   30     124.951 ±    0.904   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false   JavaTreeMap         subMap       true       0   10000  avgt   30     305.286 ±    2.187  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false   JavaTreeMap         subMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false   JavaTreeMap         subMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false   JavaTreeMap         subMap       true       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false   JavaTreeMap         subMap      false       0   10000  avgt   30       1.259 ±    0.036   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false   JavaTreeMap         subMap      false       0   10000  avgt   30       7.291 ±    0.200  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false   JavaTreeMap         subMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false   JavaTreeMap         subMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false   JavaTreeMap         subMap      false       0   10000  avgt   30       3.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     102.432 ±    1.276   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     111.471 ±    1.278  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      14.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       0.157 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      43.662 ±    0.312  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       0.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       5.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     104.261 ±    0.996   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     109.534 ±    1.030  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       0.157 ±    0.002   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      58.419 ±    0.654  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       3.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false  BPlusTreeMap         subMap       true       0   10000  avgt   30     108.078 ±    2.139   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false  BPlusTreeMap         subMap       true       0   10000  avgt   30     105.745 ±    2.058  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.980 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false  BPlusTreeMap         subMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false  BPlusTreeMap         subMap       true       0   10000  avgt   30      15.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false  BPlusTreeMap         subMap      false       0   10000  avgt   30       0.296 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false  BPlusTreeMap         subMap      false       0   10000  avgt   30      36.081 ±    0.102  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false  BPlusTreeMap         subMap      false       0   10000  avgt   30       0.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false  BPlusTreeMap         subMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false  BPlusTreeMap         subMap      false       0   10000  avgt   30       5.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false      BTreeMap        TreeMap       true       0   10000  avgt   30     203.538 ±    1.437   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false      BTreeMap        TreeMap       true       0   10000  avgt   30     243.242 ±    1.723  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false      BTreeMap        TreeMap       true       0   10000  avgt   30      51.940 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false      BTreeMap        TreeMap       true       0   10000  avgt   30      18.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false      BTreeMap        TreeMap       true       0   10000  avgt   30      23.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false      BTreeMap        TreeMap      false       0   10000  avgt   30       0.019 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false      BTreeMap        TreeMap      false       0   10000  avgt   30     367.395 ±    2.993  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false      BTreeMap        TreeMap      false       0   10000  avgt   30       0.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false      BTreeMap        TreeMap      false       0   10000  avgt   30      26.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false      BTreeMap        TreeMap      false       0   10000  avgt   30      34.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false      BTreeMap  descendingMap       true       0   10000  avgt   30     202.926 ±    5.621   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false      BTreeMap  descendingMap       true       0   10000  avgt   30     244.398 ±    6.795  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false      BTreeMap  descendingMap       true       0   10000  avgt   30      51.942 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false      BTreeMap  descendingMap       true       0   10000  avgt   30      17.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false      BTreeMap  descendingMap       true       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false      BTreeMap  descendingMap      false       0   10000  avgt   30       0.019 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false      BTreeMap  descendingMap      false       0   10000  avgt   30     476.347 ±    3.429  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false      BTreeMap  descendingMap      false       0   10000  avgt   30       0.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false      BTreeMap  descendingMap      false       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false      BTreeMap  descendingMap      false       0   10000  avgt   30      60.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false      BTreeMap         subMap       true       0   10000  avgt   30     202.135 ±    5.042   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false      BTreeMap         subMap       true       0   10000  avgt   30     245.281 ±    6.208  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false      BTreeMap         subMap       true       0   10000  avgt   30      51.944 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false      BTreeMap         subMap       true       0   10000  avgt   30      18.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false      BTreeMap         subMap       true       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.computeIfPresent                            false      BTreeMap         subMap      false       0   10000  avgt   30       0.297 ±    0.001   ns/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate              false      BTreeMap         subMap      false       0   10000  avgt   30      35.998 ±    0.117  MB/sec
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.alloc.rate.norm         false      BTreeMap         subMap      false       0   10000  avgt   30       0.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.count                   false      BTreeMap         subMap      false       0   10000  avgt   30       3.000             counts
+ChaosTreeMapUpdateBenchmark.computeIfPresent:gc.time                    false      BTreeMap         subMap      false       0   10000  avgt   30       6.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     126.279 ±    0.452   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     302.024 ±    1.087  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     120.978 ±    1.379   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     315.323 ±    3.649  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      22.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     126.667 ±    0.763   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     301.157 ±    1.794  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     122.092 ±    0.579   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     312.391 ±    1.477  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     109.618 ±    1.788   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     104.180 ±    1.655  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      16.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     145.043 ±    3.529   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      85.085 ±    1.995  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      12.943 ±    0.322    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     108.989 ±    1.724   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     104.815 ±    1.633  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     143.020 ±    1.450   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      86.776 ±    2.515  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      13.018 ±    0.372    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true      BTreeMap        TreeMap       true       0   10000  avgt   30     114.473 ±    1.017   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true      BTreeMap        TreeMap       true       0   10000  avgt   30     432.582 ±    3.863  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true      BTreeMap        TreeMap       true       0   10000  avgt   30      31.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true      BTreeMap        TreeMap       true       0   10000  avgt   30      41.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true      BTreeMap        TreeMap      false       0   10000  avgt   30     154.164 ±    2.723   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true      BTreeMap        TreeMap      false       0   10000  avgt   30      79.137 ±    1.295  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true      BTreeMap        TreeMap      false       0   10000  avgt   30      12.793 ±    0.105    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true      BTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true      BTreeMap  descendingMap       true       0   10000  avgt   30     117.056 ±    0.672   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true      BTreeMap  descendingMap       true       0   10000  avgt   30     422.990 ±    2.408  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true      BTreeMap  descendingMap       true       0   10000  avgt   30      30.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true      BTreeMap  descendingMap       true       0   10000  avgt   30      40.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                        true      BTreeMap  descendingMap      false       0   10000  avgt   30     155.784 ±    2.553   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                          true      BTreeMap  descendingMap      false       0   10000  avgt   30      79.211 ±    0.951  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                     true      BTreeMap  descendingMap      false       0   10000  avgt   30      12.940 ±    0.070    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                               true      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                                true      BTreeMap  descendingMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     127.781 ±    0.746   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     298.477 ±    1.739  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     119.309 ±    0.865   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     319.653 ±    2.317  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      23.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      30.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     129.518 ±    0.780   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     294.504 ±    1.754  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     123.785 ±    2.187   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     308.320 ±    5.363  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      30.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false   JavaTreeMap         subMap       true       0   10000  avgt   30     129.793 ±    2.380   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false   JavaTreeMap         subMap       true       0   10000  avgt   30     294.000 ±    5.373  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false   JavaTreeMap         subMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false   JavaTreeMap         subMap       true       0   10000  avgt   30      20.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false   JavaTreeMap         subMap       true       0   10000  avgt   30      35.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false   JavaTreeMap         subMap      false       0   10000  avgt   30     122.721 ±    1.126   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false   JavaTreeMap         subMap      false       0   10000  avgt   30     310.847 ±    2.818  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false   JavaTreeMap         subMap      false       0   10000  avgt   30      40.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false   JavaTreeMap         subMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false   JavaTreeMap         subMap      false       0   10000  avgt   30      23.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     102.092 ±    0.909   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     111.836 ±    0.981  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     144.565 ±    2.376   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      81.764 ±    1.143  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      12.395 ±    0.061    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     104.011 ±    1.038   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     109.796 ±    1.036  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      12.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     143.344 ±    2.274   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      88.318 ±    1.320  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      13.274 ±    0.061    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false  BPlusTreeMap         subMap       true       0   10000  avgt   30     105.218 ±    1.801   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false  BPlusTreeMap         subMap       true       0   10000  avgt   30     108.590 ±    1.843  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.980 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false  BPlusTreeMap         subMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false  BPlusTreeMap         subMap       true       0   10000  avgt   30      12.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false  BPlusTreeMap         subMap      false       0   10000  avgt   30     162.074 ±    2.665   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false  BPlusTreeMap         subMap      false       0   10000  avgt   30      76.401 ±    1.908  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false  BPlusTreeMap         subMap      false       0   10000  avgt   30      12.984 ±    0.253    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false  BPlusTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false  BPlusTreeMap         subMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false      BTreeMap        TreeMap       true       0   10000  avgt   30     112.832 ±    1.285   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false      BTreeMap        TreeMap       true       0   10000  avgt   30     438.911 ±    5.024  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false      BTreeMap        TreeMap       true       0   10000  avgt   30      31.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false      BTreeMap        TreeMap       true       0   10000  avgt   30      34.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false      BTreeMap        TreeMap      false       0   10000  avgt   30     149.201 ±    1.203   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false      BTreeMap        TreeMap      false       0   10000  avgt   30      82.648 ±    0.974  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false      BTreeMap        TreeMap      false       0   10000  avgt   30      12.938 ±    0.194    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false      BTreeMap        TreeMap      false       0   10000  avgt   30      10.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false      BTreeMap  descendingMap       true       0   10000  avgt   30     113.126 ±    1.424   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false      BTreeMap  descendingMap       true       0   10000  avgt   30     437.810 ±    5.454  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false      BTreeMap  descendingMap       true       0   10000  avgt   30      32.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false      BTreeMap  descendingMap       true       0   10000  avgt   30      35.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false      BTreeMap  descendingMap      false       0   10000  avgt   30     160.319 ±    1.485   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false      BTreeMap  descendingMap      false       0   10000  avgt   30      76.941 ±    1.238  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false      BTreeMap  descendingMap      false       0   10000  avgt   30      12.940 ±    0.212    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false      BTreeMap  descendingMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false      BTreeMap         subMap       true       0   10000  avgt   30     114.955 ±    1.663   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false      BTreeMap         subMap       true       0   10000  avgt   30     430.820 ±    6.229  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false      BTreeMap         subMap       true       0   10000  avgt   30      51.942 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false      BTreeMap         subMap       true       0   10000  avgt   30      31.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false      BTreeMap         subMap       true       0   10000  avgt   30      41.000                 ms
+ChaosTreeMapUpdateBenchmark.merge                                       false      BTreeMap         subMap      false       0   10000  avgt   30     162.025 ±    3.028   ns/op
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate                         false      BTreeMap         subMap      false       0   10000  avgt   30      77.684 ±    1.349  MB/sec
+ChaosTreeMapUpdateBenchmark.merge:gc.alloc.rate.norm                    false      BTreeMap         subMap      false       0   10000  avgt   30      13.196 ±    0.035    B/op
+ChaosTreeMapUpdateBenchmark.merge:gc.count                              false      BTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.merge:gc.time                               false      BTreeMap         subMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     122.589 ±    0.844   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     311.126 ±    2.131  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     141.331 ±    9.494   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     272.688 ±   19.678  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      19.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     127.327 ±    1.488   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     299.650 ±    3.332  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     134.970 ±    8.842   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     285.072 ±   17.524  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      20.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      24.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     109.736 ±    0.793   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     104.033 ±    0.744  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     148.701 ±    0.983   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      85.317 ±    1.690  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.308 ±    0.246    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     111.089 ±    0.461   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     102.784 ±    0.423  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      12.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     150.241 ±    1.058   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      82.604 ±    1.510  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      13.018 ±    0.214    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true      BTreeMap        TreeMap       true       0   10000  avgt   30     125.035 ±    5.310   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true      BTreeMap        TreeMap       true       0   10000  avgt   30     397.577 ±   17.617  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true      BTreeMap        TreeMap       true       0   10000  avgt   30      51.939 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true      BTreeMap        TreeMap       true       0   10000  avgt   30      29.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true      BTreeMap        TreeMap       true       0   10000  avgt   30      37.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true      BTreeMap        TreeMap      false       0   10000  avgt   30     151.887 ±    2.816   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true      BTreeMap        TreeMap      false       0   10000  avgt   30      82.842 ±    1.714  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true      BTreeMap        TreeMap      false       0   10000  avgt   30      13.191 ±    0.152    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true      BTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true      BTreeMap  descendingMap       true       0   10000  avgt   30     120.071 ±    6.551   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true      BTreeMap  descendingMap       true       0   10000  avgt   30     414.869 ±   21.389  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true      BTreeMap  descendingMap       true       0   10000  avgt   30      30.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true      BTreeMap  descendingMap       true       0   10000  avgt   30      38.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                          true      BTreeMap  descendingMap      false       0   10000  avgt   30     150.386 ±    1.431   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                            true      BTreeMap  descendingMap      false       0   10000  avgt   30      80.185 ±    1.683  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                       true      BTreeMap  descendingMap      false       0   10000  avgt   30      12.650 ±    0.244    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                 true      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                  true      BTreeMap  descendingMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     124.610 ±    0.616   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     306.079 ±    1.510  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      24.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     120.440 ±    0.892   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     316.658 ±    2.329  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      22.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      26.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     125.753 ±    2.245   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     303.532 ±    5.188  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      24.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     121.014 ±    0.579   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     315.182 ±    1.499  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false   JavaTreeMap         subMap       true       0   10000  avgt   30     124.881 ±    1.667   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false   JavaTreeMap         subMap       true       0   10000  avgt   30     305.542 ±    4.032  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false   JavaTreeMap         subMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false   JavaTreeMap         subMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false   JavaTreeMap         subMap       true       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false   JavaTreeMap         subMap      false       0   10000  avgt   30     121.210 ±    0.632   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false   JavaTreeMap         subMap      false       0   10000  avgt   30     314.680 ±    1.612  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false   JavaTreeMap         subMap      false       0   10000  avgt   30      40.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false   JavaTreeMap         subMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false   JavaTreeMap         subMap      false       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     101.757 ±    0.577   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     112.186 ±    0.632  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       8.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      15.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     146.221 ±    1.331   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      85.571 ±    1.938  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.125 ±    0.306    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     103.237 ±    0.392   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     110.602 ±    0.415  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      12.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     147.636 ±    2.096   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      84.561 ±    1.433  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      13.091 ±    0.127    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false  BPlusTreeMap         subMap       true       0   10000  avgt   30     103.369 ±    0.641   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false  BPlusTreeMap         subMap       true       0   10000  avgt   30     110.480 ±    0.685  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.980 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false  BPlusTreeMap         subMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false  BPlusTreeMap         subMap      false       0   10000  avgt   30     146.566 ±    2.319   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false  BPlusTreeMap         subMap      false       0   10000  avgt   30      83.282 ±    1.043  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false  BPlusTreeMap         subMap      false       0   10000  avgt   30      12.801 ±    0.093    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false  BPlusTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false  BPlusTreeMap         subMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false      BTreeMap        TreeMap       true       0   10000  avgt   30     114.671 ±    3.236   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false      BTreeMap        TreeMap       true       0   10000  avgt   30     432.456 ±   11.877  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false      BTreeMap        TreeMap       true       0   10000  avgt   30      31.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false      BTreeMap        TreeMap       true       0   10000  avgt   30      36.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false      BTreeMap        TreeMap      false       0   10000  avgt   30     153.592 ±    1.749   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false      BTreeMap        TreeMap      false       0   10000  avgt   30      78.549 ±    3.116  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false      BTreeMap        TreeMap      false       0   10000  avgt   30      12.647 ±    0.393    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false      BTreeMap        TreeMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false      BTreeMap  descendingMap       true       0   10000  avgt   30     112.268 ±    0.738   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false      BTreeMap  descendingMap       true       0   10000  avgt   30     441.036 ±    2.900  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false      BTreeMap  descendingMap       true       0   10000  avgt   30      31.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false      BTreeMap  descendingMap       true       0   10000  avgt   30      39.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false      BTreeMap  descendingMap      false       0   10000  avgt   30     156.390 ±    1.069   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false      BTreeMap  descendingMap      false       0   10000  avgt   30      77.994 ±    1.129  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false      BTreeMap  descendingMap      false       0   10000  avgt   30      12.795 ±    0.160    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false      BTreeMap  descendingMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false      BTreeMap         subMap       true       0   10000  avgt   30     113.960 ±    0.634   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false      BTreeMap         subMap       true       0   10000  avgt   30     434.492 ±    2.383  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false      BTreeMap         subMap       true       0   10000  avgt   30      51.942 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false      BTreeMap         subMap       true       0   10000  avgt   30      30.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false      BTreeMap         subMap       true       0   10000  avgt   30      43.000                 ms
+ChaosTreeMapUpdateBenchmark.put                                         false      BTreeMap         subMap      false       0   10000  avgt   30     153.028 ±    2.999   ns/op
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate                           false      BTreeMap         subMap      false       0   10000  avgt   30      76.770 ±    1.217  MB/sec
+ChaosTreeMapUpdateBenchmark.put:gc.alloc.rate.norm                      false      BTreeMap         subMap      false       0   10000  avgt   30      12.325 ±    0.304    B/op
+ChaosTreeMapUpdateBenchmark.put:gc.count                                false      BTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.put:gc.time                                 false      BTreeMap         subMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     124.494 ±    0.819   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true   JavaTreeMap        TreeMap       true       0   10000  avgt   30     306.373 ±    2.017  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true   JavaTreeMap        TreeMap       true       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     130.160 ±    9.701   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true   JavaTreeMap        TreeMap      false       0   10000  avgt   30     296.283 ±   20.529  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.007 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true   JavaTreeMap        TreeMap      false       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     122.833 ±    0.820   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true   JavaTreeMap  descendingMap       true       0   10000  avgt   30     310.532 ±    2.089  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true   JavaTreeMap  descendingMap       true       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     126.613 ±    2.749   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true   JavaTreeMap  descendingMap      false       0   10000  avgt   30     301.544 ±    6.506  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      20.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true   JavaTreeMap  descendingMap      false       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     105.323 ±    1.480   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     108.399 ±    1.489  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       8.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     152.211 ±    2.349   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      84.072 ±    1.986  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.418 ±    0.246    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      15.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     108.032 ±    1.517   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     105.719 ±    1.439  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     150.556 ±    1.753   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      81.295 ±    1.247  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      12.836 ±    0.122    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true      BTreeMap        TreeMap       true       0   10000  avgt   30     107.228 ±    1.250   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true      BTreeMap        TreeMap       true       0   10000  avgt   30     461.836 ±    5.433  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true      BTreeMap        TreeMap       true       0   10000  avgt   30      34.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true      BTreeMap        TreeMap       true       0   10000  avgt   30      41.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true      BTreeMap        TreeMap      false       0   10000  avgt   30     148.896 ±    1.184   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true      BTreeMap        TreeMap      false       0   10000  avgt   30      83.995 ±    0.892  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true      BTreeMap        TreeMap      false       0   10000  avgt   30      13.119 ±    0.060    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true      BTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true      BTreeMap  descendingMap       true       0   10000  avgt   30     122.608 ±    7.624   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true      BTreeMap  descendingMap       true       0   10000  avgt   30     407.429 ±   27.051  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true      BTreeMap  descendingMap       true       0   10000  avgt   30      29.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true      BTreeMap  descendingMap       true       0   10000  avgt   30      41.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                  true      BTreeMap  descendingMap      false       0   10000  avgt   30     152.425 ±    2.853   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                    true      BTreeMap  descendingMap      false       0   10000  avgt   30      79.384 ±    1.627  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm               true      BTreeMap  descendingMap      false       0   10000  avgt   30      12.686 ±    0.160    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                         true      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                          true      BTreeMap  descendingMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     125.033 ±    1.825   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false   JavaTreeMap        TreeMap       true       0   10000  avgt   30     305.146 ±    4.185  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      40.010 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false   JavaTreeMap        TreeMap       true       0   10000  avgt   30      29.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     119.803 ±    0.777   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false   JavaTreeMap        TreeMap      false       0   10000  avgt   30     318.343 ±    2.050  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      40.006 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      22.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false   JavaTreeMap        TreeMap      false       0   10000  avgt   30      25.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     127.403 ±    0.798   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false   JavaTreeMap  descendingMap       true       0   10000  avgt   30     299.427 ±    1.877  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false   JavaTreeMap  descendingMap       true       0   10000  avgt   30      23.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     121.458 ±    0.652   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false   JavaTreeMap  descendingMap      false       0   10000  avgt   30     314.060 ±    1.679  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      40.012 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false   JavaTreeMap  descendingMap      false       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false   JavaTreeMap         subMap       true       0   10000  avgt   30     124.456 ±    0.860   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false   JavaTreeMap         subMap       true       0   10000  avgt   30     306.502 ±    2.150  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false   JavaTreeMap         subMap       true       0   10000  avgt   30      40.015 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false   JavaTreeMap         subMap       true       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false   JavaTreeMap         subMap       true       0   10000  avgt   30      27.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false   JavaTreeMap         subMap      false       0   10000  avgt   30     125.530 ±    0.942   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false   JavaTreeMap         subMap      false       0   10000  avgt   30     303.867 ±    2.224  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false   JavaTreeMap         subMap      false       0   10000  avgt   30      40.011 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false   JavaTreeMap         subMap      false       0   10000  avgt   30      21.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false   JavaTreeMap         subMap      false       0   10000  avgt   30      28.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     106.579 ±    1.454   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30     107.149 ±    1.464  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.976 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false  BPlusTreeMap        TreeMap       true       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30     148.077 ±    2.784   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      84.076 ±    1.591  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30      13.052 ±    0.105    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false  BPlusTreeMap        TreeMap      false       0   10000  avgt   30       8.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     110.318 ±    0.783   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30     103.509 ±    0.727  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      11.978 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false  BPlusTreeMap  descendingMap       true       0   10000  avgt   30      12.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30     153.072 ±    3.099   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      79.159 ±    4.632  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      12.690 ±    0.575    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false  BPlusTreeMap  descendingMap      false       0   10000  avgt   30      11.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false  BPlusTreeMap         subMap       true       0   10000  avgt   30     110.130 ±    0.503   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false  BPlusTreeMap         subMap       true       0   10000  avgt   30     103.694 ±    0.473  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false  BPlusTreeMap         subMap       true       0   10000  avgt   30      11.980 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false  BPlusTreeMap         subMap       true       0   10000  avgt   30       9.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false  BPlusTreeMap         subMap       true       0   10000  avgt   30      13.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false  BPlusTreeMap         subMap      false       0   10000  avgt   30     152.462 ±    4.587   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false  BPlusTreeMap         subMap      false       0   10000  avgt   30      81.998 ±    2.160  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false  BPlusTreeMap         subMap      false       0   10000  avgt   30      13.093 ±    0.070    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false  BPlusTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false  BPlusTreeMap         subMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false      BTreeMap        TreeMap       true       0   10000  avgt   30     109.076 ±    1.559   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false      BTreeMap        TreeMap       true       0   10000  avgt   30     454.064 ±    6.212  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false      BTreeMap        TreeMap       true       0   10000  avgt   30      51.938 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false      BTreeMap        TreeMap       true       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false      BTreeMap        TreeMap       true       0   10000  avgt   30      38.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false      BTreeMap        TreeMap      false       0   10000  avgt   30     155.347 ±    1.631   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false      BTreeMap        TreeMap      false       0   10000  avgt   30      78.066 ±    1.205  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false      BTreeMap        TreeMap      false       0   10000  avgt   30      12.720 ±    0.126    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false      BTreeMap        TreeMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false      BTreeMap        TreeMap      false       0   10000  avgt   30       9.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false      BTreeMap  descendingMap       true       0   10000  avgt   30     111.681 ±    0.611   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false      BTreeMap  descendingMap       true       0   10000  avgt   30     443.307 ±    2.370  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false      BTreeMap  descendingMap       true       0   10000  avgt   30      51.941 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false      BTreeMap  descendingMap       true       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false      BTreeMap  descendingMap       true       0   10000  avgt   30      37.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false      BTreeMap  descendingMap      false       0   10000  avgt   30     153.453 ±    1.909   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false      BTreeMap  descendingMap      false       0   10000  avgt   30      80.409 ±    1.249  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false      BTreeMap  descendingMap      false       0   10000  avgt   30      12.940 ±    0.092    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false      BTreeMap  descendingMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false      BTreeMap  descendingMap      false       0   10000  avgt   30       7.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false      BTreeMap         subMap       true       0   10000  avgt   30     109.309 ±    0.565   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false      BTreeMap         subMap       true       0   10000  avgt   30     452.964 ±    2.334  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false      BTreeMap         subMap       true       0   10000  avgt   30      51.942 ±    0.001    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false      BTreeMap         subMap       true       0   10000  avgt   30      33.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false      BTreeMap         subMap       true       0   10000  avgt   30      45.000                 ms
+ChaosTreeMapUpdateBenchmark.putIfAbsent                                 false      BTreeMap         subMap      false       0   10000  avgt   30     152.867 ±    3.200   ns/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate                   false      BTreeMap         subMap      false       0   10000  avgt   30      82.334 ±    1.458  MB/sec
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.alloc.rate.norm              false      BTreeMap         subMap      false       0   10000  avgt   30      13.195 ±    0.174    B/op
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.count                        false      BTreeMap         subMap      false       0   10000  avgt   30       6.000             counts
+ChaosTreeMapUpdateBenchmark.putIfAbsent:gc.time                         false      BTreeMap         subMap      false       0   10000  avgt   30      10.000                 ms

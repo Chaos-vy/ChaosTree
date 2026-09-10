@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.AbstractMap;
 import java.util.NoSuchElementException;
 
-public class IterBuildFuzzDegree3Map {
+public class IterBuildFuzzDegree3MapTest {
     static class EntryRangeIterator implements Iterator<Map.Entry<Integer, Integer>> {
         int cur = 0; final int n;
         EntryRangeIterator(int n) { this.n = n; }

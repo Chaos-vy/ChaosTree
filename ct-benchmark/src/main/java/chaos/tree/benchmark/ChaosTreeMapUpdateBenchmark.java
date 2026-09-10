@@ -9,6 +9,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -40,6 +41,9 @@ import java.util.stream.IntStream;
  * TreeMapUpdate benchmark and adapted to compare multiple NavigableMap
  * implementations.
  *
+ * link: https://github.com/openjdk/jdk/blob/master/test/micro/org/openjdk/bench/java/util/TreeMapUpdate.java
+ *
+ * The AVL and RBT tree map did not take participate because the matrix was 8hr long.
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -49,19 +53,19 @@ import java.util.stream.IntStream;
 @State(Scope.Thread)
 public class ChaosTreeMapUpdateBenchmark {
 
-    @Param({"JavaTreeMap", "BPlusTreeMap"})
+    @Param({"JavaTreeMap", "BPlusTreeMap","BTreeMap"})
     public String mapType;
 
-    @Param({"TreeMap"})
+    @Param({"TreeMap", "descendingMap", "subMap"})
     public String mode;
 
-    @Param({"100000"})
+    @Param({"10000"})
     public int size;
 
     @Param({"true", "false"})
     public boolean comparator;
 
-    @Param({"false"})
+    @Param({"true", "false"})
     public boolean preFill;
 
     @Param({"0"})
@@ -136,6 +140,7 @@ public class ChaosTreeMapUpdateBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(10000)
     public Map<Integer, Integer> put(Blackhole bh) {
         Map<Integer, Integer> map = transformer.apply(supplier.get());
         Integer[] keys = this.keys;
@@ -146,6 +151,7 @@ public class ChaosTreeMapUpdateBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(10000)
     public Map<Integer, Integer> putIfAbsent(Blackhole bh) {
         Map<Integer, Integer> map = transformer.apply(supplier.get());
         Integer[] keys = this.keys;
@@ -156,6 +162,7 @@ public class ChaosTreeMapUpdateBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(10000)
     public Map<Integer, Integer> computeIfAbsent(Blackhole bh) {
         Map<Integer, Integer> map = transformer.apply(supplier.get());
         Integer[] keys = this.keys;
@@ -166,6 +173,7 @@ public class ChaosTreeMapUpdateBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(10000)
     public Map<Integer, Integer> compute(Blackhole bh) {
         Map<Integer, Integer> map = transformer.apply(supplier.get());
         Integer[] keys = this.keys;
@@ -176,6 +184,7 @@ public class ChaosTreeMapUpdateBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(10000)
     public Map<Integer, Integer> computeIfPresent(Blackhole bh) {
         Map<Integer, Integer> map = transformer.apply(supplier.get());
         Integer[] keys = this.keys;
@@ -186,6 +195,7 @@ public class ChaosTreeMapUpdateBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(10000)
     public Map<Integer, Integer> merge(Blackhole bh) {
         Map<Integer, Integer> map = transformer.apply(supplier.get());
         Integer[] keys = this.keys;

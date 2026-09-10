@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class IterBuildFuzzDegree3 {
+public class IterBuildFuzzDegree3Test {
     static class RangeIterator implements Iterator<Integer> {
         int cur = 0; final int n;
         RangeIterator(int n) { this.n = n; }

@@ -6,7 +6,6 @@ on:
       - main
       - core
       - test
-      - benchmark
     tags:
       - 'v*'
 
@@ -22,8 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        java: ['21', '25']
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        java: [ '21', '25' ]
 
     steps:
       - name: Checkout Repository
