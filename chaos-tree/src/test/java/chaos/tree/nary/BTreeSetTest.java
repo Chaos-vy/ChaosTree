@@ -6,10 +6,12 @@ import com.google.common.collect.testing.features.CollectionFeature;
 import com.google.common.collect.testing.features.CollectionSize;
 import junit.framework.Test;
 import junit.framework.TestCase;
+import org.junit.runner.RunWith;
+import org.junit.runners.AllTests;
 
 import java.util.Arrays;
 import java.util.SortedSet;
-
+@RunWith(AllTests.class)
 public class BTreeSetTest extends TestCase {
     public static Test suite() {
         return NavigableSetTestSuiteBuilder

@@ -335,17 +335,21 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Override
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-        return new NarySubSet(fromElement, fromInclusive, toElement, toInclusive, false);
+        compare(fromElement, fromElement);
+        compare(toElement, toElement);
+        return new NarySubSet(false, fromElement, fromInclusive, false, toElement, toInclusive, false);
     }
 
     @Override
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-        return new NarySubSet(null, true, toElement, inclusive, false);
+        compare(toElement, toElement);
+        return new NarySubSet(true, null, true, false, toElement, inclusive, false);
     }
 
     @Override
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-        return new NarySubSet(fromElement, inclusive, null, true, false);
+        compare(fromElement, fromElement);
+        return new NarySubSet(false, fromElement, inclusive, true, null, true, false);
     }
 
     @Override
@@ -365,7 +369,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Override
     public NavigableSet<E> descendingSet() {
-        return new NarySubSet(null, true, null, true, true);
+        return new NarySubSet(true, null, true, true, null, true, true);
     }
 
     abstract protected void buildFromSortedArray(Object[] flatArray, float factor);
@@ -386,25 +390,29 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     }
 
     private final class NarySubSet extends AbstractSet<E> implements NavigableSet<E>, Serializable {
+        private final boolean fromStart;
         private final E lo;
         private final boolean loInclusive;
+        private final boolean toEnd;
         private final E hi;
         private final boolean hiInclusive;
         private final boolean descending;
 
-        NarySubSet(E lo, boolean loInclusive, E hi, boolean hiInclusive, boolean descending) {
-            if (lo != null && hi != null && compare(lo, hi) > 0) {
+        NarySubSet(boolean fromStart, E lo, boolean loInclusive, boolean toEnd, E hi, boolean hiInclusive, boolean descending) {
+            if (!fromStart && !toEnd && compare(lo, hi) > 0) {
                 throw new IllegalArgumentException("fromKey > toKey");
             }
+            this.fromStart = fromStart;
             this.lo = lo;
             this.loInclusive = loInclusive;
+            this.toEnd = toEnd;
             this.hi = hi;
             this.hiInclusive = hiInclusive;
             this.descending = descending;
         }
 
         private boolean tooLow(Object key) {
-            if (lo != null) {
+            if (!fromStart) {
                 @SuppressWarnings("unchecked") int c = compare((E) key, lo);
                 return c < 0 || (c == 0 && !loInclusive);
             }
@@ -412,7 +420,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         }
 
         private boolean tooHigh(Object key) {
-            if (hi != null) {
+            if (!toEnd) {
                 @SuppressWarnings("unchecked") int c = compare((E) key, hi);
                 return c > 0 || (c == 0 && !hiInclusive);
             }
@@ -571,7 +579,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public NavigableSet<E> descendingSet() {
-            return new NarySubSet(lo, loInclusive, hi, hiInclusive, !descending);
+            return new NarySubSet(fromStart, lo, loInclusive, toEnd, hi, hiInclusive, !descending);
         }
 
         @Override
@@ -579,24 +587,24 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             if (outOfBounds(fromElement) || outOfBounds(toElement))
                 throw new IllegalArgumentException("Requested bounds out of range");
 
-            if (descending) return new NarySubSet(toElement, toInclusive, fromElement, fromInclusive, true);
-            return new NarySubSet(fromElement, fromInclusive, toElement, toInclusive, false);
+            if (descending) return new NarySubSet(false, toElement, toInclusive, false, fromElement, fromInclusive, true);
+            return new NarySubSet(false, fromElement, fromInclusive, false, toElement, toInclusive, false);
         }
 
         @Override
         public NavigableSet<E> headSet(E toElement, boolean inclusive) {
             if (outOfBounds(toElement)) throw new IllegalArgumentException("Requested bounds out of range");
 
-            if (descending) return new NarySubSet(lo, loInclusive, toElement, inclusive, true);
-            return new NarySubSet(lo, loInclusive, toElement, inclusive, false);
+            if (descending) return new NarySubSet(fromStart, lo, loInclusive, false, toElement, inclusive, true);
+            return new NarySubSet(fromStart, lo, loInclusive, false, toElement, inclusive, false);
         }
 
         @Override
         public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
             if (outOfBounds(fromElement)) throw new IllegalArgumentException("Requested bounds out of range");
 
-            if (descending) return new NarySubSet(fromElement, inclusive, hi, hiInclusive, true);
-            return new NarySubSet(fromElement, inclusive, hi, hiInclusive, false);
+            if (descending) return new NarySubSet(false, fromElement, inclusive, toEnd, hi, hiInclusive, true);
+            return new NarySubSet(false, fromElement, inclusive, toEnd, hi, hiInclusive, false);
         }
 
         @Override

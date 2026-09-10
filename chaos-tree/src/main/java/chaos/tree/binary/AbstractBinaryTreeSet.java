@@ -690,34 +690,62 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public E lower(E e) {
-            if (tooLow(e)) return null;
-            if (tooHigh(e)) return isEmpty() ? null : last();
-            E result = AbstractBinaryTreeSet.this.lower(e);
-            return (result != null && inRange(result)) ? result : null;
+            if (descending) {
+                if (tooHigh(e)) return null;
+                if (tooLow(e)) return isEmpty() ? null : first();
+                E result = AbstractBinaryTreeSet.this.higher(e);
+                return (result != null && inRange(result)) ? result : null;
+            } else {
+                if (tooLow(e)) return null;
+                if (tooHigh(e)) return isEmpty() ? null : last();
+                E result = AbstractBinaryTreeSet.this.lower(e);
+                return (result != null && inRange(result)) ? result : null;
+            }
         }
 
         @Override
         public E floor(E e) {
-            if (tooLow(e)) return null;
-            if (tooHigh(e)) return isEmpty() ? null : last();
-            E result = AbstractBinaryTreeSet.this.floor(e);
-            return (result != null && inRange(result)) ? result : null;
+            if (descending) {
+                if (tooHigh(e)) return null;
+                if (tooLow(e)) return isEmpty() ? null : first();
+                E result = AbstractBinaryTreeSet.this.ceiling(e);
+                return (result != null && inRange(result)) ? result : null;
+            } else {
+                if (tooLow(e)) return null;
+                if (tooHigh(e)) return isEmpty() ? null : last();
+                E result = AbstractBinaryTreeSet.this.floor(e);
+                return (result != null && inRange(result)) ? result : null;
+            }
         }
 
         @Override
         public E ceiling(E e) {
-            if (tooHigh(e)) return null;
-            if (tooLow(e)) return isEmpty() ? null : first();
-            E result = AbstractBinaryTreeSet.this.ceiling(e);
-            return (result != null && inRange(result)) ? result : null;
+            if (descending) {
+                if (tooLow(e)) return null;
+                if (tooHigh(e)) return isEmpty() ? null : last();
+                E result = AbstractBinaryTreeSet.this.floor(e);
+                return (result != null && inRange(result)) ? result : null;
+            } else {
+                if (tooHigh(e)) return null;
+                if (tooLow(e)) return isEmpty() ? null : first();
+                E result = AbstractBinaryTreeSet.this.ceiling(e);
+                return (result != null && inRange(result)) ? result : null;
+            }
         }
 
         @Override
         public E higher(E e) {
-            if (tooHigh(e)) return null;
-            if (tooLow(e)) return isEmpty() ? null : first();
-            E result = AbstractBinaryTreeSet.this.higher(e);
-            return (result != null && inRange(result)) ? result : null;
+            if (descending) {
+                if (tooLow(e)) return null;
+                if (tooHigh(e)) return isEmpty() ? null : last();
+                E result = AbstractBinaryTreeSet.this.lower(e);
+                return (result != null && inRange(result)) ? result : null;
+            } else {
+                if (tooHigh(e)) return null;
+                if (tooLow(e)) return isEmpty() ? null : first();
+                E result = AbstractBinaryTreeSet.this.higher(e);
+                return (result != null && inRange(result)) ? result : null;
+            }
         }
 
         @Override

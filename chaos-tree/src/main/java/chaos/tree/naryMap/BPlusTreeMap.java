@@ -987,6 +987,45 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
         return false;
     }
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean containsKey(Object key) {
+        if (root == null) return false;
+        K k = (K) key;
+        BPlusTreeMapNode<K, V> current = root;
+
+        while (true) {
+            int idx = searchNodeMap(current, k);
+
+            if (idx >= 0) {
+                if (current.isLeaf()) return true;
+                current = current.child[idx + 1];
+            } else {
+                if (current.isLeaf()) return false;
+                current = current.child[~idx];
+            }
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V get(Object key) {
+        if (root == null) return null;
+        K k = (K) key;
+        BPlusTreeMapNode<K, V> current = root;
+
+        while (true) {
+            int idx = searchNodeMap(current, k);
+
+            if (idx >= 0) {
+                if (current.isLeaf()) return (V) current.values[idx];
+                current = current.child[idx + 1];
+            } else {
+                if (current.isLeaf()) return null;
+                current = current.child[~idx];
+            }
+        }
+    }
 
     @Override
     protected Iterator<Map.Entry<K, V>> entryIterator(K fromKey, boolean fromInclusive) {

@@ -56,6 +56,43 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public boolean containsKey(Object key) {
+        if (root == null) return false;
+        K k = (K) key;
+        BTreeMapNode<K, V> current = root;
+
+        while (true) {
+            int idx = searchNodeMap(current, k);
+
+            if (idx >= 0) {
+                return true;
+            } else {
+                if (current.isLeaf()) return false;
+                current = current.child[~idx];
+            }
+        }
+    }
+    @Override
+    @SuppressWarnings("unchecked")
+    public V get(Object key) {
+        if (root == null) return null;
+        K k = (K) key;
+        BTreeMapNode<K, V> current = root;
+
+        while (true) {
+            int idx = searchNodeMap(current, k);
+
+            if (idx >= 0) {
+                return (V) current.values[idx];
+            } else {
+                if (current.isLeaf()) return null;
+                current = current.child[~idx];
+            }
+        }
+    }
+
+    @Override
     BTreeMapNode<K, V> createNode(int degree, boolean isLeaf) {
         return new BTreeMapNode<>(degree, isLeaf);
     }

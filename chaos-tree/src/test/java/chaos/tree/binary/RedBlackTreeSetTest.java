@@ -9,6 +9,10 @@ import junit.framework.Test;
 import java.util.Arrays;
 import java.util.SortedSet;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.AllTests;
+
+@RunWith(AllTests.class)
 public class RedBlackTreeSetTest {
     public static Test suite() {
         return NavigableSetTestSuiteBuilder

@@ -74,8 +74,15 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     }
 
     protected int searchNodeMapValue(N current, V v) {
-        for (int i = 0; i < current.keyCount; i++) {
-            if (Objects.equals(current.values[i], v)) return i;
+        if(v == null){
+            for (int i = 0; i < current.keyCount; i++) {
+                if(current.values[i] == null)  return i;
+            }
+        }
+        else {
+            for (int i = 0; i < current.keyCount; i++) {
+                if (Objects.equals(current.values[i], v)) return i;
+            }
         }
         return -1;
     }
@@ -110,49 +117,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     public Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> es = entrySetView;
         return (es != null) ? es : (entrySetView = new EntrySetView());
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public V get(Object key) {
-        if (root == null) return null;
-        K k = (K) key;
-        N current = root;
-        while (current != null) {
-            int idx = searchNodeMap(current, k);
-
-            if (idx >= 0) {
-                if (current.values != null) {
-                    return (V) current.values[idx];
-                }
-                current = current.child[idx + 1];
-            } else {
-                if (current.isLeaf()) return null;
-                current = current.child[~idx];
-            }
-        }
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean containsKey(Object key) {
-        if (root == null) return false;
-        K k = (K) key;
-        N current = root;
-
-        while (current != null) {
-            int idx = searchNodeMap(current, k);
-
-            if (idx >= 0) {
-                if (current.values != null) return true;
-                current = current.child[idx + 1];
-            } else {
-                if (current.isLeaf()) return false;
-                current = current.child[~idx];
-            }
-        }
-        return false;
     }
 
     @Override

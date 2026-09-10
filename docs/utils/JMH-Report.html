@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TreeMap vs BTreeMap vs BPlusTreeMap — JMH Report</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+        h1 {
+            font-size: 1.4em;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+        h2 {
+            font-size: 1.1em;
+            border-bottom: 1px dotted #000;
+            padding-bottom: 4px;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 1.0em;
+            margin-top: 25px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: right;
+        }
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px dotted #000;
+            overflow-x: auto;
+        }
+        .bold {
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<h1>The True Story of the Tail Latency (JMH)</h1>
+<p>
+    This is the raw, authentic journey of tracking down the exact cause of tail latency (p1.00) between the JDK <code>TreeMap</code> and ChaosTree. It didn't start with perfect results. It started with a flawed benchmark.
+</p>
+
+<h2>1. The Autoboxing Flaw</h2>
+<p>
+    My first attempt at running the <code>Mode.sample</code> benchmark was flawed because I was using Java's autoboxing. This accidental overhead generated massive 2ms ~ 4ms GC pauses in <b>both</b> <code>TreeMap</code> and ChaosTree at 100K elements. 
+</p>
+<p>
+    After finding this fault, I redesigned the benchmark to pre-allocate objects rather than autoboxing them on the fly. This isolated the true cost of the data structures themselves.
+</p>
+
+<h2>2. The ChaosTree Runs (Rock Solid)</h2>
+<p>
+    Once autoboxing was fixed, I ran the benchmarks at <code>w=3, f=3, i=10</code> (each 1s) at 100K on an i5 13450HX 16-core processor.
+    The results were phenomenal. The <code>B+Tree</code> and <code>B-Tree</code> never showed a single Stop-The-World GC pause. My absolute highest tail latency (p1.00) was around <b>150us</b>. 
+</p>
+
+<h2>3. The TreeMap Anomaly (The 5.9ms Pause)</h2>
+<p>
+    Then came the interesting part. I ran <code>TreeMap</code> under the exact same configuration. It caught a massive Stop-the-World GC pause clocking in at <b>2383.272us (2.3ms)</b>.
+</p>
+<p>
+    I thought I made a mistake, so I reran it. The next time it increased even further: <b>5922.816µs (5.9ms)</b>!
+</p>
+<p>
+    Seeing this, I thought my benchmark was broken again, so I immediately repeated the ChaosTree benchmark to verify. The result? Both Chaos trees came out at a maximum tail latency of <b>~142µs</b>. ChaosTree remained completely unfazed.
+</p>
+
+
+<h2>The Exact JMH Configuration</h2>
+<p>
+    If you want to reproduce these results, you cannot just run a standard JMH jar. To prevent OS-level page faults from skewing the tail latency, you must force the JVM to pre-allocate memory. To ensure apples-to-apples GC behavior, the garbage collector must be pinned.
+</p>
+<p>
+    Here is the exact command used to execute the benchmark and capture the JVM logs:
+</p>
+<pre>
+java -jar ct-benchmark/target/benchmarks.jar TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove     -p n=1000000     -bm sample     -f 3 -wi 3 -i 10     -jvmArgsAppend "-Xms4g -Xmx4g -XX:+UseParallelGC -XX:+AlwaysPreTouch -Xlog:safepoint=info,gc*=info:file=jvm_pauses.log:time,uptime,pid:filecount=5,filesize=100M"
+</pre>
+<ul>
+    <li><code>-Xms4g -Xmx4g</code>: Locks the JVM heap to exactly 4GB to prevent heap resizing pauses during the benchmark.</li>
+    <li><code>-XX:+AlwaysPreTouch</code>: Forces the JVM to touch all memory pages during startup, preventing OS page faults from artificially inflating the <code>p1.00</code> latency during the actual benchmark.</li>
+    <li><code>-XX:+UseParallelGC</code>: Pins the garbage collector to Parallel GC for deterministic, measurable throughput pauses.</li>
+    <li><code>-Xlog:safepoint=info,gc*=info</code>: Captures the exact GC pause times and safepoint events, allowing cross-referencing of JMH tail latency directly against the JVM's internal GC logs.</li>
+</ul>
+
+<h2>4. Digging into the Root Cause</h2>
+<p>
+    To find out exactly what was happening, I used JVM logs (preserved in <code>ct-benchmark/BenchmarkLog</code>). The culprit was the JDK's <code>Map.Entry</code> allocation. 
+    It doesn't hit on every iteration, but in a matrix of 30 samples, the massive GC pause hits 3 or 4 times for the JDK, while ChaosTree completely evades it.
+</p>
+
+<h2>The Astonishing Feat (Raw Data)</h2>
+<p>Here is the raw data showcasing the incredible difference at the p1.00 percentile:</p>
+
+<h3>TreeMap (The 5922us GC Pause)</h3>
+<blockquote>
+    It was only one time in 1/30 measurement. Rest measurement were all good, If I leave this specific one it also landed below 150 us/op.
+    (Sometime it might spike more than one time)
+</blockquote>
+<pre>
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove          100000  sample  303827     0.573 ± 0.064  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.999   100000  sample             5.080          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.9999  100000  sample            13.626          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p1.00    100000  sample          5922.816          us/op
+</pre>
+
+<h3>BTreeMap (Unfazed at 105us)</h3>
+<pre>
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove          100000  sample  742165    0.427 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.999   100000  sample            3.787          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.9999  100000  sample            6.851          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p1.00    100000  sample          105.600          us/op
+</pre>
+
+<h3>BTreeMap Verification Run (Unfazed at 136us)</h3>
+<pre>
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove          100000  sample  2338495    0.427 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.999   100000  sample             3.686          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.9999  100000  sample             6.746          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p1.00    100000  sample           136.960          us/op
+</pre>
+
+<p>
+    <i>These were the astonishing feats that ChaosTree achieved.</i>
+</p>
+
+<p>
+    <a href="../index.html">&larr; Back to ChaosTree Home</a>
+</p>
+</body>
+</html>
