@@ -13,46 +13,55 @@
             color: #000;
             background-color: #fff;
         }
+
         h1 {
             font-size: 1.4em;
             border-bottom: 2px solid #000;
             padding-bottom: 5px;
         }
+
         h2 {
             font-size: 1.1em;
             border-bottom: 1px dotted #000;
             padding-bottom: 4px;
             margin-top: 30px;
         }
+
         h3 {
             font-size: 1.0em;
             margin-top: 25px;
         }
+
         table {
             border-collapse: collapse;
             margin-bottom: 20px;
             width: 100%;
         }
+
         th, td {
             border: 1px solid #000;
             padding: 8px 15px;
             text-align: right;
         }
+
         th:first-child, td:first-child {
             text-align: left;
         }
+
         blockquote {
             border-left: 3px solid #000;
             margin: 20px 0;
             padding-left: 15px;
             font-style: italic;
         }
+
         pre {
             background-color: #f4f4f4;
             padding: 15px;
             border: 1px dotted #000;
             overflow-x: auto;
         }
+
         .bold {
             font-weight: 700;
         }
@@ -62,77 +71,284 @@
 
 <h1>The True Story of the Tail Latency (JMH)</h1>
 <p>
-    This is the raw, authentic journey of tracking down the exact cause of tail latency (p1.00) between the JDK <code>TreeMap</code> and ChaosTree. 
+    This is the raw, authentic journey of tracking down the exact cause of tail latency (p1.00) between the JDK <code>TreeMap</code>
+    and ChaosTree. It didn't start with perfect results. It started with a flawed benchmark.
+</p>
+
+<h2>1. The Autoboxing Flaw</h2>
+<p>
+    My first attempt at running the <code>Mode.sample</code> benchmark was flawed because I was using Java's autoboxing.
+    This accidental overhead generated massive 2ms ~ 4ms GC pauses in <b>both</b> <code>TreeMap</code> and ChaosTree at
+    100K elements.
+</p>
+<p>
+    After finding this fault, I redesigned the benchmark to pre-allocate objects rather than autoboxing them on the fly.
+    This isolated the true cost of the data structures themselves.
+</p>
+
+<h2>2. The ChaosTree Runs (Rock Solid)</h2>
+<p>
+    Once autoboxing was fixed, I ran the benchmarks at <code>w=3, f=3, i=10</code> (each 1s) at 100K on an i5 13450HX
+    16-core processor.
+    The results were phenomenal. The <code>B+Tree</code> and <code>B-Tree</code> never showed a single Stop-The-World GC
+    pause. My absolute highest tail latency (p1.00) was around <b>150us</b>.
+</p>
+
+<h2>3. The TreeMap Anomaly (The 5.9ms Pause)</h2>
+<p>
+    Then came the interesting part. I ran <code>TreeMap</code> under the exact same configuration. It caught a massive
+    Stop-the-World GC pause clocking in at <b>2383.272us (2.3ms)</b>.
+</p>
+<p>
+    I thought I made a mistake, so I reran it. The next time it increased even further: <b>5922.816µs (5.9ms)</b>!
+</p>
+<p>
+    Seeing this, I thought my benchmark was broken again, so I immediately repeated the ChaosTree benchmark to verify.
+    The result? Both Chaos trees came out at a maximum tail latency of <b>~142µs</b>. ChaosTree remained completely
+    unfazed.
 </p>
 
 <h2>The Exact JMH Configuration</h2>
 <p>
-    If you want to reproduce these results, you cannot just run a standard JMH jar. To prevent OS-level page faults from skewing the tail latency, you must force the JVM to pre-allocate memory. To ensure apples-to-apples GC behavior, the garbage collector must be pinned.
+    If I want to reproduce these results, I cannot just run a standard JMH jar. To prevent OS-level page faults from
+    skewing the tail latency, I also enforced the JVM to pre-allocate memory. To ensure that JVM has enough memory
+    to allocate during warmup session.
 </p>
 <pre>
 java -jar ct-benchmark/target/benchmarks.jar TreeMapVsBTreeVsBPlusBenchmark     -p n=1000000 -bm sample -f 4 -wi 5 -i 25     -jvmArgsAppend "-Xms4g -Xmx4g -XX:+UseParallelGC -XX:+AlwaysPreTouch -Xlog:safepoint=info,gc*=info:file=jvm_pauses.log:time,uptime,pid:filecount=5,filesize=100M"
 </pre>
 <ul>
-    <li><code>-Xms4g -Xmx4g</code>: Locks the JVM heap to exactly 4GB to prevent heap resizing pauses during the benchmark.</li>
-    <li><code>-XX:+AlwaysPreTouch</code>: Forces the JVM to touch all memory pages during startup, preventing OS page faults from artificially inflating the <code>p1.00</code> latency.</li>
-    <li><code>-XX:+UseParallelGC</code>: Pins the garbage collector to Parallel GC for deterministic, measurable throughput pauses.</li>
-    <li><code>-Xlog:safepoint=info,gc*=info</code>: Captures the exact GC pause times and safepoint events to cross-reference against JMH tail latency.</li>
+    <li><code>-Xms4g -Xmx4g</code>: Locks the JVM heap to exactly 4GB to prevent heap resizing pauses during the
+        benchmark.
+    </li>
+    <li><code>-XX:+AlwaysPreTouch</code>: Let the JVM to touch all memory pages during startup, preventing OS page
+        faults from artificially inflating the <code>p1.00</code> latency.
+    </li>
+    <li><code>-XX:+UseParallelGC</code>: Use of Parallel GC for deterministic, measurable
+        throughput pauses.
+    </li>
+    <li><code>-Xlog:safepoint=info,gc*=info</code>: Capturing the exact GC pause times and safepoint events to
+        cross-reference against JMH tail latency. This was used because TreeMap even after the log printed unusually
+        printed 147 us/op even the log said 130ms G Stop the World... C.
+    </li>
 </ul>
 
 <h2>The Astonishing Feat (Raw Data)</h2>
 <p>
-    Here is the full percentile spread, n = 1K through 10M, one continuous benchmark run each. This is the complete picture, replacing the older single-run anomalies that kicked off this investigation.
+    Here is the full percentile spread, n = 1K through 10M, one continuous benchmark run each. This is the complete
+    picture, Ran on <b>i5 13450HX 16core were used</b> There was some error bar high in <b>Cpu_atom (12-16)</b> But all
+    the previous benchmark I ran was on same config, So I did use default config rather than <b>taskset -c 0-11</b>.
 </p>
- 
+
 <h3>TreeMap — the one that pays the GC tax</h3>
 <table>
-    <tr><th>n</th><th>mean (us)</th><th>p50</th><th>p90</th><th>p99</th><th>p99.99</th><th>p1.00</th></tr>
-    <tr><td>1K</td><td>0.221</td><td>0.211</td><td>0.253</td><td>0.300</td><td>5.360</td><td>899.072</td></tr>
-    <tr><td>10K</td><td>0.319</td><td>0.304</td><td>0.363</td><td>0.460</td><td>6.692</td><td>1169.408</td></tr>
-    <tr><td>100K</td><td>0.580</td><td>0.516</td><td>0.723</td><td>1.526</td><td>13.808</td><td>2363.392</td></tr>
-    <tr><td>1M</td><td>1.616</td><td>1.514</td><td>1.994</td><td>4.360</td><td>27.163</td><td>22085.632</td></tr>
-    <tr><td>10M</td><td>2.222</td><td>2.076</td><td>2.696</td><td>5.368</td><td>27.616</td><td>130285.568</td></tr>
+    <tr>
+        <th>n</th>
+        <th>mean (us)</th>
+        <th>p50</th>
+        <th>p90</th>
+        <th>p99</th>
+        <th>p99.99</th>
+        <th>p1.00</th>
+    </tr>
+    <tr>
+        <td>1K</td>
+        <td>0.221</td>
+        <td>0.211</td>
+        <td>0.253</td>
+        <td>0.300</td>
+        <td>5.360</td>
+        <td>899.072</td>
+    </tr>
+    <tr>
+        <td>10K</td>
+        <td>0.319</td>
+        <td>0.304</td>
+        <td>0.363</td>
+        <td>0.460</td>
+        <td>6.692</td>
+        <td>1169.408</td>
+    </tr>
+    <tr>
+        <td>100K</td>
+        <td>0.580</td>
+        <td>0.516</td>
+        <td>0.723</td>
+        <td>1.526</td>
+        <td>13.808</td>
+        <td>2363.392</td>
+    </tr>
+    <tr>
+        <td>1M</td>
+        <td>1.616</td>
+        <td>1.514</td>
+        <td>1.994</td>
+        <td>4.360</td>
+        <td>27.163</td>
+        <td>22085.632</td>
+    </tr>
+    <tr>
+        <td>10M</td>
+        <td>2.222</td>
+        <td>2.076</td>
+        <td>2.696</td>
+        <td>5.368</td>
+        <td>27.616</td>
+        <td>130285.568</td>
+    </tr>
 </table>
 <p>
-    Look at the p50 and p99.99 columns next to p1.00 — that's the entire story in one table. p50 grows a boring, predictable ~10x across a 10,000x range of n. p1.00 grows <b>~145x</b> over the same range, because every so often it eats a real Young GC pause instead of doing actual tree work. Confirmed against <code>-Xlog:gc</code> at every n where it mattered — this isn't a guess, every one of these tail spikes has a matching GC log line.
+    At the p50 and p99.99 columns next to p1.00 — that's the entire story in one table. p50 grows
+    predictable ~10x across a 10,000x range of n. p1.00 grows <b>~145x</b> over the same range, because every so often
+    it eats a real Young GC pause instead of doing actual tree work. Confirmed against <code>-Xlog:gc</code> at every n
+    where it mattered — this isn't a guess, every one of these tail spikes has a matching GC log line.
 </p>
- 
+
 <h3>B+Tree — the one that doesn't</h3>
 <table>
-    <tr><th>n</th><th>mean (us)</th><th>p50</th><th>p90</th><th>p99</th><th>p99.99</th><th>p1.00</th></tr>
-    <tr><td>1K</td><td>0.222</td><td>0.216</td><td>0.254</td><td>0.302</td><td>4.776</td><td>138.752</td></tr>
-    <tr><td>10K</td><td>0.317</td><td>0.309</td><td>0.359</td><td>0.428</td><td>5.108</td><td>159.488</td></tr>
-    <tr><td>100K</td><td>0.430</td><td>0.417</td><td>0.494</td><td>0.669</td><td>7.912</td><td>208.128</td></tr>
-    <tr><td>1M</td><td>0.979</td><td>0.916</td><td>1.246</td><td>1.844</td><td>21.728</td><td>221.184</td></tr>
-    <tr><td>10M</td><td>1.605</td><td>1.496</td><td>1.992</td><td>5.048</td><td>26.912</td><td>233.984</td></tr>
+    <tr>
+        <th>n</th>
+        <th>mean (us)</th>
+        <th>p50</th>
+        <th>p90</th>
+        <th>p99</th>
+        <th>p99.99</th>
+        <th>p1.00</th>
+    </tr>
+    <tr>
+        <td>1K</td>
+        <td>0.222</td>
+        <td>0.216</td>
+        <td>0.254</td>
+        <td>0.302</td>
+        <td>4.776</td>
+        <td>138.752</td>
+    </tr>
+    <tr>
+        <td>10K</td>
+        <td>0.317</td>
+        <td>0.309</td>
+        <td>0.359</td>
+        <td>0.428</td>
+        <td>5.108</td>
+        <td>159.488</td>
+    </tr>
+    <tr>
+        <td>100K</td>
+        <td>0.430</td>
+        <td>0.417</td>
+        <td>0.494</td>
+        <td>0.669</td>
+        <td>7.912</td>
+        <td>208.128</td>
+    </tr>
+    <tr>
+        <td>1M</td>
+        <td>0.979</td>
+        <td>0.916</td>
+        <td>1.246</td>
+        <td>1.844</td>
+        <td>21.728</td>
+        <td>221.184</td>
+    </tr>
+    <tr>
+        <td>10M</td>
+        <td>1.605</td>
+        <td>1.496</td>
+        <td>1.992</td>
+        <td>5.048</td>
+        <td>26.912</td>
+        <td>233.984</td>
+    </tr>
 </table>
 <p>
-    p50 grows the same boring ~10x as TreeMap's does. p1.00 grows <b>~1.5x</b> across the same 1,000x range this table covers — practically flat. Zero <code>Pause Young</code> events logged across every fork at every n. B+Tree perfectly evades GC churn thanks to its packed-array node architecture and leaf-linked list.
+    p50 grows the same as TreeMap's does. p1.00 grows <b>~1.5x</b> across the same 1,000x range this table
+    covers — practically flat. Zero <code>Pause Young</code> events logged across every fork at every n. B+Tree
+    perfectly evades GC churn thanks to its packed-array node architecture and leaf-linked list.
 </p>
 
 <h2>B-Tree Joins the Fight</h2>
 <p>
-    Up to this point every number in this page came from <code>B+Tree</code> against <code>TreeMap</code>. The natural next question: does the plain <code>B-Tree</code> hold the same line, or was the B+Tree's flat tail a quirk of its leaf-linked structure specifically? I re-ran the exact same put/remove churn benchmark across five orders of magnitude — n = 1K, 10K, 100K, 1M, 10M — same JVM flags, same pinned heap, same GC.
+    Up to this point every number in this page came from <code>B+Tree</code> against <code>TreeMap</code>. The natural
+    next question: does the plain <code>B-Tree</code> hold the same line, or was the B+Tree's flat tail a quirk of its
+    leaf-linked structure specifically? I re-ran the exact same put/remove churn benchmark across five orders of
+    magnitude — n = 1K, 10K, 100K, 1M, 10M — same JVM flags, same pinned heap, same GC.
 </p>
 <table>
-    <tr><th>n</th><th>mean (us)</th><th>p50</th><th>p90</th><th>p99</th><th>p99.99</th><th>p1.00</th></tr>
-    <tr><td>1K</td><td>0.231</td><td>0.227</td><td>0.271</td><td>0.324</td><td>4.328</td><td>175.872</td></tr>
-    <tr><td>10K</td><td>0.306</td><td>0.299</td><td>0.348</td><td>0.419</td><td>5.104</td><td>145.408</td></tr>
-    <tr><td>100K</td><td>0.426</td><td>0.414</td><td>0.487</td><td>0.626</td><td>7.224</td><td>171.520</td></tr>
-    <tr><td>1M</td><td>0.991</td><td>0.921</td><td>1.242</td><td>1.976</td><td>22.848</td><td>187.136</td></tr>
-    <tr><td>10M</td><td>1.626</td><td>1.502</td><td>2.012</td><td>5.280</td><td>28.032</td><td>218.368</td></tr>
+    <tr>
+        <th>n</th>
+        <th>mean (us)</th>
+        <th>p50</th>
+        <th>p90</th>
+        <th>p99</th>
+        <th>p99.99</th>
+        <th>p1.00</th>
+    </tr>
+    <tr>
+        <td>1K</td>
+        <td>0.231</td>
+        <td>0.227</td>
+        <td>0.271</td>
+        <td>0.324</td>
+        <td>4.328</td>
+        <td>175.872</td>
+    </tr>
+    <tr>
+        <td>10K</td>
+        <td>0.306</td>
+        <td>0.299</td>
+        <td>0.348</td>
+        <td>0.419</td>
+        <td>5.104</td>
+        <td>145.408</td>
+    </tr>
+    <tr>
+        <td>100K</td>
+        <td>0.426</td>
+        <td>0.414</td>
+        <td>0.487</td>
+        <td>0.626</td>
+        <td>7.224</td>
+        <td>171.520</td>
+    </tr>
+    <tr>
+        <td>1M</td>
+        <td>0.991</td>
+        <td>0.921</td>
+        <td>1.242</td>
+        <td>1.976</td>
+        <td>22.848</td>
+        <td>187.136</td>
+    </tr>
+    <tr>
+        <td>10M</td>
+        <td>1.626</td>
+        <td>1.502</td>
+        <td>2.012</td>
+        <td>5.280</td>
+        <td>28.032</td>
+        <td>218.368</td>
+    </tr>
 </table>
 <p>
-    Same story as B+Tree, essentially line for line. Not a single GC pause across any run at any n. p1.00 crawls from 175us at 1K to 218us at 10M — a 10,000x growth in data size producing barely more than a 1.2x growth in worst case. Compare that to <code>TreeMap</code>'s p1.00 over the same range: 899us &rarr; 130,285us, a ~145x blowup. B-Tree isn't riding on B+Tree's coattails here — it earns the same flat line on its own, because the root cause (packed-array nodes instead of one <code>Entry</code> object per key) is shared by both members of the N-ary family.
+    Same story as B+Tree, essentially line for line. Not a single GC pause across any run at any n. p1.00 crawls from
+    175us at 1K to 218us at 10M — a 10,000x growth in data size producing barely more than a 1.2x growth in worst case.
+    Compare that to <code>TreeMap</code>'s p1.00 over the same range: 899us &rarr; 130,285us, a ~145x blowup. B-Tree
+    isn't riding on B+Tree's coattails here — it earns the same flat line on its own, because the root cause
+    (packed-array nodes instead of one <code>Entry</code> object per key) is shared by both members of the N-ary family.
+    I likely conclude that B-Tree deletion is not ghost it's just sees in key then it fetch the predecessor element to delete it.
 </p>
 <p>
-    One honest wrinkle: p1.00 at 10K (145.408us) actually sits <i>below</i> 1K (175.872us) — not a clean monotonic climb. A single p1.00 sample is an extremum, not a rate, and extrema drawn from slightly different sample counts across runs won't line up perfectly. It doesn't change the finding; it's just the kind of number that would look "wrong" if you didn't already know why it's not.
+    One honest wrinkle: p1.00 at 10K (145.408us) actually sits <i>below</i> 1K (175.872us) — not a clean monotonic
+    climb. A single p1.00 sample is an extremum, not a rate, and extrema drawn from slightly different sample counts
+    across runs won't line up perfectly. It doesn't change the finding; it's just the kind of number that would look
+    "wrong" if you didn't already know why it's not.
 </p>
- 
+
 <p>
     <i>These were the astonishing feats that ChaosTree achieved.</i>
 </p>
- 
+
 <p style="margin-top: 40px; text-align: center;">
     <a href="../index.html">&larr; Back to ChaosTree Home</a>
 </p>
