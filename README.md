@@ -1,6 +1,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.chaos-vy/chaos-tree.svg?label=maven%20central)](https://search.maven.org/artifact/io.github.chaos-vy/chaos-tree)
 [![GitHub release](https://img.shields.io/github/v/release/Chaos-vy/ChaosTree)](https://github.com/Chaos-vy/ChaosTree/releases)
 [![License](https://img.shields.io/github/license/Chaos-vy/ChaosTree)](LICENSE)
+[![Coverage](.github/badges/jacoco.svg)](https://github.com/Chaos-vy/ChaosTree/actions)
 
 ## What is ChaosTree?
 

@@ -39,3 +39,19 @@ jobs:
         env:
           MAVEN_OPTS: "-Xmx2g"
         run: mvn clean test -B
+
+      - name: Generate JaCoCo Badge
+        uses: cicirello/jacoco-badge-generator@v2
+        if: matrix.os == 'ubuntu-latest' && matrix.java == '21'
+        with:
+          generate-branches-badge: true
+          jacoco-csv-file: chaos-tree/target/site/jacoco/jacoco.csv
+
+      - name: Commit and Push Badge
+        if: matrix.os == 'ubuntu-latest' && matrix.java == '21' && github.event_name == 'push'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .github/badges/jacoco.svg
+          git commit -m "Update JaCoCo coverage badge [skip ci]" || echo "No changes to commit"
+          git push
