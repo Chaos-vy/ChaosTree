@@ -40,16 +40,6 @@ jobs:
           MAVEN_OPTS: "-Xmx2g"
         run: mvn clean test -B
 
-      - name: Debug JaCoCo CSV
-        if: matrix.os == 'ubuntu-latest' && matrix.java == '21'
-        run: |
-          echo "CSV file size:"
-          ls -lh chaos-tree/target/site/jacoco/jacoco.csv
-          echo "Awk Coverage Calculation:"
-          cat chaos-tree/target/site/jacoco/jacoco.csv | awk -F',' '{if(NR>1) {im+=$4; ic+=$5}} END {print "Instruction Covered: " ic; print "Instruction Missed: " im; print "Instruction Coverage: " (ic/(ic+im))*100 "%"}'
-          echo "Head of CSV:"
-          head -n 5 chaos-tree/target/site/jacoco/jacoco.csv
-
       - name: Generate JaCoCo Badge
         uses: cicirello/jacoco-badge-generator@v2
         if: matrix.os == 'ubuntu-latest' && matrix.java == '21'
