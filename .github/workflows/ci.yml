@@ -46,12 +46,22 @@ jobs:
         with:
           generate-branches-badge: true
           jacoco-csv-file: chaos-tree/target/site/jacoco/jacoco.csv
-
+#Just trying to get JaCoCo coverage
       - name: Commit and Push Badge
         if: matrix.os == 'ubuntu-latest' && matrix.java == '21' && github.event_name == 'push'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          mkdir -p /tmp/badges
+          cp .github/badges/jacoco.svg /tmp/badges/
+          
+          git checkout --orphan badges
+          git rm -rf .
+          
+          mkdir -p .github/badges
+          cp /tmp/badges/jacoco.svg .github/badges/
           git add .github/badges/jacoco.svg
-          git commit -m "Update JaCoCo coverage badge [skip ci]" || echo "No changes to commit"
-          git push
+          git commit -m "Update JaCoCo coverage badge" || echo "No changes to commit"
+          
+          git push origin badges --force
