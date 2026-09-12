@@ -194,7 +194,7 @@
                         <param>chaos.tree.*</param>
                     </targetTests>
                     <excludedTestClasses>
-                        <param>GuavaTestAllTree</param>
+                        <param>GuavaAllTreeTest</param>
                     </excludedTestClasses>
                     <threads>4</threads>
                     <mutators>
