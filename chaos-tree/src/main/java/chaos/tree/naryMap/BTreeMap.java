@@ -107,6 +107,37 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         return putInternal(key, value, true);
     }
 
+    @Override
+    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        if (key == null) throw new NullPointerException();
+
+        if (root == null) return null;
+
+        BTreeMapNode<K, V> current = root;
+        while (true) {
+            int idx = searchNodeMap(current, key);
+
+            if (idx >= 0) {
+                V oldValue = (V) current.values[idx];
+                if (oldValue != null) {
+                    V newValue = remappingFunction.apply(key, oldValue);
+                    if (newValue == null) {
+                        removeAtNode(current, idx);
+                        return null;
+                    } else {
+                        current.values[idx] = newValue;
+                        return newValue;
+                    }
+                } else {
+                    return null;
+                }
+            }
+            if (current.isLeaf()) return null;
+            current = current.child[~idx];
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public V putInternal(K key, V value, boolean onlyIfAbsent) {
         if (root == null) {
@@ -293,7 +324,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                     curr.values[idx] = newValue;
                     return newValue;
                 } else {
-                    remove(key);
+                    removeAtNode(curr, idx);
                     return null;
                 }
             }
@@ -357,11 +388,10 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 V oldValue = (V) current.values[idx];
                 V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
                 if (newValue == null) {
-                    remove(key);
+                    removeAtNode(current, idx);
                     return null;
                 } else {
                     current.values[idx] = newValue;
-                    modCount++;
                     return newValue;
                 }
             }
@@ -402,14 +432,18 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         BTreeMapNode<K, V> current = root;
         int idx;
         K k = (K) key;
-        V old_val = null;
         while (true) {
             idx = searchNodeMap(current, k);
             if (idx >= 0) break;
             if (current.isLeaf()) return null;
             current = current.child[~idx];
         }
-        old_val = (V) current.values[idx];
+        return removeAtNode(current, idx);
+    }
+
+    @SuppressWarnings("unchecked")
+    private V removeAtNode(BTreeMapNode<K, V> current, int idx) {
+        V old_val = (V) current.values[idx];
         if (!current.isLeaf()) {
             BTreeMapNode<K, V> predLeaf = getPredecessorLeaf(current, idx);
             K predKey = (K) predLeaf.keys[predLeaf.keyCount - 1];
@@ -419,7 +453,6 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             current = predLeaf;
             idx = current.keyCount - 1;
         }
-
 
         System.arraycopy(current.keys, idx + 1, current.keys, idx, current.keyCount - idx - 1);
         System.arraycopy(current.values, idx + 1, current.values, idx, current.keyCount - idx - 1);
@@ -1414,7 +1447,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         @Override
         @SuppressWarnings("unchecked")
         public K next() {
-            if (!hasNext()) throw new java.util.NoSuchElementException();
+            if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentNode.keys[currentIndex];
             K key = lastReturnedKey;
             advanceReverse();
@@ -1430,7 +1463,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         @Override
         @SuppressWarnings("unchecked")
         public V next() {
-            if (!hasNext()) throw new java.util.NoSuchElementException();
+            if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentNode.keys[currentIndex];
             V val = (V) currentNode.values[currentIndex];
             advanceReverse();

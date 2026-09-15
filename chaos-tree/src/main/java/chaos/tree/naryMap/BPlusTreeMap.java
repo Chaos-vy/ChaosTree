@@ -151,7 +151,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     curr.values[idx] = newValue;
                     return newValue;
                 } else {
-                    remove(key);
+                    removeAtLeaf(curr, idx);
                     return null;
                 }
             }
@@ -265,7 +265,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                         curr.values[idx] = newValue;
                         return newValue;
                     } else {
-                        remove(key);
+                        removeAtLeaf(curr, idx);
                         return null;
                     }
                 }
@@ -335,11 +335,10 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             V oldValue = (V) curr.values[idx];
             V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
             if (newValue == null) {
-                remove(key);
+                removeAtLeaf(curr, idx);
                 return null;
             } else {
                 curr.values[idx] = newValue;
-                modCount++;
                 return newValue;
             }
         }
@@ -434,6 +433,11 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         idx = searchNodeMap(curr, key);
         if (idx < 0) return null;
 
+        return removeAtLeaf(curr, idx);
+    }
+
+    @SuppressWarnings("unchecked")
+    private V removeAtLeaf(BPlusTreeMapNode<K, V> curr, int idx) {
         V val = (V) curr.values[idx];
         System.arraycopy(curr.keys, idx + 1, curr.keys, idx, curr.keyCount - idx - 1);
         System.arraycopy(curr.values, idx + 1, curr.values, idx, curr.keyCount - idx - 1);
@@ -447,7 +451,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         while (curr != root && curr.keyCount < minKeys) {
             BPlusTreeMapNode<K, V> parent = curr.parent;
 
-            childIdx = 0;
+            int childIdx = 0;
             while (childIdx <= parent.keyCount && parent.child[childIdx] != curr) childIdx++;
 
             BPlusTreeMapNode<K, V> leftSibling = (childIdx > 0) ? parent.child[childIdx - 1] : null;
