@@ -40,7 +40,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     protected transient N root;
     protected transient int size;
     protected transient long modCount;
-
+    private static final int LINEAR_THRESHOLD = 12;
 
     protected AbstractNaryTreeSet(int degree, Comparator<? super E> comparator) {
         this.comparator = comparator;
@@ -71,7 +71,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @SuppressWarnings("unchecked")
     protected int searchNode(N node, E key) {
-        if (node.keyCount < 12) {
+        if (node.keyCount <= LINEAR_THRESHOLD) {
             for (int i = 0; i < node.keyCount; i++) {
                 int cmp = compare((E) node.keys[i], key);
                 if (cmp == 0) return i;

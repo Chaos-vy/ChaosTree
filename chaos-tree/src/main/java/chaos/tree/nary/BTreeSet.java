@@ -466,9 +466,15 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             current = current.child[~idx];
         }
 
+        removeAtNode(current, idx);
+        return true;
+    }
+
+    void removeAtNode(BTreeNode<E> current, int idx) {
         if (!current.isLeaf()) {
             BTreeNode<E> predLeaf = getPredecessorLeaf(current, idx);
 
+            @SuppressWarnings("unchecked")
             E predKey = (E) predLeaf.keys[predLeaf.keyCount - 1];
             current.keys[idx] = predKey;
 
@@ -507,16 +513,14 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
                 }
             }
         }
-        if (root.keyCount == 0) {
-            if (root.isLeaf()) {
-                root = null;
-            } else {
+
+        if (root != null && root.keyCount == 0) {
+            if (root.isLeaf()) root = null;
+            else {
                 root = root.child[0];
                 root.parent = null;
             }
         }
-
-        return true;
     }
 
     private void mergeNodes(BTreeNode<E> parent, int childIdx, BTreeNode<E> left, BTreeNode<E> right) {
@@ -856,10 +860,15 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
 
+        private BTreeNode<E> lastReturnedNode = null;
+        private int lastReturnedIndex = -1;
+
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
             if (!hasNext()) throw new NoSuchElementException();
+            lastReturnedNode = currentNode;
+            lastReturnedIndex = currentIndex;
             lastReturned = (E) currentNode.keys[currentIndex];
 
             if (!currentNode.isLeaf()) {
@@ -888,14 +897,18 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void remove() {
             if (lastReturned == null) throw new IllegalStateException();
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
-            E nextTarget = higher(lastReturned);
-            BTreeSet.this.remove(lastReturned);
+            E nextTarget = (currentNode != null && currentIndex < currentNode.keyCount)
+                    ? (E) currentNode.keys[currentIndex] : null;
+
+            removeAtNode(lastReturnedNode, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturned = null;
+            lastReturnedNode = null;
 
             if (nextTarget != null) {
                 currentNode = root;
@@ -970,10 +983,15 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             return currentNode != null && currentIndex >= 0;
         }
 
+        private BTreeNode<E> lastReturnedNode = null;
+        private int lastReturnedIndex = -1;
+
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
             if (!hasNext()) throw new NoSuchElementException();
+            lastReturnedNode = currentNode;
+            lastReturnedIndex = currentIndex;
             lastReturned = (E) currentNode.keys[currentIndex];
 
             if (!currentNode.isLeaf()) {
@@ -1002,14 +1020,18 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void remove() {
             if (lastReturned == null) throw new IllegalStateException();
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
-            E nextTarget = lower(lastReturned);
-            BTreeSet.this.remove(lastReturned);
+            E nextTarget = (currentNode != null && currentIndex >= 0)
+                    ? (E) currentNode.keys[currentIndex] : null;
+
+            removeAtNode(lastReturnedNode, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturned = null;
+            lastReturnedNode = null;
 
             if (nextTarget != null) {
                 currentNode = root;

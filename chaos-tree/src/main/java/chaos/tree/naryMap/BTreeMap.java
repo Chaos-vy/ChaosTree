@@ -1213,7 +1213,13 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
 
+        BTreeMapNode<K, V> lastReturnedNode = null;
+        int lastReturnedIndex = -1;
+
         protected final void advanceReverse() {
+            lastReturnedNode = currentNode;
+            lastReturnedIndex = currentIndex;
+
             if (!currentNode.isLeaf()) {
                 currentNode = currentNode.child[currentIndex + 1];
                 while (!currentNode.isLeaf()) {
@@ -1245,23 +1251,25 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public final void remove() {
             if (lastReturnedKey == null) throw new IllegalStateException();
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
-            K keyToRemove = lastReturnedKey;
-            Map.Entry<K, V> nextTarget = higherEntry(keyToRemove);
+            K nextTarget = (currentNode != null && currentIndex < currentNode.keyCount)
+                    ? (K) currentNode.keys[currentIndex] : null;
 
-            BTreeMap.this.remove(keyToRemove);
+            removeAtNode(lastReturnedNode, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturnedKey = null;
+            lastReturnedNode = null;
 
             if (nextTarget == null) {
                 currentNode = null;
             } else {
                 BTreeMapNode<K, V> curr = root;
                 while (curr != null) {
-                    int idx = searchNodeMap(curr, nextTarget.getKey());
+                    int idx = searchNodeMap(curr, nextTarget);
                     if (idx >= 0) {
                         currentNode = curr;
                         currentIndex = idx;
@@ -1379,7 +1387,13 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             return currentNode != null && currentIndex >= 0;
         }
 
+        BTreeMapNode<K, V> lastReturnedNode = null;
+        int lastReturnedIndex = -1;
+
         protected final void advanceReverse() {
+            lastReturnedNode = currentNode;
+            lastReturnedIndex = currentIndex;
+
             if (!currentNode.isLeaf()) {
                 currentNode = currentNode.child[currentIndex];
                 while (!currentNode.isLeaf()) {
@@ -1411,23 +1425,25 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public final void remove() {
             if (lastReturnedKey == null) throw new IllegalStateException();
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
-            K keyToRemove = lastReturnedKey;
-            Map.Entry<K, V> nextTarget = lowerEntry(keyToRemove);
+            K nextTarget = (currentNode != null && currentIndex >= 0)
+                    ? (K) currentNode.keys[currentIndex] : null;
 
-            BTreeMap.this.remove(keyToRemove);
+            removeAtNode(lastReturnedNode, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturnedKey = null;
+            lastReturnedNode = null;
 
             if (nextTarget == null) {
                 currentNode = null;
             } else {
                 BTreeMapNode<K, V> curr = root;
                 while (curr != null) {
-                    int idx = searchNodeMap(curr, nextTarget.getKey());
+                    int idx = searchNodeMap(curr, nextTarget);
                     if (idx >= 0) {
                         currentNode = curr;
                         currentIndex = idx;
