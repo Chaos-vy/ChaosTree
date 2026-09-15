@@ -65,3 +65,6 @@ secrets/
 ehthumbs.db
 Thumbs.db
 .jqwik-database
+
+#Java profiler generated
+.jfr
