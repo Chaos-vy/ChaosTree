@@ -1038,27 +1038,29 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
-        long expectedModCount = modCount;
         if (root != null) {
-            forEachBTree(root, action);
-        }
-        if (modCount != expectedModCount) {
-            throw new ConcurrentModificationException();
+            forEachBTree(root, action, modCount);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void forEachBTree(BTreeMapNode<K, V> node, BiConsumer<? super K, ? super V> action) {
+    private void forEachBTree(BTreeMapNode<K, V> node, BiConsumer<? super K, ? super V> action, long expectedModCount) {
         if (node.isLeaf()) {
             for (int i = 0; i < node.keyCount; i++) {
                 action.accept((K) node.keys[i], (V) node.values[i]);
+                if (modCount != expectedModCount) {
+                    throw new ConcurrentModificationException();
+                }
             }
         } else {
             for (int i = 0; i < node.keyCount; i++) {
-                forEachBTree(node.child[i], action);
+                forEachBTree(node.child[i], action, expectedModCount);
                 action.accept((K) node.keys[i], (V) node.values[i]);
+                if (modCount != expectedModCount) {
+                    throw new ConcurrentModificationException();
+                }
             }
-            forEachBTree(node.child[node.keyCount], action);
+            forEachBTree(node.child[node.keyCount], action, expectedModCount);
         }
     }
 

@@ -1066,15 +1066,19 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     @SuppressWarnings("unchecked")
     public void forEach(BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
-        long expectedModCount = modCount;
+        final long expectedModCount = modCount;
 
         BPlusTreeMapNode<K, V> curr = root;
         if (curr != null) {
             while (!curr.isLeaf()) {
                 curr = curr.child[0];
             }
-            while (curr != null) {
+            outer:
+            while (curr != null && modCount == expectedModCount) {
                 for (int i = 0; i < curr.keyCount; i++) {
+                    if (modCount != expectedModCount) {
+                        break outer;
+                    }
                     action.accept((K) curr.keys[i], (V) curr.values[i]);
                 }
                 curr = curr.next;

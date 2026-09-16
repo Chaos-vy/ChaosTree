@@ -688,19 +688,24 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     @SuppressWarnings("unchecked")
     public void forEach(Consumer<? super E> action) {
         Objects.requireNonNull(action);
-        long expectedModCount = modCount;
+        final long expectedModCount = modCount;
 
         if (root == null) return;
         BPlusTreeNode<E> current = root;
         while (!current.isLeaf()) {
             current = current.child[0];
         }
-        while (current != null) {
+        while (current != null && expectedModCount == modCount) {
             for (int i = 0; i < current.keyCount; i++) {
+                if (expectedModCount != modCount) {
+                    throw new ConcurrentModificationException();
+                }
                 action.accept((E) current.keys[i]);
-                if (expectedModCount != modCount) throw new ConcurrentModificationException();
             }
             current = current.next;
+        }
+        if (expectedModCount != modCount) {
+            throw new ConcurrentModificationException();
         }
     }
 
