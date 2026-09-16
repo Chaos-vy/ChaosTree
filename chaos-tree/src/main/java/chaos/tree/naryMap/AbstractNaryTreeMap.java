@@ -41,6 +41,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     protected transient Collection<V> valuesView;
     protected transient Set<Map.Entry<K, V>> entrySetView;
     protected transient NavigableMap<K, V> descendingMapView;
+    private static final int LINEAR_THRESHOLD = 12;
 
     protected AbstractNaryTreeMap(int degree, Comparator<? super K> comparator) {
         this.comparator = comparator;
@@ -62,7 +63,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
 
     @SuppressWarnings("unchecked")
     protected int searchNodeMap(N current, K k) {
-        if (current.keyCount < 12) {
+        if (current.keyCount <= LINEAR_THRESHOLD) {
             for (int i = 0; i < current.keyCount; i++) {
                 int cmp = compare((K) current.keys[i], k);
                 if (cmp == 0) return i;

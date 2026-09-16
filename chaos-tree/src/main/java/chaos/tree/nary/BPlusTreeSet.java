@@ -458,6 +458,11 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         int idx = searchNode(current, e);
         if (idx < 0) return false;
 
+        removeAtLeaf(current, idx);
+        return true;
+    }
+
+    void removeAtLeaf(BPlusTreeNode<E> current, int idx) {
         System.arraycopy(current.keys, idx + 1, current.keys, idx, current.keyCount - idx - 1);
         current.keys[current.keyCount - 1] = null;
         current.keyCount--;
@@ -492,15 +497,13 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             }
         }
 
-        if (root.keyCount == 0) {
+        if (root != null && root.keyCount == 0) {
             if (root.isLeaf()) root = null;
             else {
                 root = root.child[0];
                 root.parent = null;
             }
         }
-
-        return true;
     }
 
     private void mergeNodes(BPlusTreeNode<E> parent, int childIdx, BPlusTreeNode<E> left, BPlusTreeNode<E> right) {
@@ -514,6 +517,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (rightNext != null) {
                 rightNext.prev = left;
             }
+            right.keyCount = 0; // Mark the merged node as dead for ghost pointers
         } else {
 
             left.keys[left.keyCount] = parent.keys[childIdx];
@@ -684,19 +688,24 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     @SuppressWarnings("unchecked")
     public void forEach(Consumer<? super E> action) {
         Objects.requireNonNull(action);
-        long expectedModCount = modCount;
+        final long expectedModCount = modCount;
 
         if (root == null) return;
         BPlusTreeNode<E> current = root;
         while (!current.isLeaf()) {
             current = current.child[0];
         }
-        while (current != null) {
+        while (current != null && expectedModCount == modCount) {
             for (int i = 0; i < current.keyCount; i++) {
+                if (expectedModCount != modCount) {
+                    throw new ConcurrentModificationException();
+                }
                 action.accept((E) current.keys[i]);
-                if (expectedModCount != modCount) throw new ConcurrentModificationException();
             }
             current = current.next;
+        }
+        if (expectedModCount != modCount) {
+            throw new ConcurrentModificationException();
         }
     }
 
@@ -871,11 +880,16 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             return currentLeaf != null && currentIndex < currentLeaf.keyCount;
         }
 
+        private BPlusTreeNode<E> lastReturnedLeaf = null;
+        private int lastReturnedIndex = -1;
+
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
             if (!hasNext()) throw new NoSuchElementException();
 
+            lastReturnedLeaf = currentLeaf;
+            lastReturnedIndex = currentIndex;
             lastReturned = (E) currentLeaf.keys[currentIndex];
 
             currentIndex++;
@@ -895,17 +909,40 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             E nextTarget = (currentLeaf != null && currentIndex < currentLeaf.keyCount)
                     ? (E) currentLeaf.keys[currentIndex] : null;
 
-            BPlusTreeSet.this.remove(lastReturned);
+            removeAtLeaf(lastReturnedLeaf, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturned = null;
+            lastReturnedLeaf = null;
 
             if (nextTarget != null) {
-                currentLeaf = root;
-                while (!currentLeaf.isLeaf()) {
-                    int idx = searchNode(currentLeaf, nextTarget);
-                    currentLeaf = currentLeaf.child[(idx >= 0) ? idx + 1 : ~idx];
+                BPlusTreeNode<E> search = currentLeaf;
+                int idx = -1;
+                
+                if (search != null) idx = searchNode(search, nextTarget);
+                if (idx < 0 && search != null && search.prev != null) {
+                    search = search.prev;
+                    idx = searchNode(search, nextTarget);
                 }
-                currentIndex = searchNode(currentLeaf, nextTarget);
+                if (idx < 0 && search != null && search.next != null) {
+                    search = search.next;
+                    idx = searchNode(search, nextTarget);
+                }
+                
+                if (idx < 0) {
+                    search = root;
+                    while (search != null && !search.isLeaf()) {
+                        int pos = searchNode(search, nextTarget);
+                        search = search.child[(pos >= 0) ? pos + 1 : ~pos];
+                    }
+                    if (search != null) idx = searchNode(search, nextTarget);
+                }
+                
+                currentLeaf = search;
+                currentIndex = (idx >= 0) ? idx : ~idx;
+                if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
+                    currentLeaf = currentLeaf.next;
+                    currentIndex = 0;
+                }
             } else {
                 currentLeaf = null;
             }
@@ -954,11 +991,16 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             return currentLeaf != null && currentIndex >= 0;
         }
 
+        private BPlusTreeNode<E> lastReturnedLeaf = null;
+        private int lastReturnedIndex = -1;
+
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
             if (!hasNext()) throw new NoSuchElementException();
 
+            lastReturnedLeaf = currentLeaf;
+            lastReturnedIndex = currentIndex;
             lastReturned = (E) currentLeaf.keys[currentIndex];
 
             currentIndex--;
@@ -977,17 +1019,40 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             @SuppressWarnings("unchecked")
             E nextTarget = (currentLeaf != null && currentIndex >= 0) ? (E) currentLeaf.keys[currentIndex] : null;
 
-            BPlusTreeSet.this.remove(lastReturned);
+            removeAtLeaf(lastReturnedLeaf, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturned = null;
+            lastReturnedLeaf = null;
 
             if (nextTarget != null) {
-                currentLeaf = root;
-                while (!currentLeaf.isLeaf()) {
-                    int idx = searchNode(currentLeaf, nextTarget);
-                    currentLeaf = currentLeaf.child[(idx >= 0) ? idx + 1 : ~idx];
+                BPlusTreeNode<E> search = currentLeaf;
+                int idx = -1;
+                
+                if (search != null) idx = searchNode(search, nextTarget);
+                if (idx < 0 && search != null && search.next != null) {
+                    search = search.next;
+                    idx = searchNode(search, nextTarget);
                 }
-                currentIndex = searchNode(currentLeaf, nextTarget);
+                if (idx < 0 && search != null && search.prev != null) {
+                    search = search.prev;
+                    idx = searchNode(search, nextTarget);
+                }
+                
+                if (idx < 0) {
+                    search = root;
+                    while (search != null && !search.isLeaf()) {
+                        int pos = searchNode(search, nextTarget);
+                        search = search.child[(pos >= 0) ? pos + 1 : ~pos];
+                    }
+                    if (search != null) idx = searchNode(search, nextTarget);
+                }
+                
+                currentLeaf = search;
+                currentIndex = (idx >= 0) ? idx : ~idx;
+                if (currentLeaf != null && currentIndex < 0) {
+                    currentLeaf = currentLeaf.prev;
+                    if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
+                }
             } else {
                 currentLeaf = null;
             }

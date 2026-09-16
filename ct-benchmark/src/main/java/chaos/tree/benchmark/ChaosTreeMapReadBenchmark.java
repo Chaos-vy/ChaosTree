@@ -1,7 +1,5 @@
 package chaos.tree.benchmark;
 
-import chaos.tree.binaryMap.AvlTreeMap;
-import chaos.tree.binaryMap.RedBlackTreeMap;
 import chaos.tree.naryMap.BPlusTreeMap;
 import chaos.tree.naryMap.BTreeMap;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -19,109 +17,134 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 
-/**
- * It currently run on default GC
- * G1CC
- */
-@State(Scope.Benchmark)
+
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 3, time = 2)
-@Measurement(iterations = 5, time = 2)
+@Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(3)
+@State(Scope.Thread)
 public class ChaosTreeMapReadBenchmark {
 
-    @Param({"100000", "1000000"})
-    public int size;
-
-    //@Param({"JavaTreeMap","BPlusTreeMap"})
-    @Param({"JavaTreeMap", "BTreeMap", "BPlusTreeMap", "RedBlackTreeMap", "AvlTreeMap"})
+    @Param({"JavaTreeMap", "BPlusTreeMap", "BTreeMap"})
     public String mapType;
 
-    private Map<Integer, String> map;
-    private Integer[] queryKeys;
+    @Param({"TreeMap", "descendingMap", "subMap"})
+    public String mode;
+
+    @Param({"10000"})
+    public int size;
+
+    @Param({"0"})
+    public long seed;
+
+    private NavigableMap<Integer, Integer> map;
+
+    private Integer[] hitKeys;
+
+    private Integer[] missKeys;
 
     @Setup(Level.Trial)
-    public void setup() {
-        List<Integer> keys = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            keys.add(i);
-        }
-        // Shuffle insertion order so the tree isn't built from sorted input
-        // (sorted-input insertion is a worst case / degenerate case for some
-        // of these trees and would misrepresent typical shape/height).
-        Collections.shuffle(keys, new Random(42));
-
-        map = switch (mapType) {
-            case "JavaTreeMap" -> new TreeMap<>();
-            case "BTreeMap" -> new BTreeMap<>();
-            case "BPlusTreeMap" -> new BPlusTreeMap<>();
-            case "RedBlackTreeMap" -> new RedBlackTreeMap<>();
-            case "AvlTreeMap" -> new AvlTreeMap<>();
-            default -> throw new IllegalStateException("Unknown mapType: " + mapType);
+    public void setUp() {
+        Supplier<NavigableMap<Integer, Integer>> baseSupplier = switch (mapType) {
+            case "JavaTreeMap" -> () -> new TreeMap<>(Comparator.reverseOrder());
+            case "BTreeMap" -> () -> new BTreeMap<>(Comparator.reverseOrder());
+            case "BPlusTreeMap" -> () -> new BPlusTreeMap<>(Comparator.reverseOrder());
+            default -> throw new IllegalStateException(mapType);
         };
 
-        for (Integer key : keys) {
-            map.put(key, "CHAOS-" + key);
+        NavigableMap<Integer, Integer> base = baseSupplier.get();
+        for (int i = 0; i < size; i++) {
+            base.put(i, i);
         }
-        // Fail fast instead of silently benchmarking a half-populated map.
-        assert map.size() == size;
 
-        queryKeys = keys.toArray(new Integer[0]);
-        // Independent seed from the insertion shuffle, so read order doesn't
-        // correlate with insertion order (which could flatter/hurt caching
-        // effects depending on tree internals).
-        Collections.shuffle(Arrays.asList(queryKeys), new Random(84));
+        UnaryOperator<NavigableMap<Integer, Integer>> transformer = switch (mode) {
+            case "TreeMap" -> m -> m;
+            case "descendingMap" -> NavigableMap::descendingMap;
+            case "subMap" -> m -> m.tailMap(size - 1, true);
+            default -> throw new IllegalStateException(mode);
+        };
+        map = transformer.apply(base);
+
+        hitKeys = IntStream.range(0, size).boxed().toArray(Integer[]::new);
+
+        missKeys = new Integer[size];
+        int half = size / 2;
+        for (int i = 0; i < half; i++) {
+            missKeys[i] = -(i + 1);
+        }
+        for (int i = half; i < size; i++) {
+            missKeys[i] = size + (i - half);
+        }
+
+        Random rnd = seed == 0 ? new Random() : new Random(seed);
+        Collections.shuffle(Arrays.asList(hitKeys), rnd);
+        Collections.shuffle(Arrays.asList(missKeys), rnd);
     }
 
     @Benchmark
-    @OperationsPerInvocation(1000)
-    public void getRandom(Blackhole bh) {
-        for (int i = 0; i < 1000; i++) {
-            bh.consume(map.get(queryKeys[i]));
-        }
-    }
-
-    @Benchmark
-    @OperationsPerInvocation(1000)
-    public void containsKeyRandom(Blackhole bh) {
-        for (int i = 0; i < 1000; i++) {
-            bh.consume(map.containsKey(queryKeys[i]));
-        }
-    }
-
-    @Benchmark
-    @OperationsPerInvocation(1000)
-    public void getRandomWrapped(Blackhole bh) {
-        // For runs that want > 1000 samples per invocation without adding
-        // iterate with modulo
-        // guaranteed to be a power of two.
-        for (int i = 0; i < 1000; i++) {
-            bh.consume(map.get(queryKeys[i % size]));
+    @OperationsPerInvocation(10000)
+    public void get(Blackhole bh) {
+        for (Integer key : hitKeys) {
+            bh.consume(map.get(key));
         }
     }
 
     @Benchmark
-    public void iterateEntries(Blackhole bh) {
-        for (Map.Entry<Integer, String> entry : map.entrySet()) {
-            bh.consume(entry.getKey());
-            bh.consume(entry.getValue());
+    @OperationsPerInvocation(10000)
+    public void getMiss(Blackhole bh) {
+        for (Integer key : missKeys) {
+            bh.consume(map.get(key));
         }
     }
 
     @Benchmark
-    public void iterateKeys(Blackhole bh) {
-        for (Integer key : map.keySet()) {
-            bh.consume(key);
+    @OperationsPerInvocation(10000)
+    public void containsKey(Blackhole bh) {
+        for (Integer key : hitKeys) {
+            bh.consume(map.containsKey(key));
+        }
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(10000)
+    public void floorKey(Blackhole bh) {
+        for (Integer key : hitKeys) {
+            bh.consume(map.floorKey(key));
+        }
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(10000)
+    public void ceilingKey(Blackhole bh) {
+        for (Integer key : hitKeys) {
+            bh.consume(map.ceilingKey(key));
+        }
+    }
+
+    @Benchmark
+    public void firstAndLast(Blackhole bh) {
+        bh.consume(map.firstEntry());
+        bh.consume(map.lastEntry());
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(10000)
+    public void iterate(Blackhole bh) {
+        for (Map.Entry<Integer, Integer> e : map.entrySet()) {
+            bh.consume(e.getValue());
         }
     }
 }

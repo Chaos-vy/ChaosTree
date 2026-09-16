@@ -16,6 +16,9 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -44,35 +47,69 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 3, time = 2)
 @Measurement(iterations = 5, time = 2)
-@Fork(3)
+@Fork(value = 3, jvmArgs = {
+        "-Xms4g",
+        "-Xmx4g",
+        "-XX:+UseParallelGC",
+        "-XX:+AlwaysPreTouch"
+})
 public class WriteHeavyMapx01 {
 
     @Param({"5000000"})
     public int size;
 
-    @Param({"0.8f"})
+    @Param({"0.75f"})
     public float factor;
     //    @Param({"0.5f","0.6f","0.7f","0.8f","0.9f","1f"})
 // For benchmarkers just replace this benchmark and run the DragonFeed to show how density affects the node mapping.
     private Object[][] flatMatrix;
     private TreeMap<Integer, String> preBuiltSortedMap;
-
+    private Integer[] shuffledKeys;
+    private String[] shuffledValues;
+    private String[] mappedValues;
     @Setup(Level.Trial)
     public void setup() {
         Integer[] sortedKeys = new Integer[size];
-        String[] mappedValues = new String[size];
+        Integer[] shuffledKeys = new Integer[size];
+        mappedValues = new String[size];
         preBuiltSortedMap = new TreeMap<>();
 
         for (int i = 0; i < size; i++) {
             sortedKeys[i] = i;
             mappedValues[i] = "CHAOS-" + i;
-            // Pre-build the SortedMap for the JDK to consume
             preBuiltSortedMap.put(sortedKeys[i], mappedValues[i]);
         }
+
+        // Randomized key order — same key set, shuffled insertion sequence
+        shuffledKeys = sortedKeys.clone();
+        Collections.shuffle(Arrays.asList(shuffledKeys), new Random(42)); // fixed seed for reproducibility
 
         flatMatrix = new Object[2][size];
         flatMatrix[0] = sortedKeys;
         flatMatrix[1] = mappedValues;
+
+        this.shuffledKeys = shuffledKeys; // store for random-order benchmarks
+    }
+
+    // Random insertion: not If I do decrease to L1 cache level it's TreeMap win.
+    @Benchmark
+    public void jdkTreeMapRandomPut(Blackhole bh) {
+        TreeMap<Integer, String> map = new TreeMap<>();
+        for (int i = 0; i < size; i++) {
+            Integer key = shuffledKeys[i];
+            map.put(key, mappedValues[key]);   // key doubles as the index
+        }
+        bh.consume(map);
+    }
+
+    @Benchmark
+    public void bPlusTreeMapRandomPut(Blackhole bh) {
+        BPlusTreeMap<Integer, String> map = new BPlusTreeMap<>();
+        for (int i = 0; i < size; i++) {
+            Integer key = shuffledKeys[i];
+            map.put(key, mappedValues[key]);
+        }
+        bh.consume(map);
     }
 
     // 1. ITERATIVE BASELINE (O(N log N))
@@ -109,8 +146,8 @@ public class WriteHeavyMapx01 {
     // 3. THE DRAGON FEED (O(N) Flat Matrix Ingestion)
     @Benchmark
     public void bPlusTreeDragonFeed(Blackhole bh) {
-        BTreeMap<Integer, String> map =
-                BTreeMap.Builder.<Integer, String>create(64)
+        BPlusTreeMap<Integer, String> map =
+                BPlusTreeMap.Builder.<Integer, String>create(64)
                         .factor(factor)
                         .importFlatMatrix(flatMatrix)
                         .build();
