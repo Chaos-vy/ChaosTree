@@ -87,7 +87,7 @@ public class ChaosTreeMapUpdateBenchmark {
                 transformer = NavigableMap::descendingMap;
                 break;
             case "subMap":
-                transformer = map -> map.tailMap(0, true);
+                transformer = map -> map.tailMap(comparator ? size - 1 : 0, true);
                 break;
             default:
                 throw new IllegalStateException(mode);

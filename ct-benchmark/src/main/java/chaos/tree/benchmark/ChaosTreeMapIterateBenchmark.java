@@ -15,6 +15,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,13 +54,14 @@ public class ChaosTreeMapIterateBenchmark {
 
     private TreeMap<Integer, String> javaTreeMap;
     private BPlusTreeMap<Integer, String> chaosTree;
-    private ArrayList<String> arrayList;
+    private List<Map.Entry<Integer, String>> entryList;
+    private int[] primitiveKeys;
+    private String[] primitiveValues;
 
     @Setup(Level.Trial)
     public void setup() {
         javaTreeMap = new TreeMap<>();
         chaosTree = new BPlusTreeMap<>();
-        arrayList = new ArrayList<>(size);
 
         List<Integer> keys = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
@@ -72,9 +74,16 @@ public class ChaosTreeMapIterateBenchmark {
             javaTreeMap.put(key, val);
             chaosTree.put(key, val);
         }
-
-        for (int i = 0; i < size; i++) {
-            arrayList.add("CHAOS-" + i);
+        entryList = new ArrayList<>(size);
+        primitiveKeys = new int[size];
+        primitiveValues = new String[size];
+        
+        int idx = 0;
+        for (Map.Entry<Integer, String> e : chaosTree.entrySet()) {
+            entryList.add(new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue()));
+            primitiveKeys[idx] = e.getKey();
+            primitiveValues[idx] = e.getValue();
+            idx++;
         }
     }
 
@@ -96,8 +105,17 @@ public class ChaosTreeMapIterateBenchmark {
 
     @Benchmark
     public void iterateRawArrayList(Blackhole bh) {
-        for (String s: arrayList) {
-            bh.consume(s);
+        for (Map.Entry<Integer, String> entry : entryList) {
+            bh.consume(entry.getKey());
+            bh.consume(entry.getValue());
+        }
+    }
+    
+    @Benchmark
+    public void iteratePrimitiveArrays(Blackhole bh) {
+        for (int i = 0; i < primitiveKeys.length; i++) {
+            bh.consume(primitiveKeys[i]);
+            bh.consume(primitiveValues[i]);
         }
     }
 }
