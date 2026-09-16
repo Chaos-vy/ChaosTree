@@ -30,11 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-// No Builder here — same as the parameterized suite, these are constructed like java.util.TreeSet/TreeMap.
-
-/**
- * The test just uses random data from Jqwick to test failures nothing else.
- */
 class ChaosTreeModelBasedPropertyTest {
 
     private static final int LO = -50;
