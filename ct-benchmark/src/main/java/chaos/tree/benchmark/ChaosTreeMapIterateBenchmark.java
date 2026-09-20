@@ -44,8 +44,8 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 2, time = 2)
-@Measurement(iterations = 3, time = 2)
+@Warmup(iterations = 3, time = 2)
+@Measurement(iterations = 5, time = 2)
 @Fork(3)
 public class ChaosTreeMapIterateBenchmark {
 
@@ -77,10 +77,14 @@ public class ChaosTreeMapIterateBenchmark {
         entryList = new ArrayList<>(size);
         primitiveKeys = new int[size];
         primitiveValues = new String[size];
-        
+
+        for (Integer key : keys) {
+            entryList.add(new AbstractMap.SimpleImmutableEntry<>(key, "CHAOS-" + key));
+        }
+        entryList.sort(java.util.Map.Entry.comparingByKey());
+
         int idx = 0;
-        for (Map.Entry<Integer, String> e : chaosTree.entrySet()) {
-            entryList.add(new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue()));
+        for (Map.Entry<Integer, String> e : entryList) {
             primitiveKeys[idx] = e.getKey();
             primitiveValues[idx] = e.getValue();
             idx++;
@@ -110,7 +114,7 @@ public class ChaosTreeMapIterateBenchmark {
             bh.consume(entry.getValue());
         }
     }
-    
+
     @Benchmark
     public void iteratePrimitiveArrays(Blackhole bh) {
         for (int i = 0; i < primitiveKeys.length; i++) {

@@ -2,7 +2,18 @@ package chaos.tree.benchmark;
 
 import chaos.tree.naryMap.BPlusTreeMap;
 import chaos.tree.naryMap.BTreeMap;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
@@ -22,11 +33,9 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 3, jvmArgsAppend = {"-Xms4g", "-Xmx4g"})
 public class TreeMapVsBTreeVsBPlusBenchmark {
 
+    private static final int DEGREE = 64;
     @Param({"100000", "1000000"})
     private int n;
-
-    private static final int DEGREE = 64;
-
     private NavigableMap<Integer, Integer> treeMap;
     private NavigableMap<Integer, Integer> bTreeMap;
     private NavigableMap<Integer, Integer> bPlusTreeMap;
