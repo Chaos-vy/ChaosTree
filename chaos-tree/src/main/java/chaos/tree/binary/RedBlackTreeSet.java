@@ -124,65 +124,61 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
 
     @Override
     public boolean remove(Object o) {
-        if (root == null || o == null) return false;
-        try {
-            if (isEmpty()) return false;
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            RbtNode<E> x = nodeFinder(val);
-            if (x == null) return false;
-
-            if (x.left != null && x.right != null) {
-                RbtNode<E> successor = x.right;
-                while (successor.left != null) {
-                    successor = successor.left;
-                }
-                x.value = successor.value;
-                x = successor;
-            }
-
-            RbtNode<E> nodeReplacer = x.left != null ? x.left : x.right;
-            boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
-
-            if (nodeReplacer != null) {
-                nodeReplacer.parent = x.parent;
-                if (x.parent == null) {
-                    root = nodeReplacer;
-                } else if (x == x.parent.left) {
-                    x.parent.left = nodeReplacer;
-                } else {
-                    x.parent.right = nodeReplacer;
-                }
-
-                if (deletedNodeWasBlack) {
-                    fixDoubleBlack(nodeReplacer);
-                }
-            } else if (x.parent == null) {
-                root = null;
-            } else {
-                if (deletedNodeWasBlack) {
-                    fixDoubleBlack(x);
-                }
-
-                if (x == x.parent.left) {
-                    x.parent.left = null;
-                } else {
-                    x.parent.right = null;
-                }
-                x.parent = null;
-            }
-
-
-            x.left = null;
-            x.right = null;
-            x.parent = null;
-
-            size--;
-            modCount++;
-            return true;
-        } catch (ClassCastException | NullPointerException e) {
+        @SuppressWarnings("unchecked")
+        E val = (E) o;
+        if (isEmpty()) {
+            compare(val, val);
             return false;
         }
+        RbtNode<E> x = nodeFinder(val);
+        if (x == null) return false;
+
+        if (x.left != null && x.right != null) {
+            RbtNode<E> successor = x.right;
+            while (successor.left != null) {
+                successor = successor.left;
+            }
+            x.value = successor.value;
+            x = successor;
+        }
+
+        RbtNode<E> nodeReplacer = x.left != null ? x.left : x.right;
+        boolean deletedNodeWasBlack = x.isBlack(); //This must be stored.
+
+        if (nodeReplacer != null) {
+            nodeReplacer.parent = x.parent;
+            if (x.parent == null) {
+                root = nodeReplacer;
+            } else if (x == x.parent.left) {
+                x.parent.left = nodeReplacer;
+            } else {
+                x.parent.right = nodeReplacer;
+            }
+
+            if (deletedNodeWasBlack) {
+                fixDoubleBlack(nodeReplacer);
+            }
+        } else if (x.parent == null) {
+            root = null;
+        } else {
+            if (deletedNodeWasBlack) {
+                fixDoubleBlack(x);
+            }
+
+            if (x == x.parent.left) {
+                x.parent.left = null;
+            } else {
+                x.parent.right = null;
+            }
+            x.parent = null;
+        }
+        x.left = null;
+        x.right = null;
+        x.parent = null;
+
+        size--;
+        modCount++;
+        return true;
     }
 
     private boolean isBlack(RbtNode<E> node) {
