@@ -1415,7 +1415,76 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return new TreeSubMap(fromStart, lo, loInclusive, toEnd, hi, hiInclusive, !descending);
         }
 
+        private transient Collection<V> subMapValuesView;
+
         @Override
+        public Collection<V> values() {
+            Collection<V> vs = subMapValuesView;
+            return (vs != null) ? vs : (subMapValuesView = new AbstractCollection<V>() {
+                @Override
+                public Iterator<V> iterator() {
+                    return new Iterator<V>() {
+                        N nextNode = descending ? absHighest() : absLowest();
+                        N lastReturned = null;
+                        long expectedModCount = modCount;
+
+                        @Override
+                        public boolean hasNext() {
+                            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+                            return nextNode != null;
+                        }
+
+                        @Override
+                        public V next() {
+                            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+                            if (nextNode == null) throw new NoSuchElementException();
+                            lastReturned = nextNode;
+                            if (descending) {
+                                nextNode = predecessor(nextNode);
+                                if (nextNode != null && tooLow(nextNode.key)) nextNode = null;
+                            } else {
+                                nextNode = successor(nextNode);
+                                if (nextNode != null && tooHigh(nextNode.key)) nextNode = null;
+                            }
+                            return lastReturned.value;
+                        }
+
+                        @Override
+                        public void remove() {
+                            if (lastReturned == null) {
+                                throw new IllegalStateException();
+                            }
+                            if (modCount != expectedModCount) {
+                                throw new ConcurrentModificationException();
+                            }
+
+                            if (!descending && lastReturned.left != null && lastReturned.right != null) {
+                                nextNode = lastReturned;
+                            }
+                            TreeSubMap.this.remove(lastReturned.key);
+                            if (nextNode == lastReturned && (!descending ? tooHigh(nextNode.key) : tooLow(nextNode.key))) {
+                                nextNode = null;
+                            }
+                            expectedModCount = modCount;
+                            lastReturned = null;
+                        }
+                    };
+                }
+                @Override
+                public int size() {
+                    return TreeSubMap.this.size();
+                }
+                @Override
+                public boolean contains(Object o) {
+                    return TreeSubMap.this.containsValue(o);
+                }
+                @Override
+                public void clear() {
+                    TreeSubMap.this.clear();
+                }
+            });
+        }
+
         public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
             compare(fromKey, fromKey);
             compare(toKey, toKey);
