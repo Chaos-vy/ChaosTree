@@ -1,9 +1,14 @@
 package chaos.tree.nary;
 
 import org.junit.jupiter.api.Test;
-import java.util.List;
+
 import java.util.ArrayList;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BuildFromSortedArrayTest {
 
@@ -12,14 +17,14 @@ class BuildFromSortedArrayTest {
         for (int i = 0; i < n; i++) a[i] = i;
         return a;
     }
-    
+
     private List<Integer> getLeafScan(BTreeSet<Integer> tree) {
         List<Integer> list = new ArrayList<>();
         if (tree.root == null) return list;
         inorderAddLeaves(tree.root, list);
         return list;
     }
-    
+
     private void inorderAddLeaves(BTreeNode<Integer> node, List<Integer> list) {
         if (node.isLeaf()) {
             for (int i = 0; i < node.keyCount; i++) {
@@ -38,7 +43,7 @@ class BuildFromSortedArrayTest {
         if (tree.root == null) return;
         validateNode(tree.root, tree);
     }
-    
+
     private void validateNode(BTreeNode<Integer> node, BTreeSet<Integer> tree) {
         if (node != tree.root && node.keyCount < tree.minKeys) {
             throw new AssertionError("Underflow! Node has " + node.keyCount + " keys (min " + tree.minKeys + ")");
@@ -53,9 +58,9 @@ class BuildFromSortedArrayTest {
     }
 
     @Test
-    void exactMultipleOfTargetKeys_noOrphanLeaf() {
+    void exactMultipleOfTargetKeysNoOrphanLeaf() {
         BTreeSet<Integer> tree = new BTreeSet<>(32);
-        int targetKeys = Math.max(tree.minKeys, (int) (tree.maxKeys * 1.0f)); 
+        int targetKeys = Math.max(tree.minKeys, (int) (tree.maxKeys * 1.0f));
         int n = targetKeys * 5;
         tree.importFlatArray(sortedRange(n), 1.0f);
 
@@ -65,10 +70,10 @@ class BuildFromSortedArrayTest {
     }
 
     @Test
-    void smallRemainder_forcesLeafBorrow() {
+    void smallRemainderForcesLeafBorrow() {
         BTreeSet<Integer> tree = new BTreeSet<>(32);
         int targetKeys = 63;
-        int n = targetKeys * 3 + 20; 
+        int n = targetKeys * 3 + 20;
         tree.importFlatArray(sortedRange(n), 1.0f);
 
         assertEquals(n, tree.size());
@@ -79,10 +84,10 @@ class BuildFromSortedArrayTest {
     }
 
     @Test
-    void smallRemainder_withStarvedSibling_forcesMergeAndCascade() {
+    void smallRemainderWithStarvedSiblingForcesMergeAndCascade() {
         BTreeSet<Integer> tree = new BTreeSet<>(32);
-        float factor = 0.5f; 
-        int n = 31 * 4 + 5;  
+        float factor = 0.5f;
+        int n = 31 * 4 + 5;
         tree.importFlatArray(sortedRange(n), factor);
 
         assertEquals(n, tree.size());
@@ -93,7 +98,7 @@ class BuildFromSortedArrayTest {
     }
 
     @Test
-    void multiLevelCascade_inSingleStep() {
+    void multiLevelCascadeInSingleStep() {
         BTreeSet<Integer> tree = new BTreeSet<>(32);
         int targetKeys = 63;
         int branching = targetKeys + 1;
@@ -110,13 +115,13 @@ class BuildFromSortedArrayTest {
     }
 
     @Test
-    void degreeBelowFloor_rejectedAtConstruction() {
+    void degreeBelowFloorRejectedAtConstruction() {
         BTreeSet<Integer> tree = new BTreeSet<>(31);
         assertThrows(IllegalStateException.class, () -> tree.importFlatArray(sortedRange(1000), 1.0f));
     }
 
     @Test
-    void degreeFloorInPractice_largeRealisticN_neverApproachesHeightLimit() {
+    void degreeFloorInPracticeLargeRealisticNeverApproachesHeightLimit() {
         BTreeSet<Integer> tree = new BTreeSet<>(32);
         int n = 5_000_000;
         tree.importFlatArray(sortedRange(n), 1.0f);
@@ -127,7 +132,7 @@ class BuildFromSortedArrayTest {
     }
 
     @Test
-    void phase1OnlyChecksExactZero_missesPartialInternalNodeUnderflow() {
+    void phase1OnlyChecksExactZeroMissesPartialInternalNodeUnderflow() {
         BTreeSet<Integer> tree = new BTreeSet<>(32);
         int n = 8065;
         tree.importFlatArray(sortedRange(n), 1.0f);
@@ -135,9 +140,7 @@ class BuildFromSortedArrayTest {
         assertEquals(n, tree.size());
         assertEquals(n, getLeafScan(tree).size(), "reads are still correct despite the bug");
 
-        // The bug has been fixed, so this should NOT throw an AssertionError.
-        // It should validate cleanly.
-        assertDoesNotThrow(() -> validate(tree), 
-            "The underflow bug has been patched, so validation should succeed without throwing.");
+        assertDoesNotThrow(() -> validate(tree),
+                "The underflow bug has been patched, so validation should succeed without throwing.");
     }
 }

@@ -1,19 +1,13 @@
 package chaos.tree.nary;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IterBuildSetFuzzTest {
-
-    static class RangeIterator implements Iterator<Integer> {
-        int cur = 0; final int n;
-        RangeIterator(int n) { this.n = n; }
-        public boolean hasNext() { return cur < n; }
-        public Integer next() { if (!hasNext()) throw new NoSuchElementException(); return cur++; }
-    }
 
     @Test
     void testBTreeSetExtremeEdgeCases() {
@@ -68,7 +62,7 @@ public class IterBuildSetFuzzTest {
             }
         }
     }
-    
+
     private void validateBPlusTreeSet(BPlusTreeNode<?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) {
@@ -78,6 +72,24 @@ public class IterBuildSetFuzzTest {
             for (int i = 0; i <= node.keyCount; i++) {
                 if (node.child[i] != null) validateBPlusTreeSet(node.child[i], minKeys);
             }
+        }
+    }
+
+    static class RangeIterator implements Iterator<Integer> {
+        final int n;
+        int cur = 0;
+
+        RangeIterator(int n) {
+            this.n = n;
+        }
+
+        public boolean hasNext() {
+            return cur < n;
+        }
+
+        public Integer next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            return cur++;
         }
     }
 }

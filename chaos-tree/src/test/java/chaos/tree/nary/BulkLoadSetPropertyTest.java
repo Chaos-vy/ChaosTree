@@ -11,16 +11,9 @@ import java.util.NoSuchElementException;
 
 public class BulkLoadSetPropertyTest {
 
-    static class RangeIterator implements Iterator<Integer> {
-        int cur = 0; final int n;
-        RangeIterator(int n) { this.n = n; }
-        public boolean hasNext() { return cur < n; }
-        public Integer next() { if (!hasNext()) throw new NoSuchElementException(); return cur++; }
-    }
-
     /**
      * timestamp = 2026-09-09T18:04:52.124325020, BulkLoadSetPropertyTest:testBTreeSetBulkLoad =
-     *                               |-----------------------jqwik-----------------------
+     * |-----------------------jqwik-----------------------
      * tries = 100000                | # of calls to property
      * checks = 100000               | # of not rejected calls
      * generation = RANDOMIZED       | parameters are randomly generated
@@ -30,6 +23,7 @@ public class BulkLoadSetPropertyTest {
      * edge-cases#total = 60         | # of all combined edge cases
      * edge-cases#tried = 60         | # of edge cases tried in current run
      * seed = -7572087307078597387   | random seed to reproduce generated values
+     *
      * @param degree
      * @param factor
      * @param n
@@ -42,11 +36,20 @@ public class BulkLoadSetPropertyTest {
         tree.buildFromSorted(new RangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
         validateBTreeSet(tree.root, tree.minKeys);
+        if (degree>=32) {
+            Object[] flat = new Object[n];
+            for (int i = 0; i < n; i++) {
+                flat[i] = i;
+            }
+            tree.clear();
+            tree.importFlatArray(flat, factor);
+            validateBTreeSet(tree.root, tree.minKeys);
+        }
     }
 
     /**
-     *timestamp = 2026-09-09T18:04:53.503824400, BulkLoadSetPropertyTest:testBPlusTreeSetBulkLoad =
-     *                               |-----------------------jqwik-----------------------
+     * timestamp = 2026-09-09T18:04:53.503824400, BulkLoadSetPropertyTest:testBPlusTreeSetBulkLoad =
+     * |-----------------------jqwik-----------------------
      * tries = 100000                | # of calls to property
      * checks = 100000               | # of not rejected calls
      * generation = RANDOMIZED       | parameters are randomly generated
@@ -56,6 +59,7 @@ public class BulkLoadSetPropertyTest {
      * edge-cases#total = 60         | # of all combined edge cases
      * edge-cases#tried = 60         | # of edge cases tried in current run
      * seed = 358030456051200726     | random seed to reproduce generated values
+     *
      * @param degree
      * @param factor
      * @param n
@@ -68,6 +72,15 @@ public class BulkLoadSetPropertyTest {
         tree.buildFromSorted(new RangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
         validateBPlusTreeSet(tree.root, tree.minKeys);
+        if(degree>=32) {
+            Object[] flat = new Object[n];
+            for (int i = 0; i < n; i++) {
+                flat[i] = i;
+            }
+            tree.clear();
+            tree.importFlatArray(flat, factor);
+            validateBPlusTreeSet(tree.root, tree.minKeys);
+        }
     }
 
     private void validateBTreeSet(BTreeNode<?> node, int minKeys) {
@@ -81,7 +94,7 @@ public class BulkLoadSetPropertyTest {
             }
         }
     }
-    
+
     private void validateBPlusTreeSet(BPlusTreeNode<?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) {
@@ -91,6 +104,24 @@ public class BulkLoadSetPropertyTest {
             for (int i = 0; i <= node.keyCount; i++) {
                 if (node.child[i] != null) validateBPlusTreeSet(node.child[i], minKeys);
             }
+        }
+    }
+
+    static class RangeIterator implements Iterator<Integer> {
+        final int n;
+        int cur = 0;
+
+        RangeIterator(int n) {
+            this.n = n;
+        }
+
+        public boolean hasNext() {
+            return cur < n;
+        }
+
+        public Integer next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            return cur++;
         }
     }
 }
