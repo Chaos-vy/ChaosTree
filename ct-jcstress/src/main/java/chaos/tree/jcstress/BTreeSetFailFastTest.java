@@ -1,11 +1,14 @@
 package chaos.tree.jcstress;
 
 import chaos.tree.nary.BTreeSet;
-import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.L_Result;
 
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 
 
 @JCStressTest
@@ -15,21 +18,21 @@ import java.util.Iterator;
 @Outcome(id = "AIOOBE", expect = Expect.FORBIDDEN, desc = "Array index out of bounds (internal structure corrupted without CME).")
 @State
 public class BTreeSetFailFastTest {
-    
+
     private final BTreeSet<Integer> set;
-    
+
     public BTreeSetFailFastTest() {
         set = new BTreeSet<>();
         set.add(1);
         set.add(2);
         set.add(3);
     }
-    
+
     @Actor
     public void modifier() {
         set.add(4); // Concurrent modification
     }
-    
+
     @Actor
     public void iterator(L_Result r) {
         try {
