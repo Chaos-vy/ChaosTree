@@ -136,25 +136,27 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
     @Override
     public boolean contains(Object o) {
-        if (root == null || o == null) return false;
-        try {
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            N curr = root;
-            while (curr != null) {
-                int cmp = compare(val, curr.value);
-                if (cmp == 0) return true;
-                else if (cmp > 0) curr = curr.right;
-                else curr = curr.left;
-            }
-            return false;
-        } catch (ClassCastException | NullPointerException e) {
+        @SuppressWarnings("unchecked")
+        E val = (E) o;
+        if (root == null) {
+            compare(val, val);
             return false;
         }
+        N curr = root;
+        while (curr != null) {
+            int cmp = compare(val, curr.value);
+            if (cmp == 0) return true;
+            else if (cmp > 0) curr = curr.right;
+            else curr = curr.left;
+        }
+        return false;
     }
 
     protected N nodeFinder(E val) {
-        if (root == null) return null;
+        if (root == null) {
+            compare(val, val);
+            return null;
+        }
         N current = root;
         int cmp = 0;
         while (current != null) {
@@ -308,9 +310,24 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                 if (lastReturned == null) {
                     throw new IllegalStateException();
                 }
+                E nextVal = (nextNode != null) ? nextNode.value : null;
                 AbstractBinaryTreeSet.this.remove(lastReturned);
                 lastReturned = null;
                 expectedModCount = modCount;
+                if (nextVal != null) {
+                    nextNode = root;
+                    N bestMatch = null;
+                    while (nextNode != null) {
+                        int cmp = compare(nextVal, nextNode.value);
+                        if (cmp <= 0) {
+                            bestMatch = nextNode;
+                            nextNode = nextNode.left;
+                        } else {
+                            nextNode = nextNode.right;
+                        }
+                    }
+                    nextNode = bestMatch;
+                }
             }
 
             @Override
@@ -375,9 +392,24 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                 if (lastReturned == null) {
                     throw new IllegalStateException();
                 }
+                E nextVal = (nextNode != null) ? nextNode.value : null;
                 AbstractBinaryTreeSet.this.remove(lastReturned);
                 lastReturned = null;
                 expectedModCount = modCount;
+                if (nextVal != null) {
+                    nextNode = root;
+                    N match = null;
+                    while (nextNode != null) {
+                        int cmp = compare(nextVal, nextNode.value);
+                        if (cmp >= 0) {
+                            match = nextNode;
+                            nextNode = nextNode.right;
+                        } else {
+                            nextNode = nextNode.left;
+                        }
+                    }
+                    nextNode = match;
+                }
             }
 
             @Override
@@ -397,7 +429,8 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
     @Override
     public Spliterator<E> spliterator() {
-        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
+        return Spliterators.spliteratorUnknownSize(iterator(),
+                Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
     }
 
     @Override
@@ -471,6 +504,8 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
     @Override
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+        compare(fromElement, fromElement);
+        compare(toElement, toElement);
         return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, false);
     }
 
@@ -652,12 +687,25 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         TreeSubSet(E lo, boolean loInclusive, E hi, boolean hiInclusive, boolean descending) {
             if (lo != null && hi != null && compare(lo, hi) > 0) {
                 throw new IllegalArgumentException();
+            } else {
+                if (lo != null) compare(lo, lo);
+                if (hi != null) compare(hi, hi);
             }
             this.lo = lo;
             this.loInclusive = loInclusive;
             this.hi = hi;
             this.hiInclusive = hiInclusive;
             this.descending = descending;
+        }
+
+        private boolean inRangeBound(E val, boolean inclusive) {
+            if (lo != null && compare(val, lo) < 0) return false;
+            if (hi != null && compare(val, hi) > 0) return false;
+            if (inclusive) {
+                if (lo != null && !loInclusive && compare(val, lo) == 0) return false;
+                if (hi != null && !hiInclusive && compare(val, hi) == 0) return false;
+            }
+            return true;
         }
 
         private boolean tooLow(E e) {
@@ -692,7 +740,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         public E lower(E e) {
             if (descending) {
                 if (tooHigh(e)) return null;
-                if (tooLow(e)) return isEmpty() ? null : first();
+                if (tooLow(e)) return isEmpty() ? null : last();
                 E result = AbstractBinaryTreeSet.this.higher(e);
                 return (result != null && inRange(result)) ? result : null;
             } else {
@@ -707,7 +755,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         public E floor(E e) {
             if (descending) {
                 if (tooHigh(e)) return null;
-                if (tooLow(e)) return isEmpty() ? null : first();
+                if (tooLow(e)) return isEmpty() ? null : last();
                 E result = AbstractBinaryTreeSet.this.ceiling(e);
                 return (result != null && inRange(result)) ? result : null;
             } else {
@@ -722,7 +770,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         public E ceiling(E e) {
             if (descending) {
                 if (tooLow(e)) return null;
-                if (tooHigh(e)) return isEmpty() ? null : last();
+                if (tooHigh(e)) return isEmpty() ? null : first();
                 E result = AbstractBinaryTreeSet.this.floor(e);
                 return (result != null && inRange(result)) ? result : null;
             } else {
@@ -737,7 +785,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         public E higher(E e) {
             if (descending) {
                 if (tooLow(e)) return null;
-                if (tooHigh(e)) return isEmpty() ? null : last();
+                if (tooHigh(e)) return isEmpty() ? null : first();
                 E result = AbstractBinaryTreeSet.this.lower(e);
                 return (result != null && inRange(result)) ? result : null;
             } else {
@@ -907,7 +955,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public Spliterator<E> spliterator() {
-            return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
+            return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.DISTINCT | (descending ? 0 : Spliterator.SORTED));
         }
 
         @Override
@@ -987,35 +1035,37 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+            compare(fromElement, fromElement);
+            compare(toElement, toElement);
             if (descending) {
-                if (!inRange(fromElement) || !inRange(toElement))
+                if (!inRangeBound(fromElement, fromInclusive) || !inRangeBound(toElement, toInclusive))
                     throw new IllegalArgumentException("Requested bounds are outside current window");
                 return new TreeSubSet(toElement, toInclusive, fromElement, fromInclusive, true);
             }
-            if (!inRange(fromElement) || !inRange(toElement))
+            if (!inRangeBound(fromElement, fromInclusive) || !inRangeBound(toElement, toInclusive))
                 throw new IllegalArgumentException("Requested bounds are outside current window");
             return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, false);
         }
 
         @Override
         public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+            compare(toElement, toElement);
+            if (!inRangeBound(toElement, inclusive))
+                throw new IllegalArgumentException("Requested bound is outside current window");
             if (descending) {
-                if (!inRange(toElement))
-                    throw new IllegalArgumentException("Requested bound is outside current window");
                 return new TreeSubSet(toElement, inclusive, hi, hiInclusive, true);
             }
-            if (!inRange(toElement)) throw new IllegalArgumentException("Requested bound is outside current window");
             return new TreeSubSet(lo, loInclusive, toElement, inclusive, false);
         }
 
         @Override
         public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+            compare(fromElement, fromElement);
+            if (!inRangeBound(fromElement, inclusive))
+                throw new IllegalArgumentException("Requested bound is outside current window");
             if (descending) {
-                if (!inRange(fromElement))
-                    throw new IllegalArgumentException("Requested bound is outside current window");
                 return new TreeSubSet(lo, loInclusive, fromElement, inclusive, true);
             }
-            if (!inRange(fromElement)) throw new IllegalArgumentException("Requested bound is outside current window");
             return new TreeSubSet(fromElement, inclusive, hi, hiInclusive, false);
         }
 
