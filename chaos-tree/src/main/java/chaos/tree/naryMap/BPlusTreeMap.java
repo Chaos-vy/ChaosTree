@@ -145,7 +145,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             V oldValue = (V) curr.values[idx];
 
             if (oldValue != null) {
+                long _expectedModCount = modCount;
                 V newValue = remappingFunction.apply(key, oldValue);
+                if (_expectedModCount != modCount) throw new java.util.ConcurrentModificationException();
 
                 if (newValue != null) {
                     curr.values[idx] = newValue;
@@ -166,7 +168,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         if (key == null) throw new NullPointerException();
 
         if (root == null) {
+            long _expectedModCount = modCount;
             V newValue = mappingFunction.apply(key);
+            if (_expectedModCount != modCount) throw new java.util.ConcurrentModificationException();
             if (newValue != null) {
                 compare(key, key);
                 root = new BPlusTreeMapNode<>(degree, true);
@@ -189,7 +193,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     if (oldValue != null) {
                         return oldValue;
                     } else {
+                        long _expectedModCount = modCount;
                         V newValue = mappingFunction.apply(key);
+                        if (_expectedModCount != modCount) throw new java.util.ConcurrentModificationException();
                         if (newValue != null) {
                             curr.values[idx] = newValue;
                             return newValue;
@@ -198,7 +204,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     }
                 }
 
+                long _expectedModCount = modCount;
                 V newValue = mappingFunction.apply(key);
+                if (_expectedModCount != modCount) throw new java.util.ConcurrentModificationException();
                 if (newValue == null) {
                     return null;
                 }
@@ -239,7 +247,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         if (key == null) throw new NullPointerException();
 
         if (root == null) {
+            long _expectedModCount = modCount;
             V newValue = remappingFunction.apply(key, null);
+            if (_expectedModCount != modCount) throw new java.util.ConcurrentModificationException();
             if (newValue != null) {
                 compare(key, key);
                 root = new BPlusTreeMapNode<>(degree, true);
@@ -259,7 +269,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (curr.isLeaf()) {
                 if (idx >= 0) {
                     V oldValue = (V) curr.values[idx];
+                    long _expectedModCount = modCount;
                     V newValue = remappingFunction.apply(key, oldValue);
+                    if (_expectedModCount != modCount) throw new ConcurrentModificationException();
 
                     if (newValue != null) {
                         curr.values[idx] = newValue;
@@ -270,7 +282,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     }
                 }
 
+                long _expectedModCount = modCount;
                 V newValue = remappingFunction.apply(key, null);
+                if (_expectedModCount != modCount) throw new ConcurrentModificationException();
                 if (newValue == null) {
                     return null;
                 }
@@ -333,7 +347,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         int idx = searchNodeMap(curr, key);
         if (idx >= 0) {
             V oldValue = (V) curr.values[idx];
+            long _expectedModCount = modCount;
             V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+            if (_expectedModCount != modCount) throw new ConcurrentModificationException();
             if (newValue == null) {
                 removeAtLeaf(curr, idx);
                 return null;
@@ -421,8 +437,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     @Override
     @SuppressWarnings("unchecked")
     public V remove(Object o) {
-        if (isEmpty()) return null;
         K key = (K) o;
+        compare(key, key);
+        if (isEmpty()) return null;
         BPlusTreeMapNode<K, V> curr = root;
         int idx, childIdx;
         while (!curr.isLeaf()) {
@@ -992,11 +1009,13 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
         return false;
     }
+
     @Override
     @SuppressWarnings("unchecked")
     public boolean containsKey(Object key) {
-        if (root == null) return false;
         K k = (K) key;
+        compare(k, k);
+        if (root == null) return false;
         BPlusTreeMapNode<K, V> current = root;
 
         while (true) {
@@ -1015,8 +1034,9 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     @Override
     @SuppressWarnings("unchecked")
     public V get(Object key) {
-        if (root == null) return null;
         K k = (K) key;
+        compare(k, k);
+        if (root == null) return null;
         BPlusTreeMapNode<K, V> current = root;
 
         while (true) {
@@ -1182,6 +1202,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         BPlusTreeMapNode<K, V> currentLeaf;
         int currentIndex;
         K lastReturnedKey = null;
+        BPlusTreeMapNode<K, V> lastReturnedLeaf = null;
+        int lastReturnedIndex = -1;
 
         BPlusTreeBaseIterator(K startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -1224,9 +1246,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             return currentLeaf != null && currentIndex < currentLeaf.keyCount;
         }
 
-        BPlusTreeMapNode<K, V> lastReturnedLeaf = null;
-        int lastReturnedIndex = -1;
-
         protected final void advanceReverse() {
             lastReturnedLeaf = currentLeaf;
             lastReturnedIndex = currentIndex;
@@ -1254,7 +1273,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (nextTarget != null) {
                 BPlusTreeMapNode<K, V> search = currentLeaf;
                 int idx = -1;
-                
+
                 if (search != null) idx = searchNodeMap(search, nextTarget);
                 if (idx < 0 && search != null && search.prev != null) {
                     search = search.prev;
@@ -1264,7 +1283,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     search = search.next;
                     idx = searchNodeMap(search, nextTarget);
                 }
-                
+
                 if (idx < 0) {
                     search = root;
                     while (search != null && !search.isLeaf()) {
@@ -1273,7 +1292,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     }
                     if (search != null) idx = searchNodeMap(search, nextTarget);
                 }
-                
+
                 currentLeaf = search;
                 currentIndex = (idx >= 0) ? idx : ~idx;
                 if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
@@ -1339,6 +1358,8 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         BPlusTreeMapNode<K, V> currentLeaf;
         int currentIndex;
         K lastReturnedKey = null;
+        BPlusTreeMapNode<K, V> lastReturnedLeaf = null;
+        int lastReturnedIndex = -1;
 
         BPlusTreeReverseBaseIterator(K startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -1379,9 +1400,6 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             return currentLeaf != null && currentIndex >= 0;
         }
 
-        BPlusTreeMapNode<K, V> lastReturnedLeaf = null;
-        int lastReturnedIndex = -1;
-
         protected final void advanceReverse() {
             lastReturnedLeaf = currentLeaf;
             lastReturnedIndex = currentIndex;
@@ -1409,7 +1427,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             if (nextTarget != null) {
                 BPlusTreeMapNode<K, V> search = currentLeaf;
                 int idx = -1;
-                
+
                 if (search != null) idx = searchNodeMap(search, nextTarget);
                 if (idx < 0 && search != null && search.next != null) {
                     search = search.next;
@@ -1419,7 +1437,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     search = search.prev;
                     idx = searchNodeMap(search, nextTarget);
                 }
-                
+
                 if (idx < 0) {
                     search = root;
                     while (search != null && !search.isLeaf()) {
@@ -1428,7 +1446,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
                     }
                     if (search != null) idx = searchNodeMap(search, nextTarget);
                 }
-                
+
                 currentLeaf = search;
                 currentIndex = (idx >= 0) ? idx : ~idx;
                 if (currentLeaf != null && currentIndex < 0) {
@@ -1449,7 +1467,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         @Override
         @SuppressWarnings("unchecked")
         public K next() {
-            if (!hasNext()) throw new java.util.NoSuchElementException();
+            if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentLeaf.keys[currentIndex];
             K key = lastReturnedKey;
             advanceReverse();
@@ -1465,7 +1483,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         @Override
         @SuppressWarnings("unchecked")
         public V next() {
-            if (!hasNext()) throw new java.util.NoSuchElementException();
+            if (!hasNext()) throw new NoSuchElementException();
             lastReturnedKey = (K) currentLeaf.keys[currentIndex];
             V val = (V) currentLeaf.values[currentIndex];
             advanceReverse();
