@@ -101,6 +101,10 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     }
 
     protected N nodeFinder(K key) {
+        if (root == null) {
+            compare(key, key);
+            return null;
+        }
         N current = root;
         while (current != null) {
             int cmp = compare(key, current.key);
@@ -217,7 +221,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         Objects.requireNonNull(mappingFunction);
         if (root == null) {
             compare(key, key);
-            V newValue = mappingFunction.apply(key);
+            V newValue;
+            {
+                long expectedModCount = modCount;
+                newValue = mappingFunction.apply(key);
+                if (modCount != expectedModCount) throw new ConcurrentModificationException();
+            }
             if (newValue != null) {
                 root = createNode(key, newValue);
                 size = 1;
@@ -238,7 +247,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 if (oldValue != null) {
                     return oldValue;
                 }
-                V newValue = mappingFunction.apply(key);
+                V newValue;
+
+                long expectedModCount = modCount;
+                newValue = mappingFunction.apply(key);
+                if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
                 if (newValue != null) {
                     current.value = newValue;
                 }
@@ -246,7 +260,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             } else if (cmp < 0) current = current.left;
             else current = current.right;
         }
-        V newValue = mappingFunction.apply(key);
+        V newValue;
+        {
+            long expectedModCount = modCount;
+            newValue = mappingFunction.apply(key);
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+        }
         if (newValue != null) {
             N newNode = createNode(key, newValue);
             newNode.parent = parent;
@@ -262,13 +281,22 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     @Override
     public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
+        if (root == null) {
+            compare(key, key);
+            return null;
+        }
         N current = root;
         while (current != null) {
             int cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
                 if (oldValue != null) {
-                    V newValue = remappingFunction.apply(key, oldValue);
+                    V newValue;
+
+                    long expectedModCount = modCount;
+                    newValue = remappingFunction.apply(key, oldValue);
+                    if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
                     if (newValue != null) {
                         current.value = newValue;
                         return newValue;
@@ -292,7 +320,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         Objects.requireNonNull(remappingFunction);
         if (root == null) {
             compare(key, key);
-            V newValue = remappingFunction.apply(key, null);
+            V newValue;
+
+            long expectedModCount = modCount;
+            newValue = remappingFunction.apply(key, null);
+            if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
             if (newValue != null) {
                 root = createNode(key, newValue);
                 size = 1;
@@ -310,7 +343,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
-                V newValue = remappingFunction.apply(key, oldValue);
+                V newValue;
+
+                long expectedModCount = modCount;
+                newValue = remappingFunction.apply(key, oldValue);
+                if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
                 if (newValue != null) {
                     current.value = newValue;
                     return newValue;
@@ -321,7 +359,12 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             } else if (cmp < 0) current = current.left;
             else current = current.right;
         }
-        V newValue = remappingFunction.apply(key, null);
+        V newValue;
+
+        long expectedModCount = modCount;
+        newValue = remappingFunction.apply(key, null);
+        if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
         if (newValue != null) {
             N newNode = createNode(key, newValue);
             newNode.parent = parent;
@@ -348,13 +391,17 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         }
         N parent = null;
         N current = root;
+        V newValue;
         int cmp = 0;
         while (current != null) {
             parent = current;
             cmp = compare(key, current.key);
             if (cmp == 0) {
                 V oldValue = current.value;
-                V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+                long expectedModCount = modCount;
+                newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+                if (modCount != expectedModCount) throw new ConcurrentModificationException();
+
                 if (newValue != null) {
                     current.value = newValue;
                 } else {
@@ -462,15 +509,10 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
     @Override
     public V get(Object o) {
-        if (isEmpty()) return null;
-        try {
-            @SuppressWarnings("unchecked")
-            K k = (K) o;
-            N node = nodeFinder(k);
-            return node == null ? null : node.value;
-        } catch (ClassCastException | NullPointerException e) {
-            return null;
-        }
+        @SuppressWarnings("unchecked")
+        K k = (K) o;
+        N node = nodeFinder(k);
+        return node == null ? null : node.value;
     }
 
     protected void rotateLeft(N p) {
@@ -794,16 +836,20 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
     @Override
     public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
+        compare(fromKey, fromKey);
+        compare(toKey, toKey);
         return new TreeSubMap(false, fromKey, fromInclusive, false, toKey, toInclusive, false);
     }
 
     @Override
     public NavigableMap<K, V> headMap(K toKey, boolean inclusive) {
+        compare(toKey, toKey);
         return new TreeSubMap(true, null, true, false, toKey, inclusive, false);
     }
 
     @Override
     public NavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
+        compare(fromKey, fromKey);
         return new TreeSubMap(false, fromKey, inclusive, true, null, true, false);
     }
 
@@ -1149,6 +1195,9 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         TreeSubMap(boolean fromStart, K lo, boolean loInclusive, boolean toEnd, K hi, boolean hiInclusive, boolean descending) {
             if (!fromStart && !toEnd) {
                 if (compare(lo, hi) > 0) throw new IllegalArgumentException("fromKey > toKey");
+            } else {
+                if (!fromStart) compare(lo, lo);
+                if (!toEnd) compare(hi, hi);
             }
             this.fromStart = fromStart;
             this.lo = lo;
@@ -1177,14 +1226,36 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return false;
         }
 
+        boolean inClosedRange(Object key) {
+            @SuppressWarnings("unchecked") K k = (K) key;
+            return (fromStart || compare(k, lo) >= 0) && (toEnd || compare(k, hi) <= 0);
+        }
+
         boolean inRange(Object key) {
             return !tooLow(key) && !tooHigh(key);
+        }
+
+        boolean inRangeBound(Object key, boolean inclusive) {
+            if (!inClosedRange(key)) return false;
+            @SuppressWarnings("unchecked") K k = (K) key;
+            if (inclusive) {
+                if (!fromStart && !loInclusive && compare(k, lo) == 0) return false;
+                return toEnd || hiInclusive || compare(k, hi) != 0;
+            }
+            return true;
         }
 
         @Override
         public V put(K key, V value) {
             if (!inRange(key)) throw new IllegalArgumentException("key out of range");
             return AbstractBinaryTreeMap.this.put(key, value);
+        }
+
+
+        @Override
+        public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> rf) {
+            if (!inRange(key)) throw new IllegalArgumentException("key out of range");
+            return AbstractBinaryTreeMap.this.merge(key, value, rf);
         }
 
         @Override
@@ -1346,7 +1417,9 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         @Override
         public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
-            if (!inRange(fromKey) || !inRange(toKey))
+            compare(fromKey, fromKey);
+            compare(toKey, toKey);
+            if (!inRangeBound(fromKey, fromInclusive) || !inRangeBound(toKey, toInclusive))
                 throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(false, toKey, toInclusive, false, fromKey, fromInclusive, true);
@@ -1357,7 +1430,8 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         @Override
         public NavigableMap<K, V> headMap(K toKey, boolean inclusive) {
-            if (!inRange(toKey)) throw new IllegalArgumentException("Requested bounds out of range");
+            compare(toKey, toKey);
+            if (!inRangeBound(toKey, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(false, toKey, inclusive, toEnd, hi, hiInclusive, true);
             } else {
@@ -1367,7 +1441,8 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
         @Override
         public NavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
-            if (!inRange(fromKey)) throw new IllegalArgumentException("Requested bounds out of range");
+            compare(fromKey, fromKey);
+            if (!inRangeBound(fromKey, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(fromStart, lo, loInclusive, false, fromKey, inclusive, true);
             } else {
