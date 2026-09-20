@@ -1027,20 +1027,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             if (map instanceof AbstractNaryTreeMap.DescendingMapFacade) {
                 return ((AbstractNaryTreeMap<K, V, N>.DescendingMapFacade) map).keyIterator();
             }
-            final Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
-            return new Iterator<>() {
-                public boolean hasNext() {
-                    return it.hasNext();
-                }
-
-                public K next() {
-                    return it.next().getKey();
-                }
-
-                public void remove() {
-                    it.remove();
-                }
-            };
+            throw new AssertionError("Unreachable Map type: " + map.getClass());
         }
 
         @Override
@@ -1153,6 +1140,31 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         public Comparator<? super K> comparator() {
             Comparator<? super K> cmp = AbstractNaryTreeMap.this.comparator();
             return (cmp == null) ? Collections.reverseOrder() : Collections.reverseOrder(cmp);
+        }
+
+        private transient Collection<V> descendingValuesView;
+
+        @Override
+        public Collection<V> values() {
+            Collection<V> vs = descendingValuesView;
+            return (vs != null) ? vs : (descendingValuesView = new AbstractCollection<V>() {
+                @Override
+                public Iterator<V> iterator() {
+                    return AbstractNaryTreeMap.this.descendingValueIterator(null, true);
+                }
+                @Override
+                public int size() {
+                    return AbstractNaryTreeMap.this.size();
+                }
+                @Override
+                public boolean contains(Object o) {
+                    return AbstractNaryTreeMap.this.containsValue(o);
+                }
+                @Override
+                public void clear() {
+                    AbstractNaryTreeMap.this.clear();
+                }
+            });
         }
 
         @Override
