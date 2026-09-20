@@ -444,16 +444,9 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
-        if (root == null || o == null) return false;
-        E e;
-        try {
-            @SuppressWarnings("unchecked")
-            E temp = (E) o;
-            e = temp;
-            compare(e, e);
-        } catch (ClassCastException | NullPointerException ex) {
-            return false;
-        }
+        @SuppressWarnings("unchecked") E e = (E) o;
+        compare(e, e);
+        if (root == null) return false;
 
         BTreeNode<E> current = root;
         int idx;
@@ -808,6 +801,8 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         private int currentIndex;
         private long expectedModCount;
         private E lastReturned = null;
+        private BTreeNode<E> lastReturnedNode = null;
+        private int lastReturnedIndex = -1;
 
         BTreeIterator(E startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -859,9 +854,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
-
-        private BTreeNode<E> lastReturnedNode = null;
-        private int lastReturnedIndex = -1;
 
         @Override
         @SuppressWarnings("unchecked")
@@ -931,6 +923,8 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         private int currentIndex;
         private long expectedModCount;
         private E lastReturned = null;
+        private BTreeNode<E> lastReturnedNode = null;
+        private int lastReturnedIndex = -1;
 
         BTreeReverseIterator(E startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -982,9 +976,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex >= 0;
         }
-
-        private BTreeNode<E> lastReturnedNode = null;
-        private int lastReturnedIndex = -1;
 
         @Override
         @SuppressWarnings("unchecked")
