@@ -1,26 +1,13 @@
 package chaos.tree.naryMap;
+
 import org.junit.jupiter.api.Test;
 
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.AbstractMap;
 import java.util.NoSuchElementException;
 
 public class IterBuildFuzzDegree3MapTest {
-    static class EntryRangeIterator implements Iterator<Map.Entry<Integer, Integer>> {
-        int cur = 0; final int n;
-        EntryRangeIterator(int n) { this.n = n; }
-        public boolean hasNext() { return cur < n; }
-        public Map.Entry<Integer, Integer> next() { if (!hasNext()) throw new NoSuchElementException(); int v=cur++; return new AbstractMap.SimpleEntry<>(v,v); }
-    }
-    @Test
-    public void verifier() {
-        System.out.println("Testing BTreeMap...");
-        runFuzz(3);
-        System.out.println("Testing BPlusTreeMap...");
-        runFuzz(4);
-    }
-
     public static void runFuzz(int type) {
         int failures = 0;
         int trials = 0;
@@ -57,20 +44,49 @@ public class IterBuildFuzzDegree3MapTest {
             return false;
         }
     }
-    
+
     private static void validateBTreeMap(BTreeMapNode<?, ?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) throw new AssertionError("Underflow!");
         if (!node.isLeaf()) {
-            for (int i = 0; i <= node.keyCount; i++) if (node.child[i] != null) validateBTreeMap(node.child[i], minKeys);
+            for (int i = 0; i <= node.keyCount; i++)
+                if (node.child[i] != null) validateBTreeMap(node.child[i], minKeys);
         }
     }
-    
+
     private static void validateBPlusTreeMap(BPlusTreeMapNode<?, ?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) throw new AssertionError("Underflow!");
         if (!node.isLeaf()) {
-            for (int i = 0; i <= node.keyCount; i++) if (node.child[i] != null) validateBPlusTreeMap(node.child[i], minKeys);
+            for (int i = 0; i <= node.keyCount; i++)
+                if (node.child[i] != null) validateBPlusTreeMap(node.child[i], minKeys);
+        }
+    }
+
+    @Test
+    public void verifier() {
+        System.out.println("Testing BTreeMap...");
+        runFuzz(3);
+        System.out.println("Testing BPlusTreeMap...");
+        runFuzz(4);
+    }
+
+    static class EntryRangeIterator implements Iterator<Map.Entry<Integer, Integer>> {
+        final int n;
+        int cur = 0;
+
+        EntryRangeIterator(int n) {
+            this.n = n;
+        }
+
+        public boolean hasNext() {
+            return cur < n;
+        }
+
+        public Map.Entry<Integer, Integer> next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            int v = cur++;
+            return new AbstractMap.SimpleEntry<>(v, v);
         }
     }
 }

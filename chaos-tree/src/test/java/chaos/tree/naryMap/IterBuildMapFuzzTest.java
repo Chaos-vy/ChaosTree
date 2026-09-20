@@ -1,21 +1,15 @@
 package chaos.tree.naryMap;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.AbstractMap;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IterBuildMapFuzzTest {
-
-    static class EntryRangeIterator implements Iterator<Map.Entry<Integer, Integer>> {
-        int cur = 0; final int n;
-        EntryRangeIterator(int n) { this.n = n; }
-        public boolean hasNext() { return cur < n; }
-        public Map.Entry<Integer, Integer> next() { if (!hasNext()) throw new NoSuchElementException(); int v=cur++; return new AbstractMap.SimpleEntry<>(v,v); }
-    }
 
     @Test
     void testBTreeMapExtremeEdgeCases() {
@@ -58,7 +52,7 @@ public class IterBuildMapFuzzTest {
             validateBPlusTreeMap(tree.root, tree.minKeys);
         }
     }
-    
+
     private void validateBTreeMap(BTreeMapNode<?, ?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) {
@@ -70,7 +64,7 @@ public class IterBuildMapFuzzTest {
             }
         }
     }
-    
+
     private void validateBPlusTreeMap(BPlusTreeMapNode<?, ?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) {
@@ -80,6 +74,25 @@ public class IterBuildMapFuzzTest {
             for (int i = 0; i <= node.keyCount; i++) {
                 if (node.child[i] != null) validateBPlusTreeMap(node.child[i], minKeys);
             }
+        }
+    }
+
+    static class EntryRangeIterator implements Iterator<Map.Entry<Integer, Integer>> {
+        final int n;
+        int cur = 0;
+
+        EntryRangeIterator(int n) {
+            this.n = n;
+        }
+
+        public boolean hasNext() {
+            return cur < n;
+        }
+
+        public Map.Entry<Integer, Integer> next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            int v = cur++;
+            return new AbstractMap.SimpleEntry<>(v, v);
         }
     }
 }
