@@ -20,6 +20,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.Spliterator;
+import java.util.Spliterators;
 
 /**
  * Base Engine for B-Tree and B+Tree variants.
@@ -33,6 +35,7 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Serial
     private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
+    private static final int LINEAR_THRESHOLD = 12;
     protected final int degree;
     protected final int maxKeys;
     protected final int minKeys;
@@ -40,7 +43,6 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     protected transient N root;
     protected transient int size;
     protected transient long modCount;
-    private static final int LINEAR_THRESHOLD = 12;
 
     protected AbstractNaryTreeSet(int degree, Comparator<? super E> comparator) {
         this.comparator = comparator;
@@ -50,6 +52,12 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
         this.degree = degree;
         this.maxKeys = (degree << 1) - 1;
         this.minKeys = degree - 1;
+    }
+
+
+    @Override
+    public Spliterator<E> spliterator() {
+        return Spliterators.spliterator(this, Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
     }
 
     public abstract void buildFromSorted(Iterator<? extends E> it, float f);
@@ -101,21 +109,18 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Override
     public boolean contains(Object o) {
-        if (root == null || o == null) return false;
-        try {
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            N current = root;
-            while (current != null) {
-                int idx = searchNode(current, val);
-                if (idx >= 0) return true;
-                if (current.isLeaf()) return false;
-                current = current.child[~idx];
-            }
-            return false;
-        } catch (ClassCastException | NullPointerException e) {
-            return false;
+        @SuppressWarnings("unchecked") E val = (E) o;
+        compare(val, val);
+        if (root == null) return false;
+
+        N current = root;
+        while (current != null) {
+            int idx = searchNode(current, val);
+            if (idx >= 0) return true;
+            if (current.isLeaf()) return false;
+            current = current.child[~idx];
         }
+        return false;
     }
 
     @Override
@@ -431,16 +436,20 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             return !tooLow(key) && !tooHigh(key);
         }
 
-        private boolean outOfBounds(Object key) {
-            if (lo != null) {
-                @SuppressWarnings("unchecked") int c = compare((E) key, lo);
-                if (c < 0) return true;
+        private boolean outOfBounds(Object key, boolean inclusive) {
+            if (inclusive) {
+                return tooLow(key) || tooHigh(key);
+            } else {
+                if (!fromStart) {
+                    @SuppressWarnings("unchecked") int c = AbstractNaryTreeSet.this.compare((E) key, lo);
+                    if (c < 0) return true;
+                }
+                if (!toEnd) {
+                    @SuppressWarnings("unchecked") int c = AbstractNaryTreeSet.this.compare((E) key, hi);
+                    if (c > 0) return true;
+                }
+                return false;
             }
-            if (hi != null) {
-                @SuppressWarnings("unchecked") int c = compare((E) key, hi);
-                return c > 0;
-            }
-            return false;
         }
 
         @Override
@@ -451,24 +460,16 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public boolean contains(Object o) {
-            if (o == null) return false;
-            try {
-                @SuppressWarnings("unchecked") E e = (E) o;
-                return inRange(e) && AbstractNaryTreeSet.this.contains(e);
-            } catch (ClassCastException | NullPointerException ex) {
-                return false;
-            }
+            @SuppressWarnings("unchecked") E e = (E) o;
+            AbstractNaryTreeSet.this.compare(e, e);
+            return inRange(e) && AbstractNaryTreeSet.this.contains(e);
         }
 
         @Override
         public boolean remove(Object o) {
-            if (o == null) return false;
-            try {
-                @SuppressWarnings("unchecked") E e = (E) o;
-                return inRange(e) && AbstractNaryTreeSet.this.remove(e);
-            } catch (ClassCastException | NullPointerException ex) {
-                return false;
-            }
+            @SuppressWarnings("unchecked") E e = (E) o;
+            AbstractNaryTreeSet.this.compare(e, e);
+            return inRange(e) && AbstractNaryTreeSet.this.remove(e);
         }
 
         private E getAbsLowest() {
@@ -571,6 +572,16 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             return getAbsLowest() == null;
         }
 
+
+        @Override
+        public Spliterator<E> spliterator() {
+            int chars = Spliterator.ORDERED | Spliterator.DISTINCT;
+            if (!descending) {
+                chars |= Spliterator.SORTED;
+            }
+            return Spliterators.spliterator(this, chars);
+        }
+
         @Override
         public Comparator<? super E> comparator() {
             if (descending) return Collections.reverseOrder(AbstractNaryTreeSet.this.comparator);
@@ -584,26 +595,31 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
         @Override
         public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-            if (outOfBounds(fromElement) || outOfBounds(toElement))
+            int c = AbstractNaryTreeSet.this.compare(fromElement, toElement);
+            if (descending ? c < 0 : c > 0)
+                throw new IllegalArgumentException("fromElement > toElement");
+            if (outOfBounds(fromElement, fromInclusive) || outOfBounds(toElement, toInclusive))
                 throw new IllegalArgumentException("Requested bounds out of range");
 
-            if (descending) return new NarySubSet(false, toElement, toInclusive, false, fromElement, fromInclusive, true);
+            if (descending)
+                return new NarySubSet(false, toElement, toInclusive, false, fromElement, fromInclusive, true);
             return new NarySubSet(false, fromElement, fromInclusive, false, toElement, toInclusive, false);
         }
 
         @Override
         public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-            if (outOfBounds(toElement)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (outOfBounds(toElement, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
 
-            if (descending) return new NarySubSet(fromStart, lo, loInclusive, false, toElement, inclusive, true);
+            if (descending) return new NarySubSet(false, toElement, inclusive, toEnd, hi, hiInclusive, true);
             return new NarySubSet(fromStart, lo, loInclusive, false, toElement, inclusive, false);
         }
 
         @Override
         public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-            if (outOfBounds(fromElement)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (outOfBounds(fromElement, inclusive))
+                throw new IllegalArgumentException("Requested bounds out of range");
 
-            if (descending) return new NarySubSet(false, fromElement, inclusive, toEnd, hi, hiInclusive, true);
+            if (descending) return new NarySubSet(fromStart, lo, loInclusive, false, fromElement, inclusive, true);
             return new NarySubSet(false, fromElement, inclusive, toEnd, hi, hiInclusive, false);
         }
 
