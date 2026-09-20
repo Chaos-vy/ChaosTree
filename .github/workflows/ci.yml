@@ -40,13 +40,18 @@ jobs:
           MAVEN_OPTS: "-Xmx2g"
         run: mvn clean test -B
 
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.java == '21'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Generate JaCoCo Badge
         uses: cicirello/jacoco-badge-generator@v2
         if: matrix.os == 'ubuntu-latest' && matrix.java == '21'
         with:
           generate-branches-badge: true
           jacoco-csv-file: chaos-tree/target/site/jacoco/jacoco.csv
-#Just trying to get JaCoCo coverage
       - name: Commit and Push Badge
         if: matrix.os == 'ubuntu-latest' && matrix.java == '21' && github.event_name == 'push'
         run: |

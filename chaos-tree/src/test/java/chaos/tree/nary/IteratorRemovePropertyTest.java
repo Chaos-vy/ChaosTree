@@ -19,7 +19,7 @@ public class IteratorRemovePropertyTest {
             @ForAll @IntRange(min = 3, max = 32) int degree,
             @ForAll @Size(max = 2000) List<@IntRange(min = -1000, max = 1000) Integer> elements,
             @ForAll @Size(max = 2000) List<Boolean> removeDecisions) {
-            
+
         BPlusTreeSet<Integer> target = new BPlusTreeSet<>(degree);
         TreeSet<Integer> reference = new TreeSet<>();
 
@@ -43,11 +43,11 @@ public class IteratorRemovePropertyTest {
                 refIt.remove();
             }
         }
-        
+
         assertEquals(refIt.hasNext(), targetIt.hasNext());
         assertEquals(reference.size(), target.size());
         assertEquals(new ArrayList<>(reference), new ArrayList<>(target));
-        
+
         // CLRS White-Box Validation
         validateBPlusTreeSet(target.root, target.minKeys);
     }
@@ -57,7 +57,7 @@ public class IteratorRemovePropertyTest {
             @ForAll @IntRange(min = 3, max = 32) int degree,
             @ForAll @Size(max = 2000) List<@IntRange(min = -1000, max = 1000) Integer> elements,
             @ForAll @Size(max = 2000) List<Boolean> removeDecisions) {
-            
+
         BTreeSet<Integer> target = new BTreeSet<>(degree);
         TreeSet<Integer> reference = new TreeSet<>();
 
@@ -81,7 +81,7 @@ public class IteratorRemovePropertyTest {
                 refIt.remove();
             }
         }
-        
+
         assertEquals(refIt.hasNext(), targetIt.hasNext());
         assertEquals(reference.size(), target.size());
         assertEquals(new ArrayList<>(reference), new ArrayList<>(target));

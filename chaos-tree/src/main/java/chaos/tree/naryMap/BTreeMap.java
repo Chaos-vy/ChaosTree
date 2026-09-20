@@ -58,8 +58,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     @Override
     @SuppressWarnings("unchecked")
     public boolean containsKey(Object key) {
-        if (root == null) return false;
         K k = (K) key;
+        compare(k, k);
+        if (root == null) return false;
         BTreeMapNode<K, V> current = root;
 
         while (true) {
@@ -73,11 +74,13 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             }
         }
     }
+
     @Override
     @SuppressWarnings("unchecked")
     public V get(Object key) {
-        if (root == null) return null;
         K k = (K) key;
+        compare(k, k);
+        if (root == null) return null;
         BTreeMapNode<K, V> current = root;
 
         while (true) {
@@ -108,6 +111,7 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         if (key == null) throw new NullPointerException();
@@ -121,7 +125,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (idx >= 0) {
                 V oldValue = (V) current.values[idx];
                 if (oldValue != null) {
+                    long _expectedModCount = modCount;
                     V newValue = remappingFunction.apply(key, oldValue);
+                    if (_expectedModCount != modCount) throw new ConcurrentModificationException();
                     if (newValue == null) {
                         removeAtNode(current, idx);
                         return null;
@@ -227,7 +233,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         if (key == null) throw new NullPointerException();
 
         if (root == null) {
+            long _expectedModCount = modCount;
             V computed = mappingFunction.apply(key);
+            if (_expectedModCount != modCount) throw new ConcurrentModificationException();
             if (computed != null) {
                 compare(key, key);
                 root = new BTreeMapNode<>(degree, true);
@@ -248,7 +256,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
                 if (oldValue != null) {
                     return oldValue;
                 }
+                long _expectedModCount = modCount;
                 V computed = mappingFunction.apply(key);
+                if (_expectedModCount != modCount) throw new ConcurrentModificationException();
                 if (computed != null) {
                     curr.values[idx] = computed;
                 }
@@ -256,7 +266,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             }
 
             if (curr.isLeaf()) {
+                long _expectedModCount = modCount;
                 V computed = mappingFunction.apply(key);
+                if (_expectedModCount != modCount) throw new ConcurrentModificationException();
                 if (computed == null) {
                     return null;
                 }
@@ -299,7 +311,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         if (key == null) throw new NullPointerException();
 
         if (root == null) {
+            long _expectedModCount = modCount;
             V newValue = remappingFunction.apply(key, null);
+            if (_expectedModCount != modCount) throw new ConcurrentModificationException();
             if (newValue != null) {
                 compare(key, key);
                 root = createNode(degree, true);
@@ -318,7 +332,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
             if (idx >= 0) {
                 V oldValue = (V) curr.values[idx];
+                long _expectedModCount = modCount;
                 V newValue = remappingFunction.apply(key, oldValue);
+                if (_expectedModCount != modCount) throw new ConcurrentModificationException();
 
                 if (newValue != null) {
                     curr.values[idx] = newValue;
@@ -330,7 +346,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             }
 
             if (curr.isLeaf()) {
+                long _expectedModCount = modCount;
                 V newValue = remappingFunction.apply(key, null);
+                if (_expectedModCount != modCount) throw new ConcurrentModificationException();
                 if (newValue == null) {
                     return null;
                 }
@@ -386,7 +404,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
             if (idx >= 0) {
                 V oldValue = (V) current.values[idx];
+                long _expectedModCount = modCount;
                 V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
+                if (_expectedModCount != modCount) throw new ConcurrentModificationException();
                 if (newValue == null) {
                     removeAtNode(current, idx);
                     return null;
@@ -427,11 +447,12 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     @Override
     @SuppressWarnings("unchecked")
     public V remove(Object key) {
+        K k = (K) key;
+        compare(k, k);
         if (root == null) return null;
 
         BTreeMapNode<K, V> current = root;
         int idx;
-        K k = (K) key;
         while (true) {
             idx = searchNodeMap(current, k);
             if (idx >= 0) break;
@@ -1162,6 +1183,8 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         BTreeMapNode<K, V> currentNode;
         int currentIndex;
         K lastReturnedKey = null;
+        BTreeMapNode<K, V> lastReturnedNode = null;
+        int lastReturnedIndex = -1;
 
         BTreeBaseIterator(K startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -1214,9 +1237,6 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex < currentNode.keyCount;
         }
-
-        BTreeMapNode<K, V> lastReturnedNode = null;
-        int lastReturnedIndex = -1;
 
         protected final void advanceReverse() {
             lastReturnedNode = currentNode;
@@ -1336,6 +1356,8 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         BTreeMapNode<K, V> currentNode;
         int currentIndex;
         K lastReturnedKey = null;
+        BTreeMapNode<K, V> lastReturnedNode = null;
+        int lastReturnedIndex = -1;
 
         BTreeReverseBaseIterator(K startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -1388,9 +1410,6 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
             return currentNode != null && currentIndex >= 0;
         }
-
-        BTreeMapNode<K, V> lastReturnedNode = null;
-        int lastReturnedIndex = -1;
 
         protected final void advanceReverse() {
             lastReturnedNode = currentNode;

@@ -1,0 +1,270 @@
+Benchmark                                                     (mapType)         (mode)  (seed)  (size)  Mode  Cnt     Score     Error   Units
+ChaosTreeMapReadBenchmark.ceilingKey                        JavaTreeMap        TreeMap      42   10000  avgt   15   104.301 ±   1.386   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate          JavaTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm     JavaTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count               JavaTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                        JavaTreeMap  descendingMap      42   10000  avgt   15   106.361 ±   1.485   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate          JavaTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm     JavaTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count               JavaTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                        JavaTreeMap         subMap      42   10000  avgt   15   114.961 ±  13.487   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate          JavaTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm     JavaTreeMap         subMap      42   10000  avgt   15     0.002 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count               JavaTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                       BPlusTreeMap        TreeMap      42   10000  avgt   15   103.802 ±   1.542   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate         BPlusTreeMap        TreeMap      42   10000  avgt   15   145.603 ± 113.923  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm    BPlusTreeMap        TreeMap      42   10000  avgt   15    16.001 ±  12.520    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count              BPlusTreeMap        TreeMap      42   10000  avgt   15     4.000            counts
+ChaosTreeMapReadBenchmark.ceilingKey:gc.time               BPlusTreeMap        TreeMap      42   10000  avgt   15     7.000                ms
+ChaosTreeMapReadBenchmark.ceilingKey                       BPlusTreeMap  descendingMap      42   10000  avgt   15   104.251 ±   0.633   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate         BPlusTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm    BPlusTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count              BPlusTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                       BPlusTreeMap         subMap      42   10000  avgt   15   105.056 ±   2.244   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate         BPlusTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm    BPlusTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count              BPlusTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                           BTreeMap        TreeMap      42   10000  avgt   15   107.065 ±   5.086   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate             BTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm        BTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count                  BTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                           BTreeMap  descendingMap      42   10000  avgt   15   103.922 ±   1.007   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate             BTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm        BTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count                  BTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.ceilingKey                           BTreeMap         subMap      42   10000  avgt   15   110.093 ±   0.930   ns/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate             BTreeMap         subMap      42   10000  avgt   15   207.825 ±   1.782  MB/sec
+ChaosTreeMapReadBenchmark.ceilingKey:gc.alloc.rate.norm        BTreeMap         subMap      42   10000  avgt   15    24.002 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.ceilingKey:gc.count                  BTreeMap         subMap      42   10000  avgt   15     6.000            counts
+ChaosTreeMapReadBenchmark.ceilingKey:gc.time                   BTreeMap         subMap      42   10000  avgt   15     9.000                ms
+ChaosTreeMapReadBenchmark.containsKey                       JavaTreeMap        TreeMap      42   10000  avgt   15   106.291 ±   0.912   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate         JavaTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm    JavaTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count              JavaTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                       JavaTreeMap  descendingMap      42   10000  avgt   15   106.035 ±   1.750   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate         JavaTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm    JavaTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count              JavaTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                       JavaTreeMap         subMap      42   10000  avgt   15   105.562 ±   3.444   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate         JavaTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm    JavaTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count              JavaTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                      BPlusTreeMap        TreeMap      42   10000  avgt   15   102.058 ±   1.650   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate        BPlusTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm   BPlusTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count             BPlusTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                      BPlusTreeMap  descendingMap      42   10000  avgt   15   106.329 ±   5.312   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate        BPlusTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm   BPlusTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count             BPlusTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                      BPlusTreeMap         subMap      42   10000  avgt   15   102.287 ±   5.050   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate        BPlusTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm   BPlusTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count             BPlusTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                          BTreeMap        TreeMap      42   10000  avgt   15   103.073 ±   0.879   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate            BTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm       BTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count                 BTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                          BTreeMap  descendingMap      42   10000  avgt   15   103.145 ±   3.036   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate            BTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm       BTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count                 BTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.containsKey                          BTreeMap         subMap      42   10000  avgt   15   105.353 ±   1.514   ns/op
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate            BTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.containsKey:gc.alloc.rate.norm       BTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.containsKey:gc.count                 BTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.firstAndLast                      JavaTreeMap        TreeMap      42   10000  avgt   15    24.886 ±   0.060   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate        JavaTreeMap        TreeMap      42   10000  avgt   15  1838.520 ±   4.374  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm   JavaTreeMap        TreeMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count             JavaTreeMap        TreeMap      42   10000  avgt   15    59.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time              JavaTreeMap        TreeMap      42   10000  avgt   15    47.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                      JavaTreeMap  descendingMap      42   10000  avgt   15    27.889 ±   0.090   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate        JavaTreeMap  descendingMap      42   10000  avgt   15  1640.614 ±   5.147  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm   JavaTreeMap  descendingMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count             JavaTreeMap  descendingMap      42   10000  avgt   15    51.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time              JavaTreeMap  descendingMap      42   10000  avgt   15    43.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                      JavaTreeMap         subMap      42   10000  avgt   15    60.000 ±   0.469   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate        JavaTreeMap         subMap      42   10000  avgt   15   762.609 ±   5.946  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm   JavaTreeMap         subMap      42   10000  avgt   15    48.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count             JavaTreeMap         subMap      42   10000  avgt   15    27.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time              JavaTreeMap         subMap      42   10000  avgt   15    24.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                     BPlusTreeMap        TreeMap      42   10000  avgt   15     9.698 ±   0.064   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate       BPlusTreeMap        TreeMap      42   10000  avgt   15  4717.580 ±  32.320  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm  BPlusTreeMap        TreeMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count            BPlusTreeMap        TreeMap      42   10000  avgt   15    94.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time             BPlusTreeMap        TreeMap      42   10000  avgt   15    68.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                     BPlusTreeMap  descendingMap      42   10000  avgt   15    10.487 ±   0.067   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate       BPlusTreeMap  descendingMap      42   10000  avgt   15  4362.863 ±  27.571  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm  BPlusTreeMap  descendingMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count            BPlusTreeMap  descendingMap      42   10000  avgt   15    90.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time             BPlusTreeMap  descendingMap      42   10000  avgt   15    61.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                     BPlusTreeMap         subMap      42   10000  avgt   15    32.772 ±   0.179   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate       BPlusTreeMap         subMap      42   10000  avgt   15  1396.180 ±   7.731  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm  BPlusTreeMap         subMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count            BPlusTreeMap         subMap      42   10000  avgt   15    40.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time             BPlusTreeMap         subMap      42   10000  avgt   15    34.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                         BTreeMap        TreeMap      42   10000  avgt   15     9.654 ±   0.045   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate           BTreeMap        TreeMap      42   10000  avgt   15  4739.536 ±  22.253  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm      BTreeMap        TreeMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count                BTreeMap        TreeMap      42   10000  avgt   15    89.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time                 BTreeMap        TreeMap      42   10000  avgt   15    52.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                         BTreeMap  descendingMap      42   10000  avgt   15    10.451 ±   0.031   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate           BTreeMap  descendingMap      42   10000  avgt   15  4377.676 ±  12.724  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm      BTreeMap  descendingMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count                BTreeMap  descendingMap      42   10000  avgt   15    86.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time                 BTreeMap  descendingMap      42   10000  avgt   15    55.000                ms
+ChaosTreeMapReadBenchmark.firstAndLast                         BTreeMap         subMap      42   10000  avgt   15    34.644 ±   0.194   ns/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate           BTreeMap         subMap      42   10000  avgt   15  1320.719 ±   7.412  MB/sec
+ChaosTreeMapReadBenchmark.firstAndLast:gc.alloc.rate.norm      BTreeMap         subMap      42   10000  avgt   15    48.000 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.firstAndLast:gc.count                BTreeMap         subMap      42   10000  avgt   15    45.000            counts
+ChaosTreeMapReadBenchmark.firstAndLast:gc.time                 BTreeMap         subMap      42   10000  avgt   15    45.000                ms
+ChaosTreeMapReadBenchmark.floorKey                          JavaTreeMap        TreeMap      42   10000  avgt   15   106.488 ±   1.856   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate            JavaTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm       JavaTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                 JavaTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                          JavaTreeMap  descendingMap      42   10000  avgt   15   103.952 ±   0.817   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate            JavaTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm       JavaTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                 JavaTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                          JavaTreeMap         subMap      42   10000  avgt   15   105.865 ±   1.572   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate            JavaTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm       JavaTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                 JavaTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                         BPlusTreeMap        TreeMap      42   10000  avgt   15   104.801 ±   1.400   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate           BPlusTreeMap        TreeMap      42   10000  avgt   15   218.325 ±   2.918  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm      BPlusTreeMap        TreeMap      42   10000  avgt   15    24.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                BPlusTreeMap        TreeMap      42   10000  avgt   15     6.000            counts
+ChaosTreeMapReadBenchmark.floorKey:gc.time                 BPlusTreeMap        TreeMap      42   10000  avgt   15     8.000                ms
+ChaosTreeMapReadBenchmark.floorKey                         BPlusTreeMap  descendingMap      42   10000  avgt   15   105.058 ±   1.247   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate           BPlusTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm      BPlusTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                BPlusTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                         BPlusTreeMap         subMap      42   10000  avgt   15   107.727 ±   2.494   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate           BPlusTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm      BPlusTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                BPlusTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                             BTreeMap        TreeMap      42   10000  avgt   15   106.315 ±   0.427   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate               BTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm          BTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                    BTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                             BTreeMap  descendingMap      42   10000  avgt   15   103.984 ±   2.261   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate               BTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm          BTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                    BTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.floorKey                             BTreeMap         subMap      42   10000  avgt   15   128.866 ±   3.438   ns/op
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate               BTreeMap         subMap      42   10000  avgt   15   177.646 ±   4.817  MB/sec
+ChaosTreeMapReadBenchmark.floorKey:gc.alloc.rate.norm          BTreeMap         subMap      42   10000  avgt   15    24.002 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.floorKey:gc.count                    BTreeMap         subMap      42   10000  avgt   15     8.000            counts
+ChaosTreeMapReadBenchmark.floorKey:gc.time                     BTreeMap         subMap      42   10000  avgt   15    12.000                ms
+ChaosTreeMapReadBenchmark.get                               JavaTreeMap        TreeMap      42   10000  avgt   15   110.032 ±   3.601   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                 JavaTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm            JavaTreeMap        TreeMap      42   10000  avgt   15     0.002 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                      JavaTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                               JavaTreeMap  descendingMap      42   10000  avgt   15   107.638 ±   2.701   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                 JavaTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm            JavaTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                      JavaTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                               JavaTreeMap         subMap      42   10000  avgt   15   105.426 ±   1.276   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                 JavaTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm            JavaTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                      JavaTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                              BPlusTreeMap        TreeMap      42   10000  avgt   15    99.955 ±   0.531   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                BPlusTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm           BPlusTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                     BPlusTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                              BPlusTreeMap  descendingMap      42   10000  avgt   15   105.560 ±   2.685   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                BPlusTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm           BPlusTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                     BPlusTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                              BPlusTreeMap         subMap      42   10000  avgt   15   102.438 ±   1.500   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                BPlusTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm           BPlusTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                     BPlusTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                                  BTreeMap        TreeMap      42   10000  avgt   15   106.008 ±   0.905   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                    BTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm               BTreeMap        TreeMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                         BTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                                  BTreeMap  descendingMap      42   10000  avgt   15   101.977 ±   1.939   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                    BTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm               BTreeMap  descendingMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                         BTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.get                                  BTreeMap         subMap      42   10000  avgt   15   106.513 ±   2.064   ns/op
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate                    BTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.get:gc.alloc.rate.norm               BTreeMap         subMap      42   10000  avgt   15     0.001 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.get:gc.count                         BTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                           JavaTreeMap        TreeMap      42   10000  avgt   15    34.835 ±   3.507   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate             JavaTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm        JavaTreeMap        TreeMap      42   10000  avgt   15    ≈ 10⁻³              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                  JavaTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                           JavaTreeMap  descendingMap      42   10000  avgt   15    34.385 ±   5.471   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate             JavaTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm        JavaTreeMap  descendingMap      42   10000  avgt   15    ≈ 10⁻³              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                  JavaTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                           JavaTreeMap         subMap      42   10000  avgt   15    12.201 ±   0.337   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate             JavaTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm        JavaTreeMap         subMap      42   10000  avgt   15    ≈ 10⁻⁴              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                  JavaTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                          BPlusTreeMap        TreeMap      42   10000  avgt   15    29.044 ±   0.500   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate            BPlusTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm       BPlusTreeMap        TreeMap      42   10000  avgt   15    ≈ 10⁻³              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                 BPlusTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                          BPlusTreeMap  descendingMap      42   10000  avgt   15    31.159 ±   1.266   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate            BPlusTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm       BPlusTreeMap  descendingMap      42   10000  avgt   15    ≈ 10⁻³              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                 BPlusTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                          BPlusTreeMap         subMap      42   10000  avgt   15    15.817 ±   0.320   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate            BPlusTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm       BPlusTreeMap         subMap      42   10000  avgt   15    ≈ 10⁻⁴              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                 BPlusTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                              BTreeMap        TreeMap      42   10000  avgt   15    32.579 ±   1.238   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate                BTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm           BTreeMap        TreeMap      42   10000  avgt   15    ≈ 10⁻³              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                     BTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                              BTreeMap  descendingMap      42   10000  avgt   15    34.045 ±   0.181   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate                BTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm           BTreeMap  descendingMap      42   10000  avgt   15    ≈ 10⁻³              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                     BTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.getMiss                              BTreeMap         subMap      42   10000  avgt   15    18.717 ±   0.079   ns/op
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate                BTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.getMiss:gc.alloc.rate.norm           BTreeMap         subMap      42   10000  avgt   15    ≈ 10⁻⁴              B/op
+ChaosTreeMapReadBenchmark.getMiss:gc.count                     BTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.iterate                           JavaTreeMap        TreeMap      42   10000  avgt   15     3.974 ±   0.049   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate             JavaTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm        JavaTreeMap        TreeMap      42   10000  avgt   15    ≈ 10⁻⁴              B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                  JavaTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.iterate                           JavaTreeMap  descendingMap      42   10000  avgt   15     4.227 ±   0.029   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate             JavaTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm        JavaTreeMap  descendingMap      42   10000  avgt   15    ≈ 10⁻⁴              B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                  JavaTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.iterate                           JavaTreeMap         subMap      42   10000  avgt   15     4.205 ±   0.036   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate             JavaTreeMap         subMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm        JavaTreeMap         subMap      42   10000  avgt   15    ≈ 10⁻⁴              B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                  JavaTreeMap         subMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.iterate                          BPlusTreeMap        TreeMap      42   10000  avgt   15     1.556 ±   0.046   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate            BPlusTreeMap        TreeMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm       BPlusTreeMap        TreeMap      42   10000  avgt   15    ≈ 10⁻⁵              B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                 BPlusTreeMap        TreeMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.iterate                          BPlusTreeMap  descendingMap      42   10000  avgt   15     1.487 ±   0.034   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate            BPlusTreeMap  descendingMap      42   10000  avgt   15     0.013 ±   0.001  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm       BPlusTreeMap  descendingMap      42   10000  avgt   15    ≈ 10⁻⁵              B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                 BPlusTreeMap  descendingMap      42   10000  avgt   15       ≈ 0            counts
+ChaosTreeMapReadBenchmark.iterate                          BPlusTreeMap         subMap      42   10000  avgt   15     8.644 ±   0.363   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate            BPlusTreeMap         subMap      42   10000  avgt   15  4418.322 ± 165.866  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm       BPlusTreeMap         subMap      42   10000  avgt   15    40.010 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                 BPlusTreeMap         subMap      42   10000  avgt   15    97.000            counts
+ChaosTreeMapReadBenchmark.iterate:gc.time                  BPlusTreeMap         subMap      42   10000  avgt   15    59.000                ms
+ChaosTreeMapReadBenchmark.iterate                              BTreeMap        TreeMap      42   10000  avgt   15     7.436 ±   0.072   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate                BTreeMap        TreeMap      42   10000  avgt   15  5129.385 ±  49.310  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm           BTreeMap        TreeMap      42   10000  avgt   15    40.005 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                     BTreeMap        TreeMap      42   10000  avgt   15   106.000            counts
+ChaosTreeMapReadBenchmark.iterate:gc.time                      BTreeMap        TreeMap      42   10000  avgt   15    63.000                ms
+ChaosTreeMapReadBenchmark.iterate                              BTreeMap  descendingMap      42   10000  avgt   15     7.405 ±   0.087   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate                BTreeMap  descendingMap      42   10000  avgt   15  5150.578 ±  60.949  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm           BTreeMap  descendingMap      42   10000  avgt   15    40.005 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                     BTreeMap  descendingMap      42   10000  avgt   15   101.000            counts
+ChaosTreeMapReadBenchmark.iterate:gc.time                      BTreeMap  descendingMap      42   10000  avgt   15    57.000                ms
+ChaosTreeMapReadBenchmark.iterate                              BTreeMap         subMap      42   10000  avgt   15     8.791 ±   0.061   ns/op
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate                BTreeMap         subMap      42   10000  avgt   15  4338.743 ±  30.390  MB/sec
+ChaosTreeMapReadBenchmark.iterate:gc.alloc.rate.norm           BTreeMap         subMap      42   10000  avgt   15    40.010 ±   0.001    B/op
+ChaosTreeMapReadBenchmark.iterate:gc.count                     BTreeMap         subMap      42   10000  avgt   15    90.000            counts
+ChaosTreeMapReadBenchmark.iterate:gc.time                      BTreeMap         subMap      42   10000  avgt   15    52.000                ms

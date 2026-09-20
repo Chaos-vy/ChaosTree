@@ -20,7 +20,7 @@ public class MapIteratorRemovePropertyTest {
             @ForAll @IntRange(min = 3, max = 32) int degree,
             @ForAll @Size(max = 2000) List<@IntRange(min = -1000, max = 1000) Integer> elements,
             @ForAll @Size(max = 2000) List<Boolean> removeDecisions) {
-            
+
         BPlusTreeMap<Integer, String> target = new BPlusTreeMap<>(degree);
         TreeMap<Integer, String> reference = new TreeMap<>();
 
@@ -44,11 +44,11 @@ public class MapIteratorRemovePropertyTest {
                 refIt.remove();
             }
         }
-        
+
         assertEquals(refIt.hasNext(), targetIt.hasNext());
         assertEquals(reference.size(), target.size());
         assertEquals(new ArrayList<>(reference.keySet()), new ArrayList<>(target.keySet()));
-        
+
         // CLRS White-Box Validation
         validateBPlusTreeMap(target.root, target.minKeys);
     }
@@ -58,7 +58,7 @@ public class MapIteratorRemovePropertyTest {
             @ForAll @IntRange(min = 3, max = 32) int degree,
             @ForAll @Size(max = 2000) List<@IntRange(min = -1000, max = 1000) Integer> elements,
             @ForAll @Size(max = 2000) List<Boolean> removeDecisions) {
-            
+
         BTreeMap<Integer, String> target = new BTreeMap<>(degree);
         TreeMap<Integer, String> reference = new TreeMap<>();
 
@@ -82,11 +82,11 @@ public class MapIteratorRemovePropertyTest {
                 refIt.remove();
             }
         }
-        
+
         assertEquals(refIt.hasNext(), targetIt.hasNext());
         assertEquals(reference.size(), target.size());
         assertEquals(new ArrayList<>(reference.keySet()), new ArrayList<>(target.keySet()));
-        
+
         // CLRS White-Box Validation
         validateBTreeMap(target.root, target.minKeys);
     }

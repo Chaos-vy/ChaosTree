@@ -11,6 +11,7 @@ import org.junit.runners.AllTests;
 
 import java.util.Arrays;
 import java.util.SortedSet;
+
 @RunWith(AllTests.class)
 public class BPlusTreeSetTest extends TestCase {
     public static Test suite() {
@@ -34,7 +35,6 @@ public class BPlusTreeSetTest extends TestCase {
                         CollectionFeature.RESTRICTS_ELEMENTS,
                         CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
                         CollectionFeature.SERIALIZABLE,
-                        CollectionFeature.ALLOWS_NULL_QUERIES,
                         CollectionSize.ANY
                 )
                 .createTestSuite();

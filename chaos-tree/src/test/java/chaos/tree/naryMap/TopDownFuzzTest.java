@@ -1,9 +1,10 @@
 package chaos.tree.naryMap;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TopDownFuzzTest {
 
@@ -51,7 +52,7 @@ public class TopDownFuzzTest {
                 keys[i] = i;
                 values[i] = "v" + i;
             }
-            
+
             BTreeMap<Integer, String> tree = BTreeMap.Builder.<Integer, String>create(degree)
                     .factor(factor)
                     .importFlatMatrix(new Object[][]{keys, values})

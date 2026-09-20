@@ -96,7 +96,11 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
 
     @Override
     public V remove(Object o) {
-        if (isEmpty()) return null;
+        if (isEmpty()) {
+            @SuppressWarnings("unchecked") K key = (K) o;
+            compare(key, key);
+            return null;
+        }
         @SuppressWarnings("unchecked")
         K key = (K) o;
         AvlMapNode<K, V> x = nodeFinder(key);

@@ -1,25 +1,11 @@
 package chaos.tree.nary;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class IterBuildFuzzDegree3Test {
-    static class RangeIterator implements Iterator<Integer> {
-        int cur = 0; final int n;
-        RangeIterator(int n) { this.n = n; }
-        public boolean hasNext() { return cur < n; }
-        public Integer next() { if (!hasNext()) throw new NoSuchElementException(); return cur++; }
-    }
-
-    @Test
-    public void verifier() {
-        System.out.println("Testing BTreeSet...");
-        runFuzz(1);
-        System.out.println("Testing BPlusTreeSet...");
-        runFuzz(2);
-    }
-
     public static void runFuzz(int type) {
         int failures = 0;
         int trials = 0;
@@ -61,15 +47,43 @@ public class IterBuildFuzzDegree3Test {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) throw new AssertionError("Underflow!");
         if (!node.isLeaf()) {
-            for (int i = 0; i <= node.keyCount; i++) if (node.child[i] != null) validateBTreeSet(node.child[i], minKeys);
+            for (int i = 0; i <= node.keyCount; i++)
+                if (node.child[i] != null) validateBTreeSet(node.child[i], minKeys);
         }
     }
-    
+
     private static void validateBPlusTreeSet(BPlusTreeNode<?> node, int minKeys) {
         if (node == null) return;
         if (node.parent != null && node.keyCount < minKeys) throw new AssertionError("Underflow!");
         if (!node.isLeaf()) {
-            for (int i = 0; i <= node.keyCount; i++) if (node.child[i] != null) validateBPlusTreeSet(node.child[i], minKeys);
+            for (int i = 0; i <= node.keyCount; i++)
+                if (node.child[i] != null) validateBPlusTreeSet(node.child[i], minKeys);
+        }
+    }
+
+    @Test
+    public void verifier() {
+        System.out.println("Testing BTreeSet...");
+        runFuzz(1);
+        System.out.println("Testing BPlusTreeSet...");
+        runFuzz(2);
+    }
+
+    static class RangeIterator implements Iterator<Integer> {
+        final int n;
+        int cur = 0;
+
+        RangeIterator(int n) {
+            this.n = n;
+        }
+
+        public boolean hasNext() {
+            return cur < n;
+        }
+
+        public Integer next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            return cur++;
         }
     }
 }

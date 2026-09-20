@@ -1,0 +1,19 @@
+Benchmark                                    (mapType)     (mix)  (seed)   (size)  Mode  Cnt    Score    Error  Units
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  70,20,10      42  1000000  avgt   30  799.974 ± 35.740  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  50,25,25      42  1000000  avgt   30  798.765 ± 12.470  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  10,70,20      42  1000000  avgt   30  816.821 ± 34.469  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,60,20      42  1000000  avgt   30  839.408 ± 27.836  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  34,33,33      42  1000000  avgt   30  861.024 ± 24.655  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,10,70      42  1000000  avgt   30  829.618 ± 19.528  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  70,20,10      42  1000000  avgt   30  450.906 ± 24.157  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  50,25,25      42  1000000  avgt   30  440.563 ± 21.609  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  10,70,20      42  1000000  avgt   30  444.837 ± 12.713  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,60,20      42  1000000  avgt   30  455.377 ± 14.690  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  34,33,33      42  1000000  avgt   30  450.845 ± 15.140  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,10,70      42  1000000  avgt   30  455.877 ± 11.772  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  70,20,10      42  1000000  avgt   30  423.991 ± 12.655  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  50,25,25      42  1000000  avgt   30  473.899 ± 24.453  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  10,70,20      42  1000000  avgt   30  491.246 ± 24.545  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,60,20      42  1000000  avgt   30  466.604 ± 15.955  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  34,33,33      42  1000000  avgt   30  455.621 ±  5.631  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,10,70      42  1000000  avgt   30  463.281 ±  3.661  ms/op

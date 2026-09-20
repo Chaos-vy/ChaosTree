@@ -437,16 +437,9 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
-        if (root == null || o == null) return false;
-        E e;
-        try {
-            @SuppressWarnings("unchecked")
-            E temp = (E) o;
-            e = temp;
-            compare(e, e);
-        } catch (ClassCastException | NullPointerException ex) {
-            return false;
-        }
+        E e = (E) o;
+        compare(e, e);
+        if (root == null) return false;
 
         BPlusTreeNode<E> current = root;
         while (!current.isLeaf()) {
@@ -597,23 +590,17 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
 
     @Override
     public boolean contains(Object o) {
-        if (root == null || o == null) {
-            return false;
+        @SuppressWarnings("unchecked") E val = (E) o;
+        compare(val, val);
+        if (root == null) return false;
+
+        BPlusTreeNode<E> current = root;
+        while (current != null) {
+            int idx = searchNode(current, val);
+            if (current.isLeaf()) return idx >= 0;
+            current = current.child[(idx >= 0) ? idx + 1 : ~idx];
         }
-        try {
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            BPlusTreeNode<E> current = root;
-            while (current != null) {
-                int idx = searchNode(current, val);
-                if (current.isLeaf()) return idx >= 0;
-                int childIdx = (idx >= 0) ? idx + 1 : ~idx;
-                current = current.child[childIdx];
-            }
-            return false;
-        } catch (ClassCastException e) {
-            return false;
-        }
+        return false;
     }
 
     @Override
@@ -845,6 +832,8 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         private int currentIndex;
         private long expectedModCount;
         private E lastReturned = null;
+        private BPlusTreeNode<E> lastReturnedLeaf = null;
+        private int lastReturnedIndex = -1;
 
         BPlusTreeIterator(E startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -880,9 +869,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             return currentLeaf != null && currentIndex < currentLeaf.keyCount;
         }
 
-        private BPlusTreeNode<E> lastReturnedLeaf = null;
-        private int lastReturnedIndex = -1;
-
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
@@ -917,7 +903,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (nextTarget != null) {
                 BPlusTreeNode<E> search = currentLeaf;
                 int idx = -1;
-                
+
                 if (search != null) idx = searchNode(search, nextTarget);
                 if (idx < 0 && search != null && search.prev != null) {
                     search = search.prev;
@@ -927,7 +913,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     search = search.next;
                     idx = searchNode(search, nextTarget);
                 }
-                
+
                 if (idx < 0) {
                     search = root;
                     while (search != null && !search.isLeaf()) {
@@ -936,7 +922,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     }
                     if (search != null) idx = searchNode(search, nextTarget);
                 }
-                
+
                 currentLeaf = search;
                 currentIndex = (idx >= 0) ? idx : ~idx;
                 if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
@@ -954,6 +940,8 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         private int currentIndex;
         private long expectedModCount;
         private E lastReturned = null;
+        private BPlusTreeNode<E> lastReturnedLeaf = null;
+        private int lastReturnedIndex = -1;
 
         BPlusTreeReverseIterator(E startKey, boolean startInclusive) {
             this.expectedModCount = modCount;
@@ -991,9 +979,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             return currentLeaf != null && currentIndex >= 0;
         }
 
-        private BPlusTreeNode<E> lastReturnedLeaf = null;
-        private int lastReturnedIndex = -1;
-
         @Override
         @SuppressWarnings("unchecked")
         public E next() {
@@ -1027,7 +1012,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (nextTarget != null) {
                 BPlusTreeNode<E> search = currentLeaf;
                 int idx = -1;
-                
+
                 if (search != null) idx = searchNode(search, nextTarget);
                 if (idx < 0 && search != null && search.next != null) {
                     search = search.next;
@@ -1037,7 +1022,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     search = search.prev;
                     idx = searchNode(search, nextTarget);
                 }
-                
+
                 if (idx < 0) {
                     search = root;
                     while (search != null && !search.isLeaf()) {
@@ -1046,7 +1031,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                     }
                     if (search != null) idx = searchNode(search, nextTarget);
                 }
-                
+
                 currentLeaf = search;
                 currentIndex = (idx >= 0) ? idx : ~idx;
                 if (currentLeaf != null && currentIndex < 0) {
