@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
  * BulkLoadSetBenchmark.treeSet_JdkStandard                  5000000  avgt   15  46.369 ± 6.892  ms/op
  * </pre>
  * <p>
- * Speed of transmission was slow to cope up with build.
  */
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
@@ -88,9 +87,6 @@ public class BulkLoadSetBenchmark {
                 .build();
     }
 
-    /**
-     * The custom array-based Iterator the user requested.
-     */
     private static class CustomArrayIterator implements Iterator<Integer> {
         private final Integer[] array;
         private int index = 0;
@@ -109,6 +105,4 @@ public class BulkLoadSetBenchmark {
             return array[index++];
         }
     }
-
-
 }

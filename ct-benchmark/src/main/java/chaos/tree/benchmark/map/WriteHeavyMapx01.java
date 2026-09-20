@@ -1,7 +1,6 @@
 package chaos.tree.benchmark.map;
 
 import chaos.tree.naryMap.BPlusTreeMap;
-import chaos.tree.naryMap.BTreeMap;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -67,6 +66,7 @@ public class WriteHeavyMapx01 {
     private Integer[] shuffledKeys;
     private String[] shuffledValues;
     private String[] mappedValues;
+
     @Setup(Level.Trial)
     public void setup() {
         Integer[] sortedKeys = new Integer[size];

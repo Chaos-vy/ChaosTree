@@ -18,6 +18,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -54,8 +55,7 @@ public class WriteHeavyMapShuffled {
             valuesByKey[i] = "CHAOS-" + i;
         }
 
-        // Fisher-Yates shuffle, seeded — deterministic across forks/methods
-        java.util.Random rnd = new java.util.Random(SHUFFLE_SEED);
+        Random rnd = new Random(SHUFFLE_SEED);
         for (int i = size - 1; i > 0; i--) {
             int j = rnd.nextInt(i + 1);
             Integer tmp = shuffledKeys[i];
