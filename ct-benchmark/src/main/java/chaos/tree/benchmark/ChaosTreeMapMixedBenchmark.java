@@ -26,24 +26,19 @@ import java.util.function.Supplier;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Fork(value = 3, jvmArgsAppend = {"-Xms2g", "-Xmx2g"})
+@Fork(value = 3)
 @State(Scope.Thread)
 public class ChaosTreeMapMixedBenchmark {
 
+    private static final byte OP_GET = 0, OP_PUT = 1, OP_REMOVE = 2;
     @Param({"JavaTreeMap", "BPlusTreeMap", "BTreeMap"})
     public String mapType;
-
     @Param({"10000", "100000"})
     public int size;
-
     @Param({"42"})
     public long seed;
-
-    @Param({"70,20,10","50,25,25","10,70,20","20,60,20","34,33,33","20,10,70"})
+    @Param({"70,20,10", "50,25,25", "10,70,20", "20,60,20", "34,33,33", "20,10,70"})
     public String mix;
-
-    private static final byte OP_GET = 0, OP_PUT = 1, OP_REMOVE = 2;
-
     private Supplier<NavigableMap<Integer, Integer>> baseSupplier;
     private NavigableMap<Integer, Integer> template;
 

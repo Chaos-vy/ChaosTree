@@ -44,6 +44,11 @@ import java.util.stream.IntStream;
  * link: https://github.com/openjdk/jdk/blob/master/test/micro/org/openjdk/bench/java/util/TreeMapUpdate.java
  *
  * The AVL and RBT tree map did not take participate because the matrix was 8hr long.
+ * BTW if anyone want to have run can run it.
+ * two dataset at NaryTree have been recorded and put
+ * 10K and 100K
+ * Read the Data where it suits I have also made the HTML document as well
+ * For reproducing the result when running the benchmark make sure to change the OperationPerInvocation(), It might be same ratio or different due to different MPA.
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -51,9 +56,9 @@ import java.util.stream.IntStream;
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(3)
 @State(Scope.Thread)
-public class ChaosTreeMapUpdateBenchmark {
+public class NaryTreeMapUpdateBenchmark {
 
-    @Param({"JavaTreeMap", "BPlusTreeMap","BTreeMap"})
+    @Param({"JavaTreeMap", "BPlusTreeMap", "BTreeMap"})
     public String mapType;
 
     @Param({"TreeMap", "descendingMap", "subMap"})
