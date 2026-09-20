@@ -29,8 +29,8 @@ public class RedBlackTreeMapTest {
                 .withFeatures(
                         MapFeature.SUPPORTS_PUT,
                         MapFeature.SUPPORTS_REMOVE,
-                        MapFeature.ALLOWS_NULL_VALUES,
                         MapFeature.RESTRICTS_KEYS,
+                        MapFeature.ALLOWS_NULL_VALUES,
                         CollectionFeature.SUPPORTS_ITERATOR_REMOVE,
                         CollectionFeature.KNOWN_ORDER,
                         CollectionSize.ANY,

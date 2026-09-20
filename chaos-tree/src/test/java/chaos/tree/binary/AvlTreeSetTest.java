@@ -5,12 +5,11 @@ import com.google.common.collect.testing.TestStringSortedSetGenerator;
 import com.google.common.collect.testing.features.CollectionFeature;
 import com.google.common.collect.testing.features.CollectionSize;
 import junit.framework.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.AllTests;
 
 import java.util.Arrays;
 import java.util.SortedSet;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.AllTests;
 
 @RunWith(AllTests.class)
 public class AvlTreeSetTest {
@@ -35,7 +34,6 @@ public class AvlTreeSetTest {
                         CollectionFeature.RESTRICTS_ELEMENTS,
                         CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION,
                         CollectionFeature.SERIALIZABLE,
-                        CollectionFeature.ALLOWS_NULL_QUERIES,
                         CollectionSize.ANY
                 )
                 .createTestSuite();
