@@ -73,56 +73,52 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
 
     @Override
     public boolean remove(Object o) {
-        if (isEmpty() || o == null) return false;
-        try {
-            @SuppressWarnings("unchecked")
-            E val = (E) o;
-            AvlNode<E> x = nodeFinder(val);
-            if (x == null) return false;
-            if (x.right != null && x.left != null) {
-                AvlNode<E> successor = x.right;
-                while (successor.left != null) {
-                    successor = successor.left;
-                }
-                x.value = successor.value;
-                x = successor;
-            }
-            AvlNode<E> replacement = x.left != null ? x.left : x.right;
-
-            if (replacement != null) {
-                replacement.parent = x.parent;
-                if (x.parent == null) {
-                    root = replacement;
-                } else if (x == x.parent.left) {
-                    x.parent.left = replacement;
-                } else {
-                    x.parent.right = replacement;
-                }
-                fixUpFromBottom(replacement.parent);
-
-            } else if (x.parent == null) {
-                root = null;
-            } else {
-                AvlNode<E> parent = x.parent;
-                if (x == parent.left) {
-                    parent.left = null;
-                } else {
-                    parent.right = null;
-                }
-                fixUpFromBottom(parent);
-            }
-
-
-            x.left = null;
-            x.right = null;
-            x.parent = null;
-            size--;
-            modCount++;
-            return true;
-        } catch (ClassCastException | NullPointerException e) {
+        @SuppressWarnings("unchecked")
+        E val = (E) o;
+        if (isEmpty()) {
+            compare(val, val);
             return false;
         }
+        AvlNode<E> x = nodeFinder(val);
+        if (x == null) return false;
+        if (x.right != null && x.left != null) {
+            AvlNode<E> successor = x.right;
+            while (successor.left != null) {
+                successor = successor.left;
+            }
+            x.value = successor.value;
+            x = successor;
+        }
+        AvlNode<E> replacement = x.left != null ? x.left : x.right;
 
+        if (replacement != null) {
+            replacement.parent = x.parent;
+            if (x.parent == null) {
+                root = replacement;
+            } else if (x == x.parent.left) {
+                x.parent.left = replacement;
+            } else {
+                x.parent.right = replacement;
+            }
+            fixUpFromBottom(replacement.parent);
+
+        } else if (x.parent == null) {
+            root = null;
+        } else {
+            AvlNode<E> parent = x.parent;
+            if (x == parent.left) {
+                parent.left = null;
+            } else {
+                parent.right = null;
+            }
+            fixUpFromBottom(parent);
+        }
+        x.left = null;
+        x.right = null;
+        x.parent = null;
+        size--;
+        modCount++;
+        return true;
     }
 
     private void fixUpFromBottom(AvlNode<E> node) {
