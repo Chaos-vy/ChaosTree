@@ -1,0 +1,35 @@
+Benchmark                                (degree)  (factor)  (size)  Mode  Cnt   Score    Error  Units
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75   10000  avgt   15   0.061 ±  0.002  ms/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75  100000  avgt   15   0.627 ±  0.054  ms/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75   10000  avgt   15   0.075 ±  0.002  ms/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75  100000  avgt   15   0.825 ±  0.034  ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75   10000  avgt   15   0.009 ±  0.001  ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75  100000  avgt   15   0.092 ±  0.001  ms/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75   10000  avgt   15   1.475 ±  0.023  ms/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75  100000  avgt   15  24.007 ±  0.143  ms/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75   10000  avgt   15   1.286 ±  0.014  ms/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75  100000  avgt   15  28.027 ±  0.261  ms/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75   10000  avgt   15   0.227 ±  0.005  ms/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75  100000  avgt   15   3.104 ±  0.092  ms/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75   10000  avgt   15   0.435 ±  0.001  ms/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75  100000  avgt   15   9.356 ±  0.086  ms/op
+
+Benchmark                                (degree)  (factor)   (size)  Mode  Cnt    Score   Error  Units
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75  1000000  avgt   15   11.200 ± 1.656  ms/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75  1000000  avgt   15   15.890 ± 0.568  ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75  1000000  avgt   15    0.944 ± 0.006  ms/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75  1000000  avgt   15  572.993 ± 2.085  ms/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75  1000000  avgt   15  919.531 ± 6.505  ms/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75  1000000  avgt   15   38.142 ± 0.914  ms/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75  1000000  avgt   15  159.635 ± 3.682  ms/op
+
+Benchmark                                (degree)  (factor)    (size)  Mode  Cnt      Score     Error  Units
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75  10000000  avgt   30     85.461 ±  11.456  ms/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75  10000000  avgt   30    142.619 ±   7.136  ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75  10000000  avgt   30     11.070 ±   0.151  ms/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75  10000000  avgt   30   8515.940 ± 405.465  ms/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75  10000000  avgt   30  18975.535 ± 968.789  ms/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75  10000000  avgt   30    816.843 ±  61.124  ms/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75  10000000  avgt   30   2017.410 ±  52.524  ms/op
+
+

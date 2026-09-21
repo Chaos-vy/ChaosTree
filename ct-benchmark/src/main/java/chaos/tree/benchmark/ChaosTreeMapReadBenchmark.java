@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(3)
 @State(Scope.Thread)
@@ -95,7 +95,7 @@ public class ChaosTreeMapReadBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(10000)
     public void get(Blackhole bh) {
         for (Integer key : hitKeys) {
             bh.consume(map.get(key));
@@ -103,7 +103,7 @@ public class ChaosTreeMapReadBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(10000)
     public void getMiss(Blackhole bh) {
         for (Integer key : missKeys) {
             bh.consume(map.get(key));
@@ -111,7 +111,7 @@ public class ChaosTreeMapReadBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(10000)
     public void containsKey(Blackhole bh) {
         for (Integer key : hitKeys) {
             bh.consume(map.containsKey(key));
@@ -119,7 +119,7 @@ public class ChaosTreeMapReadBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(10000)
     public void floorKey(Blackhole bh) {
         for (Integer key : hitKeys) {
             bh.consume(map.floorKey(key));
@@ -127,7 +127,7 @@ public class ChaosTreeMapReadBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(10000)
     public void ceilingKey(Blackhole bh) {
         for (Integer key : hitKeys) {
             bh.consume(map.ceilingKey(key));
@@ -141,7 +141,7 @@ public class ChaosTreeMapReadBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(100000)
+    @OperationsPerInvocation(10000)
     public void iterate(Blackhole bh) {
         for (Map.Entry<Integer, Integer> e : map.entrySet()) {
             bh.consume(e.getValue());
