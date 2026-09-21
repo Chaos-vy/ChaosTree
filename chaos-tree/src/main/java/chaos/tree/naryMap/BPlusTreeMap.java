@@ -413,7 +413,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             sibling.keyCount = degree;
             System.arraycopy(child.keys, degree, sibling.keys, 0, degree);
             System.arraycopy(child.child, degree, sibling.child, 0, degree + 1);
-            //uff..
+
             for (int i = 0; i <= degree; i++) {
                 if (sibling.child[i] != null) sibling.child[i].parent = sibling;
             }
@@ -1265,42 +1265,62 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             K nextTarget = (currentLeaf != null && currentIndex < currentLeaf.keyCount)
                     ? (K) currentLeaf.keys[currentIndex] : null;
 
-            removeAtLeaf(lastReturnedLeaf, lastReturnedIndex);
+            final BPlusTreeMapNode<K, V> leaf = lastReturnedLeaf;
+            final int idx0 = lastReturnedIndex;
+            final int oldCount = leaf.keyCount;
+
+            removeAtLeaf(leaf, idx0);
             expectedModCount = modCount;
             lastReturnedKey = null;
             lastReturnedLeaf = null;
 
-            if (nextTarget != null) {
-                BPlusTreeMapNode<K, V> search = currentLeaf;
-                int idx = -1;
-
-                if (search != null) idx = searchNodeMap(search, nextTarget);
-                if (idx < 0 && search != null && search.prev != null) {
-                    search = search.prev;
-                    idx = searchNodeMap(search, nextTarget);
-                }
-                if (idx < 0 && search != null && search.next != null) {
-                    search = search.next;
-                    idx = searchNodeMap(search, nextTarget);
-                }
-
-                if (idx < 0) {
-                    search = root;
-                    while (search != null && !search.isLeaf()) {
-                        int pos = searchNodeMap(search, nextTarget);
-                        search = search.child[(pos >= 0) ? pos + 1 : ~pos];
-                    }
-                    if (search != null) idx = searchNodeMap(search, nextTarget);
-                }
-
-                currentLeaf = search;
-                currentIndex = (idx >= 0) ? idx : ~idx;
-                if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
-                    currentLeaf = currentLeaf.next;
-                    currentIndex = 0;
-                }
-            } else {
+            if (nextTarget == null) {
                 currentLeaf = null;
+                return;
+            }
+            if (leaf.keyCount == oldCount - 1) {
+                if (idx0 < leaf.keyCount) {
+                    if (leaf.keys[idx0] == nextTarget) {
+                        currentLeaf = leaf;
+                        currentIndex = idx0;
+                        return;
+                    }
+                } else {
+                    BPlusTreeMapNode<K, V> n = leaf.next;
+                    if (n != null && n.keyCount > 0 && n.keys[0] == nextTarget) {
+                        currentLeaf = n;
+                        currentIndex = 0;
+                        return;
+                    }
+                }
+            }
+
+            BPlusTreeMapNode<K, V> search = currentLeaf;
+            int idx = -1;
+
+            if (search != null) idx = searchNodeMap(search, nextTarget);
+            if (idx < 0 && search != null && search.prev != null) {
+                search = search.prev;
+                idx = searchNodeMap(search, nextTarget);
+            }
+            if (idx < 0 && search != null && search.next != null) {
+                search = search.next;
+                idx = searchNodeMap(search, nextTarget);
+            }
+            if (idx < 0) {
+                search = root;
+                while (search != null && !search.isLeaf()) {
+                    int pos = searchNodeMap(search, nextTarget);
+                    search = search.child[(pos >= 0) ? pos + 1 : ~pos];
+                }
+                if (search != null) idx = searchNodeMap(search, nextTarget);
+            }
+
+            currentLeaf = search;
+            currentIndex = (idx >= 0) ? idx : ~idx;
+            if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
+                currentLeaf = currentLeaf.next;
+                currentIndex = 0;
             }
         }
     }
@@ -1419,42 +1439,55 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
             K nextTarget = (currentLeaf != null && currentIndex >= 0)
                     ? (K) currentLeaf.keys[currentIndex] : null;
 
-            removeAtLeaf(lastReturnedLeaf, lastReturnedIndex);
+            final BPlusTreeMapNode<K, V> leaf = lastReturnedLeaf;
+            final int oldCount = leaf.keyCount;
+            final BPlusTreeMapNode<K, V> curLeaf = currentLeaf;
+            final int curIdx = currentIndex;
+
+            removeAtLeaf(leaf, lastReturnedIndex);
             expectedModCount = modCount;
             lastReturnedKey = null;
             lastReturnedLeaf = null;
 
-            if (nextTarget != null) {
-                BPlusTreeMapNode<K, V> search = currentLeaf;
-                int idx = -1;
-
-                if (search != null) idx = searchNodeMap(search, nextTarget);
-                if (idx < 0 && search != null && search.next != null) {
-                    search = search.next;
-                    idx = searchNodeMap(search, nextTarget);
-                }
-                if (idx < 0 && search != null && search.prev != null) {
-                    search = search.prev;
-                    idx = searchNodeMap(search, nextTarget);
-                }
-
-                if (idx < 0) {
-                    search = root;
-                    while (search != null && !search.isLeaf()) {
-                        int pos = searchNodeMap(search, nextTarget);
-                        search = search.child[(pos >= 0) ? pos + 1 : ~pos];
-                    }
-                    if (search != null) idx = searchNodeMap(search, nextTarget);
-                }
-
-                currentLeaf = search;
-                currentIndex = (idx >= 0) ? idx : ~idx;
-                if (currentLeaf != null && currentIndex < 0) {
-                    currentLeaf = currentLeaf.prev;
-                    if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
-                }
-            } else {
+            if (nextTarget == null) {
                 currentLeaf = null;
+                return;
+            }
+
+            if (leaf.keyCount == oldCount - 1
+                    && curIdx < curLeaf.keyCount
+                    && curLeaf.keys[curIdx] == nextTarget) {
+                currentLeaf = curLeaf;
+                currentIndex = curIdx;
+                return;
+            }
+
+            BPlusTreeMapNode<K, V> search = currentLeaf;
+            int idx = -1;
+
+            if (search != null) idx = searchNodeMap(search, nextTarget);
+            if (idx < 0 && search != null && search.next != null) {
+                search = search.next;
+                idx = searchNodeMap(search, nextTarget);
+            }
+            if (idx < 0 && search != null && search.prev != null) {
+                search = search.prev;
+                idx = searchNodeMap(search, nextTarget);
+            }
+            if (idx < 0) {
+                search = root;
+                while (search != null && !search.isLeaf()) {
+                    int pos = searchNodeMap(search, nextTarget);
+                    search = search.child[(pos >= 0) ? pos + 1 : ~pos];
+                }
+                if (search != null) idx = searchNodeMap(search, nextTarget);
+            }
+
+            currentLeaf = search;
+            currentIndex = (idx >= 0) ? idx : ~idx;
+            if (currentLeaf != null && currentIndex < 0) {
+                currentLeaf = currentLeaf.prev;
+                if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
             }
         }
     }
