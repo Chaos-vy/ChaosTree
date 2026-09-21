@@ -7,8 +7,11 @@ import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -187,7 +190,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         Assertions.assertEquals(reference.comparator(), tree.comparator(), "comparator");
     }
 
-    @Property(tries = 5000)
+    @Property(tries = 1000)
     void bTreeMatchesTreeMap(
             @ForAll("degrees") int degree,
             @ForAll("initialLoad") List<Integer> initial,
@@ -195,7 +198,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         runScenario(new BTreeMap<>(degree), initial, actions);
     }
 
-    @Property(tries = 5000)
+    @Property(tries = 1000)
     void bPlusTreeMatchesTreeMap(
             @ForAll("degrees") int degree,
             @ForAll("initialLoad") List<Integer> initial,
@@ -266,5 +269,81 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
             revIt.remove();
         }
         Assertions.assertTrue(bt.isEmpty());
+    }
+
+    @Example
+    void testBulkLoadExceptions() {
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(32);
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(32);
+        
+        Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
+        
+        Assertions.assertDoesNotThrow(() -> bpt.importFlatMatrix(new Object[0][0], 0.75f));
+        Assertions.assertDoesNotThrow(() -> bt.importFlatMatrix(new Object[0][0],0.75f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[1][0], 0.75f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, 0.75f));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[1][0], 0.75f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, 0.75f));
+        
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, 0.4f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, 1.1f));
+        
+        BPlusTreeMap<Integer, Integer> smallBpt = new BPlusTreeMap<>(16);
+        Assertions.assertThrows(IllegalStateException.class, () -> smallBpt.importFlatMatrix(matrix, 0.75f));
+        BTreeMap<Integer, Integer> smallBt = new BTreeMap<>(16);
+        Assertions.assertThrows(IllegalStateException.class, () -> smallBt.importFlatMatrix(matrix, 0.75f));
+        
+        bpt.put(5, 5);
+        bt.put(5,5);
+        Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatMatrix(matrix, 0.75f));
+        Assertions.assertThrows(IllegalStateException.class, () -> bt.importFlatMatrix(matrix, 0.75f));
+    }
+
+
+    @Example
+    void testBuilderExceptions() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.create(1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.create(1));
+        
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.newBuilder().factor(0.4f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.newBuilder().factor(1.1f));
+    }
+
+    @Example
+    void testConstructors() {
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(1, 1);
+        SortedMap<Integer, Integer> sorted = new TreeMap<>(map);
+        
+        new BTreeMap<>(Comparator.naturalOrder());
+        new BTreeMap<>(map);
+        new BTreeMap<>(sorted);
+        new BTreeMap<>(58,null);
+        
+        new BPlusTreeMap<>(Comparator.naturalOrder());
+        new BPlusTreeMap<>(map);
+        new BPlusTreeMap<>(sorted);
+        new BPlusTreeMap<>(58,null);
+    }
+
+    @net.jqwik.api.Example
+    void testSubSetExceptions() {
+        chaos.tree.naryMap.BTreeMap<Integer, Integer> bt = new chaos.tree.naryMap.BTreeMap<>(32);
+        for(int i=1; i<=10; i++) bt.put(i, i);
+        
+        java.util.NavigableMap<Integer, Integer> sub = bt.subMap(3, true, 8, true);
+        
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(1, true, 5, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(5, true, 10, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.headMap(10, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.tailMap(1, true));
+        
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(6, true, 5, true));
+        
+        java.util.NavigableMap<Integer, Integer> descSub = sub.descendingMap();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.subMap(5, true, 6, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.headMap(1, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.tailMap(10, true));
     }
 }

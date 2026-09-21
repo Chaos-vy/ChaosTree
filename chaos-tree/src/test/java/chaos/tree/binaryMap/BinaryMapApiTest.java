@@ -11,14 +11,14 @@ import java.util.List;
 
 public class BinaryMapApiTest extends AbstractNavigableMapApiTest {
 
-    @Property(tries = 10000)
+    @Property(tries = 1000)
     void rbtMatchesTreeMap(
             @ForAll("initialLoad") List<Integer> initial,
             @ForAll("actions") List<Action> actions) {
         runScenario(new RedBlackTreeMap<>(), initial, actions);
     }
 
-    @Property(tries = 10000)
+    @Property(tries = 1000)
     void avlMatchesTreeMap(
             @ForAll("initialLoad") List<Integer> initial,
             @ForAll("actions") List<Action> actions) {

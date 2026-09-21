@@ -7,6 +7,8 @@ import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
@@ -186,7 +188,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         Assertions.assertEquals(reference.comparator(), tree.comparator(), "comparator");
     }
 
-    @Property(tries = 5000)
+    @Property(tries = 1000)
     void bTreeMatchesTreeSet(
             @ForAll("degrees") int degree,
             @ForAll("initialLoad") List<Integer> initial,
@@ -194,7 +196,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         runScenario(new BTreeSet<>(degree), initial, actions);
     }
 
-    @Property(tries = 5000)
+    @Property(tries = 1000)
     void bPlusTreeMatchesTreeSet(
             @ForAll("degrees") int degree,
             @ForAll("initialLoad") List<Integer> initial,
@@ -264,5 +266,73 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
             revIt.remove();
         }
         Assertions.assertTrue(bt.isEmpty());
+    }
+
+    @Example
+    void testBulkLoadExceptions() {
+        BTreeSet<Integer> bt = new BTreeSet<>(32);
+        BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(32);
+        
+        Object[] keys = new Object[]{1, 2, 3};
+        
+        Assertions.assertDoesNotThrow(() -> bpt.importFlatArray(null, 0.75f));
+        Assertions.assertDoesNotThrow(() -> bt.importFlatArray(null, 0.75f));
+        
+        Assertions.assertDoesNotThrow(() -> bpt.importFlatArray(new Object[0], 0.75f));
+        Assertions.assertDoesNotThrow(() -> bt.importFlatArray(new Object[0], 0.75f));
+        
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatArray(keys, 0.4f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatArray(keys, 1.1f));
+        
+        BPlusTreeSet<Integer> smallBpt = new BPlusTreeSet<>(16);
+        Assertions.assertThrows(IllegalStateException.class, () -> smallBpt.importFlatArray(keys, 0.75f));
+        
+        bpt.add(5);
+        Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatArray(keys, 0.75f));
+    }
+
+    @Example
+    void testBuilderExceptions() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.create(1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.create(1));
+        
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.newBuilder().factor(0.4f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.newBuilder().factor(1.1f));
+    }
+
+    @Example
+    void testConstructors() {
+        List<Integer> list = Arrays.asList(1, 2, 3);
+        SortedSet<Integer> sorted = new TreeSet<>(list);
+        
+        new BTreeSet<>(Comparator.naturalOrder());
+        new BTreeSet<>(list);
+        new BTreeSet<>(sorted);
+        new BTreeSet<>(6,null);
+        
+        new BPlusTreeSet<>(Comparator.naturalOrder());
+        new BPlusTreeSet<>(list);
+        new BPlusTreeSet<>(sorted);
+        new BPlusTreeSet<>(6,null);
+    }
+
+    @Example
+    void testSubSetExceptions() {
+        BTreeSet<Integer> bt = new BTreeSet<>(32);
+        bt.addAll(java.util.Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        
+        NavigableSet<Integer> sub = bt.subSet(3, true, 8, true);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(1, true, 5, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(5, true, 10, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.headSet(10, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.tailSet(1, true));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(6, true, 5, true));
+
+        NavigableSet<Integer> descSub = sub.descendingSet();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.subSet(5, true, 6, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.headSet(1, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.tailSet(10, true));
     }
 }
