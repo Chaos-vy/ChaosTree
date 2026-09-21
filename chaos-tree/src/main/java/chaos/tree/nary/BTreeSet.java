@@ -45,7 +45,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
         super(builder.degree, builder.comparator);
 
         if (builder.flatArray != null) {
-            buildFromSortedArray(builder.flatArray, builder.factor);
+            importFlatArray(builder.flatArray, builder.factor);
         } else if (builder.sortedIterator != null) {
             buildFromSorted(builder.sortedIterator, builder.factor);
         } else if (builder.collection != null) {
@@ -225,17 +225,6 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
     @Override
     protected void buildFromSortedArray(Object[] sortedArray, float fillFactor) {
-        if (sortedArray == null || sortedArray.length == 0) return;
-        if (!isEmpty()) {
-            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
-        }
-        if (degree < 32) {
-            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
-        }
-        if (fillFactor < 0.5f || fillFactor > 1.0f) {
-            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
-        }
-
         int N = sortedArray.length;
         int targetKeys = Math.max(minKeys, (int) (maxKeys * fillFactor));
 
