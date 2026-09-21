@@ -1,20 +1,26 @@
+![Supported JVM Versions](https://img.shields.io/badge/JVM-21+-brightgreen.svg?&logo=openjdk)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.chaos-vy/chaos-tree.svg?label=maven%20central)](https://search.maven.org/artifact/io.github.chaos-vy/chaos-tree)
 [![GitHub release](https://img.shields.io/github/v/release/Chaos-vy/ChaosTree)](https://github.com/Chaos-vy/ChaosTree/releases)
 [![License](https://img.shields.io/github/license/Chaos-vy/ChaosTree)](LICENSE)
 [![Coverage](https://raw.githubusercontent.com/Chaos-vy/ChaosTree/badges/.github/badges/jacoco.svg)](https://github.com/Chaos-vy/ChaosTree/actions)
+[![codecov](https://codecov.io/gh/Chaos-vy/ChaosTree/graph/badge.svg?token=V6LKTLXZA2)](https://codecov.io/gh/Chaos-vy/ChaosTree)
 
 ## What is ChaosTree?
 
-**ChaosTree is a Java Sorted Set/Map library built around multiple search-tree data structures, including AVL Trees, Red-Black Trees, B-Trees, and B+ Trees.**
+**ChaosTree is a Java Sorted Set/Map library built around multiple search-tree data structures, including AVL Trees,
+Red-Black Trees, B-Trees, and B+ Trees.**
 
-The library provides both **Set and Map implementations**, with APIs designed around the semantics of the JDK's `NavigableSet`, `NavigableMap`, `SequencedSet`, and `SequencedMap` contracts.
+The library provides both **Set and Map implementations**, with APIs designed around the semantics of the JDK's
+`NavigableSet`, `NavigableMap`, `SequencedSet`, and `SequencedMap` contracts.
 
-In addition to the standard collection APIs, ChaosTree provides specialized construction APIs for users who want direct control over the initial structure of N-ary trees, Do read 
+In addition to the standard collection APIs, ChaosTree provides specialized construction APIs for users who want direct
+control over the initial structure of N-ary trees, Do read
 
 * `buildFromSorted(Iterator, factor)`
 * `importFlatMatrix(Object[][], factor)`
 
-These APIs allow users to control the target node occupancy through a configurable `factor` in the supported range **[0.5, 1.0]**, while maintaining the structural invariants required by the underlying B-Tree/B+Tree design.
+These APIs allow users to control the target node occupancy through a configurable `factor` in the supported range
+**[0.5, 1.0]**, while maintaining the structural invariants required by the underlying B-Tree/B+Tree design.
 
 ### Correctness & Validation
 
@@ -28,25 +34,30 @@ ChaosTree is validated through multiple layers of testing:
 * Exception and iterator-contract testing
 * Serialization and cloning tests
 
-The structural tests inspect the internal tree representation rather than relying solely on externally observable behavior. This provides an additional layer of validation for node occupancy, ordering, topology, and balancing invariants.
+The structural tests inspect the internal tree representation rather than relying solely on externally observable
+behavior. This provides an additional layer of validation for node occupancy, ordering, topology, and balancing
+invariants.
 
-Performance claims are backed by reproducible JMH benchmark configurations. If a referenced benchmark source is missing from the repository due to project cleanup, it can be restored or replaced with an updated benchmark.
+Performance claims are backed by reproducible JMH benchmark configurations. If a referenced benchmark source is missing
+from the repository due to project cleanup, it can be restored or replaced with an updated benchmark.
 
 ### Why ChaosTree?
 
-* **Cache-Locality First:** The N-ary engine packs data tightly into pre-allocated exact-capacity arrays, drastically improving L1/L2 CPU cache hit rates and memory load stalls by nearly 40% during large range scans.
-* **Strictly Compatible:** Leverages the new JDK 21 `SequencedCollection`, `SequencedSet`, and `SequencedMap` interfaces. It passes the Guava Testlib (214,000+ tests) to enforce identical semantics to `java.util.TreeMap` and `TreeSet`.
-* **Public Bulk Load:** I do explicitly provide two powerful API through which user is allowed to build the N-ary tree family, It only works at empty tree. Need sorted data. Verified tested.
-* **Serializable & Cloneable** Each tree supports Serialization **(Bulk load O(N))** as well as Cloneable.
-
+* **Cache-Locality First:** The N-ary engine packs data tightly into pre-allocated exact-capacity arrays, drastically
+  improving L1/L2 CPU cache hit rates and memory load stalls by nearly 40% during large range scans.
+* **Strictly Compatible:** Leverages the new JDK 21 `SequencedCollection`, `SequencedSet`, and `SequencedMap`
+  interfaces. It passes the Guava Testlib (214,000+ tests) to enforce identical semantics to `java.util.TreeMap` and
+  `TreeSet`.
+* **Public Bulk Load:** I do explicitly provide two powerful API through which user is allowed to build the N-ary tree
+  family, It only works at empty tree. Need sorted data. Verified tested.
+* **Serializable & Cloneable** Each tree supports Serialization **(Bulk load O (N))** as well as Cloneable.
 
 ## Requirements
 
 - **Minimum JDK: 0xCAFEBABE 0000 0041 | JDK 21+**
-- **Build Tool: Maven 3.8+** 
+- **Build Tool: Maven 3.8+**
 
-**Details about ChaosTree:** https://chaos-vy.github.io/ChaosTree/index.html 
-
+**Details about ChaosTree:** https://chaos-vy.github.io/ChaosTree/index.html
 
 *(Note: As strictly sorted structures, `addFirst()` and `addLast()` are unsupported and fail-fast).*
 
@@ -92,28 +103,64 @@ public class Main {
 }
 ```
 
-
 ## Data Structures and Architecture
 
 ChaosTree is split into two foundational engines:
 
-* **The N-ary Family (Sets & Maps):** `BTree`, `BPlusTree`. Built for maximum read throughput, large-scale range scans, and zero GC churn. The `BPlusTree` pushes all real data to a contiguous double linked-list at the bottom layer, allowing high read through put.
-* **The Binary Family (Sets):** `AVL`, `RBT`, . Built for fast point-queries and everyday data storage where the extreme caching of the N-ary engine is not required.
+* **The N-ary Family (Sets & Maps):** `BTree`, `BPlusTree`. Built for maximum read throughput, large-scale range scans,
+  and zero GC churn. The `BPlusTree` pushes all real data to a contiguous double linked-list at the bottom layer,
+  allowing high read through put.
+* **The Binary Family (Sets):** `AVL`, `RBT`, . Built for fast point-queries and everyday data storage where the extreme
+  caching of the N-ary engine is not required.
 
 ## Testing & Thread-Safety
 
-I wanted ChaosTree to be correct just as much as I wanted it to be fast. It is validated by these following testing suite:
+I wanted ChaosTree to be correct just as much as I wanted it to be fast. It is validated by these following testing
+suite:
 
-* **Guava Testlib:** ChaosTree passes 214,000+ generated test cases validating exact `java.util.NavigableMap` and `NavigableSet` for all tree.
-* **The Fuzz Test:** Trees are subjected to hundreds of thousands of completely randomized property tests via `jqwik` to verify structural invariants against a source-of-truth (`java.util.TreeMap`). Due to Nary API node structure of 32 the new node never got created in Guava So I explicitly designed the verify API which verify explicitly for that.
-* **Strict Contracts:** Enforces fail-fast `ConcurrentModificationException` iterator semantics, exact size counting, and strict Null-Pointer guards on custom Comparators.
+* **Guava Testlib:** ChaosTree passes 214,000+ generated test cases validating exact `java.util.NavigableMap` and
+  `NavigableSet` for all tree.
+* **The Fuzz Test:** Trees are subjected to hundreds of thousands of completely randomized property tests via `jqwik` to
+  verify structural invariants against a source-of-truth (`java.util.TreeMap`). Due to Nary API node structure of 32 the
+  new node never got created in Guava So I explicitly designed the verify API which verify explicitly for that.
+* **Strict Contracts:** Enforces fail-fast `ConcurrentModificationException` iterator semantics, exact size counting,
+  and strict Null-Pointer guards on custom Comparators.
+
+## Benchmark highlights
+
+### Iteration Performance: BPlusTreeMap vs TreeMap vs ArrayList
+
+Benchmarked `entrySet()` iteration cost (JMH, avgt, `-prof perfnorm`) across sizes from 1K to 1M elements.
+
+| Structure                  | Cost @ small N | Cost @ 1M elements |
+|----------------------------|----------------|--------------------|
+| `BPlusTreeMap` (ChaosTree) | ~1.6 ns/elem   | **2.57 ns/elem**   |
+| `ArrayList<Entry>`         | ~0.37 ns/elem  | 3.09 ns/elem       |
+| `java.util.TreeMap`        | ~6.1 ns/elem   | 21.1 ns/elem       |
+
+**BPlusTreeMap overtakes a flat `ArrayList` at scale (~280K elements and above)**, despite executing ~4.6x more
+instructions per element. The reason is memory locality, not raw compute: keys and values live directly in packed leaf
+arrays, avoiding the extra `Map.Entry` indirection a reference-based collection pays for every element. At 1M elements,
+hardware counters confirm this directly — `ArrayList`'s LLC cache-miss ratio climbs to 86.8% (nearly every access is a
+full round-trip to main memory) versus 38% for BPlusTreeMap, which also makes ~21x fewer LLC accesses per element
+overall. The payoff shows up as sustained IPC: 3.72 for BPlusTreeMap vs 0.88 for ArrayList at 1M — ArrayList's pipeline
+is mostly stalled waiting on memory, not doing useful work.
+
+`TreeMap` is 5-10x slower than both across every size tested — its successor-pointer traversal touches far more
+scattered memory per step (parent/left/right node pointers) than either alternative.
+
+**Takeaway:** below ~280K entries, a flat array beats any tree structure for pure iteration. Past that point,
+BPlusTreeMap's cache-friendly leaf layout wins, and the gap widens with scale.
 
 ## Documentation
 
 * **Architecture Decision Records:** [`docs/ADR.html`](https://chaos-vy.github.io/ChaosTree/utils/ADR.html)
-* **JMH GC Profiling & The 82ms Pause:** [`docs/utils/JMH-Report.html`](https://chaos-vy.github.io/ChaosTree/utils/JMH-Report.html)
-* **Throughput & CPU Benchmarks:** [`docs/Benchmark_Analysis.html`](https://chaos-vy.github.io/ChaosTree/utils/Benchmark_Analysis.html)
-* **The Testing Journey:** [`docs/Test_Journey.html`](https://chaos-vy.github.io/ChaosTree/utils/build/Test_Journey.html)
+* **JMH GC Profiling & The 82ms Pause:** [
+  `docs/benchmark/JMH-Report.html`](https://chaos-vy.github.io/ChaosTree/utils/JMH-Report.html)
+* **Throughput & CPU Benchmarks:** [
+  `docs/Benchmark_Analysis.html`](https://chaos-vy.github.io/ChaosTree/utils/Benchmark_Analysis.html)
+* **The Testing Journey:** [
+  `docs/Test_Journey.html`](https://chaos-vy.github.io/ChaosTree/utils/build/Test_Journey.html)
 * **Release history:** [`CHANGELOG.md`](CHANGELOG.md)
 * **Contributing guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
@@ -122,7 +169,7 @@ I wanted ChaosTree to be correct just as much as I wanted it to be fast. It is v
 * **Bugs and features:** GitHub Issues
 * **Discussion:** GitHub Discussions
 
-Pull requests and well-scoped issue reports for compatibility, correctness, and maintenance work are welcome! 
+Pull requests and well-scoped issue reports for compatibility, correctness, and maintenance work are welcome!
 
 
 ---

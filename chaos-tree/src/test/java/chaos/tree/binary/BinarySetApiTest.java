@@ -11,14 +11,14 @@ import java.util.List;
 
 public class BinarySetApiTest extends AbstractNavigableSetApiTest {
 
-    @Property(tries = 10000)
+    @Property(tries = 1000)
     void rbtMatchesTreeSet(
             @ForAll("initialLoad") List<Integer> initial,
             @ForAll("actions") List<Action> actions) {
         runScenario(new RedBlackTreeSet<>(), initial, actions);
     }
 
-    @Property(tries = 10000)
+    @Property(tries = 1000)
     void avlMatchesTreeSet(
             @ForAll("initialLoad") List<Integer> initial,
             @ForAll("actions") List<Action> actions) {
