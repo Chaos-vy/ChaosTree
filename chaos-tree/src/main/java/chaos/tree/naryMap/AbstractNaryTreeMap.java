@@ -25,7 +25,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K, V, N>>
         extends AbstractMap<K, V> implements NaryMap<K, V>, Serializable, Cloneable permits BTreeMap, BPlusTreeMap {
@@ -418,6 +420,17 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         }
     }
 
+    protected boolean removeMatching(BiPredicate<? super K, ? super V> test) {
+        boolean changed = false;
+        for (Iterator<Map.Entry<K, V>> it = entryIterator(null, true); it.hasNext(); ) {
+            Map.Entry<K, V> e = it.next();
+            if (test.test(e.getKey(), e.getValue())) {
+                it.remove();
+                changed = true;
+            }
+        }
+        return changed;
+    }
     protected abstract Iterator<K> keyIterator(K fromKey, boolean fromInclusive);
 
     protected abstract Iterator<K> descendingKeyIterator(K fromKey, boolean fromInclusive);
@@ -520,6 +533,12 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super Entry<K, V>> filter) {
+            Objects.requireNonNull(filter);
+            return AbstractNaryTreeMap.this.removeMatching((k, v) -> filter.test(new AbstractMap.SimpleImmutableEntry<>(k, v)));
         }
 
         @Override
@@ -728,16 +747,21 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public Map.Entry<K, V> pollFirstEntry() {
             Map.Entry<K, V> e = firstEntry();
-            if (e != null) remove(e.getKey());
-            return e;
+            if (e == null) return null;
+            Map.Entry<K, V> snap = new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue());
+            remove(snap.getKey());
+            return snap;
         }
 
         @Override
         public Map.Entry<K, V> pollLastEntry() {
             Map.Entry<K, V> e = lastEntry();
-            if (e != null) remove(e.getKey());
-            return e;
+            if (e == null) return null;
+            Map.Entry<K, V> snap = new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue());
+            remove(snap.getKey());
+            return snap;
         }
+
 
         @Override
         public Comparator<? super K> comparator() {
@@ -809,7 +833,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             return new SubMapEntrySet();
         }
 
-
         @Override
         public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
             if (outOfBounds(key, true)) {
@@ -842,114 +865,109 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
             return AbstractNaryTreeMap.this.merge(key, value, remappingFunction);
         }
 
+        private boolean endUnbounded() {
+            return descending ? fromStart : toEnd;
+        }
+
+        private Map.Entry<K, V> iterationEnd() {
+            return descending ? absLowest() : absHighest();
+        }
+
+        private Iterator<Map.Entry<K, V>> startEntryIterator() {
+            return descending
+                    ? descendingEntryIterator(toEnd ? null : hi, hiInclusive)
+                    : entryIterator(fromStart ? null : lo, loInclusive);
+        }
+
+        private Iterator<K> startKeyIterator() {
+            return descending
+                    ? descendingKeyIterator(toEnd ? null : hi, hiInclusive)
+                    : AbstractNaryTreeMap.this.keyIterator(fromStart ? null : lo, loInclusive);
+        }
+
         public Iterator<K> keyIterator() {
-            return new Iterator<K>() {
-                private Iterator<K> it = descending
-                        ? descendingKeyIterator(toEnd ? null : hi, hiInclusive)
-                        : AbstractNaryTreeMap.this.keyIterator(fromStart ? null : lo, loInclusive);
-                private K nextKey = null;
-                private K lastReturned = null;
+            Map.Entry<K, V> end = iterationEnd();
+            if (end == null) return Collections.emptyIterator();
+            Iterator<K> it = startKeyIterator();
+            return endUnbounded() ? it : new UntilKeyIterator(it, end.getKey());
+        }
 
-                {
-                    advance();
-                }
+        private Iterator<Map.Entry<K, V>> boundedEntryIterator() {
+            Map.Entry<K, V> end = iterationEnd();
+            if (end == null) return Collections.emptyIterator();
+            Iterator<Map.Entry<K, V>> it = startEntryIterator();
+            return endUnbounded() ? it : new UntilEntryIterator(it, end.getKey());
+        }
 
-                private void advance() {
-                    if (it.hasNext()) {
-                        nextKey = it.next();
-                        if (descending) {
-                            if (!fromStart && tooLow(nextKey)) nextKey = null;
-                        } else {
-                            if (!toEnd && tooHigh(nextKey)) nextKey = null;
-                        }
-                    } else {
-                        nextKey = null;
-                    }
-                }
+        private final class UntilKeyIterator implements Iterator<K> {
+            private final Iterator<K> it;
+            private final K lastKey;
+            private boolean done;
 
-                public boolean hasNext() {
-                    return nextKey != null;
-                }
+            UntilKeyIterator(Iterator<K> it, K lastKey) {
+                this.it = it;
+                this.lastKey = lastKey;
+            }
 
-                public K next() {
-                    if (nextKey == null) throw new NoSuchElementException();
-                    lastReturned = nextKey;
-                    advance();
-                    return lastReturned;
-                }
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
 
-                public void remove() {
-                    if (lastReturned == null) throw new IllegalStateException();
-                    SubNaryMap.this.remove(lastReturned);
-                    lastReturned = null;
-                    if (nextKey != null) {
-                        it = descending ? descendingKeyIterator(nextKey, true)
-                                : AbstractNaryTreeMap.this.keyIterator(nextKey, true);
-                        advance();
-                    }
-                }
-            };
+            @Override
+            public K next() {
+                if (done) throw new NoSuchElementException();
+                K k = it.next();
+                if (k == lastKey) done = true;
+                return k;
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
+        }
+
+        private final class UntilEntryIterator implements Iterator<Map.Entry<K, V>> {
+            private final Iterator<Map.Entry<K, V>> it;
+            private final K lastKey;
+            private boolean done;
+
+            UntilEntryIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
+                this.it = it;
+                this.lastKey = lastKey;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public Map.Entry<K, V> next() {
+                if (done) throw new NoSuchElementException();
+                Map.Entry<K, V> e = it.next();
+                if (e.getKey() == lastKey) done = true;
+                return e;
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
         }
 
         private final class SubMapEntrySet extends AbstractSet<Map.Entry<K, V>> {
 
             @Override
             public Iterator<Map.Entry<K, V>> iterator() {
-                return new Iterator<>() {
-                    private Iterator<Map.Entry<K, V>> it = descending
-                            ? descendingEntryIterator(toEnd ? null : hi, hiInclusive)
-                            : entryIterator(fromStart ? null : lo, loInclusive);
-                    private Map.Entry<K, V> nextEntry = null;
-                    private Map.Entry<K, V> lastReturned = null;
-
-                    {
-                        advance();
-                    }
-
-                    private void advance() {
-                        if (it.hasNext()) {
-                            nextEntry = it.next();
-                            if (descending) {
-                                if (!fromStart && tooLow(nextEntry.getKey())) nextEntry = null;
-                            } else {
-                                if (!toEnd && tooHigh(nextEntry.getKey())) nextEntry = null;
-                            }
-                        } else {
-                            nextEntry = null;
-                        }
-                    }
-
-                    @Override
-                    public boolean hasNext() {
-                        return nextEntry != null;
-                    }
-
-                    @Override
-                    public Map.Entry<K, V> next() {
-                        if (nextEntry == null) throw new NoSuchElementException();
-                        lastReturned = nextEntry;
-                        advance();
-                        return lastReturned;
-                    }
-
-                    @Override
-                    public void remove() {
-                        if (lastReturned == null) throw new IllegalStateException();
-                        SubNaryMap.this.remove(lastReturned.getKey());
-                        lastReturned = null;
-                        if (nextEntry != null) {
-                            it = descending ? descendingEntryIterator(nextEntry.getKey(), true)
-                                    : entryIterator(nextEntry.getKey(), true);
-                            advance();
-                        }
-                    }
-                };
+                return boundedEntryIterator();
             }
 
             @Override
             public int size() {
                 int count = 0;
-                for (Map.Entry<K, V> ignored : this) count++;
+                for (Iterator<Map.Entry<K, V>> i = iterator(); i.hasNext(); i.next()) count++;
                 return count;
             }
 
@@ -982,6 +1000,18 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                     return false;
                 }
             }
+            @Override
+            public boolean removeIf(Predicate<? super Map.Entry<K, V>> filter) {
+                Objects.requireNonNull(filter);
+                boolean changed = false;
+                for (Iterator<Map.Entry<K, V>> it = boundedEntryIterator(); it.hasNext(); ) {
+                    if (filter.test(it.next())) {
+                        it.remove();
+                        changed = true;
+                    }
+                }
+                return changed;
+            }
         }
     }
 
@@ -1005,6 +1035,11 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public void clear() {
             AbstractNaryTreeMap.this.clear();
+        }
+        @Override
+        public boolean removeIf(Predicate<? super V> filter) {
+            Objects.requireNonNull(filter);
+            return AbstractNaryTreeMap.this.removeMatching((k, v) -> filter.test(v));
         }
     }
 
@@ -1131,6 +1166,12 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public K last() {
             return map.lastKey();
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super K> filter) {
+            Objects.requireNonNull(filter);
+            return removeMatching((k, v) -> filter.test(k));
         }
 
     }

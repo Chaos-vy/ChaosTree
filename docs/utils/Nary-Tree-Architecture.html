@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+          type="image/svg+xml">
+    <meta charset="UTF-8">
+    <title>ChaosTree: Architectural Mathematics & Node Structure</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: left;
+        }
+
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #000;
+            overflow-x: auto;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .diagram-container {
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid #000;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+
+    </style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+
+<h1>ChaosTree: Node Architecture & Mathematics</h1>
+<p class="bold">
+    ChaosTree diverges from textbook CLRS (Cormen, Leiserson, Rivest, and Stein) implementations to extract maximum
+    mechanical sympathy from the Java Virtual Machine (JVM). This document details the array capacity mathematics, the
+    Structure-of-Arrays (SoA) layout, and the crucial differences between the BTreeMap and BPlusTreeMap engines.
+</p>
+
+<div class="diagram-container">
+    <img alt="ChaosTree N-ary Node Structure Diagram" src="build/ChaosTreeNaryNode.svg">
+</div>
+
+<h2>1. The 2t Capacity Math & The Overflow Slot</h2>
+<p>
+    Standard B-Tree and B+-Tree literature defines a node capacity based on a degree parameter <i>t</i> (where <i>t &ge;
+    2</i>).
+    Textbook CLRS defines the maximum number of keys in a node as <code>maxKeys = 2t - 1</code>.
+</p>
+<p>
+    In ChaosTree, <code>maxKeys</code> is indeed <code>2t - 1</code>, <b>but the physical arrays are allocated to size
+    2t</b>.
+</p>
+<pre>
+int maxKeys = degree &lt;&lt; 1; // 2t physical slots allocated
+this.keys = new Object[maxKeys]; 
+</pre>
+<p>
+    This creates a <b>dummy slot</b> (or overflow slot) as illustrated in the SVG diagram above. By allocating one extra
+    slot beyond the legal mathematical maximum, ChaosTree can use an <i>insert-then-split</i> architecture instead of
+    the traditional <i>split-then-insert</i>.
+</p>
+<blockquote>
+    <b>Traditional (Preemptive):</b> If node is full (2t-1), split it. Then figure out which half the new key belongs
+    to, and insert it.<br>
+    <br>
+    <b>ChaosTree (Overflow):</b> Unconditionally insert the key. The node temporarily holds 2t keys. Then, <code>while
+    (current.keyCount &gt; maxKeys)</code>, split the node and push the separator up.
+</blockquote>
+<p>
+    This completely eliminates the need to branch or reason about pending keys during a split, removing complex control
+    flow from the JIT hot-path.
+</p>
+
+<h2>2. Structure of Arrays (SoA) for L2 Cache Locality</h2>
+<p>
+    Standard Java implementations like <code>java.util.TreeMap</code> use a Structure-of-Objects layout. Every node is
+    an <code>Entry&lt;K,V&gt;</code> that holds pointers to left, right, parent, color, key, and value. Binary searching
+    forces the CPU to drag values and node pointers through the CPU cache line.
+</p>
+<p>
+    ChaosTree uses <b>Structure of Arrays (SoA)</b>:
+</p>
+<pre>
+protected final Object[] keys;
+protected final Object[] values;
+protected final N[] child;
+</pre>
+<p>
+    When ChaosTree searches a node, it runs a binary search <i>exclusively</i> over the <code>keys[]</code> array. The
+    CPU can fetch consecutive keys in a single L2 cache line without touching a single value or child pointer.
+</p>
+
+<h2>3. BTreeMap vs BPlusTreeMap: The GC Null Discriminator</h2>
+<p>
+    A classical <b>B-Tree</b> stores values in both internal routing nodes and leaf nodes. A <b>B+-Tree</b> pushes all
+    values down to the leaf nodes, leaving internal nodes strictly as a routing index.
+</p>
+<p>
+    ChaosTree leverages this mathematical distinction to ruthlessly optimize Garbage Collection retention:
+</p>
+<table>
+    <caption>Array allocations by node type</caption>
+    <thead>
+    <tr>
+        <th>Tree Type</th>
+        <th>Leaf Node Arrays</th>
+        <th>Internal Node Arrays</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><b>BTreeMap</b></td>
+        <td><code>keys[]</code>, <code>values[]</code></td>
+        <td><code>keys[]</code>, <code>values[]</code>, <code>child[]</code></td>
+    </tr>
+    <tr>
+        <td><b>BPlusTreeMap</b></td>
+        <td><code>keys[]</code>, <code>values[]</code></td>
+        <td><code>keys[]</code>, <i>null</i>, <code>child[]</code></td>
+    </tr>
+    </tbody>
+</table>
+<pre>
+boolean needsValues = isLeaf || (this instanceof BTreeMapNode);
+this.values = needsValues ? new Object[maxKeys] : null;
+</pre>
+<p>
+    Because internal nodes account for roughly <code>1/t</code> of the total tree volume, dropping the
+    <code>values[]</code> array entirely in <code>BPlusTreeMap</code> saves a massive amount of heap space. During a
+    top-down bulk load of 10,000 elements, this GC optimization causes <code>BPlusTreeMap</code> to generate just <b>119
+    KB</b> of allocation compared to <code>BTreeMap</code>'s <b>519 KB</b>.
+</p>
+
+<h2>4. Analysation of JOL at 1M</h2>
+
+<p>Build paths: put = sequential <code>put(i, i)</code> for 0..999,999 (leaves settle at t = 64 keys); import = <code>importFlatMatrix(exportFlatMatrix(), 1.0f)</code> (leaves at 127 keys).</p>
+
+<p>Constants (JOL, compressed oops): Integer = 16 B, TreeMap$Entry = 40 B, TreeMap = 48 B, BTreeMapNode = 32 B, BPlusTreeMapNode = 40 B, BTreeMap/BPlusTreeMap = 72 B.</p>
+
+<pre>
+t = 64
+physical slots    = 2t     = 128
+keys[] / values[] = 16 + 128*4       = 528 B
+child[]           = 16 + (2t+1)*4    = 532 -> 536 B (8 B aligned)
+Integer objects   = 2*1,000,000 - 128 (cache -128..127) = 1,999,872
+Integer bytes     = 1,999,872 * 16   = 31,997,952 B
+</pre>
+
+<h3>Node census (from JOL counts)</h3>
+<pre>
+internal = count(Node[])
+leaves   = count(Node) - internal
+
+put()       : 15,873 - 248 = 15,625 leaves, 248 internal
+import 1.0f:  7,939 -  63 =  7,876 leaves,  63 internal
+
+keys per leaf: 1,000,000 / 15,625 = 64.00
+               1,000,000 /  7,876 = 126.97
+
+Object[] check
+  BTree  : 2 * 15,873          = 31,746
+  B+Tree : 2 * 15,625 + 248    = 31,498
+  B+ import: 2 *  7,876 +  63    = 15,815
+</pre>
+
+<h3>Totals</h3>
+<table>
+    <thead>
+    <tr><th>Structure</th><th>Node[]</th><th>Object[]</th><th>Nodes</th><th>Map</th><th>Structure</th><th>+ Integers</th></tr>
+    </thead>
+    <tbody>
+    <tr><td>TreeMap</td><td>-</td><td>-</td><td>1,000,000 * 40 = 40,000,000</td><td>48</td><td>40,000,048</td><td>71,998,000</td></tr>
+    <tr><td>BTree (put)</td><td>248 * 536 = 132,928</td><td>31,746 * 528 = 16,761,888</td><td>15,873 * 32 = 507,936</td><td>72</td><td>17,402,824</td><td>49,400,776</td></tr>
+    <tr><td>B+Tree (put)</td><td>248 * 536 = 132,928</td><td>31,498 * 528 = 16,630,944</td><td>15,873 * 40 = 634,920</td><td>72</td><td>17,398,864</td><td>49,396,816</td></tr>
+    <tr><td>B+Tree (import 1.0f)</td><td>63 * 536 = 33,768</td><td>15,815 * 528 = 8,350,320</td><td>7,939 * 40 = 317,560</td><td>72</td><td>8,701,720</td><td>40,699,672</td></tr>
+    </tbody>
+</table>
+
+<h3>BTree vs B+Tree delta (same shape)</h3>
+<pre>
+B+ saves  : 248 values[] * 528 = 130,944 B
+B+ pays   : 15,873 nodes * 8 B = 126,984 B   (next, prev)
+net       : 130,944 - 126,984  =   3,960 B   = 49,400,776 - 49,396,816
+</pre>
+
+<h3>Ratios</h3>
+<pre>
+per entry, structure : TreeMap 40.00 | B+ put 17.40 | B+ import 8.70 B
+per entry, total     : TreeMap 72.00 | B+ put 49.40 | B+ import 40.70 B
+
+vs TreeMap total     : 49,396,816 / 71,998,000 = 0.6861  (-31.4%)
+                       40,699,672 / 71,998,000 = 0.5653  (-43.5%)
+vs TreeMap structure : 40,000,048 / 17,398,864 = 2.30x
+                       40,000,048 /  8,701,720 = 4.60x
+
+Integer share of B+ import total : 31,997,952 / 40,699,672 = 78.6%
+</pre>
+
+<h3>Slot waste and floor</h3>
+<pre>
+dead leaf slots put    : 15,625 * 2 * (128 - 64) * 4 = 8,000,000 B
+dead leaf slots import :  7,876 * 2 * (128 - 127) * 4 =    63,008 B   (127 keys/leaf)
+ref floor (2 refs/entry) : 2 * 1,000,000 * 4 = 8,000,000 B
+B+ import structure / floor : 8,701,720 / 8,000,000 = 1.088
+</pre>
+
+<details>
+    <summary>Raw JOL output (1M)</summary>
+    <pre>
+java.util.TreeMap@4edde6e5d footprint:
+     COUNT       AVG       SUM   DESCRIPTION
+   1999872        16  31997952   java.lang.Integer
+         1        48        48   java.util.TreeMap
+   1000000        40  40000000   java.util.TreeMap$Entry
+   2999873            71998000   (total)
+
+chaos.tree.naryMap.BTreeMap@5ef0e311d footprint:
+     COUNT       AVG       SUM   DESCRIPTION
+       248       536    132928   [Lchaos.tree.naryMap.BTreeMapNode;
+     31746       528  16761888   [Ljava.lang.Object;
+         1        72        72   chaos.tree.naryMap.BTreeMap
+     15873        32    507936   chaos.tree.naryMap.BTreeMapNode
+   1999872        16  31997952   java.lang.Integer
+   2047740            49400776   (total)
+
+chaos.tree.naryMap.BPlusTreeMap@40b02d47d footprint:
+     COUNT       AVG       SUM   DESCRIPTION
+       248       536    132928   [Lchaos.tree.naryMap.BPlusTreeMapNode;
+     31498       528  16630944   [Ljava.lang.Object;
+         1        72        72   chaos.tree.naryMap.BPlusTreeMap
+     15873        40    634920   chaos.tree.naryMap.BPlusTreeMapNode
+   1999872        16  31997952   java.lang.Integer
+   2047492            49396816   (total)
+
+chaos.tree.naryMap.BPlusTreeMap@64ec7f47d footprint: (importFlatMatrix, 1.0f)
+     COUNT       AVG       SUM   DESCRIPTION
+        63       536     33768   [Lchaos.tree.naryMap.BPlusTreeMapNode;
+     15815       528   8350320   [Ljava.lang.Object;
+         1        72        72   chaos.tree.naryMap.BPlusTreeMap
+      7939        40    317560   chaos.tree.naryMap.BPlusTreeMapNode
+   1999872        16  31997952   java.lang.Integer
+   2023690            40699672   (total)
+</pre>
+</details>
+
+</p>
+<h2>5. The Top-Down Bulk Loader Arithmetic</h2>
+<p>
+    ChaosTree's <code>buildFromSorted</code> eliminates the "Phase 2" repair pass found in standard database
+    bulk-loaders by computing exact capacity windows <i>before</i> descending.
+</p>
+<blockquote>
+    <b>B-Tree capacity bound:</b> (numKeys + 1) / maxChild<sup>h</sup> &le; Children &le; (numKeys + 1) /
+    minChild<sup>h</sup><br>
+    <b>B+-Tree capacity bound:</b> maxSubtree = maxKeys * maxChild<sup>h-1</sup>
+</blockquote>
+<p>
+    By proving that <i>C</i> (the chosen number of children) fits within the clamped window, ChaosTree guarantees every
+    child will land inside its legal <code>[minKeys, maxKeys]</code> boundary before the recursion even reaches it. The
+    remainder is smeared uniformly (1 per child) to bound the worst-case sibling imbalance at exactly 1 key. This makes
+    underflow mathematically impossible and fully eliminates the need for a secondary tree-repair traversal.
+</p>
+
+<p>
+    <a href="../index.html">&larr; Back to ChaosTree Home</a>
+</p>
+
+
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark-mode');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+</script>
+</body>
+</html>
