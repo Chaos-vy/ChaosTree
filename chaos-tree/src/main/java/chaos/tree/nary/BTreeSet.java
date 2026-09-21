@@ -56,6 +56,12 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
     @Override
     @SuppressWarnings("unchecked")
     public void buildFromSorted(Iterator<? extends E> it, float factor) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (factor < 0.5f || factor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
         if (!it.hasNext()) {
             return;
         }

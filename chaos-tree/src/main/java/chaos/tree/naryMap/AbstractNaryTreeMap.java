@@ -25,9 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K, V, N>>
         extends AbstractMap<K, V> implements NaryMap<K, V>, Serializable, Cloneable permits BTreeMap, BPlusTreeMap {
@@ -420,17 +418,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         }
     }
 
-    protected boolean removeMatching(BiPredicate<? super K, ? super V> test) {
-        boolean changed = false;
-        for (Iterator<Map.Entry<K, V>> it = entryIterator(null, true); it.hasNext(); ) {
-            Map.Entry<K, V> e = it.next();
-            if (test.test(e.getKey(), e.getValue())) {
-                it.remove();
-                changed = true;
-            }
-        }
-        return changed;
-    }
+
     protected abstract Iterator<K> keyIterator(K fromKey, boolean fromInclusive);
 
     protected abstract Iterator<K> descendingKeyIterator(K fromKey, boolean fromInclusive);
@@ -533,12 +521,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                 return true;
             }
             return false;
-        }
-
-        @Override
-        public boolean removeIf(Predicate<? super Entry<K, V>> filter) {
-            Objects.requireNonNull(filter);
-            return AbstractNaryTreeMap.this.removeMatching((k, v) -> filter.test(new AbstractMap.SimpleImmutableEntry<>(k, v)));
         }
 
         @Override
@@ -747,21 +729,16 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public Map.Entry<K, V> pollFirstEntry() {
             Map.Entry<K, V> e = firstEntry();
-            if (e == null) return null;
-            Map.Entry<K, V> snap = new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue());
-            remove(snap.getKey());
-            return snap;
+            if (e != null) remove(e.getKey());
+            return e;
         }
 
         @Override
         public Map.Entry<K, V> pollLastEntry() {
             Map.Entry<K, V> e = lastEntry();
-            if (e == null) return null;
-            Map.Entry<K, V> snap = new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue());
-            remove(snap.getKey());
-            return snap;
+            if (e != null) remove(e.getKey());
+            return e;
         }
-
 
         @Override
         public Comparator<? super K> comparator() {
@@ -1000,18 +977,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                     return false;
                 }
             }
-            @Override
-            public boolean removeIf(Predicate<? super Map.Entry<K, V>> filter) {
-                Objects.requireNonNull(filter);
-                boolean changed = false;
-                for (Iterator<Map.Entry<K, V>> it = boundedEntryIterator(); it.hasNext(); ) {
-                    if (filter.test(it.next())) {
-                        it.remove();
-                        changed = true;
-                    }
-                }
-                return changed;
-            }
         }
     }
 
@@ -1035,11 +1000,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public void clear() {
             AbstractNaryTreeMap.this.clear();
-        }
-        @Override
-        public boolean removeIf(Predicate<? super V> filter) {
-            Objects.requireNonNull(filter);
-            return AbstractNaryTreeMap.this.removeMatching((k, v) -> filter.test(v));
         }
     }
 
@@ -1166,12 +1126,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public K last() {
             return map.lastKey();
-        }
-
-        @Override
-        public boolean removeIf(Predicate<? super K> filter) {
-            Objects.requireNonNull(filter);
-            return removeMatching((k, v) -> filter.test(k));
         }
 
     }
