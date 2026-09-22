@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTree — Mix-Ratio Sweep (get/put/remove)</title>
+
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2, h3 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .winner {
+            color: #2e7d32; /* dark green */
+            font-weight: bold;
+        }
+
+        .loser {
+            color: #c62828; /* dark red */
+            font-weight: bold;
+        }
+    </style>
+
+
+</head>
+<body>
+
+
+<h1>N-ary Tree Mixed Workload — Mix-Ratio Sweep</h1>
+<p>
+    This benchmark is designed to test under mixed work load. The Benchmark was performed on <b>i5-13450HX 16 core</b>
+    with heap pinned <b>-Xmx2g -Xmx2g</b> for varying dataset <b>sizes: 10K, 100K, 1M</b>. <b>JDK 21</b> is used for
+    Benchmark.
+<ul>
+    <li><b>@Warmup</b> = 10 500ms each while <b>100K>=</b> 1000ms each</li>
+    <li><b>@Measurement</b> = 10 500ms each while <b>100K>=</b> 1000ms each</li>
+    <li><b>Default GC</b></li>
+</ul>
+</p>
+<p>
+    The benchmark uses mixed operations defined as
+    <b>(get%, put%, remove%)</b>. The following workload distributions are evaluated:
+</p>
+
+<ul>
+    <li>
+        <b>Read-dominant</b>
+        <ul>
+            <li><b>(70, 20, 10)</b> — 70% get, 20% put, 10% remove</li>
+            <li><b>(50, 25, 25)</b> — 50% get, 25% put, 25% remove</li>
+        </ul>
+    </li>
+    <li>
+        <b>Balanced</b>
+        <ul>
+            <li><b>(34, 33, 33)</b> — 34% get, 33% put, 33% remove</li>
+        </ul>
+    </li>
+
+    <li>
+        <b>Insert-dominant</b>
+        <ul>
+            <li><b>(10, 70, 20)</b> — 10% get, 70% put, 20% remove</li>
+            <li><b>(20, 60, 20)</b> — 20% get, 60% put, 20% remove</li>
+        </ul>
+    </li>
+
+    <li>
+        <b>Remove-dominant</b>
+        <ul>
+            <li><b>(20, 10, 70)</b> — 20% get, 10% put, 70% remove</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>1. Mixed benchmark at 10K size</h3>
+<table>
+    <tr>
+        <th>Mix (get,put,del)</th>
+        <th>Map</th>
+        <th>ms/op</th>
+        <th>Δ vs TreeMap</th>
+    </tr>
+
+    <tr>
+        <td rowspan="3">70,20,10<br><span class="note">read-heavy</span></td>
+        <td>JavaTreeMap</td>
+        <td>1.191 ± 0.006</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">1.104 ± 0.016</td>
+        <td class="winner">1.08x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">1.128 ± 0.023</td>
+        <td class="winner">1.06x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">50,25,25<br><span class="note">balanced, read-leaning</span></td>
+        <td>JavaTreeMap</td>
+        <td>1.251 ± 0.006</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">1.206 ± 0.021</td>
+        <td class="winner">1.04x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">1.226 ± 0.005</td>
+        <td class="winner">1.02x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">10,70,20<br><span class="note">write-heavy</span></td>
+        <td>JavaTreeMap</td>
+        <td>1.263 ± 0.005</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">1.173 ± 0.005</td>
+        <td class="winner">1.08x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">1.226 ± 0.009</td>
+        <td class="winner">1.03x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">20,60,20<br><span class="note">write-dominant</span></td>
+        <td>JavaTreeMap</td>
+        <td>1.289 ± 0.016</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">1.186 ± 0.004</td>
+        <td class="winner">1.09x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">1.236 ± 0.007</td>
+        <td class="winner">1.04x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">34,33,33<br><span class="note">evenly balanced</span></td>
+        <td>JavaTreeMap</td>
+        <td>1.309 ± 0.007</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">1.249 ± 0.023</td>
+        <td class="winner">1.05x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">1.278 ± 0.006</td>
+        <td class="winner">1.02x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">20,10,70<br><span class="note">delete-heavy</span></td>
+        <td>JavaTreeMap</td>
+        <td class="winner">1.295 ± 0.006</td>
+        <td class="winner">—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="loser">1.369 ± 0.022</td>
+        <td class="loser">0.95x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="loser">1.428 ± 0.043</td>
+        <td class="loser">0.91x</td>
+    </tr>
+</table>
+<details>
+    <summary><b>View benchmark results</b></summary>
+    <pre>
+    Benchmark                                    (mapType)     (mix)  (seed)  (size)  Mode  Cnt  Score   Error  Units
+    ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  70,20,10      42   10000  avgt   30  1.191 ± 0.006  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  50,25,25      42   10000  avgt   30  1.251 ± 0.006  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  10,70,20      42   10000  avgt   30  1.263 ± 0.005  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,60,20      42   10000  avgt   30  1.289 ± 0.016  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  34,33,33      42   10000  avgt   30  1.309 ± 0.007  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,10,70      42   10000  avgt   30  1.295 ± 0.006  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  70,20,10      42   10000  avgt   30  1.104 ± 0.016  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  50,25,25      42   10000  avgt   30  1.206 ± 0.021  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  10,70,20      42   10000  avgt   30  1.173 ± 0.005  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,60,20      42   10000  avgt   30  1.186 ± 0.004  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  34,33,33      42   10000  avgt   30  1.249 ± 0.023  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,10,70      42   10000  avgt   30  1.369 ± 0.022  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  70,20,10      42   10000  avgt   30  1.128 ± 0.023  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  50,25,25      42   10000  avgt   30  1.226 ± 0.005  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  10,70,20      42   10000  avgt   30  1.226 ± 0.009  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,60,20      42   10000  avgt   30  1.236 ± 0.007  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  34,33,33      42   10000  avgt   30  1.278 ± 0.006  ms/op
+    ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,10,70      42   10000  avgt   30  1.428 ± 0.043  ms/op
+    </pre>
+</details>
+
+<h3>The reason behind the delete loss:</h3>
+<p>
+    TBH, it was already predicted, from past few days benchmarking at lower dataset, it was eventually seen that <b>N-ary
+    Tree</b> was
+    always loosing as the data size gets lower. This part of study was done by pinning the <b>CPU to taskset -c 0-11</b>
+    where
+    I read every data and found that the <b>lower the data size gets <=10K the data gets stored into cache level memory
+    which does not get spilled over
+    L2/L3 cache cliff.</b> The real reason is also more behind the <b>IPC</b> It was noted my N-ary Tree performed <b>4.6x~6x
+    IPC</b> which was consumed in native function mostly <b>~70%</b>
+    were noted from <b><code>Arrays.binarysearch()</code> and <code>System.arraycopy().</code></b>
+</p>
+
+<p>
+    So the more I had gone deep the more terrible were my loss seen against the dataset.
+    <b>Conclusion:</b> <=10K is obviously less so this benchmark data is real caveat how the Tree performs at scaling
+    dataset.
+</p>
+
+<blockquote>
+    delete() operation is slow because it does two different things under the hood, where my B-Tree needs a predecessor
+    before delete, so it fetches for the predecessor swap then move to leaf, then
+    it propagate to root, it must be noted it might be routing key that got deleted so many cases befalls during
+    the deletion and insertion, howsoever in TreeMap there is only one pointer swap and rebalancing of tree.
+</blockquote>
+
+<h3>2. Mixed benchmark at 100K size</h3>
+
+
+<table>
+    <tr>
+        <th>Mix (get,put,del)</th>
+        <th>Map</th>
+        <th>ms/op</th>
+        <th>Δ vs TreeMap</th>
+    </tr>
+
+    <tr>
+        <td rowspan="3">70,20,10</td>
+        <td>JavaTreeMap</td>
+        <td>27.323 ± 0.878</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">18.358 ± 0.308</td>
+        <td class="winner">1.49x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">17.790 ± 0.085</td>
+        <td class="winner">1.54x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">50,25,25</td>
+        <td>JavaTreeMap</td>
+        <td>26.990 ± 0.354</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">18.606 ± 0.284</td>
+        <td class="winner">1.45x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">19.072 ± 0.100</td>
+        <td class="winner">1.42x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">10,70,20</td>
+        <td>JavaTreeMap</td>
+        <td>27.148 ± 1.614</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">18.620 ± 0.320</td>
+        <td class="winner">1.46x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">19.571 ± 0.203</td>
+        <td class="winner">1.39x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">20,60,20</td>
+        <td>JavaTreeMap</td>
+        <td>27.965 ± 0.422</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">18.488 ± 0.306</td>
+        <td class="winner">1.51x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">18.965 ± 0.111</td>
+        <td class="winner">1.47x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">34,33,33</td>
+        <td>JavaTreeMap</td>
+        <td>27.117 ± 0.657</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">18.944 ± 0.305</td>
+        <td class="winner">1.43x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">19.311 ± 0.110</td>
+        <td class="winner">1.40x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">20,10,70<br><span class="note">delete-heavy — reversed at 10K</span></td>
+        <td>JavaTreeMap</td>
+        <td>26.763 ± 0.654</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">20.385 ± 0.410</td>
+        <td class="winner">1.31x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">20.789 ± 0.109</td>
+        <td class="winner">1.29x</td>
+    </tr>
+</table>
+<details>
+    <summary><b>View benchmark results</b></summary>
+    <pre>
+
+Benchmark                                    (mapType)     (mix)  (seed)  (size)  Mode  Cnt   Score   Error  Units
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  70,20,10      42  100000  avgt   30  27.323 ± 0.878  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  50,25,25      42  100000  avgt   30  26.990 ± 0.354  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  10,70,20      42  100000  avgt   30  27.148 ± 1.614  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,60,20      42  100000  avgt   30  27.965 ± 0.422  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  34,33,33      42  100000  avgt   30  27.117 ± 0.657  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,10,70      42  100000  avgt   30  26.763 ± 0.654  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  70,20,10      42  100000  avgt   30  18.358 ± 0.308  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  50,25,25      42  100000  avgt   30  18.606 ± 0.284  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  10,70,20      42  100000  avgt   30  18.620 ± 0.320  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,60,20      42  100000  avgt   30  18.488 ± 0.306  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  34,33,33      42  100000  avgt   30  18.944 ± 0.305  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,10,70      42  100000  avgt   30  20.385 ± 0.410  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  70,20,10      42  100000  avgt   30  17.790 ± 0.085  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  50,25,25      42  100000  avgt   30  19.072 ± 0.100  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  10,70,20      42  100000  avgt   30  19.571 ± 0.203  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,60,20      42  100000  avgt   30  18.965 ± 0.111  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  34,33,33      42  100000  avgt   30  19.311 ± 0.110  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,10,70      42  100000  avgt   30  20.789 ± 0.109  ms/op
+</pre>
+
+</details>
+<p>
+    As I increased the dataset size by 10&times;, an interesting result emerged:
+    the N-ary tree increasingly outperformed the pointer-based tree.
+    This raises an obvious question:
+    <b>Why don't the lower-cost pointer swaps and insert/delete operations
+        continue to outperform the N-ary tree?</b>
+    <br><br>
+    The answer becomes apparent when the dataset grows beyond the effective
+    cache capacity. With pointer-based trees, traversal involves following
+    pointers to nodes that may be scattered throughout memory. As the working
+    set grows, this pointer chasing can encounter the
+    <b>L2/L3 cache capacity cliff</b>, increasing memory-stall time.
+    <br><br>
+
+    The N-ary tree takes a different approach. By storing multiple keys and
+    child references within each node, a single cache-line or memory fetch
+    can expose a larger portion of the tree to the CPU. This gives the
+    hardware prefetcher more sequential data to work with, reducing the
+    frequency of expensive memory accesses compared with chasing individual
+    pointers.
+    <br><br>
+
+    This effect became more visible as the dataset increased by 10&times;.
+    Although individual N-ary tree operations may perform more work inside
+    a node, that additional work is largely performed on data that is already
+    close to the CPU. The benchmark also showed <b>lower cache-miss rates and
+    higher IPC</b> for the N-ary tree at larger dataset sizes, consistent with
+    better utilization of the CPU pipeline and memory hierarchy.
+    <br><br>
+
+    In other words, the advantage is not simply about the number of pointer
+    operations performed. Once the working set becomes large enough,
+    <b>memory locality and cache behavior can dominate the cost of the
+        algorithm itself.</b>
+
+</p>
+
+<h3>3. Mixed benchmark at 1M size</h3>
+
+<table>
+    <tr>
+        <th>Mix (get,put,del)</th>
+        <th>Map</th>
+        <th>ms/op</th>
+        <th>Scaling vs TreeMap</th>
+    </tr>
+
+    <tr>
+        <td rowspan="3">70,20,10</td>
+        <td>JavaTreeMap</td>
+        <td>799.974 ± 35.740</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">450.906 ± 24.157</td>
+        <td class="winner">1.77x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">423.991 ± 12.655</td>
+        <td class="winner">1.89x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">50,25,25</td>
+        <td>JavaTreeMap</td>
+        <td>798.765 ± 12.470</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">440.563 ± 21.609</td>
+        <td class="winner">1.81x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">473.899 ± 24.453</td>
+        <td class="winner">1.69x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">10,70,20</td>
+        <td>JavaTreeMap</td>
+        <td>816.821 ± 34.469</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">444.837 ± 12.713</td>
+        <td class="winner">1.84x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">491.246 ± 24.545</td>
+        <td class="winner">1.66x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">20,60,20</td>
+        <td>JavaTreeMap</td>
+        <td>839.408 ± 27.836</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">455.377 ± 14.690</td>
+        <td class="winner">1.84x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">466.604 ± 15.955</td>
+        <td class="winner">1.80x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">34,33,33</td>
+        <td>JavaTreeMap</td>
+        <td>861.024 ± 24.655</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">450.845 ± 15.140</td>
+        <td class="winner">1.91x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">455.621 ± 5.631</td>
+        <td class="winner">1.89x</td>
+    </tr>
+
+    <tr>
+        <td rowspan="3">20,10,70</td>
+        <td>JavaTreeMap</td>
+        <td>829.618 ± 19.528</td>
+        <td>—</td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="winner">455.877 ± 11.772</td>
+        <td class="winner">1.82x</td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="winner">463.281 ± 3.661</td>
+        <td class="winner">1.79x</td>
+    </tr>
+</table>
+
+<details>
+    <summary><b>View benchmark results</b></summary>
+    <pre>
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  70,20,10      42  1000000  avgt   30  799.974 ± 35.740  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  50,25,25      42  1000000  avgt   30  798.765 ± 12.470  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  10,70,20      42  1000000  avgt   30  816.821 ± 34.469  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,60,20      42  1000000  avgt   30  839.408 ± 27.836  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  34,33,33      42  1000000  avgt   30  861.024 ± 24.655  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload   JavaTreeMap  20,10,70      42  1000000  avgt   30  829.618 ± 19.528  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  70,20,10      42  1000000  avgt   30  450.906 ± 24.157  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  50,25,25      42  1000000  avgt   30  440.563 ± 21.609  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  10,70,20      42  1000000  avgt   30  444.837 ± 12.713  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,60,20      42  1000000  avgt   30  455.377 ± 14.690  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  34,33,33      42  1000000  avgt   30  450.845 ± 15.140  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload  BPlusTreeMap  20,10,70      42  1000000  avgt   30  455.877 ± 11.772  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  70,20,10      42  1000000  avgt   30  423.991 ± 12.655  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  50,25,25      42  1000000  avgt   30  473.899 ± 24.453  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  10,70,20      42  1000000  avgt   30  491.246 ± 24.545  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,60,20      42  1000000  avgt   30  466.604 ± 15.955  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  34,33,33      42  1000000  avgt   30  455.621 ±  5.631  ms/op
+ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,10,70      42  1000000  avgt   30  463.281 ±  3.661  ms/op
+</pre>
+
+</details>
+<h3>Conclusion &amp; Caveat</h3>
+
+<p>
+    These results show that the performance characteristics of a tree
+    implementation are strongly dependent on both <b>dataset size</b> and
+    <b>workload composition</b>. At smaller dataset sizes, the pointer-based
+    <code>TreeMap</code> can benefit from the entire working set remaining
+    closer to the CPU cache hierarchy, while the additional work performed
+    inside N-ary nodes can become overhead.
+</p>
+
+<p>
+    As the dataset grows, however, the cost of pointer chasing becomes more
+    significant. The N-ary implementations were able to maintain lower
+    execution times across the larger datasets tested, with the difference
+    becoming more pronounced at 100K and 1M elements.
+</p>
+
+<p>
+    <b>The important caveat is that this should not be interpreted as a
+        universal replacement for <code>TreeMap</code>.</b> The benchmark uses a
+    specific hardware configuration, JVM version, dataset generation,
+    workload distribution, and implementation. In particular, the
+    delete-heavy workload at 10K demonstrates that the N-ary implementation
+    can lose when the dataset is small enough for pointer-based traversal to
+    remain cache-friendly.
+</p>
+
+<p>
+    The result therefore highlights a more general point:
+    <b>asymptotic complexity alone does not determine real-world performance;
+        memory locality, cache behavior, instruction throughput, and workload
+        characteristics can materially change the outcome.</b>
+</p>
+
+</body>
+</html>

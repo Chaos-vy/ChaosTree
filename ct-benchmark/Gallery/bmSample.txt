@@ -1,0 +1,163 @@
+Benchmark                                                         (n)    Mode     Cnt      Score   Error  Units
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet                  10000  sample  539864      0.134 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.00            10000  sample              0.038          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.50            10000  sample              0.128          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.90            10000  sample              0.157          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.95            10000  sample              0.167          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.99            10000  sample              0.279          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.999           10000  sample              1.198          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.9999          10000  sample              4.704          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p1.00            10000  sample             16.032          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet                 100000  sample  319181      0.234 ± 0.002  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.00           100000  sample              0.057          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.50           100000  sample              0.211          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.90           100000  sample              0.271          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.95           100000  sample              0.307          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.99           100000  sample              0.733          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.999          100000  sample              3.822          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.9999         100000  sample             10.659          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p1.00           100000  sample             64.128          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet                1000000  sample  430124      0.663 ± 0.004  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.00          1000000  sample              0.094          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.50          1000000  sample              0.588          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.90          1000000  sample              0.867          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.95          1000000  sample              0.983          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.99          1000000  sample              3.736          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.999         1000000  sample              9.008          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p0.9999        1000000  sample             18.303          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapGet:p1.00          1000000  sample            183.296          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove            10000  sample  387156      0.340 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.00      10000  sample              0.131          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.50      10000  sample              0.327          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.90      10000  sample              0.376          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.95      10000  sample              0.396          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.99      10000  sample              0.634          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.999     10000  sample              2.956          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.9999    10000  sample              5.876          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p1.00      10000  sample            102.400          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove           100000  sample  567003      0.452 ± 0.002  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.00     100000  sample              0.197          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.50     100000  sample              0.436          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.90     100000  sample              0.509          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.95     100000  sample              0.537          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.99     100000  sample              0.821          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.999    100000  sample              3.848          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.9999   100000  sample              7.421          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p1.00     100000  sample            163.840          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove          1000000  sample  492814      1.007 ± 0.004  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.00    1000000  sample              0.312          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.50    1000000  sample              0.933          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.90    1000000  sample              1.258          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.95    1000000  sample              1.382          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.99    1000000  sample              4.128          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.999   1000000  sample              9.312          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p0.9999  1000000  sample             25.506          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bPlusTreeMapPutRemove:p1.00    1000000  sample            269.824          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet                      10000  sample  553853      0.135 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.00                10000  sample              0.033          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.50                10000  sample              0.129          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.90                10000  sample              0.157          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.95                10000  sample              0.166          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.99                10000  sample              0.260          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.999               10000  sample              1.194          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.9999              10000  sample              4.925          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p1.00                10000  sample             36.736          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet                     100000  sample  336118      0.225 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.00               100000  sample              0.041          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.50               100000  sample              0.204          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.90               100000  sample              0.263          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.95               100000  sample              0.293          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.99               100000  sample              0.692          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.999              100000  sample              3.672          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.9999             100000  sample              8.608          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p1.00               100000  sample             26.656          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet                    1000000  sample  457579      0.636 ± 0.003  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.00              1000000  sample              0.047          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.50              1000000  sample              0.562          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.90              1000000  sample              0.837          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.95              1000000  sample              0.949          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.99              1000000  sample              3.816          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.999             1000000  sample              9.127          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p0.9999            1000000  sample             18.198          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapGet:p1.00              1000000  sample            153.600          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove                10000  sample  382176      0.343 ± 0.002  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.00          10000  sample              0.144          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.50          10000  sample              0.330          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.90          10000  sample              0.379          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.95          10000  sample              0.398          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.99          10000  sample              0.620          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.999         10000  sample              2.951          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.9999        10000  sample              7.148          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p1.00          10000  sample            155.648          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove               100000  sample  559894      0.457 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.00         100000  sample              0.182          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.50         100000  sample              0.439          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.90         100000  sample              0.516          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.95         100000  sample              0.548          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.99         100000  sample              0.865          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.999        100000  sample              3.932          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.9999       100000  sample              8.417          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p1.00         100000  sample            148.224          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove              1000000  sample  493397      1.010 ± 0.004  us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.00        1000000  sample              0.302          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.50        1000000  sample              0.930          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.90        1000000  sample              1.252          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.95        1000000  sample              1.376          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.99        1000000  sample              4.280          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.999       1000000  sample             11.460          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p0.9999      1000000  sample             22.628          us/op
+TreeMapVsBTreeVsBPlusBenchmark.bTreeMapPutRemove:p1.00        1000000  sample            147.456          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet                       10000  sample  524904      0.142 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.00                 10000  sample              0.023          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.50                 10000  sample              0.134          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.90                 10000  sample              0.166          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.95                 10000  sample              0.177          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.99                 10000  sample              0.357          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.999                10000  sample              1.862          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.9999               10000  sample              5.128          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p1.00                 10000  sample             72.320          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet                      100000  sample  465508      0.295 ± 0.001  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.00                100000  sample              0.032          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.50                100000  sample              0.269          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.90                100000  sample              0.371          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.95                100000  sample              0.430          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.99                100000  sample              0.873          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.999               100000  sample              4.088          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.9999              100000  sample              9.265          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p1.00                100000  sample             35.264          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet                     1000000  sample  413575      0.904 ± 0.004  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.00               1000000  sample              0.044          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.50               1000000  sample              0.820          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.90               1000000  sample              1.204          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.95               1000000  sample              1.390          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.99               1000000  sample              4.280          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.999              1000000  sample             13.040          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p0.9999             1000000  sample             24.635          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapGet:p1.00               1000000  sample            135.936          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove                 10000  sample  389263      0.355 ± 0.003  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.00           10000  sample              0.135          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.50           10000  sample              0.316          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.90           10000  sample              0.395          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.95           10000  sample              0.446          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.99           10000  sample              1.415          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.999          10000  sample              4.047          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.9999         10000  sample             12.161          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p1.00           10000  sample            157.696          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove                100000  sample  429500      0.617 ± 0.003  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.00          100000  sample              0.183          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.50          100000  sample              0.544          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.90          100000  sample              0.759          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.95          100000  sample              0.916          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.99          100000  sample              1.902          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.999         100000  sample              6.348          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.9999        100000  sample             14.113          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p1.00          100000  sample            168.960          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove               1000000  sample  325448      1.722 ± 0.424  us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.00         1000000  sample              0.339          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.50         1000000  sample              1.420          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.90         1000000  sample              1.988          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.95         1000000  sample              2.320          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.99         1000000  sample              5.656          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.999        1000000  sample             14.569          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p0.9999       1000000  sample            100.241          us/op
+TreeMapVsBTreeVsBPlusBenchmark.treeMapPutRemove:p1.00         1000000  sample          41943.040          us/op

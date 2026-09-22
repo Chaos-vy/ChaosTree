@@ -418,7 +418,6 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         }
     }
 
-
     protected abstract Iterator<K> keyIterator(K fromKey, boolean fromInclusive);
 
     protected abstract Iterator<K> descendingKeyIterator(K fromKey, boolean fromInclusive);
@@ -1142,7 +1141,7 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
         @Override
         public Collection<V> values() {
             Collection<V> vs = descendingValuesView;
-            return (vs != null) ? vs : (descendingValuesView = new AbstractCollection<V>() {
+            return (vs != null) ? vs : (descendingValuesView = new AbstractCollection<>() {
                 @Override
                 public Iterator<V> iterator() {
                     return AbstractNaryTreeMap.this.descendingValueIterator(null, true);

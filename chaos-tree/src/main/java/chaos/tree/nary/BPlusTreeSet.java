@@ -884,42 +884,64 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             E nextTarget = (currentLeaf != null && currentIndex < currentLeaf.keyCount)
                     ? (E) currentLeaf.keys[currentIndex] : null;
 
-            removeAtLeaf(lastReturnedLeaf, lastReturnedIndex);
+            final BPlusTreeNode<E> leaf = lastReturnedLeaf;
+            final int idx0 = lastReturnedIndex;
+            final int oldCount = leaf.keyCount;
+
+            removeAtLeaf(leaf, idx0);
             expectedModCount = modCount;
             lastReturned = null;
             lastReturnedLeaf = null;
 
-            if (nextTarget != null) {
-                BPlusTreeNode<E> search = currentLeaf;
-                int idx = -1;
-
-                if (search != null) idx = searchNode(search, nextTarget);
-                if (idx < 0 && search != null && search.prev != null) {
-                    search = search.prev;
-                    idx = searchNode(search, nextTarget);
-                }
-                if (idx < 0 && search != null && search.next != null) {
-                    search = search.next;
-                    idx = searchNode(search, nextTarget);
-                }
-
-                if (idx < 0) {
-                    search = root;
-                    while (search != null && !search.isLeaf()) {
-                        int pos = searchNode(search, nextTarget);
-                        search = search.child[(pos >= 0) ? pos + 1 : ~pos];
-                    }
-                    if (search != null) idx = searchNode(search, nextTarget);
-                }
-
-                currentLeaf = search;
-                currentIndex = (idx >= 0) ? idx : ~idx;
-                if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
-                    currentLeaf = currentLeaf.next;
-                    currentIndex = 0;
-                }
-            } else {
+            if (nextTarget == null) {
                 currentLeaf = null;
+                return;
+            }
+
+            if (leaf.keyCount == oldCount - 1) {
+                if (idx0 < leaf.keyCount) {
+                    if (leaf.keys[idx0] == nextTarget) {
+                        currentLeaf = leaf;
+                        currentIndex = idx0;
+                        return;
+                    }
+                } else {
+                    BPlusTreeNode<E> n = leaf.next;
+                    if (n != null && n.keyCount > 0 && n.keys[0] == nextTarget) {
+                        currentLeaf = n;
+                        currentIndex = 0;
+                        return;
+                    }
+                }
+            }
+
+            BPlusTreeNode<E> search = currentLeaf;
+            int idx = -1;
+
+            if (search != null) idx = searchNode(search, nextTarget);
+            if (idx < 0 && search != null && search.prev != null) {
+                search = search.prev;
+                idx = searchNode(search, nextTarget);
+            }
+            if (idx < 0 && search != null && search.next != null) {
+                search = search.next;
+                idx = searchNode(search, nextTarget);
+            }
+
+            if (idx < 0) {
+                search = root;
+                while (search != null && !search.isLeaf()) {
+                    int pos = searchNode(search, nextTarget);
+                    search = search.child[(pos >= 0) ? pos + 1 : ~pos];
+                }
+                if (search != null) idx = searchNode(search, nextTarget);
+            }
+
+            currentLeaf = search;
+            currentIndex = (idx >= 0) ? idx : ~idx;
+            if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
+                currentLeaf = currentLeaf.next;
+                currentIndex = 0;
             }
         }
     }
@@ -991,44 +1013,68 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
             if (modCount != expectedModCount) throw new ConcurrentModificationException();
 
             @SuppressWarnings("unchecked")
-            E nextTarget = (currentLeaf != null && currentIndex >= 0) ? (E) currentLeaf.keys[currentIndex] : null;
+            E nextTarget = (currentLeaf != null && currentIndex < currentLeaf.keyCount)
+                    ? (E) currentLeaf.keys[currentIndex] : null;
 
-            removeAtLeaf(lastReturnedLeaf, lastReturnedIndex);
+            final BPlusTreeNode<E> leaf = lastReturnedLeaf;
+            final int idx0 = lastReturnedIndex;
+            final int oldCount = leaf.keyCount;
+
+            removeAtLeaf(leaf, idx0);
             expectedModCount = modCount;
             lastReturned = null;
             lastReturnedLeaf = null;
 
-            if (nextTarget != null) {
-                BPlusTreeNode<E> search = currentLeaf;
-                int idx = -1;
-
-                if (search != null) idx = searchNode(search, nextTarget);
-                if (idx < 0 && search != null && search.next != null) {
-                    search = search.next;
-                    idx = searchNode(search, nextTarget);
-                }
-                if (idx < 0 && search != null && search.prev != null) {
-                    search = search.prev;
-                    idx = searchNode(search, nextTarget);
-                }
-
-                if (idx < 0) {
-                    search = root;
-                    while (search != null && !search.isLeaf()) {
-                        int pos = searchNode(search, nextTarget);
-                        search = search.child[(pos >= 0) ? pos + 1 : ~pos];
-                    }
-                    if (search != null) idx = searchNode(search, nextTarget);
-                }
-
-                currentLeaf = search;
-                currentIndex = (idx >= 0) ? idx : ~idx;
-                if (currentLeaf != null && currentIndex < 0) {
-                    currentLeaf = currentLeaf.prev;
-                    if (currentLeaf != null) currentIndex = currentLeaf.keyCount - 1;
-                }
-            } else {
+            if (nextTarget == null) {
                 currentLeaf = null;
+                return;
+            }
+
+            // fast path: leaf lost exactly one key, so the next element shifted into idx0
+            if (leaf.keyCount == oldCount - 1) {
+                if (idx0 < leaf.keyCount) {
+                    if (leaf.keys[idx0] == nextTarget) {
+                        currentLeaf = leaf;
+                        currentIndex = idx0;
+                        return;
+                    }
+                } else {
+                    BPlusTreeNode<E> n = leaf.next;
+                    if (n != null && n.keyCount > 0 && n.keys[0] == nextTarget) {
+                        currentLeaf = n;
+                        currentIndex = 0;
+                        return;
+                    }
+                }
+            }
+
+            BPlusTreeNode<E> search = currentLeaf;
+            int idx = -1;
+
+            if (search != null) idx = searchNode(search, nextTarget);
+            if (idx < 0 && search != null && search.prev != null) {
+                search = search.prev;
+                idx = searchNode(search, nextTarget);
+            }
+            if (idx < 0 && search != null && search.next != null) {
+                search = search.next;
+                idx = searchNode(search, nextTarget);
+            }
+
+            if (idx < 0) {
+                search = root;
+                while (search != null && !search.isLeaf()) {
+                    int pos = searchNode(search, nextTarget);
+                    search = search.child[(pos >= 0) ? pos + 1 : ~pos];
+                }
+                if (search != null) idx = searchNode(search, nextTarget);
+            }
+
+            currentLeaf = search;
+            currentIndex = (idx >= 0) ? idx : ~idx;
+            if (currentLeaf != null && currentIndex >= currentLeaf.keyCount) {
+                currentLeaf = currentLeaf.next;
+                currentIndex = 0;
             }
         }
     }

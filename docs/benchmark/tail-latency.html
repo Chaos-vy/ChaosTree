@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+          type="image/svg+xml">
+    <meta charset="UTF-8">
+    <title>Tail latency Benchmark</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1 {
+            font-size: 1.4em;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            border-bottom: 1px dotted #000;
+            padding-bottom: 4px;
+            margin-top: 30px;
+        }
+
+        h3 {
+            font-size: 1.0em;
+            margin-top: 25px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: right;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px dotted #000;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: monospace;
+        }
+
+        .bold {
+            font-weight: 700;
+        }
+
+        .err {
+            color: #666;
+            font-weight: 400;
+            opacity: 0.75;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .err {
+            color: #c9a3ff;
+            opacity: 0.65;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+
+<h1>Tail latency Benchmark</h1>
+<p>
+    This is the setup doc: what <code>TreeMapVsBTreeVsBPlusBenchmark</code> builds, what each benchmark method
+    measures, and exactly what the reproduction command does to it. No narrative here, just the mechanics.
+</p>
+
+<h2>1. The Class</h2>
+<p>
+    One JMH state class, six <code>@Benchmark</code> methods — a <code>Get</code> and a <code>PutRemove</code> for
+    each of <code>TreeMap</code>, <code>BTreeMap</code>, and <code>BPlusTreeMap</code>. Both ChaosTree maps are
+    constructed with <code>DEGREE = 64</code>, so every internal node holds up to 64 children before it splits.
+</p>
+<pre><code>@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
+@State(Scope.Benchmark)
+@Warmup(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+@Fork(value = 3, jvmArgsAppend = {"-Xms6g", "-Xmx6g"})
+public class TreeMapVsBTreeVsBPlusBenchmark {
+
+    private static final int DEGREE = 64;
+    @Param({"100000", "1000000"})
+    public int n;
+    ...
+}</code></pre>
+<p>
+    Those class-level annotations are defaults, not the last word — every one of them can be, and is, overridden
+    from the command line. <code>@Param({"100000", "1000000"})</code> is what's in the source; the actual runs on
+    this site use <code>-p n=...</code> on the CLI to override it per run instead of editing the class.
+</p>
+
+<h2>2. The Data Setup — <code>@Setup(Level.Trial)</code></h2>
+<p>
+    Runs once per fork, before any timed iteration:
+</p>
+<pre><code>treeMap = new TreeMap<>();
+bTreeMap = new BTreeMap<>(DEGREE);
+bPlusTreeMap = new BPlusTreeMap<>(DEGREE);
+
+key = new ArrayList<>(n);
+value = new ArrayList<>(n);
+for (int i = 0; i < n; i++) {
+    key.add(i);
+    value.add(i);
+}
+Collections.shuffle(key, new Random(42));
+Collections.shuffle(value, new Random(43));
+
+keyDel = new ArrayList<>(key);
+Collections.shuffle(keyDel, new Random(44));
+
+for (int i = 0; i < n; i++) {
+    treeMap.put(key.get(i), value.get(i));
+    bTreeMap.put(key.get(i), value.get(i));
+    bPlusTreeMap.put(key.get(i), value.get(i));
+}</code></pre>
+<p>
+    Three fixed seeds, three different roles: <code>Random(42)</code> shuffles the key order, <code>Random(43)</code>
+    shuffles the value order independently, and <code>Random(44)</code> shuffles a separate copy of the keys
+    (<code>keyDel</code>) that drives deletion order later. Fixed seeds mean every fork, every run, every map gets
+    the exact same insertion and deletion sequence — the only thing that changes between <code>TreeMap</code>,
+    <code>BTreeMap</code>, and <code>BPlusTreeMap</code> is the data structure itself, not the data. All three maps
+    are pre-loaded with all <code>n</code> entries before a single timed op runs.
+</p>
+<p>
+    <code>nextIndex()</code> is a plain round-robin cursor shared by every benchmark method — it walks
+    <code>0..n-1</code> and wraps back to <code>0</code>, so each op touches the next key in the fixed shuffle
+    order rather than a freshly-random one per call. That keeps op-to-op overhead down to the map operation itself,
+    not RNG cost.
+</p>
+
+<h2>3. The Two Workloads</h2>
+<p>
+    <b>Get</b> is the read path — round-robin through <code>key</code> and look each one up:
+</p>
+<pre><code>@Benchmark
+public void treeMapGet(Blackhole bh) {
+    bh.consume(treeMap.get(key.get(nextIndex())));
+}</code></pre>
+<p>
+    <b>PutRemove</b> is the workload that actually matters for tail latency. Each invocation removes a key, then
+    immediately re-inserts the same key with the value that was just removed:
+</p>
+<pre><code>@Benchmark
+public void treeMapPutRemove(Blackhole bh) {
+    Integer k = keyDel.get(nextIndex());
+    Integer removed = treeMap.remove(k);
+    bh.consume(treeMap.put(k, removed));
+}</code></pre>
+<p>
+    That's a deliberate churn pattern — one alloc/dealloc cycle of tree-node and boxed-<code>Integer</code>
+    turnover per op, held at a constant map size forever. Steady-state churn is what exposes GC-driven tail latency;
+    a pure read benchmark never touches the allocator hard enough to show it.
+</p>
+
+<h2>4. The Benchmark Table</h2>
+<p>
+    <code>PutRemove</code> results only — that's the churn workload section 3 describes, and the one the tail
+    latency actually shows up in. n = 10K / 100K / 1M, heap pinned at 6GB/6GB, 3 forks, 10 warmup + 10 measurement
+    iterations at 500ms each. Each mean carries JMH's own <code>Score ± Error</code> confidence interval.
+</p>
+
+<h3>TreeMap</h3>
+<table>
+    <tr>
+        <th>n</th>
+        <th>mean (us)</th>
+        <th>p50</th>
+        <th>p90</th>
+        <th>p99</th>
+        <th>p99.99</th>
+        <th>p1.00</th>
+    </tr>
+    <tr>
+        <td>10K</td>
+        <td>0.355 <span class="err">± 0.003</span></td>
+        <td>0.316</td>
+        <td>0.395</td>
+        <td>1.415</td>
+        <td>12.161</td>
+        <td>157.696</td>
+    </tr>
+    <tr>
+        <td>100K</td>
+        <td>0.617 <span class="err">± 0.003</span></td>
+        <td>0.544</td>
+        <td>0.759</td>
+        <td>1.902</td>
+        <td>14.113</td>
+        <td>168.960</td>
+    </tr>
+    <tr>
+        <td>1M</td>
+        <td>1.722 <span class="err">± 0.424</span></td>
+        <td>1.420</td>
+        <td>1.988</td>
+        <td>5.656</td>
+        <td>100.241</td>
+        <td>41943.040</td>
+    </tr>
+</table>
+
+<h3>BTreeMap</h3>
+<table>
+    <tr>
+        <th>n</th>
+        <th>mean (us)</th>
+        <th>p50</th>
+        <th>p90</th>
+        <th>p99</th>
+        <th>p99.99</th>
+        <th>p1.00</th>
+    </tr>
+    <tr>
+        <td>10K</td>
+        <td>0.343 <span class="err">± 0.002</span></td>
+        <td>0.330</td>
+        <td>0.379</td>
+        <td>0.620</td>
+        <td>7.148</td>
+        <td>155.648</td>
+    </tr>
+    <tr>
+        <td>100K</td>
+        <td>0.457 <span class="err">± 0.001</span></td>
+        <td>0.439</td>
+        <td>0.516</td>
+        <td>0.865</td>
+        <td>8.417</td>
+        <td>148.224</td>
+    </tr>
+    <tr>
+        <td>1M</td>
+        <td>1.010 <span class="err">± 0.004</span></td>
+        <td>0.930</td>
+        <td>1.252</td>
+        <td>4.280</td>
+        <td>22.628</td>
+        <td>147.456</td>
+    </tr>
+</table>
+
+<h3>BPlusTreeMap</h3>
+<table>
+    <tr>
+        <th>n</th>
+        <th>mean (us)</th>
+        <th>p50</th>
+        <th>p90</th>
+        <th>p99</th>
+        <th>p99.99</th>
+        <th>p1.00</th>
+    </tr>
+    <tr>
+        <td>10K</td>
+        <td>0.340 <span class="err">± 0.001</span></td>
+        <td>0.327</td>
+        <td>0.376</td>
+        <td>0.634</td>
+        <td>5.876</td>
+        <td>102.400</td>
+    </tr>
+    <tr>
+        <td>100K</td>
+        <td>0.452 <span class="err">± 0.002</span></td>
+        <td>0.436</td>
+        <td>0.509</td>
+        <td>0.821</td>
+        <td>7.421</td>
+        <td>163.840</td>
+    </tr>
+    <tr>
+        <td>1M</td>
+        <td>1.007 <span class="err">± 0.004</span></td>
+        <td>0.933</td>
+        <td>1.258</td>
+        <td>4.128</td>
+        <td>25.506</td>
+        <td>269.824</td>
+    </tr>
+</table>
+
+<p>
+    Even After running multiple of time this was the result. There is nothing wrong in the result the Outlier I got was also 1/30(measurement).
+</p>
+<p style="margin-top: 40px; text-align: center;">
+    <a href="../index.html">&larr; Back to ChaosTree Home</a>
+</p>
+
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark-mode');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+</script>
+</body>
+</html>

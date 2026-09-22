@@ -128,6 +128,64 @@ suite:
 
 ## Benchmark highlights
 
+### N-ary Tree (B-Tree/B+Tree)
+
+> JMH · degree=64 · i5-13450HX (16c) · G1GC · default heap · 3 forks × 10 warmup/10 measurement iters
+
+>Factor define the minimum node occupancy for 64 degree B+tree CLRS maximum key = 127
+> - 127 x 0.5  = 63  minKey
+> - 127 x 0.75 = 95  minKey
+> - 127 x 1.0  = 127 minKey == maxKey
+
+### Bulk Import (`importFlatMatrix`, arraycopy-based)
+
+|  Factor  |        10K |        100K |          1M |         10M |
+|:--------:|-----------:|------------:|------------:|------------:|
+|   0.5f   |    11.5 µs |    145.7 µs |     1.47 ms |    16.73 ms |
+|  0.75f   |     9.7 µs |     98.8 µs |     1.02 ms |    13.01 ms |
+| **1.0f** | **7.3 µs** | **75.2 µs** | **0.79 ms** | **9.73 ms** |
+
+### Sorted Build (`buildFromSorted`, iterator-driven)
+
+| Factor |     10K |     100K |      1M |     10M |
+|:------:|--------:|---------:|--------:|--------:|
+|  0.5f  | 74.3 µs | 700.3 µs | 7.64 ms | 82.8 ms |
+| 0.75f  | 72.6 µs | 705.4 µs | 7.60 ms | 84.0 ms |
+|  1.0f  | 73.8 µs | 689.4 µs | 7.62 ms | 84.4 ms |
+
+*Factor is a non-factor here — cost is dominated by per-entry comparator/split overhead, not node packing.*
+
+### Memory Footprint @ 1M entries
+
+|  Factor  |        Time |  Tree Size |
+|:--------:|------------:|-----------:|
+|   0.5f   |     1.48 ms |    16.7 MB |
+|  0.75f   |     1.02 ms |    12.0 MB |
+| **1.0f** | **0.78 ms** | **8.3 MB** |
+
+**Rule of thumb:** `0.75f` (default) — headroom for future writes. `1.0f` — read-only/snapshot data, fastest + smallest, but first write after load forces a split.
+Read more in detailed [DragonFeed]()
+
+##  Tail Latency (p1.00)
+
+> JMH · `-bm sample` · n=1K→10M · degree=64 · Xms4g/Xmx4g · `-XX:+UseParallelGC -XX:+AlwaysPreTouch`
+
+Average time hides rare expensive operations. Sample mode keeps every individual invocation, so a real GC pause or rebalance cascade shows up at p1.00 instead of being averaged into invisibility.
+
+|    n | TreeMap p1.00 | B+Tree p1.00 | B-Tree p1.00 |
+|-----:|--------------:|-------------:|-------------:|
+|   1K |        899 µs |       139 µs |       176 µs |
+|  10K |      1,169 µs |       159 µs |       145 µs |
+| 100K |      2,363 µs |       208 µs |       172 µs |
+|   1M |     22,086 µs |       221 µs |       187 µs |
+|  10M |    130,286 µs |       234 µs |       218 µs |
+
+**TreeMap's worst case grows ~145x** over this range (899µs → 130ms) — confirmed against `-Xlog:gc` as real Stop-The-World pauses, not benchmark noise. **B+Tree and B-Tree grow ~1.3–1.5x** over the same 10,000x increase in data size — zero GC pauses logged at any n, on any fork.
+
+Root cause: packed-array nodes (ChaosTree) vs. one heap-allocated `Entry` object per key (`TreeMap`) — fewer, larger allocations instead of millions of small ones means far less GC pressure under churn.
+
+Full percentile breakdown (p50–p99.99) and methodology: [tail-latency-report](./tail-latency-report.html)
+
 ### Iteration Performance: BPlusTreeMap vs TreeMap vs ArrayList
 
 Benchmarked `entrySet()` iteration cost (JMH, avgt, `-prof perfnorm`) across sizes from 1K to 1M elements.
@@ -156,7 +214,7 @@ BPlusTreeMap's cache-friendly leaf layout wins, and the gap widens with scale.
 
 * **Architecture Decision Records:** [`docs/ADR.html`](https://chaos-vy.github.io/ChaosTree/utils/ADR.html)
 * **JMH GC Profiling & The 82ms Pause:** [
-  `docs/benchmark/JMH-Report.html`](https://chaos-vy.github.io/ChaosTree/utils/JMH-Report.html)
+  `docs/benchmark/tail-latency.html`](https://chaos-vy.github.io/ChaosTree/utils/JMH-Report.html)
 * **Throughput & CPU Benchmarks:** [
   `docs/Benchmark_Analysis.html`](https://chaos-vy.github.io/ChaosTree/utils/Benchmark_Analysis.html)
 * **The Testing Journey:** [

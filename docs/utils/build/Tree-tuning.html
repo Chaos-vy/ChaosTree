@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+          type="image/svg+xml">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ChaosTree: Choosing Degree, Fill Factor, and Load Path</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .scroll {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: left;
+        }
+
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #000;
+            overflow-x: auto;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+
+<h1>ChaosTree: Choosing Degree, Fill Factor, and Load Path</h1>
+
+<h2>0. Definitions</h2>
+<pre>
+t        = degree                     (t &ge; 3)
+maxKeys  = 2t - 1                     (logical)
+minKeys  = t - 1
+slots    = 2t                         (physical, +1 overflow slot)
+keys[] / values[]  = 16 + 4 * 2t      = 8t + 16 B
+child[]            = 16 + 4 * (2t+1)  = 8t + 20 B, 8 B aligned
+distinct fills     = maxKeys - minKeys + 1 = t + 1
+</pre>
+
+<h2>1. Choosing the degree t</h2>
+
+<h3>1.1 Cost model</h3>
+<pre>
+bytes/entry (leaf-only, excl. internal nodes, excl. Integers)
+    = (2 * (8t + 16) + 40) / k  =  (16t + 72) / k        k = keys per leaf
+
+put-fill : k = t,      fanout = t + 1
+packed   : k = 2t - 1, fanout = 2t
+levels   = 1 + ceil( log_fanout( ceil(n / k) ) )
+
+leaf insert shift ~ (2t - 1) refs   (keys[] + values[], avg half of maxKeys each)
+</pre>
+<p>Checked against the 1M JOL census at t = 64: put-fill 4 levels / 248 internal, packed 3 levels / 63 internal.</p>
+
+<h3>1.2 Table, n = 1,000,000</h3>
+<div class="scroll">
+    <table>
+        <thead>
+        <tr>
+            <th>t</th>
+            <th>maxKeys</th>
+            <th>minKeys</th>
+            <th>keys[] B</th>
+            <th>levels put-fill</th>
+            <th>levels packed</th>
+            <th>B/entry k=t</th>
+            <th>B/entry k=2t-1</th>
+            <th>shift refs/insert</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td>3</td><td>5</td><td>2</td><td>40</td><td>11</td><td>8</td><td>40.00</td><td>24.00</td><td>5</td></tr>
+        <tr><td>4</td><td>7</td><td>3</td><td>48</td><td>9</td><td>7</td><td>34.00</td><td>19.43</td><td>7</td></tr>
+        <tr><td>8</td><td>15</td><td>7</td><td>80</td><td>7</td><td>6</td><td>25.00</td><td>13.33</td><td>15</td></tr>
+        <tr><td>16</td><td>31</td><td>15</td><td>144</td><td>5</td><td>4</td><td>20.50</td><td>10.58</td><td>31</td></tr>
+        <tr><td>32</td><td>63</td><td>31</td><td>272</td><td>4</td><td>4</td><td>18.25</td><td>9.27</td><td>63</td></tr>
+        <tr><td>64</td><td>127</td><td>63</td><td>528</td><td>4</td><td>3</td><td>17.13</td><td>8.63</td><td>127</td></tr>
+        <tr><td>128</td><td>255</td><td>127</td><td>1040</td><td>3</td><td>3</td><td>16.56</td><td>8.31</td><td>255</td></tr>
+        <tr><td>TreeMap</td><td colspan="4">Entry = 40 B/entry</td><td>~20 (log2 n)</td><td colspan="3">-</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<h3>1.3 Rules</h3>
+<pre>
+t = 3, 4   : put-fill B/entry &ge; 34, no better than TreeMap's 40. Only for testing splits/merges.
+read-heavy, large n        -> raise t   (fewer levels, fewer cache misses)
+random-write-heavy         -> lower t   (shift per insert = 2t - 1 refs)
+memory-bound               -> raise t   (B/entry ~ 16 + 72/t at k = t)
+</pre>
+<blockquote>
+    Measured at t = 64 (JMH, avgt): randomPut B+ vs TreeMap = 0.87x at 10K, 1.17x at 100K, 1.6x at 1M, 2.2x at 10M.
+    The crossover is the write-side shift cost paying off only once the working set leaves cache.
+</blockquote>
+
+<h2>2. Choosing the fill factor f &isin; [0.5, 1.0]</h2>
+
+<h3>2.1 Formula (buildFromSorted)</h3>
+<pre>
+targetKeys = max(minKeys, (int)(maxKeys * f))          applied to leaves and internal nodes
+f &lt; 0.5 or f &gt; 1.0 -> IllegalArgumentException
+tree not empty      -> IllegalStateException
+</pre>
+
+<h3>2.2 Table, t = 64 (maxKeys = 127, minKeys = 63)</h3>
+<div class="scroll">
+    <table>
+        <thead>
+        <tr>
+            <th>f</th>
+            <th>targetKeys k</th>
+            <th>leaf B/entry = 1096 / k</th>
+            <th>inserts/leaf before first split = 127 - k</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td>0.50</td><td>63 (= minKeys)</td><td>17.40</td><td>64</td></tr>
+        <tr><td>0.60</td><td>76</td><td>14.42</td><td>51</td></tr>
+        <tr><td>0.69 (ln 2)</td><td>87</td><td>12.60</td><td>40</td></tr>
+        <tr><td>0.75</td><td>95</td><td>11.54</td><td>32</td></tr>
+        <tr><td>0.80</td><td>101</td><td>10.85</td><td>26</td></tr>
+        <tr><td>0.90</td><td>114</td><td>9.61</td><td>13</td></tr>
+        <tr><td>1.00</td><td>127</td><td>8.63</td><td>0</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<h3>2.3 Reference points</h3>
+<pre>
+sequential put()           : k = t = 64  (JOL, 1M)  ~ f = 0.5
+importFlatMatrix(.., 1.0f) : k = 127     (JOL, 1M)  = f = 1.0
+random-insert steady state : k ~ ln 2 * maxKeys ~ 0.69 * 127 = 87
+</pre>
+
+<h3>2.4 Rules</h3>
+<pre>
+read-only / snapshot / rare writes      f = 1.0
+append-only (writes hit the right edge) f = 1.0   (lower f only wastes slots, no leaf but the last is touched)
+random inserts after load               f ~ 0.69  (matches steady-state fill, no split storm, no long-run slack)
+random inserts + deletes, memory tight  f = 0.6 - 0.75
+f = 0.5                                 same fill as put(); no memory or write advantage over building by insertion
+</pre>
+<blockquote>
+    JMH bulk-load numbers in this repo were taken at f = 0.75, t = 64 (k = 95). They do not describe f = 1.0.
+</blockquote>
+
+<h2>3. importFlatMatrix(Object[][], f) vs buildFromSorted(Iterator, f)</h2>
+
+<h3>3.1 Measured (JMH, avgt, ms/op, t = 64, f = 0.75)</h3>
+<div class="scroll">
+    <table>
+        <thead>
+        <tr>
+            <th>n</th>
+            <th>importFlatMatrix</th>
+            <th>buildFromSorted (B+)</th>
+            <th>bulkLoad JDK TreeMap</th>
+            <th>buildFromSorted / import</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td>10,000</td><td>0.009</td><td>0.061</td><td>0.075</td><td>6.8x</td></tr>
+        <tr><td>100,000</td><td>0.092</td><td>0.627</td><td>0.825</td><td>6.8x</td></tr>
+        <tr><td>1,000,000</td><td>0.944</td><td>11.200</td><td>15.890</td><td>11.9x</td></tr>
+        <tr><td>10,000,000</td><td>11.070</td><td>85.461</td><td>142.619</td><td>7.7x</td></tr>
+        </tbody>
+    </table>
+</div>
+<p>exportFlatMatrix is not in these numbers. buildFromSorted error bars at 1M / 10M: 14.8% / 13.4%.</p>
+
+<h3>3.2 Cost of materializing the matrix</h3>
+<pre>
+Object[][] from an Iterator : 2 arrays * (16 + 4n) = 8n + 32 B transient, plus one O(n) copy pass
+n = 1,000,000 -> 8.0 MB
+</pre>
+
+<h3>3.3 Decision</h3>
+<div class="scroll">
+    <table>
+        <thead>
+        <tr><th>Input</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+        <tr><td>Already Object[][] (exportFlatMatrix of another tree, snapshot)</td><td><code>importFlatMatrix(m, f)</code></td></tr>
+        <tr><td>Iterator / stream / cursor / another Map, sorted</td><td><code>buildFromSorted(it, f)</code></td></tr>
+        <tr><td>Iterator, and Object[][] is needed later anyway</td><td>materialize once, then <code>importFlatMatrix</code></td></tr>
+        <tr><td>Copy of an existing tree</td><td><code>exportFlatMatrix</code> + <code>importFlatMatrix</code> </td></tr>
+        <tr><td>Memory-constrained, n large</td><td><code>buildFromSorted</code> (no 8n B transient)</td></tr>
+        </tbody>
+    </table>
+</div>
+<pre>
+break-even, materialize-then-import vs buildFromSorted:
+    T_materialize(n) + T_import(n)  &lt;  T_build(n)
+measure T_materialize on your source; T_import and T_build are in 3.1.
+</pre>
+
+<h2>4. Build once, no mutation, t &ge; 32</h2>
+<pre>
+f      = 1.0
+path   = importFlatMatrix(m, 1.0f)   if the source is already Object[][]
+         buildFromSorted(it, 1.0f)   otherwise (no 8n B matrix copy)
+levels = 1 + ceil(log_2t(ceil(n / (2t - 1))))
+n_max(L levels) = (2t)^(L-1) * (2t - 1)
+</pre>
+<div class="scroll">
+    <table>
+        <thead>
+        <tr>
+            <th>t</th>
+            <th>n &le; for 2 levels</th>
+            <th>n &le; for 3 levels</th>
+            <th>n &le; for 4 levels</th>
+            <th>B/entry (leaf-only)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td>32</td><td>4,032</td><td>258,048</td><td>16,515,072</td><td>9.27</td></tr>
+        <tr><td>64</td><td>16,256</td><td>2,080,768</td><td>266,338,304</td><td>8.63</td></tr>
+        <tr><td>128</td><td>65,280</td><td>16,711,680</td><td>4,278,190,080</td><td>8.31</td></tr>
+        </tbody>
+    </table>
+</div>
+<pre>
+n &le; 2,080,768              t = 64
+2,080,768 &lt; n &le; 16,711,680  t = 128   (64 needs a 4th level)
+</pre>
+<blockquote>
+    Only t = 64 has get() measurements. Sweep get at t = 64 vs 128 before treating the level count as decisive.
+</blockquote>
+
+<p>
+    <a href="../index.html">&larr; Back to ChaosTree Home</a>
+</p>
+
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark-mode');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+</script>
+</body>
+</html>

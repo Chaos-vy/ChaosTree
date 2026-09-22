@@ -1,0 +1,13 @@
+Benchmark                                (degree)  (factor)    (size)  Mode  Cnt      Score     Error  Units
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.5f     10000  avgt   30     11.545 ±   0.166  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.5f    100000  avgt   30    145.733 ±   0.895  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.5f   1000000  avgt   30   1466.230 ±   7.196  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.5f  10000000  avgt   30  16729.324 ± 511.749  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f     10000  avgt   30      9.700 ±   0.121  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f    100000  avgt   30     98.792 ±   0.499  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f   1000000  avgt   30   1015.293 ±   4.962  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f  10000000  avgt   30  13006.075 ± 629.287  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f     10000  avgt   30      7.319 ±   0.032  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f    100000  avgt   30     75.207 ±   0.288  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f   1000000  avgt   30    791.220 ±  16.122  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f  10000000  avgt   30   9726.478 ± 109.668  us/op
