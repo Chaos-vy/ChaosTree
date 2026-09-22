@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="UTF-8">
+<html lang="en">
 <head>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E">
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+          type="image/svg+xml">
     <meta charset="UTF-8">
     <title>ChaosTree | The Dragon Feed</title>
     <style>
@@ -59,16 +60,45 @@
         a:hover {
             text-decoration: underline;
         }
-    
-        
-        body.dark-mode { background-color: #121212; color: #e0e0e0; }
-        body.dark-mode a { color: #66b3ff; }
-        body.dark-mode pre { background-color: #1e1e1e; border-color: #444; color: #e0e0e0; }
-        body.dark-mode blockquote { background-color: #1a1a1a; border-left-color: #66b3ff; }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { border-bottom-color: #444; }
-        body.dark-mode th, body.dark-mode td { border-color: #555; }
-        body.dark-mode th { background-color: #222; }
-        
+
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        body.dark-mode .err {
+            color: #c9a3ff;
+            opacity: 0.65;
+        }
+
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -83,9 +113,21 @@
             border-radius: 5px;
             z-index: 1000;
         }
+
         body.dark-mode .theme-toggle {
             border-color: #e0e0e0;
             color: #e0e0e0;
+        }
+
+        .err {
+            color: #8a2be2;
+            opacity: 0.55;
+            font-size: 0.92em;
+        }
+
+        table.bench td {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
 
     </style>
@@ -98,7 +140,8 @@
 <h1>The Dragon Feed</h1>
 
 <blockquote>
-    "Every rev (factor) of the dragon is a warning. Every gearshift bears the load (memory). The dragon unleashes its might
+    "Every rev (factor) of the dragon is a warning. Every gearshift bears the load (memory). The dragon unleashes its
+    might
     at 1.0f, packing your data into the map like it never even felt it."
 </blockquote>
 
@@ -119,84 +162,213 @@
     - <b>1.0f (Top Gear):</b> 100% capacity. Zero wasted bytes. Maximum CPU cache line saturation. Pure throughput.
 </p>
 
-<h2>15 Million Elements: The Parameter Sweep</h2>
+<h2>JMH Benchmarks (degree = 64)</h2>
 <p>
-    The following benchmark demonstrates the flawless mathematical scaling of the Dragon Feed. As the packing factor
-    increases, memory allocation and execution time drop in absolute linear lockstep.
+    <strong>Benchmark performed on:</strong> Intel Core i5-13450HX (16 cores), G1GC, default heap (5803 MB).
 </p>
+<p>
+    Two ingestion paths were measured. <code>importFlatMatrix</code> bulk-copies a pre-built sorted matrix directly
+    into node arrays via <code>System.arraycopy</code>; <code>buildFromSorted</code> walks a sorted iterator
+    (the same style of construction <code>TreeMap</code> uses) and builds nodes incrementally. All 30-fork averages,
+    times in microseconds per operation.
+</p>
+<p>
+    Reproduce with:
+</p>
+<pre>
+java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap.bulkLoadBPlusTree \
+    -p size=10000,100000,1000000,10000000 \
+    -p factor=0.5f,0.75f,1.0f \
+    -f 3 -wi 10 -w 1 -r 1 -i 10 -tu us -rf text -rff bulkLoad.txt
 
-<table>
+java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap.importFlatMatrixBPlusTree \
+    -p size=10000,100000,1000000,10000000 \
+    -p factor=0.5f,0.75f,1.0f \
+    -f 3 -wi 10 -w 1 -r 1 -i 10 -tu us -rf text -rff dragonFeed.txt
+</pre>
+
+<h3>importFlatMatrix — arraycopy-based bulk import</h3>
+<table class="bench">
     <thead>
     <tr>
-        <th>Benchmark</th>
         <th>Factor</th>
-        <th>Time (ms)</th>
-        <th>Allocated (MB)</th>
-        <th>GC Pauses (ms)</th>
+        <th>10,000</th>
+        <th>100,000</th>
+        <th>1,000,000</th>
+        <th>10,000,000</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-        <td>B+Tree</td>
         <td>0.5f</td>
-        <td>25.00</td>
-        <td>256.5</td>
-        <td>247</td>
+        <td>11.545 <span class="err">± 0.166</span></td>
+        <td>145.733 <span class="err">± 0.895</span></td>
+        <td>1466.230 <span class="err">± 7.196</span></td>
+        <td>16729.324 <span class="err">± 511.749</span></td>
     </tr>
     <tr>
-        <td>B+Tree</td>
-        <td>0.6f</td>
-        <td>21.59</td>
-        <td>213.4</td>
-        <td>107</td>
+        <td>0.75f</td>
+        <td>9.700 <span class="err">± 0.121</span></td>
+        <td>98.792 <span class="err">± 0.499</span></td>
+        <td>1015.293 <span class="err">± 4.962</span></td>
+        <td>13006.075 <span class="err">± 629.287</span></td>
     </tr>
     <tr>
-        <td>B+Tree</td>
-        <td>0.7f</td>
-        <td>20.48</td>
-        <td>182.7</td>
-        <td>360</td>
-    </tr>
-    <tr>
-        <td>B+Tree</td>
-        <td>0.8f</td>
-        <td>18.31</td>
-        <td>159.7</td>
-        <td>235</td>
-    </tr>
-    <tr>
-        <td>B+Tree</td>
-        <td>0.9f</td>
-        <td>17.10</td>
-        <td>141.8</td>
-        <td>274</td>
-    </tr>
-    <tr>
-        <td><strong>B+Tree</strong></td>
         <td><strong>1.0f</strong></td>
-        <td><strong>15.96</strong></td>
-        <td><strong>126.9</strong></td>
-        <td><strong>301</strong></td>
-    </tr>
-    <tr>
-        <td><strong>B-Tree</strong></td>
-        <td><strong>1.0f</strong></td>
-        <td><strong>15.76</strong></td>
-        <td><strong>126</strong></td>
-        <td><strong>193</strong></td>
+        <td><strong>7.319</strong> <span class="err">± 0.032</span></td>
+        <td><strong>75.207</strong> <span class="err">± 0.288</span></td>
+        <td><strong>791.220</strong> <span class="err">± 16.122</span></td>
+        <td><strong>9726.478</strong> <span class="err">± 109.668</span></td>
     </tr>
     </tbody>
 </table>
-
 <p>
-    At <code>1.0f</code>, the engine processes <b>15,000,000</b> elements in <b>15.9 milliseconds</b>, consuming only
-    126 MB of heap. There is zero algorithmic overhead remaining; execution time is strictly bound by main memory
-    bandwidth and cache retrieval.
+    All values in microseconds per operation, rows are factor, columns are size — read down a column to compare
+    factors at fixed size, or across a row to see how a single factor scales with size.
+</p>
+<p>
+    Packing factor directly sizes the underlying flat array and resize threshold here, so it's a first-order
+    effect: <code>1.0f</code> beats <code>0.5f</code> by roughly 35–42% across every size.
 </p>
 
-<h2>Usage</h2>
-<h3>1. By Constructor</h3>
+<h3>Factor vs. Memory — importFlatMatrix, size = 1,000,000</h3>
+<p>
+    Same path, finer-grained factor sweep, with JMH's <code>gc.alloc.rate.norm</code> profiler enabled to see
+    bytes allocated per op directly. Allocation drops almost linearly as factor rises — less slack per node means
+    fewer nodes, which means less array overhead per element — and time tracks it closely.
+</p>
 <pre>
+java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap.importFlatMatrixBPlusTree \
+    -p size=1000000 \
+    -p factor=0.5f,0.6f,0.7f,0.8f,0.9f,1.0f \
+    -f 3 -wi 10 -w 1 -r 1 -i 10 -tu ms -prof gc -rf text -rff dragonFeedMemory.txt
+</pre>
+<table>
+    <thead>
+    <table class="bench">
+        <thead>
+        <tr>
+            <th>Factor</th>
+            <th>Time (ms/op)</th>
+            <th>Alloc Rate (MB/sec)</th>
+            <th>Alloc/op (B/op)</th>
+            <th>Tree Size (MB)</th>
+            <th>GC Count</th>
+            <th>GC Time (ms)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>0.5f</td>
+            <td>1.483 <span class="err">± 0.009</span></td>
+            <td>11273.263 <span class="err">± 69.080</span></td>
+            <td>17538210.268</td>
+            <td>16.73</td>
+            <td>248</td>
+            <td>384</td>
+        </tr>
+        <tr>
+            <td>0.6f</td>
+            <td>1.241 <span class="err">± 0.005</span></td>
+            <td>11213.114 <span class="err">± 46.660</span></td>
+            <td>14592160.594</td>
+            <td>13.91</td>
+            <td>258</td>
+            <td>384</td>
+        </tr>
+        <tr>
+            <td>0.7f</td>
+            <td>1.097 <span class="err">± 0.007</span></td>
+            <td>10976.941 <span class="err">± 70.795</span></td>
+            <td>12628127.598</td>
+            <td>12.04</td>
+            <td>259</td>
+            <td>329</td>
+        </tr>
+        <tr>
+            <td>0.8f</td>
+            <td>0.954 <span class="err">± 0.006</span></td>
+            <td>10950.163 <span class="err">± 69.089</span></td>
+            <td>10952094.603</td>
+            <td>10.44</td>
+            <td>258</td>
+            <td>354</td>
+        </tr>
+        <tr>
+            <td>0.9f</td>
+            <td>0.845 <span class="err">± 0.004</span></td>
+            <td>10901.292 <span class="err">± 46.037</span></td>
+            <td>9664125.850</td>
+            <td>9.22</td>
+            <td>282</td>
+            <td>337</td>
+        </tr>
+        <tr>
+            <td><strong>1.0f</strong></td>
+            <td><strong>0.777</strong> <span class="err">± 0.008</span></td>
+            <td><strong>10682.879</strong> <span class="err">± 114.768</span></td>
+            <td><strong>8701725.380</strong></td>
+            <td><strong>8.30</strong></td>
+            <td>279</td>
+            <td>343</td>
+        </tr>
+        </tbody>
+    </table>
+    <p>
+        <code>Tree Size (MB)</code> is <code>Alloc/op</code> converted to MB — for a bulk import benchmark this is
+        effectively the resident size of the built tree, since each op constructs one fresh tree from scratch.
+        <code>0.5f → 1.0f</code> shrinks it from 16.73 MB to 8.30 MB, roughly halving memory footprint for
+        1,000,000 entries, while time drops ~48% in step.
+    </p>
+
+    <h3>buildFromSorted — iterator-driven build</h3>
+    <table class="bench">
+        <thead>
+        <tr>
+            <th>Factor</th>
+            <th>10,000</th>
+            <th>100,000</th>
+            <th>1,000,000</th>
+            <th>10,000,000</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>0.5f</td>
+            <td>74.251 <span class="err">± 0.847</span></td>
+            <td>700.342 <span class="err">± 15.937</span></td>
+            <td>7640.535 <span class="err">± 68.402</span></td>
+            <td>82775.216 <span class="err">± 4449.711</span></td>
+        </tr>
+        <tr>
+            <td>0.75f</td>
+            <td>72.601 <span class="err">± 0.235</span></td>
+            <td>705.388 <span class="err">± 14.247</span></td>
+            <td>7597.012 <span class="err">± 35.819</span></td>
+            <td>83992.645 <span class="err">± 4933.130</span></td>
+        </tr>
+        <tr>
+            <td>1.0f</td>
+            <td>73.762 <span class="err">± 1.303</span></td>
+            <td>689.406 <span class="err">± 6.192</span></td>
+            <td>7619.628 <span class="err">± 46.503</span></td>
+            <td>84430.291 <span class="err">± 5037.158</span></td>
+        </tr>
+        </tbody>
+    </table>
+    <p>
+        All values in microseconds per operation, same layout as above — down a column compares factors at fixed
+        size, across a row shows one factor's scaling.
+    </p>
+    <p>
+        Here the three factors sit within each other's error bars at every size — packing density only controls node
+        occupancy, and it's a second-order effect compared to the per-entry comparator/iterator/split cost that
+        dominates this path.
+    </p>
+
+    <h2>Usage</h2>
+    <h3>1. By Constructor</h3>
+    <pre>
 // Use the Dragon at top gear (1.0f)
 // It is advised to leave a space for future operation.
 // 1. Prepare your sorted data matrix
@@ -212,166 +384,155 @@ BPlusTreeMap<Integer, String> fastMap = new BPlusTreeMap<>(
         .build()
 );
     </pre>
-<h3>2. By Public API through array</h3>
+    <h3>2. By Public API through array</h3>
 
-<strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
+    <strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
 
-This is a high-performance, Data-Oriented, cache-aware array ingestion engine.
-It is hungry for raw array throughput, but it is extremely unforgiving.
-Use with absolute precision.
+    This is a high-performance, Data-Oriented, cache-aware array ingestion engine.
+    It is hungry for raw array throughput, but it is extremely unforgiving.
+    Use with absolute precision.
 
-<strong>THE FLAT MATRIX RULES:</strong>
+    <strong>THE FLAT MATRIX RULES:</strong>
 
-<ul>
-    <li>
-        <strong>Matrix Layout:</strong>
-        The blast parameter must be exactly 2D:
-        <code>blast[0]</code> contains the keys, and
-        <code>blast[1]</code> contains the values.
-    </li>
+    <ul>
+        <li>
+            <strong>Matrix Layout:</strong>
+            The blast parameter must be exactly 2D:
+            <code>blast[0]</code> contains the keys, and
+            <code>blast[1]</code> contains the values.
+        </li>
 
-    <li>
-        <strong>Array Integrity:</strong>
-        Neither array can be null, and both must be of exactly equal length.
-    </li>
+        <li>
+            <strong>Array Integrity:</strong>
+            Neither array can be null, and both must be of exactly equal length.
+        </li>
 
-    <li>
-        <strong>No Null Keys:</strong>
-        A key must never be null.
-        If a value is empty/missing, you must explicitly place
-        <code>null</code> in the value array at that index.
-    </li>
+        <li>
+            <strong>No Null Keys:</strong>
+            A key must never be null.
+            If a value is empty/missing, you must explicitly place
+            <code>null</code> in the value array at that index.
+        </li>
 
-    <li>
-        <strong>Strictly Sorted:</strong>
-        The keys array <strong>MUST</strong> be strictly sorted according
-        to the tree's comparator.
-        Feeding unsorted data will instantly and silently corrupt
-        the entire tree structure.
-    </li>
+        <li>
+            <strong>Strictly Sorted:</strong>
+            The keys array <strong>MUST</strong> be strictly sorted according
+            to the tree's comparator.
+            Feeding unsorted data will instantly and silently corrupt
+            the entire tree structure.
+        </li>
 
-    <li>
-        <strong>Minimum Degree:</strong>
-        This API relies on chunked array-copying and only services
-        trees with a degree &gt;= 32.
-    </li>
+        <li>
+            <strong>Minimum Degree:</strong>
+            This API relies on chunked array-copying and only services
+            trees with a degree &gt;= 32.
+        </li>
 
-    <li>
-        <strong>FILL FACTOR:</strong>
-        The factor determines node occupancy and has strict limits
-        between <code>0.5f</code> and <code>1.0f</code>.
-        A factor of <code>0.75f</code> is highly recommended for bulk loading.
-        This packs the nodes densely while leaving exactly enough buffer room
-        to prevent future insertions from triggering massive, cascading
-        split operations.
-        <strong>Hold the Chaos!</strong>
-    </li>
-</ul>
+        <li>
+            <strong>FILL FACTOR:</strong>
+            The factor determines node occupancy and has strict limits
+            between <code>0.5f</code> and <code>1.0f</code>.
+            A factor of <code>0.75f</code> is highly recommended for bulk loading.
+            This packs the nodes densely while leaving exactly enough buffer room
+            to prevent future insertions from triggering massive, cascading
+            split operations.
+            <strong>Hold the Chaos!</strong>
+        </li>
+    </ul>
 
-<strong>Method:</strong>
-<i>abstract void importFlatMatrix(Object[][] blast, float factor);</i>
+    <strong>Method:</strong>
+    <i>abstract void importFlatMatrix(Object[][] blast, float factor);</i>
 
-<strong>Parameters:</strong>
+    <strong>Parameters:</strong>
 
-<strong>blast</strong>
-A 2D array where <code>blast[0]</code> is the sorted keys and
-<code>blast[1]</code> is the mapped values.
+    <strong>blast</strong>
+    A 2D array where <code>blast[0]</code> is the sorted keys and
+    <code>blast[1]</code> is the mapped values.
 
-<strong>factor</strong>
-The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
+    <strong>factor</strong>
+    The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
 
-<pre>
+    <pre>
     // Awaken the Dragon at top gear (1.0f)
-    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;()
+    Object[][] blast = new Object[][]{sortedKeys, values};
+    float factor = 1.0f;
+
+    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;();
     //this creates a default degree of 64 and comparator null!
-    map.insertFromMatrix(blast, factor);
+    map.importFlatMatrix(blast, factor);
     </pre>
 
-<h3>3. By Public API through Sorted Map.Entry</h3>
+    <h3>3. By Public API through Sorted Map.Entry</h3>
 
-<strong>Streams strictly sorted data directly into the tree in O(N) time.</strong>
+    <strong>Streams strictly sorted data directly into the tree in O(N) time.</strong>
 
-<p>
-    <strong>WARNING:</strong>
-    The provided iterator <strong>MUST</strong> yield elements in strict
-    ascending order according to this tree's comparator.
-    If the data is unsorted, the tree structure will be corrupted.
-</p>
+    <p>
+        <strong>WARNING:</strong>
+        The provided iterator <strong>MUST</strong> yield elements in strict
+        ascending order according to this tree's comparator.
+        If the data is unsorted, the tree structure will be corrupted.
+    </p>
 
-<p><strong>FILL FACTOR:</strong></p>
+    <p><strong>FILL FACTOR:</strong></p>
 
-<ul>
-    <li>
-        A value between <code>0.5</code> and <code>1.0</code> representing
-        how full to pack each node.
-    </li>
-    <li>
-        Use <code>1.0f</code> for read-only data.
-    </li>
-    <li>
-        Use a lower value to leave room for future insertions.
-    </li>
-    <li>
-        A value of <code>0.9f</code> is used for bulk loading in my tree.
-    </li>
-    <li>
-        For read purposes, you can use <code>1.0f</code>, but after that,
-        any insert or remove operation will trigger massive split, merge,
-        borrow, and array-shifting operations.
-    </li>
-</ul>
+    <ul>
+        <li>
+            A value between <code>0.5</code> and <code>1.0</code> representing
+            how full to pack each node.
+        </li>
+        <li>
+            Use <code>1.0f</code> for read-only data.
+        </li>
+        <li>
+            Use a lower value to leave room for future insertions.
+        </li>
+        <li>
+            A value of <code>0.9f</code> is used for bulk loading in my tree.
+        </li>
+        <li>
+            For read purposes, you can use <code>1.0f</code>, but after that,
+            any insert or remove operation will trigger massive split, merge,
+            borrow, and array-shifting operations.
+        </li>
+    </ul>
 
-<p><strong>Parameters:</strong></p>
+    <p><strong>Parameters:</strong></p>
 
-<ul>
-    <li>
-        <strong>sortedData:</strong>
-        An iterator providing strictly sorted elements.
-    </li>
-    <li>
-        <strong>fillFactor:</strong>
-        A value between <code>0.5</code> and <code>1.0</code> representing
-        how full to pack each node.
-    </li>
-</ul>
-<i>public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor)</i> The
-<strong>factor</strong> provide the node density <strong>[0.5f, 1f]</strong> more you pack the less it's take memory.
-<i>Internally used in Serialization at a factor of <strong>0.75f.</strong></i>
-<pre>
+    <ul>
+        <li>
+            <strong>sortedData:</strong>
+            An iterator providing strictly sorted elements.
+        </li>
+        <li>
+            <strong>fillFactor:</strong>
+            A value between <code>0.5</code> and <code>1.0</code> representing
+            how full to pack each node.
+        </li>
+    </ul>
+    <i>public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor)</i> The
+    <strong>factor</strong> provide the node density <strong>[0.5f, 1f]</strong> more you pack the less it's take memory.
+    <i>Internally used in Serialization at a factor of <strong>0.75f.</strong></i>
+    <pre>
     // Use the Dragon at top gear (1.0f)
-    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;()
+    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;();
     //this creates a default degree of 64 and comparator null!
     map.buildFromSorted(iterator, factor);
     </pre>
 
-<script>
-    const toggleBtn = document.getElementById('theme-toggle');
-    const body = document.body;
-    const savedTheme = localStorage.getItem('theme');
-    
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        body.classList.add('dark-mode');
-    }
-    
-    toggleBtn.addEventListener('click', () => {
-        body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
-    });
-</script>
+
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            body.classList.add('dark-mode');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+    </script>
 </body>
-<p>
-    Nary set and map at glance
-</p>
-<blockquote>
-    void buildFromSorted(Iterator<? extends E> it, float factor);<br>
-    void importFlatArray(Object[] flatArray, float fillFactor);<br>
-    // Note: Object[] toArray() is inherited from java.util.Collection acting as exportFlastArray()<br>
-    I have also mentioned in code "You can treat it as exportFlatArray()"
-</blockquote>
-<blockquote>
-    Map Specific <br>
-    void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor);<br>
-    void importFlatMatrix(Object[][] flatMatrix, float factor);<br>
-    Object[][] exportFlatMatrix();
-</blockquote>
 </html>
