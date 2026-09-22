@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+          type="image/svg+xml">
     <meta charset="UTF-8">
     <title>ChaosTree</title>
     <style>
@@ -55,20 +57,75 @@
         .bold {
             font-weight: 700;
         }
+
         table td ul {
             text-align: left;
             margin: 0;
             padding-left: 20px;
         }
 
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+
     </style>
 </head>
 <body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
 
 <h1>ChaosTree</h1>
 <h4>v2.0.0</h4>
 <p class="bold">A zero-dependency, cache-aware NavigableSet and NavigableMap engine for Java 21+.
-    v2.0.0 tore out the old custom API in favor of full NavigableSet/Map and SequencedSet/Map compliance &mdash;
+    v2.0.0 is removal of custom API in favor of full NavigableSet/Map and SequencedSet/Map compliance &mdash;
     verified against 214,680 Guava testlib permutations and jqwik property tests run at 1M tries.
     Built for bulk ingestion at scale, without the GC overhead of the JDK's own trees.</p>
 <blockquote>
@@ -121,17 +178,13 @@
     <li>buildFromSorted(Iterator, factor)</li>
 </ul>
 <p>The last <b>3</b> API are <b>Nary-Tree</b> Specific.</p>
-
-<blockquote>
-    <a href="utils/ChaosTree_Architecture.html">Read the full Node Structure &rarr;</a><br>
-    <a href="utils/ADR.html">Read Some covered ADR (Architectural Decision Record) &rarr;</a><br>
-    <a href="utils/nary-complexity-map.html">View N-ary API Time & Space Complexity &rarr;</a>
-</blockquote>
+<hr>
 <h2>1. The Guava testlib</h2>
 <p>
     Speed without correctness is useless. ChaosTree perfectly implements <code>subMap()</code>, <code>headMap()</code>,
     <code>tailMap()</code>, and <code>descendingMap()</code>.
-    It has been subjected to Google Guava's <code>NavigableSetTestBuilder</code> and <code>NavigableMapTestSuiteBuilder</code> mathematically passes all strict
+    It has been subjected to Google Guava's <code>NavigableSetTestBuilder</code> and
+    <code>NavigableMapTestSuiteBuilder</code> mathematically passes all strict
     test permutations including:
 </p>
 <table>
@@ -190,7 +243,8 @@
 
 <blockquote>
     <b>Point to be noted:</b> Every work is done 2x here!. There is no wrapping of set in Map interface. Set work on
-    <b>AbstractBinarySet and AbstractNarySet Engine</b> and Map works on <b>AbstractBinaryMap and AbstractNaryMap Engine</b>.
+    <b>AbstractBinarySet and AbstractNarySet Engine</b> and Map works on <b>AbstractBinaryMap and AbstractNaryMap
+    Engine</b>.
 </blockquote>
 
 <p>
@@ -204,7 +258,8 @@
     <li>Class visibility weaken issue</li>
     <li>Missing to store the old deletion value in put</li>
     <li>Most importantly the ClassCastException which I never thought would be the bottleneck even after using
-        F-form polymorphism.</li>
+        F-form polymorphism.
+    </li>
 </ul>
 
 
@@ -212,9 +267,6 @@
     These test maybe a bottleneck for any library but they do make ensure and highlight many missing cases.
     A big thanks to Guava testlib <3;
 </p>
-<blockquote>
-    <a href="utils/build/Test_Journey.html">Read the full story of the Testing Journey &rarr;</a>
-</blockquote>
 
 <p>
     I have currently tested my bulk load testing<i> Dragon feed </i> against TreeMap rigorous testing randomized suite
@@ -222,14 +274,16 @@
     <b>The test claims are true and further test and bug report are welcome through opening an issue or PR to
         /test branch</b>
 </p>
+<hr>
 
 
-<h2>1. The Truth (10x+)</h2>
-<p>Benchmark environment: Java 21, JMH. Measuring execution time, heap allocation, and GC time for 5,000,000
-    elements.</p>
+<h2>1. The Truth (168x Sequential / 2.07x Random)</h2>
+<p>Benchmark environment: Java 21.0.12 (OpenJDK), JMH 1.37, -Xms4g -Xmx4g -XX:+UseParallelGC -XX:+AlwaysPreTouch.<br>
+    3 forks, 5 measurement iterations, 5,000,000 integer keys, single run per table.</p>
 
+<h3>1a. Sequential Keys (factor 0.75f)</h3>
 <table>
-    <caption>5,000,000 Element Insertion Matrix</caption>
+    <caption>5,000,000 Element Insertion — Sequential Key Order</caption>
     <thead>
     <tr>
         <th>Benchmark (Strategy)</th>
@@ -241,73 +295,196 @@
     </thead>
     <tbody>
     <tr>
-        <td>B+Tree.dragonFeed (Native, factor(0.8f))</td>
+        <td>B+Tree.dragonFeed (Native, factor 0.75f)</td>
         <td>O(N)</td>
-        <td>5.418</td>
-        <td>52,807,339</td>
-        <td>229</td>
+        <td>5.451</td>
+        <td>58,058,576</td>
+        <td>649</td>
     </tr>
     <tr>
         <td>B+Tree.bulkLoad (Iterator)</td>
         <td>O(N)</td>
-        <td>36.649</td>
-        <td>48,498,184</td>
-        <td>36</td>
+        <td>41.202</td>
+        <td>58,298,864</td>
+        <td>197</td>
     </tr>
     <tr>
         <td>JDK TreeMap.bulkLoad (SortedMap)</td>
         <td>O(N)</td>
-        <td>50.638</td>
-        <td>200,000,256</td>
-        <td>740</td>
+        <td>80.988</td>
+        <td>200,000,311</td>
+        <td>1,022</td>
     </tr>
     <tr>
-        <td>B+Tree.iterativePut (Standard)(Sequential)</td>
+        <td>B+Tree.iterativePut (Sequential)</td>
         <td>O(N log N)</td>
-        <td>217.728</td>
-        <td>86,994,733</td>
-        <td>56</td>
+        <td>300.806</td>
+        <td>86,994,836</td>
+        <td>673</td>
     </tr>
     <tr>
-        <td>JDK TreeMap.iterativePut (Standard)(sequential)</td>
+        <td>JDK TreeMap.iterativePut (Sequential)</td>
         <td>O(N log N)</td>
-        <td>698.918</td>
-        <td>200,002,397</td>
-        <td>347</td>
+        <td>917.328</td>
+        <td>200,001,987</td>
+        <td>717</td>
     </tr>
     </tbody>
 </table>
 
 <p>
-    <strong>Result:</strong> ChaosTree dragon feed is <b>129x faster</b> than standard JDK insertions, <b>10x faster</b>
-    than JDK bulk loading, and uses <b>74% less JVM heap overhead</b>.
-    <i>{It depends on factor dev so do read the below article of Dragon feed}</i>
-    <br>
-    Well, I know this it bit more escalation, but it's the truth. The Dragon feed is fast enough to sweep the complete
-    array in <strong>Milliseconds.</strong> Because it uses <i>System.arraycopy()</i>.
-    <br>
-    <a href="utils/dragon-feed.html">Read the full Dragon Feed Parameter Sweep &rarr;</a><br>
+    <strong>Result:</strong> <code>dragonFeed</code> is <b>168x faster</b> than standard JDK sequential insertion, <b>14.9x
+    faster</b> than the JDK's own bulk loader, and allocates <b>71% less heap</b> than either JDK path.
+</p>
+<p>
+    <strong>The Mechanism:</strong> Given strictly sorted input, <code>dragonFeed</code> bypasses the entire
+    tree-routing layer. It skips comparisons and rotations entirely, constructing nodes directly via chunked <code>System.arraycopy()</code>.
+    That is the source of the 168x speedup—it is a data-oriented hardware bypass, not a magic iterative insert.
+</p>
 
+<h3>1b. Random-Order Keys (factor 0.75f)</h3>
+<p>
+    Sequential keys are the happy phase for any tree structure. Every insert lands physically adjacent to the last one,
+    perfectly accommodating the CPU's L1 cache prefetcher. Real-world entropy is rarely this forgiving. Here are the
+    same 5,000,000 elements inserted in <b>uniformly random order</b> (fixed seed, same key/value pairs; bulk-loading
+    bypasses cannot apply here).
+</p>
 
+<table>
+    <caption>5,000,000 Element Insertion — Random Key Order</caption>
+    <thead>
+    <tr>
+        <th>Benchmark (Strategy)</th>
+        <th>Score (ms/op)</th>
+        <th>Allocated (Bytes/op)</th>
+        <th>GC Time (ms)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>B+Tree.randomPut</td>
+        <td>3,535.158 &plusmn; 399.494</td>
+        <td>62,784,682</td>
+        <td>620</td>
+    </tr>
+    <tr>
+        <td>JDK TreeMap.randomPut</td>
+        <td>7,314.133 &plusmn; 483.405</td>
+        <td>200,005,846</td>
+        <td>342</td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Result:</strong> Under random insertion, ChaosTree is <b>2.07x faster</b> than the JDK and allocates <b>3.2x
+    less heap</b>. I am stating this plainly because showcasing only the sequential 168x best-case is marketing, not
+    engineering. The gap narrows precisely because random insertion destroys the CPU cache-locality advantage for <i>both</i>
+    structures. The massive slowdown versus the sequential run (300ms &rarr; 3,535ms) tracks entirely with L3 cache
+    misses. The latency tax comes directly from random pointer-chasing across the heap, not allocation.
+</p>
+
+<p>
+    <strong>The JMH Profiler Artifact:</strong> If you read the raw JMH output, you will notice an anomaly: ChaosTree
+    reports a higher <code>gc.time</code> (620ms) despite allocating 3.2x less garbage than <code>TreeMap</code>. I
+    rooted this via raw <code>-Xlog:gc</code> logs. It is a JMH timing-window artifact. <code>TreeMap</code>'s GC pauses
+    happened to straddle unmeasured warmup iterations, causing JMH's secondary metric to undercount its true pause cost.
+    A byte-for-byte log comparison of single pauses proved they are identical (~205ms to move ~645MB). The primary
+    <code>Score</code> column is immune to this artifact.
+</p>
+
+<hr>
 <blockquote>
-    <a href="utils/build/array-build-proof.html">The running math behind it &rarr;</a><br>
-    <a href="utils/Benchmark_Analysis.html">Read the Explicit Benchmark Document &rarr;</a><br>
-    <a href="utils/JMH-Report.html">Tail Latency benchmark in detail &rarr;</a>
-</blockquote>
+    <b>Important</b>
+    My system config are as such follows:
+    <pre>
 
-<blockquote>
-    The reason behind this simple frontend was easy maintenance, because I can maintain this level of frontend.
+    </pre>
 </blockquote>
+<hr>
+
+<h2>Appendix</h2>
+<ul>
+    <li>
+        <strong><a href="utils/Nary-Tree-Architecture.html">Node structure of N-ary Tree(B+Tree &
+            B-Tree)</a></strong><br>
+        A detailed information about the node structure of N-ary tree for an example dummy slot, null values...
+    </li>
+    <li>
+        <strong><a href="utils/Slow-at-low-dataset.html">Journey 0x0001: The Amortization Quirk</a></strong><br>
+        A time when without realizing the amortization cost I did try to tune my performance.
+    </li>
+    <li>
+        <strong><a href="utils/ADR.html">Architectural Decision Records (ADR)</a></strong><br>
+        The complete log of the core design decisions, hardware optimizations, and mechanical sympathy trade-offs that
+        forged the ChaosTree engine.
+    </li>
+    <li>
+        <strong><a href="utils/nary-complexity-map.html">A table for complexity of N-ary map</a></strong><br>
+        A detailed table which I usually also kept as a reference to optimize the default fn and optimize them as well.
+    </li>
+    <li>
+        <strong><a href="utils/build/Test_Journey.html">The details about test</a></strong><br>
+        A detailed info of rigorous test suite subjected to concrete test with JUnit, randomized test suite with jqwick
+        and furthermore...
+    </li>
+    <li>
+        <strong><a href="utils/build/array-build-proof.html">Math behind the importFlatMatrix()</a></strong><br>
+        Detailed maths behind the bulk load from array which strictly guarantees that the build from sorted matrix to
+        always respect the CLRS system..
+    </li>
+    <li>
+        <strong><a href="benchmark/BenchmarkInsertHeavy.html">100% insert(write) heavy benchmark</a></strong><br>
+        <b>The design is strictly copied from openJdk official site.</b>
+        A benchmark detailed analysis at 100% write heavy work load.
+    </li>
+    <li>
+        <strong><a href="benchmark/BenchmarkWriteHeavy.html">100% remove(write) heavy benchmark</a></strong><br>
+        A benchmark detailed analysis at 100% write heavy work load.
+    </li>
+    <li>
+        <strong><a href="benchmark/BenchmarkReadHeavy.html">100% Read heavy benchmark</a></strong><br>
+        A benchmark detailed analysis at 100% Read heavy work load.
+    </li>
+    <li>
+        <strong><a href="benchmark/BenchmarkMixedHeavy.html">Mixed benchmark</a></strong><br>
+        <strong><a href="benchmark/nary-remove-deep-dive.html">N-ary Remove & Iterator Deep Dive (Escape Analysis & API
+            Compliance)</a></strong><br>
+        A benchmark detailed analysis at Mixed work load.
+    </li>
+</ul>
 
 <div style="text-align: center; margin: 40px 0;">
     <h3>Always Pushing the Limits</h3>
     <p>
-        <i>This library was built through relentless benchmarking and intense mechanical sympathy. If anyone finds further optimizations or edge-case bottlenecks, you are encouraged to open a PR or Issue. I am always ready to make it faster!</i>
+        <i>This library was built through relentless benchmarking and intense mechanical sympathy. If anyone finds
+            further optimizations or edge-case bottlenecks, you are encouraged to open a PR or Issue. I am always ready
+            to make it optimized!</i>
     </p>
     <p class="bold" style="margin-top: 20px; font-size: 1.1em;">
         &#9889; Not built on caffeine, but on Phonk !! &#9889;
     </p>
 </div>
+<hr>
+<blockquote>
+    The reason behind this simple frontend was easy maintenance.
+</blockquote>
+<hr>
 
+
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark-mode');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+</script>
 </body>
 </html>
