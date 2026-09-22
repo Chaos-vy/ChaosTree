@@ -47,7 +47,7 @@ public class ChaosTreeMapRemoveBenchmark {
     @Param({"JavaTreeMap", "BPlusTreeMap", "BTreeMap"})
     public String mapType;
 
-    @Param({"10000", "100000"})
+    @Param({"100000"})
     public int size;
 
     @Param({"42"})
@@ -115,14 +115,14 @@ public class ChaosTreeMapRemoveBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(5000)
+    @OperationsPerInvocation(50000)
     public void removeIfHalf(Blackhole bh) {
         workingMap.entrySet().removeIf(e -> e.getKey() % 2 == 0);
         bh.consume(workingMap);
     }
 
     @Benchmark
-    @OperationsPerInvocation(5000)
+    @OperationsPerInvocation(50000)
     public void removeAllHalf(Blackhole bh) {
         workingMap.entrySet().removeAll(evenEntries);
         bh.consume(workingMap);

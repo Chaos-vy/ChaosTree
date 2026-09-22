@@ -19,6 +19,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.NavigableMap;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -58,11 +59,11 @@ public class TreeMapVsBTreeVsBPlusBenchmark {
             key.add(i);
             value.add(i);
         }
-        Collections.shuffle(key);
-        Collections.shuffle(value);
+        Collections.shuffle(key, new Random(42));
+        Collections.shuffle(value, new Random(43));
 
         keyDel = new ArrayList<>(key);
-        Collections.shuffle(keyDel);
+        Collections.shuffle(keyDel, new Random(44));
 
         for (int i = 0; i < n; i++) {
             treeMap.put(key.get(i), value.get(i));

@@ -1,0 +1,13 @@
+Benchmark                        (degree)  (factor)    (size)  Mode  Cnt      Score      Error  Units
+WriteHeavyMap.bulkLoadBPlusTree        64      0.5f     10000  avgt   30     74.251 ±    0.847  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      0.5f    100000  avgt   30    700.342 ±   15.937  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      0.5f   1000000  avgt   30   7640.535 ±   68.402  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      0.5f  10000000  avgt   30  82775.216 ± 4449.711  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64     0.75f     10000  avgt   30     72.601 ±    0.235  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64     0.75f    100000  avgt   30    705.388 ±   14.247  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64     0.75f   1000000  avgt   30   7597.012 ±   35.819  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64     0.75f  10000000  avgt   30  83992.645 ± 4933.130  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      1.0f     10000  avgt   30     73.762 ±    1.303  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      1.0f    100000  avgt   30    689.406 ±    6.192  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      1.0f   1000000  avgt   30   7619.628 ±   46.503  us/op
+WriteHeavyMap.bulkLoadBPlusTree        64      1.0f  10000000  avgt   30  84430.291 ± 5037.158  us/op

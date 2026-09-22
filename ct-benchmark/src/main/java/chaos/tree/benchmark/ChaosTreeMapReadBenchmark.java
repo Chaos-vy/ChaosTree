@@ -44,7 +44,7 @@ public class ChaosTreeMapReadBenchmark {
     @Param({"TreeMap", "descendingMap", "subMap"})
     public String mode;
 
-    @Param({"100000"})
+    @Param({"10000"})
     public int size;
 
     @Param({"42"})

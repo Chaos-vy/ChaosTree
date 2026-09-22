@@ -1,0 +1,31 @@
+Benchmark                                                   (degree)  (factor)   (size)  Mode  Cnt         Score     Error   Units
+WriteHeavyMap.importFlatMatrixBPlusTree                           64      0.5f  1000000  avgt   30         1.483 ±   0.009   ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate             64      0.5f  1000000  avgt   30     11273.263 ±  69.080  MB/sec
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate.norm        64      0.5f  1000000  avgt   30  17538210.268 ±   0.060    B/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.count                  64      0.5f  1000000  avgt   30       248.000            counts
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.time                   64      0.5f  1000000  avgt   30       384.000                ms
+WriteHeavyMap.importFlatMatrixBPlusTree                           64      0.6f  1000000  avgt   30         1.241 ±   0.005   ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate             64      0.6f  1000000  avgt   30     11213.114 ±  46.660  MB/sec
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate.norm        64      0.6f  1000000  avgt   30  14592160.594 ±   0.036    B/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.count                  64      0.6f  1000000  avgt   30       258.000            counts
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.time                   64      0.6f  1000000  avgt   30       384.000                ms
+WriteHeavyMap.importFlatMatrixBPlusTree                           64      0.7f  1000000  avgt   30         1.097 ±   0.007   ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate             64      0.7f  1000000  avgt   30     10976.941 ±  70.795  MB/sec
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate.norm        64      0.7f  1000000  avgt   30  12628127.598 ±   0.051    B/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.count                  64      0.7f  1000000  avgt   30       259.000            counts
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.time                   64      0.7f  1000000  avgt   30       329.000                ms
+WriteHeavyMap.importFlatMatrixBPlusTree                           64      0.8f  1000000  avgt   30         0.954 ±   0.006   ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate             64      0.8f  1000000  avgt   30     10950.163 ±  69.089  MB/sec
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate.norm        64      0.8f  1000000  avgt   30  10952094.603 ±   0.043    B/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.count                  64      0.8f  1000000  avgt   30       258.000            counts
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.time                   64      0.8f  1000000  avgt   30       354.000                ms
+WriteHeavyMap.importFlatMatrixBPlusTree                           64      0.9f  1000000  avgt   30         0.845 ±   0.004   ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate             64      0.9f  1000000  avgt   30     10901.292 ±  46.037  MB/sec
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate.norm        64      0.9f  1000000  avgt   30   9664125.850 ±   0.026    B/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.count                  64      0.9f  1000000  avgt   30       282.000            counts
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.time                   64      0.9f  1000000  avgt   30       337.000                ms
+WriteHeavyMap.importFlatMatrixBPlusTree                           64      1.0f  1000000  avgt   30         0.777 ±   0.008   ms/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate             64      1.0f  1000000  avgt   30     10682.879 ± 114.768  MB/sec
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.alloc.rate.norm        64      1.0f  1000000  avgt   30   8701725.380 ±   0.058    B/op
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.count                  64      1.0f  1000000  avgt   30       279.000            counts
+WriteHeavyMap.importFlatMatrixBPlusTree:gc.time                   64      1.0f  1000000  avgt   30       343.000                ms
