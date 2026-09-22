@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChaosTreeMapReadBenchmark — Read-Heavy Report</title>
+    <style>
+        body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-family: monospace; line-height: 1.6; color: #000; background-color: #fff; }
+        h1, h2 { border-bottom: 1px solid #000; padding-bottom: 5px; }
+        table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
+        th, td { border: 1px solid #000; padding: 8px 15px; text-align: right; }
+        th:first-child, td:first-child { text-align: left; }
+        blockquote { border-left: 3px solid #000; margin: 20px 0; padding-left: 15px; font-style: italic; }
+        pre { background-color: #f4f4f4; padding: 15px; border: 1px dotted #000; overflow-x: auto; }
+        a { color: #0000ee; }
+        .bold { font-weight: 700; }
+        table td ul { text-align: left; margin: 0; padding-left: 20px; }
+        body.dark-mode { background-color: #121212; color: #e0e0e0; }
+        body.dark-mode a { color: #66b3ff; }
+        body.dark-mode pre { background-color: #1e1e1e; border-color: #444; color: #e0e0e0; }
+        body.dark-mode blockquote { background-color: #1a1a1a; border-left-color: #66b3ff; }
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { border-bottom-color: #444; }
+        body.dark-mode th, body.dark-mode td { border-color: #555; }
+        body.dark-mode th { background-color: #222; }
+        .theme-toggle { position: fixed; top: 20px; right: 20px; background: transparent; border: 1px solid #000; color: #000; cursor: pointer; padding: 5px 10px; font-family: monospace; font-size: 14px; border-radius: 5px; z-index: 1000; }
+        body.dark-mode .theme-toggle { border-color: #e0e0e0; color: #e0e0e0; }
+        .pending { opacity: 0.5; }
+        .win { color: #007a00; font-weight: 700; }
+        body.dark-mode .win { color: #4caf50; }
+        .err { font-size: 0.6em; opacity: 0.35; font-weight: 400; font-style: normal; }
+
+    </style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="document.body.classList.toggle('dark-mode')">toggle theme</button>
+
+<h1>ChaosTreeMapReadBenchmark — Read-Heavy Benchmark</h1>
+
+<h2>1. Setup</h2>
+<p>Comparing <code>java.util.TreeMap</code> against ChaosTree's <code>BTreeMap</code> and <code>BPlusTreeMap</code>
+    under heavy read workloads.</p>
+
+<pre>java -jar ct-benchmark/target/benchmarks.jar ChaosTreeMapReadBenchmark \
+    -p size=100000 -p seed=42 -wi 10 -w 500ms -i 10 -r 500ms -tu ns -rf text -rff ReadHeavy100K.txt
+
+java -jar ct-benchmark/target/benchmarks.jar ChaosTreeMapReadBenchmark \
+    -p size=10000  -p seed=42 -wi 10 -w 500ms -i 10 -r 500ms -tu ns -rf text -rff ReadHeavy10K.txt</pre>
+
+<p><span class="bold">Caveats:</span></p>
+<ul>
+    <li>Measurements are in strictly <strong>nanoseconds (ns/op)</strong>, average time (<code>avgt</code>), shown as
+        score &plusmn; error (JMH 99.9% confidence interval).</li>
+    <li>10 warmup + 10 measurement iterations of 500 ms each (30 samples per cell: <code>Cnt = 30</code>).
+        GC profiler (<code>-prof gc</code>) is <strong>not</strong> attached in this run.</li>
+    <li>Two sizes run: 10,000 and 100,000 entries — same seed (42) across both, ensuring parity in cache scaling
+        boundaries.
+    </li>
+    <li><strong>preFill=true</strong> is implicitly forced for all methods here, as read benchmarks inherently require
+        querying an already populated data structure.
+    </li>
+    <li><strong>Lower is better.</strong></li>
+</ul>
+<h2>2. ceilingKey()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td class="win">104.113 <span class="err">&plusmn; 1.840</span></td>
+        <td class="win">103.749 <span class="err">&plusmn; 1.486</span></td>
+        <td>111.992 <span class="err">&plusmn; 7.934</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>106.284 <span class="err">&plusmn; 0.749</span></td>
+        <td>105.011 <span class="err">&plusmn; 0.488</span></td>
+        <td>110.674 <span class="err">&plusmn; 0.312</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td>104.784 <span class="err">&plusmn; 1.120</span></td>
+        <td>104.149 <span class="err">&plusmn; 0.418</span></td>
+        <td class="win">105.350 <span class="err">&plusmn; 0.794</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>220.758 <span class="err">&plusmn; 3.533</span></td>
+        <td class="win">161.532 <span class="err">&plusmn; 1.141</span></td>
+        <td>216.032 <span class="err">&plusmn; 27.020</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>191.204 <span class="err">&plusmn; 1.651</span></td>
+        <td>188.098 <span class="err">&plusmn; 1.616</span></td>
+        <td>180.164 <span class="err">&plusmn; 3.480</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">175.192 <span class="err">&plusmn; 4.114</span></td>
+        <td>181.387 <span class="err">&plusmn; 2.267</span></td>
+        <td class="win">166.751 <span class="err">&plusmn; 1.904</span></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>3. containsKey()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>103.693 <span class="err">&plusmn; 0.266</span></td>
+        <td>105.311 <span class="err">&plusmn; 0.556</span></td>
+        <td>104.376 <span class="err">&plusmn; 1.993</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="win">99.343 <span class="err">&plusmn; 0.739</span></td>
+        <td class="win">98.972 <span class="err">&plusmn; 0.465</span></td>
+        <td class="win">99.300 <span class="err">&plusmn; 0.335</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td>101.579 <span class="err">&plusmn; 0.871</span></td>
+        <td>101.659 <span class="err">&plusmn; 4.012</span></td>
+        <td>100.650 <span class="err">&plusmn; 0.989</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>225.389 <span class="err">&plusmn; 4.334</span></td>
+        <td>186.226 <span class="err">&plusmn; 21.074</span></td>
+        <td>230.997 <span class="err">&plusmn; 4.349</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="win">175.474 <span class="err">&plusmn; 1.009</span></td>
+        <td class="win">178.824 <span class="err">&plusmn; 2.406</span></td>
+        <td class="win">175.594 <span class="err">&plusmn; 1.970</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td>183.437 <span class="err">&plusmn; 2.568</span></td>
+        <td>184.217 <span class="err">&plusmn; 1.137</span></td>
+        <td>176.353 <span class="err">&plusmn; 3.762</span></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>4. firstAndLast()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>24.881 <span class="err">&plusmn; 0.120</span></td>
+        <td>28.065 <span class="err">&plusmn; 0.213</span></td>
+        <td>48.467 <span class="err">&plusmn; 0.391</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>9.741 <span class="err">&plusmn; 0.065</span></td>
+        <td>10.583 <span class="err">&plusmn; 0.119</span></td>
+        <td>34.974 <span class="err">&plusmn; 0.100</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">9.700 <span class="err">&plusmn; 0.036</span></td>
+        <td class="win">10.486 <span class="err">&plusmn; 0.055</span></td>
+        <td class="win">32.903 <span class="err">&plusmn; 0.238</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>37.425 <span class="err">&plusmn; 1.403</span></td>
+        <td>44.945 <span class="err">&plusmn; 0.475</span></td>
+        <td>65.829 <span class="err">&plusmn; 0.322</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>9.698 <span class="err">&plusmn; 0.043</span></td>
+        <td class="win">10.449 <span class="err">&plusmn; 0.028</span></td>
+        <td class="win">37.960 <span class="err">&plusmn; 0.072</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">9.669 <span class="err">&plusmn; 0.033</span></td>
+        <td>10.461 <span class="err">&plusmn; 0.036</span></td>
+        <td>38.685 <span class="err">&plusmn; 0.069</span></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>5. floorKey()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>105.560 <span class="err">&plusmn; 1.109</span></td>
+        <td>104.442 <span class="err">&plusmn; 0.784</span></td>
+        <td class="win">106.569 <span class="err">&plusmn; 2.703</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>106.352 <span class="err">&plusmn; 0.253</span></td>
+        <td>106.776 <span class="err">&plusmn; 0.354</span></td>
+        <td>129.717 <span class="err">&plusmn; 0.446</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">104.392 <span class="err">&plusmn; 1.305</span></td>
+        <td class="win">104.136 <span class="err">&plusmn; 0.355</span></td>
+        <td>108.605 <span class="err">&plusmn; 1.117</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>232.312 <span class="err">&plusmn; 3.469</span></td>
+        <td class="win">165.451 <span class="err">&plusmn; 10.086</span></td>
+        <td>209.476 <span class="err">&plusmn; 12.999</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>186.308 <span class="err">&plusmn; 0.829</span></td>
+        <td>192.617 <span class="err">&plusmn; 3.633</span></td>
+        <td>197.923 <span class="err">&plusmn; 7.215</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">173.365 <span class="err">&plusmn; 3.861</span></td>
+        <td>182.239 <span class="err">&plusmn; 3.475</span></td>
+        <td class="win">171.394 <span class="err">&plusmn; 1.805</span></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>6. get()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>106.753 <span class="err">&plusmn; 1.950</span></td>
+        <td>107.809 <span class="err">&plusmn; 0.376</span></td>
+        <td class="win">101.441 <span class="err">&plusmn; 0.590</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="win">100.100 <span class="err">&plusmn; 0.604</span></td>
+        <td class="win">99.493 <span class="err">&plusmn; 0.653</span></td>
+        <td>107.979 <span class="err">&plusmn; 0.254</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td>104.221 <span class="err">&plusmn; 0.301</span></td>
+        <td>101.777 <span class="err">&plusmn; 0.539</span></td>
+        <td>105.642 <span class="err">&plusmn; 1.169</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>258.974 <span class="err">&plusmn; 2.397</span></td>
+        <td>204.973 <span class="err">&plusmn; 27.733</span></td>
+        <td>257.960 <span class="err">&plusmn; 16.230</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="win">183.570 <span class="err">&plusmn; 4.975</span></td>
+        <td class="win">184.059 <span class="err">&plusmn; 4.579</span></td>
+        <td class="win">183.807 <span class="err">&plusmn; 5.338</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td>190.062 <span class="err">&plusmn; 6.158</span></td>
+        <td>190.536 <span class="err">&plusmn; 8.955</span></td>
+        <td>187.670 <span class="err">&plusmn; 4.837</span></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>7. getMiss()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>36.773 <span class="err">&plusmn; 0.273</span></td>
+        <td>41.598 <span class="err">&plusmn; 0.263</span></td>
+        <td class="win">12.878 <span class="err">&plusmn; 0.308</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>32.558 <span class="err">&plusmn; 0.119</span></td>
+        <td>30.118 <span class="err">&plusmn; 0.091</span></td>
+        <td>19.869 <span class="err">&plusmn; 1.320</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">29.850 <span class="err">&plusmn; 0.164</span></td>
+        <td class="win">29.271 <span class="err">&plusmn; 0.146</span></td>
+        <td>15.760 <span class="err">&plusmn; 0.159</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>56.364 <span class="err">&plusmn; 3.225</span></td>
+        <td>52.246 <span class="err">&plusmn; 2.438</span></td>
+        <td class="win">18.573 <span class="err">&plusmn; 0.420</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td class="win">39.104 <span class="err">&plusmn; 0.336</span></td>
+        <td class="win">40.498 <span class="err">&plusmn; 0.825</span></td>
+        <td>23.594 <span class="err">&plusmn; 0.484</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td>41.954 <span class="err">&plusmn; 0.470</span></td>
+        <td>42.300 <span class="err">&plusmn; 1.581</span></td>
+        <td>23.054 <span class="err">&plusmn; 1.376</span></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>8. iterate()</h2>
+<p class="bold">10k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>3.921 <span class="err">&plusmn; 0.031</span></td>
+        <td>4.421 <span class="err">&plusmn; 0.029</span></td>
+        <td>4.383 <span class="err">&plusmn; 0.038</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>7.495 <span class="err">&plusmn; 0.033</span></td>
+        <td>7.469 <span class="err">&plusmn; 0.155</span></td>
+        <td>9.387 <span class="err">&plusmn; 1.266</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">1.596 <span class="err">&plusmn; 0.023</span></td>
+        <td class="win">1.576 <span class="err">&plusmn; 0.037</span></td>
+        <td class="win">3.579 <span class="err">&plusmn; 0.042</span></td>
+    </tr>
+</table>
+
+<p class="bold">100k</p>
+<table>
+    <tr>
+        <th>TreeType</th>
+        <th>TreeMap</th>
+        <th>descendingMap</th>
+        <th>subMap</th>
+    </tr>
+    <tr>
+        <td>JavaTreeMap</td>
+        <td>4.370 <span class="err">&plusmn; 0.101</span></td>
+        <td>6.637 <span class="err">&plusmn; 1.016</span></td>
+        <td>4.700 <span class="err">&plusmn; 0.092</span></td>
+    </tr>
+    <tr>
+        <td>BTreeMap</td>
+        <td>6.047 <span class="err">&plusmn; 1.471</span></td>
+        <td>4.380 <span class="err">&plusmn; 1.458</span></td>
+        <td>8.565 <span class="err">&plusmn; 0.252</span></td>
+    </tr>
+    <tr>
+        <td>BPlusTreeMap</td>
+        <td class="win">1.522 <span class="err">&plusmn; 0.007</span></td>
+        <td class="win">1.555 <span class="err">&plusmn; 0.013</span></td>
+        <td class="win">3.574 <span class="err">&plusmn; 0.041</span></td>
+    </tr>
+</table>
+
+<hr>
+
+
+
+</body>
+</html>
