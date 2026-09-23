@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+          type="image/svg+xml">
+    <meta charset="UTF-8">
+    <title>Journey 0x0001 - Cold Start at Low N</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2, h3 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+        }
+
+        blockquote {
+            border-left: 4px solid #000;
+            margin: 1.5em 10px;
+            padding: 0.5em 10px;
+            background-color: #f9f9f9;
+            font-style: italic;
+        }
+
+        a {
+            color: #000;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .win {
+            color: #8a2be2;
+            font-weight: bold;
+        }
+
+        body.dark-mode .win {
+            color: #c299fc;
+        }
+
+        .err {
+            opacity: 0.55;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+
+    </style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+
+<h1>Cold Start at Low N: Why BPlusTreeMap Loses Before It Wins</h1>
+
+<p>
+    This is a study of one specific regime: <code>BPlusTreeMap</code> running <i>cold</i> — starting from an
+    empty tree, no warm-up — at low key counts. It's not one benchmark and it's not one bug. It started with a
+    single redundant binary search inside <code>merge()</code>, but chasing that down small-N cold behavior kept
+    turning up more: a benchmark-annotation bug that was quietly inflating every per-key API's reported cost at
+    100k, an eager-allocation design choice that costs a small, flat tax on every empty node, and a crossover
+    with <code>java.util.TreeMap</code> that only shows up once size and warm-up state are separated out instead
+    of conflated. Every wrong turn below is left in — the value here is the sequence of theories that profiling
+    and cross-checking killed, not just the final numbers.
+</p>
+
+<h2>Round 1: The Merge Benchmark Loses</h2>
+<p>
+    It started, like most of these do, with a benchmark that hurt my expectation.
+    I ran a merge benchmark against <code>TreeMap</code>, fully expecting to win. I didn't.
+    Before even touching performance, I found an actual bug sitting in the middle of the merge path —
+    <code>modCount</code>
+    was being tracked inconsistently across the operation, so I refactored that first. Correctness before speed.
+</p>
+
+<h2>Round 2: The Two-Traversal Tax</h2>
+<p>
+    With the bug fixed, I went looking for the slowdown itself. Turned out <code>remove()</code> was doing the
+    classic rookie move: find the key in one traversal, then remove it in a second, separate traversal. Two trips
+    down the tree for one logical operation. I collapsed that into a single pass.
+</p>
+<p>
+    Ran the benchmark again. Still ~20ns slower than <code>TreeMap</code>. Somewhere, I was still paying for
+    something I didn't need to pay for.
+</p>
+
+<h2>Round 3: Finding the Real Waste</h2>
+<p>
+    So I stopped micro-tuning and actually traced the shape of the operation top to bottom. Going down the tree,
+    I do a binary search at every level to route to the right child — that part's unavoidable, it's the whole
+    point of a B+Tree. But on the way back <i>up</i>, when a split or merge needs to know a node's position in its
+    parent, I was doing <i>another</i> binary search to re-derive information I basically already had on the way down.
+    Same work, done twice, for no real reason. That redundancy was the real target.
+</p>
+
+<h2>The Three Traps</h2>
+<p>I went through four ideas to kill that redundant search. The first three all turned out to be traps.</p>
+
+<h3>1. The Depth Stack</h3>
+<p>
+    Idea: keep a fixed-size (32-deep) <code>int[]</code> stack on the way down that remembers position at each
+    depth, then pop it on the way back up instead of re-searching.
+</p>
+<blockquote>
+    <b>The Trap:</b> The whole plan rests on the JVM's Escape Analysis stack-allocating that array so it's
+    effectively free. But EA is not a promise — it's a best-effort optimization that can silently bail out under
+    the wrong conditions. I'd be betting real performance on a compiler heuristic I don't control and can't fully
+    predict.
+</blockquote>
+
+<h3>2. The ThreadLocal Buffer</h3>
+<p>
+    Idea: sidestep allocation entirely with a <code>ThreadLocal&lt;int[]&gt;</code> depth buffer, reused per thread.
+</p>
+<blockquote>
+    <b>The Trap:</b> This only holds up if the caller's thread stays "clean." The moment someone wraps a call in a
+    <code>synchronized</code> block or a reentrant lock in a way that re-enters the tree on the same thread, the
+    buffer state gets corrupted out from under you. Rejected.
+</blockquote>
+
+<h3>3. The Node-Level Healer Field</h3>
+<p>
+    Idea: add a small tracking field directly to the node — call it a "healer" slot — that gets populated during
+    parsing and just tells the node its own index in the parent, no search needed.
+</p>
+<blockquote>
+    <b>The Trap:</b> It works, but it's a standing memory cost on <i>every node, all the time</i>, to save a
+    search that only matters occasionally. Small per node, but it adds up across the whole tree for a benefit that
+    doesn't scale with it.
+</blockquote>
+
+<h2>The Fourth Trap I Almost Missed: Turning a Clean Read into a Dirty Write</h2>
+<p> There was one more angle I nearly skipped. What if I just updated the <code>traceHealer</code> field only during
+    <code>put()</code> descents, leaving reads alone? That sounds harmless, but it introduces a real hardware penalty:
+    I'd be dirtying cache lines that never needed to be touched. Right now, the descent phase of a mutation is entirely
+    read-only until it hits the leaf — the CPU streams the arrays through L1 at full speed, no side effects. If I force
+    the tree to save its path by writing <code>curr.childIdx = idx</code> on every hop, I turn a pristine, read-only
+    descent into a series of memory writes. Every write marks that cache line dirty, and a dirty line eventually has to
+    be written back — down to L2, possibly further — whether or not I ever use <code>traceHealer</code> for that
+    particular put. Reads never pay this: they stream through, leave the line clean, and it can just be evicted for free
+    when the cache needs the space. The "useless" binary search on the bubble-up phase is actually cheaper than forcing
+    the CPU to write to memory on the way down. </p>
+<h2>Confirming It With JFR</h2>
+<p>
+    Before committing to "just eat the search," I wanted data, not intuition. I profiled the merge benchmark with
+    JFR. The hot-methods view told the real story: inside <code>BPlusTreeMap</code>, roughly 65% of samples during
+    merge landed in <code>Arrays.binarySearch0</code>, with the tree's own <code>merge()</code> method itself
+    accounting for about 12–13% of samples. Allocation pressure was dominated by the map's own entry objects and
+    backing arrays, not by anything exotic.
+</p>
+<blockquote>
+    <b>Java Methods that Executes the Most:</b>
+</blockquote>
+<pre>
+Method                                                                                                  Samples Percent
+------------------------------------------------------------------------------------------------------- ------- -------
+java.util.Arrays.binarySearch0(Object[], int, int, Object)                                                  159  64.90%
+chaos.tree.naryMap.BPlusTreeMap.merge(Object, Object, BiFunction)                                            30  12.24%
+chaos.tree.naryMap.BPlusTreeMap.buildFromSorted(Iterator, float)                                             14   5.71%
+java.lang.Integer.compare(int, int)                                                                          11   4.49%
+chaos.tree.naryMap.AbstractNaryTreeMap.searchNodeMap(AbstractNaryMapNode, Object)                             8   3.27%
+</pre>
+
+<blockquote>
+    <b>Allocation by class</b>
+</blockquote>
+<pre>
+Object Type                                                         Allocation Pressure
+------------------------------------------------------------------- -------------------
+chaos.tree.naryMap.AbstractNaryTreeMap$ChaosEntry                                62.93%
+java.lang.Object[]                                                               35.67%
+</pre>
+<p>
+    That matched the theory cleanly: the cost was already concentrated in binary search, already small relative
+    to total execution, and not hiding some other bottleneck I'd missed. No allocation storm, no lock contention,
+    just the search itself — exactly the cost the amortization argument said was fine to keep paying.
+</p>
+
+<h2>The Realization</h2>
+<p>
+    After rejecting all three, I went back and actually measured how often that upward propagation happens.
+    A split or merge that propagates up only triggers around the <code>2t</code> boundary of a node — and as the
+    degree increases, that boundary gets hit less and less often relative to total operations.
+</p>
+<p>
+    <b>I was trying to eliminate a cost that barely happens, by paying a cost on every operation that does.</b>
+</p>
+<p>
+    That's the amortization quirk: the honest fix isn't a cleverer data structure to avoid the search — it's
+    recognizing that the search is already rare, and letting it stay rare instead of engineering around it.
+    Just like <code>ArrayList</code> eats an array-copy tax during resizing to keep <code>add()</code> at O(1) the
+    rest of the time, the tree eats one binary search at propagation time to keep every other operation clean.
+</p>
+
+<blockquote>
+    <p><i>The fix wasn't a smarter structure. It was noticing the cost I was trying to avoid almost never shows up.</i>
+    </p>
+</blockquote>
+
+<h1>Part 2: The Extended Investigation — Cold Start Across Size</h1>
+
+<blockquote>
+    A performance autopsy on ChaosTree's cold-start behavior, picking up where the merge() investigation left
+    off. Chasing cache locality, allocation pressure, and binary search overhead across four orders of
+    magnitude turned up two more real bugs and two design tradeoffs — including one benchmark bug (below) that
+    was silently inflating every 100k number in an earlier draft of this post by ~10x.
+</blockquote>
+
+<h2>The setup</h2>
+<p>
+    ChaosTree is a zero-dependency Java tree library, and one of its map implementations — <code>BPlusTreeMap</code> —
+    was benchmarked head-to-head against <code>java.util.TreeMap</code> across four orders of magnitude: 1,000 / 10,000
+    / 100,000 / 1,000,000 keys. The results weren't a clean win or loss — they were a <strong>crossover</strong>:
+</p>
+
+<h3>Benchmark setup</h3>
+<p>
+    All numbers in this post come from <code>NaryTreeMapUpdateBenchmark</code>, a JMH <code>avgt</code> (average time)
+    benchmark comparing <code>BPlusTreeMap</code> against <code>java.util.TreeMap</code> across their shared API
+    surface (<code>put</code>, <code>putIfAbsent</code>, <code>merge</code>, <code>compute</code>,
+    <code>computeIfAbsent</code>, <code>computeIfPresent</code>, plus a <code>baseline</code> insert-only case).
+</p>
+<p>
+    Two JMH params matter for reading every table below:
+</p>
+<ul>
+    <li><strong><code>comparator=true</code></strong> — a <code>Collections.reverseOrder()</code>-style wrapping
+        comparator is used instead of natural ordering, adding one extra virtual dispatch per comparison for both
+        implementations.
+    </li>
+    <li><strong><code>preFill</code></strong> — this is the one that actually explains most of the swings in this
+        post. <code>preFill=false</code> means each benchmark iteration starts from an empty tree (cold: no
+        warm-up, near-empty structure). <code>preFill=true</code> means the tree is pre-loaded to <code>size</code>
+        entries before the timed portion starts (warm: JIT and caches are hot, structure is at steady-state depth).
+    </li>
+</ul>
+<p>
+    The crossover numbers quoted throughout ("BPlusTreeMap loses at 1k/10k, wins at 100k/1M") come from the
+    <code>preFill=false</code> (cold) rows specifically. As the raw evidence below shows, the cold-start picture
+    is not flat across sizes — the gap narrows substantially as the dataset grows and the result crosses over
+    between 10k and 100k.
+</p>
+
+<p>
+    <b>Point to be noted:</b> The data below is from the <code>computeIfAbsent()</code> API with
+    <code>@OperationsPerInvocation(1000)</code>. Therefore, the reported <code>ns/op</code> is averaged over
+    1,000 operations per benchmark invocation, which is why these numbers are approximately 10× lower than
+    the raw per-invocation figures shown elsewhere.
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Size</th>
+        <th>BPlusTreeMap</th>
+        <th>JavaTreeMap</th>
+        <th>Result</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1,000</td>
+        <td>10.788 ns/op</td>
+        <td><span class="win">6.408 ns/op</span></td>
+        <td>JavaTreeMap, by 68%</td>
+    </tr>
+    <tr>
+        <td>10,000</td>
+        <td>144.808 ns/op</td>
+        <td><span class="win">118.612 ns/op</span></td>
+        <td>JavaTreeMap, by 22%</td>
+    </tr>
+    <tr>
+        <td>100,000</td>
+        <td><span class="win">1,984.975 ns/op</span></td>
+        <td>2,314.615 ns/op</td>
+        <td><strong>BPlusTreeMap, by 17%</strong></td>
+    </tr>
+    <tr>
+        <td>1,000,000</td>
+        <td><span class="win">40,346.250 ns/op</span></td>
+        <td>63,928.446 ns/op</td>
+        <td><strong>BPlusTreeMap, by 58%</strong></td>
+    </tr>
+    </tbody>
+</table>
+
+<h3>Reproduce the benchmark</h3>
+
+<p>
+    The following JMH command reproduces the cold-start comparison shown above:
+</p>
+
+<pre><code>java -jar ct-benchmark/target/benchmarks.jar \
+  NaryTreeMapUpdateBenchmark.computeIfAbsent \
+  -p size=1000,10000,100000,1000000 \
+  -p mapType=BPlusTreeMap,JavaTreeMap \
+  -p mode=TreeMap \
+  -p preFill=false \
+  -p comparator=true \
+  -wi 5 -w 500ms \
+  -i 5 -r 500ms \
+  -f 3
+    #Note: See the OperationPerInvocation(10000) default by me.
+</code></pre>
+
+<p>
+    Two different regimes, two different stories. This post is the full investigation — including every wrong turn —
+    that eventually explained both.
+</p>
+<p>
+    My first instinct, looking at the small-N losses, was architectural: a red-black tree is nodes-and-pointers, no
+    array maintenance. My B+Tree stores keys in per-node arrays and has to do array bookkeeping — shifting, splitting,
+    propagating — on every insert. Surely <i>that</i> was the cost.
+</p>
+<p>
+    I was wrong about almost everything for the first half of this investigation, and the data proved it every time.
+    That's the actual value of this post: not the final fix, but the sequence of plausible-sounding theories that
+    profiling killed one by one — and the fact that the small-N loss and the large-N win turned out to be <strong>caused
+    by two unrelated mechanisms</strong>, not one story that flips sign.
+</p>
+
+<h2>Raw evidence: cold vs. warm, per API, at 10k and 100k</h2>
+<p>
+    Before digging into theories, here's the raw <code>NaryTreeMapUpdateBenchmark</code> output the crossover claims
+    above are built on — full per-API breakdowns at two sizes, cold (<code>preFill=false</code>) and warm
+    (<code>preFill=true</code>) side by side, <code>comparator=true</code> throughout. Reproducible, not asserted —
+    here's exactly how it was run:
+</p>
+<pre>
+# cold (empty tree, no pre-fill)
+java -jar ct-benchmark/target/benchmarks.jar NaryTreeMapUpdateBenchmark \
+    -p size=100000 -p mapType=BPlusTreeMap,JavaTreeMap -p mode=TreeMap \
+    -p preFill=false -p comparator=true \
+    -wi 5 -w 500ms -i 10 -r 500ms -f 3
+
+# warm (tree pre-loaded to `size` before timing starts)
+java -jar ct-benchmark/target/benchmarks.jar NaryTreeMapUpdateBenchmark \
+    -p size=100000 -p mapType=BPlusTreeMap,JavaTreeMap -p mode=TreeMap \
+    -p preFill=true -p comparator=true \
+    -wi 5 -w 500ms -i 10 -r 500ms -f 3
+</pre>
+<p>
+    5 warmup iterations at 500ms, 10 measured iterations at 500ms, 3 forks — same JMH config for every row in both
+    tables below, only <code>preFill</code> flips between runs. Same story for the 10k tables, with
+    <code>-p size=10000</code>.
+</p>
+
+<h3>size = 10,000</h3>
+<table>
+    <thead>
+    <tr>
+        <th>API</th>
+        <th>Cold: BPlusTreeMap</th>
+        <th>Cold: JavaTreeMap</th>
+        <th>Warm: BPlusTreeMap</th>
+        <th>Warm: JavaTreeMap</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>baseline</td>
+        <td><span>6.292</span> <span class="err">± 0.189</span></td>
+        <td class="win">4.368 <span class="err">± 0.065</span></td>
+        <td class="win">78,788.515 <span class="err">± 578.668</span></td>
+        <td><span>88,985.572</span> <span class="err">± 3918.981</span></td>
+    </tr>
+    <tr>
+        <td>compute</td>
+        <td>173.280 <span class="err">± 3.192</span></td>
+        <td><span class="win">120.055</span> <span class="err">± 2.324</span></td>
+        <td><span class="win">109.116</span> <span class="err">± 0.626</span></td>
+        <td>121.257 <span class="err">± 4.479</span></td>
+    </tr>
+    <tr>
+        <td>computeIfAbsent</td>
+        <td>147.613 <span class="err">± 2.626</span></td>
+        <td><span class="win">117.553</span> <span class="err">± 4.033</span></td>
+        <td><span class="win">116.723</span> <span class="err">± 0.552</span></td>
+        <td>123.236 <span class="err">± 4.260</span></td>
+    </tr>
+    <tr>
+        <td>computeIfPresent</td>
+        <td>0.156 <span class="err">± 0.005</span></td>
+        <td><span class="win">0.019</span> <span class="err">± 0.001</span></td>
+        <td><span class="win">103.459</span> <span class="err">± 2.098</span></td>
+        <td>123.945 <span class="err">± 4.696</span></td>
+    </tr>
+    <tr>
+        <td>merge</td>
+        <td>142.593 <span class="err">± 3.018</span></td>
+        <td><span class="win">117.466</span> <span class="err">± 3.527</span></td>
+        <td><span class="win">105.741</span> <span class="err">± 1.626</span></td>
+        <td>124.202 <span class="err">± 3.903</span></td>
+    </tr>
+    <tr>
+        <td>put</td>
+        <td>148.144 <span class="err">± 2.840</span></td>
+        <td><span class="win">121.698</span> <span class="err">± 2.737</span></td>
+        <td><span class="win">109.627</span> <span class="err">± 0.371</span></td>
+        <td>123.172 <span class="err">± 1.260</span></td>
+    </tr>
+    <tr>
+        <td>putIfAbsent</td>
+        <td>148.353 <span class="err">± 3.094</span></td>
+        <td><span class="win">117.370</span> <span class="err">± 3.239</span></td>
+        <td><span class="win">103.706</span> <span class="err">± 1.051</span></td>
+        <td>124.887 <span class="err">± 3.734</span></td>
+    </tr>
+    </tbody>
+</table>
+<p>
+    At 10k, the pattern is clean: <strong>cold loses on every API, warm wins on every API.</strong> The 144.808 vs
+    118.612 ns/op crossover-table number for <code>merge</code> is the cold row here — Java is faster while the tree
+    is still being built up from empty, at this size.
+</p>
+
+<h3>size = 100,000</h3>
+<table>
+    <thead>
+    <tr>
+        <th>API</th>
+        <th>Cold: BPlusTreeMap</th>
+        <th>Cold: JavaTreeMap</th>
+        <th>Warm: BPlusTreeMap</th>
+        <th>Warm: JavaTreeMap</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>baseline</td>
+        <td><span>7.124</span> <span class="err">± 0.910</span></td>
+        <td class="win">4.767 <span class="err">± 1.184</span></td>
+        <td class="win">803,245.883 <span class="err">± 7609.834</span></td>
+        <td><span>1,374,308.961</span> <span class="err">± 37,198.608</span></td>
+    </tr>
+    <tr>
+        <td>compute</td>
+        <td><span class="win">204.832</span> <span class="err">± 2.700</span></td>
+        <td>242.048 <span class="err">± 27.593</span></td>
+        <td><span class="win">172.817</span> <span class="err">± 10.829</span></td>
+        <td>247.365 <span class="err">± 15.407</span></td>
+    </tr>
+    <tr>
+        <td>computeIfAbsent</td>
+        <td><span class="win">201.706</span> <span class="err">± 2.017</span></td>
+        <td>228.679 <span class="err">± 22.141</span></td>
+        <td><span class="win">173.655</span> <span class="err">± 3.029</span></td>
+        <td>246.638 <span class="err">± 18.454</span></td>
+    </tr>
+    <tr>
+        <td>computeIfPresent</td>
+        <td>0.156 <span class="err">± 0.005</span></td>
+        <td><span class="win">0.017</span> <span class="err">± 0.001</span></td>
+        <td><span class="win">157.591</span> <span class="err">± 1.719</span></td>
+        <td>243.654 <span class="err">± 19.817</span></td>
+    </tr>
+    <tr>
+        <td>merge</td>
+        <td><span class="win">197.745</span> <span class="err">± 16.387</span></td>
+        <td>224.365 <span class="err">± 21.446</span></td>
+        <td><span class="win">164.670</span> <span class="err">± 8.520</span></td>
+        <td>252.834 <span class="err">± 19.297</span></td>
+    </tr>
+    <tr>
+        <td>put</td>
+        <td><span class="win">205.348</span> <span class="err">± 2.854</span></td>
+        <td>229.111 <span class="err">± 29.199</span></td>
+        <td><span class="win">162.543</span> <span class="err">± 4.984</span></td>
+        <td>255.935 <span class="err">± 18.527</span></td>
+    </tr>
+    <tr>
+        <td>putIfAbsent</td>
+        <td><span class="win">199.807</span> <span class="err">± 8.970</span></td>
+        <td>230.884 <span class="err">± 23.000</span></td>
+        <td><span class="win">166.363</span> <span class="err">± 1.889</span></td>
+        <td>256.255 <span class="err">± 24.147</span></td>
+    </tr>
+    </tbody>
+</table>
+<p>
+    At 100k, cold and warm are both far closer to 10k's magnitude than the earlier (mis-annotated) 100k numbers
+    suggested — <code>compute</code> goes from 176.871ns/op cold at 10k to only 204.832ns/op cold at 100k, a modest
+    bump consistent with the couple of extra tree levels a 10x larger tree adds, not the ~12x jump the
+    un-aligned numbers implied. BPlusTreeMap still wins cold on five of seven APIs at 100k, same pattern as
+    before, just at a corrected scale. <code>baseline</code> and cold <code>computeIfPresent</code> are unaffected
+    by this fix — neither loops over <code>keys</code>, so neither was exposed to the mis-aligned annotation.
+</p>
+
+
+
+<h2>Two more findings from the cold-path audit</h2>
+
+<h3>Why <code>baseline</code> stays completely flat across size</h3>
+<p>
+    <code>baseline</code> cold doesn't move at all between 10,000 and 100,000 — 6.5–7.1ns/op for BPlusTreeMap,
+    4.3–4.8ns/op for JavaTreeMap, regardless of <code>size</code>. That's expected, not a bug: the method is just
+</p>
+<pre>
+public Map&lt;Integer, Integer&gt; baseline() {
+    return transformer.apply(supplier.get());
+}
+</pre>
+<p>
+    — one constructor call, no loop over <code>keys</code>. <code>size</code> only controls how many keys get
+    shuffled into the <code>keys</code> array during <code>@Setup</code>; <code>baseline</code> never touches that
+    array, so there's no path by which it could scale with <code>size</code>.
+</p>
+<p>
+    The ~2ns gap itself comes from a real, small design choice: every <code>BPlusTreeMap</code> node — including
+    a brand-new, empty root — eagerly allocates full <code>2 × degree</code> capacity at construction. At
+    <code>degree=64</code> that's a 128-length key array and a 129-length child array, plus a <code>keyCount</code>
+    and a parent pointer, all allocated before a single key is ever inserted. <code>TreeMap</code>'s constructor,
+    by contrast, is close to a single field assignment — it defers all node allocation to the first
+    <code>put</code>. Roughly 1–2KB of upfront array payload per empty node is a small cost for one root, but it's
+    paid by <i>every</i> node in the tree, not just the one <code>baseline</code> happens to measure — worth
+    revisiting if node count ever gets memory-sensitive, independent of the ns/op story here.
+</p>
+
+<h3>Why cold <code>computeIfPresent</code> is near-zero for both — but still 8x apart</h3>
+<p>
+    Cold <code>computeIfPresent</code> sits at 0.15–0.16ns/op (BPlusTreeMap) vs. 0.017–0.02ns/op (JavaTreeMap) at
+    both 10k and 100k — flat across size, for both implementations, unlike every other API in these tables. That
+    flatness is the tell: on an empty, cold tree, <code>computeIfPresent(key, ...)</code> never finds the key, so
+    the remapping function never runs. Both implementations are measuring "look up in an empty structure, find
+    nothing, return null" — genuinely near-zero work, not a real search — so it's expected to stay flat rather
+    than scale with <code>size</code>.
+</p>
+
+<h2>Part 1: Why BPlusTreeMap loses at small N (1,000–10,000 keys)</h2>
+
+<h3>Theory 1: "Array maintenance is inherently slower than pointer surgery"</h3>
+<p>
+    The initial hypothesis: a red-black tree's rebalancing is O(1) local pointer fixup, while a B-tree's bottom-up
+    propagation requires "massive array calculation" at every level.
+</p>
+<p>
+    First JFR profile (<code>comparator=true, BPlusTreeMap, size=10000, cold</code>):
+</p>
+<pre>
+Arrays.binarySearch0                    44.89%
+Collections$ReverseComparator.compare   21.02%
+Integer.compare                         14.20%
+BPlusTreeMap.merge                       9.09%
+AbstractNaryMapNode.&lt;init&gt;               5.68%
+</pre>
+<p>
+    No array-copy or split method anywhere near the top. The dominant cost was <strong>search</strong>, not propagation.
+    Theory 1 was dead on arrival — the actual hot path was <code>Arrays.binarySearch0</code> calling into a comparator,
+    not array shifting during rebalance.
+</p>
+
+<h3>Theory 2: "It's the JDK binary search method's overhead"</h3>
+<p>
+    Next theory: maybe <code>Arrays.binarySearch0</code>'s generic bounds-checking and dispatch machinery was the tax,
+    and a hand-rolled binary search loop, inlined directly into the search method, would remove it.
+</p>
+<p>
+    I'd already found per-key-type linear-search thresholds (32 for <code>Integer</code>, 8 for <code>String</code>, 12
+    generic) by empirically finding the linear/binary crossover point for each comparator cost profile. I wired those
+    in, replaced <code>Arrays.binarySearch</code> with a manual loop, and reran.
+</p>
+<p>
+    Result: <strong>147.591 ns/op &rarr; 144.808 ns/op.</strong> A 2% improvement. Nothing.
+</p>
+<p>
+    The profile explained why:
+</p>
+<pre>
+searchNodeMap (manual loop)              45.18%   [was binarySearch0 at 44.89%]
+ReverseComparator.compare                19.88%   [was 21.02%]
+</pre>
+<p>
+    The exact same percentage, just relabeled under a different method name. <code>Arrays.binarySearch0</code> was never
+    scaffolding — it was already a tight loop. I'd rewritten the same cost by hand and congratulated myself on nothing.
+</p>
+<p>
+    This also surfaced a fanout problem separate from the search-algorithm question entirely: the tree's degree was 64,
+    meaning every node held 63–127 keys — always above even the <i>largest</i> linear-search threshold (32). The
+    threshold logic I'd built was correct and completely inert, because it could never trigger at the fanout actually
+    being benchmarked.
+</p>
+
+<h3>Theory 3: "It's excessive allocation — my nodes allocate too much"</h3>
+<p>
+    <code>allocation-by-site</code> showed 92.37% of allocation pressure coming from node construction (<code>AbstractNaryMapNode.&lt;init&gt;</code>),
+    versus Java's <code>TreeMap.addEntry</code> at 62.54%. Looked damning.
+</p>
+<p>
+    It wasn't. Comparing <strong>absolute bytes</strong>, not relative percentages:
+</p>
+<ul>
+    <li>Java: <strong>1.2 GB</strong> total allocated</li>
+    <li>BPlusTreeMap: <strong>339.6 MB</strong> total allocated</li>
+</ul>
+<p>
+    Java allocated <strong>3.5x more garbage</strong> over the same run and was still faster. 92% of a small number is
+    not automatically bigger than 62% of a large one — relative allocation-site percentages from two different processes
+    are not comparable without the absolute totals. This was the most instructive dead end of the whole investigation: a
+    metric that looked alarming in isolation and meant the opposite once normalized correctly.
+</p>
+
+<h3>Theory 4: "It's L3 cache locality — my scattered array nodes thrash the cache while RBT pointer-chasing stays
+    local"</h3>
+<p>
+    This felt like the strongest theory yet at the time, and it matched the widening relative gap between 10k and 1k
+    (22% slower vs. 68% slower — worse, not better, as the tree got smaller, which ruled out "amortized over more real
+    work" as an explanation and pointed at something structurally fixed-cost). It would later turn out cache behavior
+    <i>is</i> the answer — just not at this size, and not in this direction.
+</p>
+<p>
+    I ran <code>perf stat</code> with hardware counters, first sloppily (both mapTypes in one invocation, contaminating
+    the counts), then correctly split per implementation, then normalized to misses-per-instruction:
+</p>
+<table>
+    <thead>
+    <tr>
+        <th>Metric (MPKI)</th>
+        <th>BPlusTreeMap</th>
+        <th>JavaTreeMap</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>L1-dcache MPKI</td>
+        <td>1.09</td>
+        <td><strong>3.81</strong></td>
+    </tr>
+    <tr>
+        <td>LLC-load-miss MPKI</td>
+        <td>0.039</td>
+        <td>0.050</td>
+    </tr>
+    <tr>
+        <td>IPC</td>
+        <td>2.42</td>
+        <td>2.34</td>
+    </tr>
+    </tbody>
+</table>
+<p>
+    Java's L1 cache-miss rate was <strong>3.5x higher</strong> than mine. My IPC was slightly better. Every cache metric
+    available pointed the <i>opposite</i> direction from the theory. The red-black tree's pointer-chasing was generating
+    more cache pressure per instruction, not less. Theory 4 wasn't just unconfirmed — it was actively backwards.
+</p>
+
+<h3>The small-N answer: 2.38x the instructions, uniformly</h3>
+<p>
+    JMH's <code>-prof perfnorm</code> gave the number that ended the search, reported per-operation instead of per-run,
+    at <code>size=1000</code>:
+</p>
+<table>
+    <thead>
+    <tr>
+        <th>Metric (per op)</th>
+        <th>BPlusTreeMap</th>
+        <th>JavaTreeMap</th>
+        <th>Ratio</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>instructions</td>
+        <td>79.836</td>
+        <td>33.492</td>
+        <td><strong>2.38x</strong></td>
+    </tr>
+    <tr>
+        <td>cycles</td>
+        <td>31.032</td>
+        <td>16.223</td>
+        <td>1.91x</td>
+    </tr>
+    <tr>
+        <td>branches</td>
+        <td>16.669</td>
+        <td>8.150</td>
+        <td>2.05x</td>
+    </tr>
+    <tr>
+        <td>branch-misses</td>
+        <td>0.437</td>
+        <td>0.190</td>
+        <td>2.30x</td>
+    </tr>
+    <tr>
+        <td>L1-dcache-loads</td>
+        <td>20.289</td>
+        <td>9.182</td>
+        <td>2.21x</td>
+    </tr>
+    <tr>
+        <td>LLC-load-misses</td>
+        <td>&approx; 10&strnsup;-4;</td>
+        <td>&approx; 10&strnsup;-3;</td>
+        <td>Java worse</td>
+    </tr>
+    </tbody>
+</table>
+<p>
+    No cache story at this size. No allocation story. No binary-search-scaffolding story. Just: <strong>for every single
+    insert, my code executes roughly 2.38x as many instructions as <code>TreeMap</code> does</strong>, with every
+    sub-metric (branches, loads, cycles) scaling almost exactly proportionally. My code isn't executing its instructions
+    less efficiently — IPC was actually <i>better</i> than Java's (2.57 vs 2.06) — it's executing more of them.
+</p>
+<p>
+    The two live suspects, both visible in every profile from the first one to the last and never fixed as of this
+    writing:
+</p>
+<ol>
+    <li><strong><code>Collections$ReverseComparator</code> double-dispatch.</strong> Every comparison goes through a
+        wrapping comparator object before reaching the real <code>Integer.compare</code> — two virtual calls where a
+        direct comparison needs one. This showed up at 19–21% of self-time in every small-N profile.
+    </li>
+    <li><strong><code>merge()</code>'s own per-ascent-level overhead</strong>, which <i>grew</i> in relative share from
+        13.86% at size 10,000 to 23.26% at size 1,000 — a signature of fixed per-call cost that doesn't scale down with
+        tree height, while everything else (search, comparator, allocation) stayed flat or shrank across the same
+        comparison.
+    </li>
+</ol>
+
+
+<h2>Part 2: Why BPlusTreeMap wins at large N (100k–1M) — and why the margin widens</h2>
+<p>
+    Here's the twist that made a second investigation necessary: <strong>the 2.38x instruction gap does not
+    persist.</strong> Re-running <code>perfnorm</code> at 100k and 1M:
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Metric (per op)</th>
+        <th>100k BPlus</th>
+        <th>100k Java</th>
+        <th>1M BPlus</th>
+        <th>1M Java</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>instructions</td>
+        <td>10,434.483</td>
+        <td>4,998.309</td>
+        <td>115,075.033</td>
+        <td>112,324.769</td>
+    </tr>
+    <tr>
+        <td>IPC</td>
+        <td>1.36</td>
+        <td>0.58</td>
+        <td>0.87</td>
+        <td>0.46</td>
+    </tr>
+    <tr>
+        <td>LLC-load-misses</td>
+        <td>0.385</td>
+        <td>0.977</td>
+        <td>223.901</td>
+        <td>459.609</td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    By 1M, instruction counts have essentially converged (115,075 vs 112,325 — a 2% difference). The "I execute more
+    instructions" story from Part 1 is gone. What's left is <strong>IPC collapse</strong>: Java's IPC craters to
+    0.46–0.58 while mine stays at 0.87–1.36. Falling IPC with flat instruction count and rising cycle count is the
+    signature of a CPU stalling on memory, and LLC-load-misses confirm it directly — Java suffers roughly 2–2.5x my miss
+    rate at both sizes.
+</p>
+<p>
+    This is the cache-locality theory from Part 1 — just true at the opposite size and for the opposite reason. At
+    1k/10k the whole tree fits in cache regardless of shape, so pointer-chasing costs nothing extra. Past 100k, working
+    sets exceed cache capacity, and now every pointer hop in a <code>TreeMap</code> descent (height &approx; log&strnsup;2;(n)
+    &approx; 20 at 1M) is a chance to miss, while my wider fanout (degree 64, height &approx; log&strnsup;64;(n)
+    &approx; 4) needs far fewer hops, each into a cache-friendly contiguous array.
+</p>
+
+<h3>But that still doesn't explain why the <i>margin</i> widens</h3>
+<p>
+    Cache-miss ratio and IPC ratio between the two implementations stay roughly flat — if anything they move slightly
+    <i>toward</i> parity — between 100k and 1M. So does the allocation-rate ratio: JMH's <code>-prof gc</code> gave
+    exact bytes/op, and Java allocates almost exactly <strong>3.2x</strong> more than I do at <i>both</i> sizes (400.036
+    vs 124.442 B/op at 100k; 4000.696 vs 1250.882 B/op at 1M). A flat 3.2x doesn't explain a widening ns/op gap either.
+    Two solid, real disadvantages for Java — worse cache behavior, more garbage — and neither one's <i>ratio</i> grows
+    with N. Something else had to be compounding.
+</p>
+
+<h3>The real driver: G1's remembered-set cost compounding</h3>
+<p>
+    The answer came from reading raw GC logs (<code>-Xlog:gc*</code>) line by line instead of trusting aggregate <code>gc.time</code>
+    totals. Every collection in every log — both implementations, both sizes — was a plain <strong>young</strong>
+    collection; there wasn't a single old-gen or mixed collection anywhere. So the cost isn't about <i>doing</i> old-gen
+    collections. It's about how the <i>young</i> collections behave as old-gen accumulates around them:
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>GC #</th>
+        <th>JavaTreeMap @ 1M: old regions</th>
+        <th>Evacuate Collection Set</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>0</td>
+        <td>1&rarr;4</td>
+        <td>4.85 ms</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>7&rarr;10</td>
+        <td>6.32 ms</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>14&rarr;17</td>
+        <td>7.63 ms</td>
+    </tr>
+    <tr>
+        <td>6</td>
+        <td>22&rarr;31</td>
+        <td>12.63 ms</td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td>31&rarr;44</td>
+        <td><strong>16.78 ms</strong></td>
+    </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+    <tr>
+        <th>GC #</th>
+        <th>BPlusTreeMap @ 1M: old regions</th>
+        <th>Evacuate Collection Set</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>0</td>
+        <td>1&rarr;4</td>
+        <td>4.45 ms</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>7&rarr;10</td>
+        <td>6.08 ms</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>10&rarr;15</td>
+        <td>4.51 ms</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>17&rarr;18</td>
+        <td><strong>2.39 ms</strong></td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    Java's per-collection evacuation cost <strong>nearly quadruples</strong> as old regions climb from 4 to 44 over the
+    course of a single run. Mine <strong>falls by almost half</strong> over the same kind of run, and old-region growth
+    itself slows to a crawl. Every collection sampled here is young-only — this is G1's remembered set (RSet) at work:
+    every young collection has to scan old-gen&rarr;young-gen cross-references to find live roots, and that scan cost
+    grows with how many such cross-references exist.
+</p>
+<p>
+    A red-black tree insert mutates an <strong>already-promoted parent's child pointer</strong> to point at a brand-new,
+    young-gen node — a fresh old-to-young reference on every single insert, tracked via the write barrier. The more
+    nodes get promoted over the tree's lifetime, the more of these references accumulate, and the more expensive every
+    subsequent young GC becomes to scan — a genuinely compounding cost. My B+Tree mutates a <strong>key/child slot
+    inside an existing array</strong>, and because the fanout is wide, there are simply far fewer distinct node objects
+    promoted for the same key count — fewer old-to-young references for G1 to track, and RSet-scan cost stays flat or
+    shrinks instead of compounding.
+</p>
+<p>
+    That's the widening-margin mechanism: not allocation rate (flat ratio), not raw cache-miss rate alone
+    (flat-to-shrinking ratio), but <strong>GC remembered-set scan cost compounding specifically as a function of total
+    promoted-object count</strong> — which is structurally much higher for a node-per-key pointer structure than for a
+    wide-fanout array-node structure, and gets worse, not better, the longer the tree lives and grows.
+</p>
+
+<h2>What actually mattered, in order</h2>
+<ol>
+    <li><strong>Trust the profiler over the architecture diagram — but check both directions.</strong> "RBT has no
+        array, so it must be cheaper" was wrong at every size I initially tested. "Array-based B-trees are
+        cache-friendly" was <i>also</i> wrong — at small N. Both statements turned out true, just each one only in the
+        size regime I hadn't looked at yet.
+    </li>
+    <li><strong>A relabeled cost is not a fixed cost.</strong> Rewriting <code>Arrays.binarySearch</code> by hand moved
+        a line in the profile output without moving the benchmark number, because the <i>thing being measured</i> isn't
+        the same as <i>the thing that costs time</i>.
+    </li>
+    <li><strong>Relative percentages from two different processes are not comparable.</strong> 92% of a small allocation
+        total looked worse than 62% of a large one until the absolute bytes were checked.
+    </li>
+    <li><strong>Normalize before you compare — always.</strong> Raw <code>perf stat</code> counts, raw allocation
+        totals, and raw <code>gc.time</code> sums all scale with how long the process ran and how many operations it
+        completed. <code>misses/instruction</code>, <code>bytes/op</code>, and <code>instructions/op</code> were the
+        only numbers that meant anything.
+    </li>
+    <li><strong>A flat ratio explains a gap; only a widening ratio explains a widening gap.</strong> The one metric that
+        actually widened in step with the ns/op gap was per-collection GC pause cost, and only reading raw GC logs
+        line-by-line surfaced it.
+    </li>
+    <li><strong>The small-N loss and the large-N win are unrelated.</strong> Below the point where the tree exceeds
+        cache, this is an instruction-count problem. Above that point, instruction counts converge and it becomes a
+        memory-subsystem problem (cache misses, compounding GC RSet cost).
+    </li>
+    <li><strong>Cold and warm are not the same benchmark.</strong> The raw evidence tables show the cold-start loss
+        itself shrinking with N — five of seven APIs already flip to a BPlusTreeMap win, cold, by 100k. Any crossover
+        story built only on the size axis without separating cold vs. warm risks conflating two different effects.
+    </li>
+    <li><strong>Check a suspicious number against its siblings before trusting it.</strong> A hardcoded
+        <code>@OperationsPerInvocation(100000)</code> silently divided <code>computeIfPresent</code>'s reported
+        time by the wrong constant at every size except exactly 100,000 — invisible until it was lined up next to
+        <code>put</code>, <code>merge</code>, and the other single-traversal APIs at the same params and didn't
+        match their scale. The same check later caught a second, still-open 10x discrepancy across an entire
+        100k rerun. Trust the shape of the whole table, not any one row in isolation.
+    </li>
+</ol>
+
+<p>
+    <a href="../index.html">&larr; Back to ChaosTree</a>
+</p>
+
+
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark-mode');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+</script>
+</body>
+</html>
