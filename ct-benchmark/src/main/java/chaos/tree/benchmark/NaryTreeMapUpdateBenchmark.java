@@ -76,6 +76,8 @@ public class NaryTreeMapUpdateBenchmark {
     @Param({"0"})
     public long seed;
 
+    @Param({"64"})
+    public int degree;
     private Supplier<NavigableMap<Integer, Integer>> supplier;
 
     private UnaryOperator<NavigableMap<Integer, Integer>> transformer;
@@ -105,8 +107,8 @@ public class NaryTreeMapUpdateBenchmark {
                 case "JavaTreeMap" -> () -> new TreeMap<>(Comparator.reverseOrder());
                 case "AvlTreeMap" -> () -> new AvlTreeMap<>(Comparator.reverseOrder());
                 case "RedBlackTreeMap" -> () -> new RedBlackTreeMap<>(Comparator.reverseOrder());
-                case "BTreeMap" -> () -> new BTreeMap<>(Comparator.reverseOrder());
-                case "BPlusTreeMap" -> () -> new BPlusTreeMap<>(Comparator.reverseOrder());
+                case "BTreeMap" -> () -> new BTreeMap<>(degree,Comparator.reverseOrder());
+                case "BPlusTreeMap" -> () -> new BPlusTreeMap<>(degree,Comparator.reverseOrder());
                 default -> throw new IllegalStateException(mapType);
             };
         } else {
@@ -114,8 +116,8 @@ public class NaryTreeMapUpdateBenchmark {
                 case "JavaTreeMap" -> TreeMap::new;
                 case "AvlTreeMap" -> AvlTreeMap::new;
                 case "RedBlackTreeMap" -> RedBlackTreeMap::new;
-                case "BTreeMap" -> BTreeMap::new;
-                case "BPlusTreeMap" -> BPlusTreeMap::new;
+                case "BTreeMap" -> () -> new BTreeMap<>(degree);
+                case "BPlusTreeMap" -> () -> new BPlusTreeMap<>(degree);
                 default -> throw new IllegalStateException(mapType);
             };
         }
