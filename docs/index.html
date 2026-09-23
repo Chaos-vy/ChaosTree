@@ -123,7 +123,7 @@
 <button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
 
 <h1>ChaosTree</h1>
-<h4>v2.0.0</h4>
+<h4>v2.0.1</h4>
 <p class="bold">A zero-dependency, cache-aware NavigableSet and NavigableMap engine for Java 21+.
     v2.0.0 is removal of custom API in favor of full NavigableSet/Map and SequencedSet/Map compliance &mdash;
     verified against 214,680 Guava testlib permutations and jqwik property tests run at 1M tries.
@@ -208,7 +208,6 @@
                 <li>CollectionFeature.RESTRICTS_ELEMENTS</li>
                 <li>CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION</li>
                 <li>CollectionFeature.SERIALIZABLE</li>
-                <li>CollectionFeature.ALLOWS_NULL_QUERIES</li>
                 <li>CollectionSize.ANY</li>
             </ul>
             <b>permutation count: 526</b>
@@ -218,8 +217,8 @@
             <ul>
                 <li>MapFeature.SUPPORTS_PUT</li>
                 <li>MapFeature.SUPPORTS_REMOVE</li>
-                <li>MapFeature.ALLOWS_NULL_VALUES</li>
                 <li>MapFeature.RESTRICTS_KEYS</li>
+                <li>MapFeature.ALLOWS_NULL_VALUES</li>
                 <li>CollectionFeature.SUPPORTS_ITERATOR_REMOVE</li>
                 <li>CollectionFeature.KNOWN_ORDER</li>
                 <li>CollectionFeature.SUBSET_VIEW</li>
@@ -398,7 +397,15 @@
     <b>Important</b>
     My system config are as such follows:
     <pre>
+CPU: 13th Gen Intel(R) Core(TM) i5-13450HX
+RAM: 24 GB (22 GiB Available)
+OS:  Ubuntu (Linux 7.0.0-31-generic x86_64)
 
+L1 Cache: 864 KiB
+L2 Cache: 9.5 MiB
+L3 Cache: 20 MiB
+
+JVM: OpenJDK 64-Bit Server VM (build 21.0.12)
     </pre>
 </blockquote>
 <hr>
@@ -408,7 +415,11 @@
     <li>
         <strong><a href="utils/Nary-Tree-Architecture.html">Node structure of N-ary Tree(B+Tree &
             B-Tree)</a></strong><br>
-        A detailed information about the node structure of N-ary tree for an example dummy slot, null values...
+        Detailed information about the node structure of N-ary tree for an example dummy slot, null values...
+    </li>
+    <li>
+        <strong><a href="utils/build/Tree-tuning.html">The choosing of degree and choosing between importFlatMatrix and buildFromSorted</a></strong><br>
+        A complete breakdown of how to tune your performance to bleeding edge on JVM..
     </li>
     <li>
         <strong><a href="utils/Slow-at-low-dataset.html">Journey 0x0001: The Amortization Quirk</a></strong><br>
@@ -434,23 +445,25 @@
         always respect the CLRS system..
     </li>
     <li>
-        <strong><a href="benchmark/BenchmarkInsertHeavy.html">100% insert(write) heavy benchmark</a></strong><br>
+        <strong><a href="benchmark/nary-insert-heavy.html">100% insert(write) heavy benchmark</a></strong><br>
         <b>The design is strictly copied from openJdk official site.</b>
         A benchmark detailed analysis at 100% write heavy work load.
     </li>
     <li>
-        <strong><a href="benchmark/BenchmarkWriteHeavy.html">100% remove(write) heavy benchmark</a></strong><br>
-        A benchmark detailed analysis at 100% write heavy work load.
+        <strong><a href="benchmark/tail-latency.html">Tail Latency Benchmark (Put/Remove Churn)</a></strong><br>
+        A benchmark detailed analysis measuring tail latency under heavy node churn (remove and re-insert).
     </li>
     <li>
-        <strong><a href="benchmark/BenchmarkReadHeavy.html">100% Read heavy benchmark</a></strong><br>
+        <strong><a href="benchmark/nary-read-heavy.html">100% Read heavy benchmark</a></strong><br>
         A benchmark detailed analysis at 100% Read heavy work load.
     </li>
     <li>
-        <strong><a href="benchmark/BenchmarkMixedHeavy.html">Mixed benchmark</a></strong><br>
-        <strong><a href="benchmark/nary-remove-deep-dive.html">N-ary Remove & Iterator Deep Dive (Escape Analysis & API
-            Compliance)</a></strong><br>
+        <strong><a href="benchmark/nary-mixed-workload.html">Mixed benchmark</a></strong><br>
         A benchmark detailed analysis at Mixed work load.
+    </li>
+    <li>
+        <strong><a href="benchmark/dragon-feed.html">The Dragon Feed (Bulk Load)</a></strong><br>
+        Deep dive into the 168x sequential bypass strategy and random insertion behavior.
     </li>
 </ul>
 
@@ -466,9 +479,9 @@
     </p>
 </div>
 <hr>
-<blockquote>
-    The reason behind this simple frontend was easy maintenance.
-</blockquote>
+<p style="text-align: center;">
+    <b>The reason behind this simple frontend was easy maintenance.</b>
+</p>
 <hr>
 
 
