@@ -137,6 +137,32 @@ suite:
 > - 127 x 0.75 = 95  minKey
 > - 127 x 1.0  = 127 minKey == maxKey
 
+### The Truth (168x Sequential / 2.07x Random)
+
+> Benchmark environment: Java 21.0.12 (OpenJDK), JMH 1.37, -Xms4g -Xmx4g -XX:+UseParallelGC -XX:+AlwaysPreTouch.
+> 3 forks, 5 measurement iterations, 5,000,000 integer keys, single run per table.
+
+**5,000,000 Element Insertion — Sequential Key Order**
+
+| Benchmark (Strategy)                      | Complexity | Score (ms/op) | Allocated (Bytes/op) | GC Time (ms) |
+|:------------------------------------------|:----------:|--------------:|---------------------:|-------------:|
+| **B+Tree.dragonFeed (Native, factor 0.75f)** | O(N)       | **5.451**     | **58,058,576**       | **649**      |
+| B+Tree.bulkLoad (Iterator)                | O(N)       | 41.202        | 58,298,864           | 197          |
+| JDK TreeMap.bulkLoad (SortedMap)          | O(N)       | 80.988        | 200,000,311          | 1,022        |
+| B+Tree.iterativePut (Sequential)          | O(N log N) | 300.806       | 86,994,836           | 673          |
+| JDK TreeMap.iterativePut (Sequential)     | O(N log N) | 917.328       | 200,001,987          | 717          |
+
+*Result: `dragonFeed` is **168x faster** than standard JDK sequential insertion, **14.9x faster** than the JDK's own bulk loader, and allocates **71% less heap** than either JDK path.*
+
+**5,000,000 Element Insertion — Random Key Order**
+
+| Benchmark (Strategy)  | Score (ms/op) | Allocated (Bytes/op) | GC Time (ms) |
+|:----------------------|--------------:|---------------------:|-------------:|
+| **B+Tree.randomPut**  | **3,535.158** | **62,784,682**       | **620**      |
+| JDK TreeMap.randomPut | 7,314.133     | 200,005,846          | 342          |
+
+*Result: Under random insertion, ChaosTree is **2.07x faster** than the JDK and allocates **3.2x less heap**.*
+
 ### Bulk Import (`importFlatMatrix`, arraycopy-based)
 
 |  Factor  |        10K |        100K |          1M |         10M |
@@ -210,17 +236,7 @@ scattered memory per step (parent/left/right node pointers) than either alternat
 **Takeaway:** below ~280K entries, a flat array beats any tree structure for pure iteration. Past that point,
 BPlusTreeMap's cache-friendly leaf layout wins, and the gap widens with scale.
 
-## Documentation
-
-* **Architecture Decision Records:** [`docs/ADR.html`](https://chaos-vy.github.io/ChaosTree/utils/ADR.html)
-* **JMH GC Profiling & The 82ms Pause:** [
-  `docs/benchmark/tail-latency.html`](https://chaos-vy.github.io/ChaosTree/utils/JMH-Report.html)
-* **Throughput & CPU Benchmarks:** [
-  `docs/Benchmark_Analysis.html`](https://chaos-vy.github.io/ChaosTree/utils/Benchmark_Analysis.html)
-* **The Testing Journey:** [
-  `docs/Test_Journey.html`](https://chaos-vy.github.io/ChaosTree/utils/build/Test_Journey.html)
-* **Release history:** [`CHANGELOG.md`](CHANGELOG.md)
-* **Contributing guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+### For documentation do use : [https://chaos-vy.github.io/ChaosTree/](https://chaos-vy.github.io/ChaosTree/)
 
 ## Support and contributions
 
