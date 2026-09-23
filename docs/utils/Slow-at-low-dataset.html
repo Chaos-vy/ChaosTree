@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E"
+          rel="icon"
           type="image/svg+xml">
     <meta charset="UTF-8">
     <title>Journey 0x0001 - Cold Start at Low N</title>
@@ -564,7 +565,6 @@ java -jar ct-benchmark/target/benchmarks.jar NaryTreeMapUpdateBenchmark \
     before, just at a corrected scale. <code>baseline</code> and cold <code>computeIfPresent</code> are unaffected
     by this fix — neither loops over <code>keys</code>, so neither was exposed to the mis-aligned annotation.
 </p>
-
 
 
 <h2>Two more findings from the cold-path audit</h2>

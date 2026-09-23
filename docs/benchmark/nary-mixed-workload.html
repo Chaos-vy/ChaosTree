@@ -45,11 +45,64 @@
             color: #c62828; /* dark red */
             font-weight: bold;
         }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
     </style>
 
 
 </head>
 <body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
 
 
 <h1>N-ary Tree Mixed Workload — Mix-Ratio Sweep</h1>
@@ -609,5 +662,15 @@ ChaosTreeMapMixedBenchmark.mixedWorkload      BTreeMap  20,10,70      42  100000
         characteristics can materially change the outcome.</b>
 </p>
 
+<script> const toggleBtn = document.getElementById("theme-toggle");
+const body = document.body;
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    body.classList.add("dark-mode");
+}
+toggleBtn.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", body.classList.contains("dark-mode") ? "dark" : "light");
+}); </script>
 </body>
 </html>

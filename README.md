@@ -75,7 +75,7 @@ public class Main {
 
 Two engines, chosen by workload:
 
-- **N-ary family** (`BTree`, `BPlusTree`) — maximum read throughput and large-scale range scans, zero GC churn. `BPlusTree` pushes all data into a contiguous doubly-linked leaf layer for fast sequential reads.
+- **N-ary family** (`BTree`, `BPlusTree`) — maximum read throughput and large-scale range scans, zero GC churn. `BPlusTree` pushes all data into a contiguous doubly-linked (SoA) leaf layer for fast sequential reads.
 - **Binary family** (`AVL`, `RBT`) — fast point queries and everyday storage where N-ary's extreme cache optimization isn't needed.
   Deep dives: [Architecture Decision Records](https://chaos-vy.github.io/ChaosTree/utils/ADR.html) · [N-ary Tree Architecture](https://chaos-vy.github.io/ChaosTree/utils/Nary-Tree-Architecture.html) · [N-ary Complexity Map](https://chaos-vy.github.io/ChaosTree/utils/nary-complexity-map.html) · [Math Behind Bulk Load](https://chaos-vy.github.io/ChaosTree/utils/build/array-build-proof.html)
 

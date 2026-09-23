@@ -4,35 +4,142 @@
     <meta charset="UTF-8">
     <title>ChaosTreeMapReadBenchmark — Read-Heavy Report</title>
     <style>
-        body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-family: monospace; line-height: 1.6; color: #000; background-color: #fff; }
-        h1, h2 { border-bottom: 1px solid #000; padding-bottom: 5px; }
-        table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
-        th, td { border: 1px solid #000; padding: 8px 15px; text-align: right; }
-        th:first-child, td:first-child { text-align: left; }
-        blockquote { border-left: 3px solid #000; margin: 20px 0; padding-left: 15px; font-style: italic; }
-        pre { background-color: #f4f4f4; padding: 15px; border: 1px dotted #000; overflow-x: auto; }
-        a { color: #0000ee; }
-        .bold { font-weight: 700; }
-        table td ul { text-align: left; margin: 0; padding-left: 20px; }
-        body.dark-mode { background-color: #121212; color: #e0e0e0; }
-        body.dark-mode a { color: #66b3ff; }
-        body.dark-mode pre { background-color: #1e1e1e; border-color: #444; color: #e0e0e0; }
-        body.dark-mode blockquote { background-color: #1a1a1a; border-left-color: #66b3ff; }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { border-bottom-color: #444; }
-        body.dark-mode th, body.dark-mode td { border-color: #555; }
-        body.dark-mode th { background-color: #222; }
-        .theme-toggle { position: fixed; top: 20px; right: 20px; background: transparent; border: 1px solid #000; color: #000; cursor: pointer; padding: 5px 10px; font-family: monospace; font-size: 14px; border-radius: 5px; z-index: 1000; }
-        body.dark-mode .theme-toggle { border-color: #e0e0e0; color: #e0e0e0; }
-        .pending { opacity: 0.5; }
-        .win { color: #007a00; font-weight: 700; }
-        body.dark-mode .win { color: #4caf50; }
-        .err { font-size: 0.6em; opacity: 0.35; font-weight: 400; font-style: normal; }
+        body {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: monospace;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2 {
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 15px;
+            text-align: right;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        blockquote {
+            border-left: 3px solid #000;
+            margin: 20px 0;
+            padding-left: 15px;
+            font-style: italic;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border: 1px dotted #000;
+            overflow-x: auto;
+        }
+
+        a {
+            color: #0000ee;
+        }
+
+        .bold {
+            font-weight: 700;
+        }
+
+        table td ul {
+            text-align: left;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode a {
+            color: #66b3ff;
+        }
+
+        body.dark-mode pre {
+            background-color: #1e1e1e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode blockquote {
+            background-color: #1a1a1a;
+            border-left-color: #66b3ff;
+        }
+
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode th, body.dark-mode td {
+            border-color: #555;
+        }
+
+        body.dark-mode th {
+            background-color: #222;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #000;
+            color: #000;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            border-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+
+        .pending {
+            opacity: 0.5;
+        }
+
+        .win {
+            color: #007a00;
+            font-weight: 700;
+        }
+
+        body.dark-mode .win {
+            color: #4caf50;
+        }
+
+        .err {
+            font-size: 0.6em;
+            opacity: 0.35;
+            font-weight: 400;
+            font-style: normal;
+        }
 
     </style>
 </head>
 <body>
 
-<button class="theme-toggle" onclick="document.body.classList.toggle('dark-mode')">toggle theme</button>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
 
 <h1>ChaosTreeMapReadBenchmark — Read-Heavy Benchmark</h1>
 
@@ -49,9 +156,11 @@ java -jar ct-benchmark/target/benchmarks.jar ChaosTreeMapReadBenchmark \
 <p><span class="bold">Caveats:</span></p>
 <ul>
     <li>Measurements are in strictly <strong>nanoseconds (ns/op)</strong>, average time (<code>avgt</code>), shown as
-        score &plusmn; error (JMH 99.9% confidence interval).</li>
+        score &plusmn; error (JMH 99.9% confidence interval).
+    </li>
     <li>10 warmup + 10 measurement iterations of 500 ms each (30 samples per cell: <code>Cnt = 30</code>).
-        GC profiler (<code>-prof gc</code>) is <strong>not</strong> attached in this run.</li>
+        GC profiler (<code>-prof gc</code>) is <strong>not</strong> attached in this run.
+    </li>
     <li>Two sizes run: 10,000 and 100,000 entries — same seed (42) across both, ensuring parity in cache scaling
         boundaries.
     </li>
@@ -474,6 +583,15 @@ java -jar ct-benchmark/target/benchmarks.jar ChaosTreeMapReadBenchmark \
 <hr>
 
 
-
+<script> const toggleBtn = document.getElementById("theme-toggle");
+const body = document.body;
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    body.classList.add("dark-mode");
+}
+toggleBtn.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", body.classList.contains("dark-mode") ? "dark" : "light");
+}); </script>
 </body>
 </html>

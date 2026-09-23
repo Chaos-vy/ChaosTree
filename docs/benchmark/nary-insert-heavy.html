@@ -132,12 +132,9 @@
 </head>
 <body>
 
-<button class="theme-toggle" onclick="document.body.classList.toggle('dark-mode')">toggle theme</button>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
 
 <h1>NaryTreeMapUpdateBenchmark — Insert-Heavy Update Benchmark</h1>
-
-<p><span class="bold">Author:</span> Chaos &middot; <span class="bold">JDK:</span> 21 &middot; <span class="bold">Library:</span>
-    ChaosTree</p>
 
 <h2>1. Setup</h2>
 
@@ -1668,5 +1665,15 @@ java -jar ct-benchmark/target/benchmarks.jar NaryTreeMapUpdateBenchmark \
     massive scales.</p>
 
 
+<script> const toggleBtn = document.getElementById("theme-toggle");
+const body = document.body;
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    body.classList.add("dark-mode");
+}
+toggleBtn.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", body.classList.contains("dark-mode") ? "dark" : "light");
+}); </script>
 </body>
 </html>
