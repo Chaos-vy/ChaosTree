@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E"
+          rel="icon"
           type="image/svg+xml">
     <meta charset="UTF-8">
     <title>ChaosTree: Architectural Mathematics & Node Structure</title>
@@ -226,9 +227,11 @@ this.values = needsValues ? new Object[maxKeys] : null;
 
 <h2>4. Analysation of JOL at 1M</h2>
 
-<p>Build paths: put = sequential <code>put(i, i)</code> for 0..999,999 (leaves settle at t = 64 keys); import = <code>importFlatMatrix(exportFlatMatrix(), 1.0f)</code> (leaves at 127 keys).</p>
+<p>Build paths: put = sequential <code>put(i, i)</code> for 0..999,999 (leaves settle at t = 64 keys); import = <code>importFlatMatrix(exportFlatMatrix(),
+    1.0f)</code> (leaves at 127 keys).</p>
 
-<p>Constants (JOL, compressed oops): Integer = 16 B, TreeMap$Entry = 40 B, TreeMap = 48 B, BTreeMapNode = 32 B, BPlusTreeMapNode = 40 B, BTreeMap/BPlusTreeMap = 72 B.</p>
+<p>Constants (JOL, compressed oops): Integer = 16 B, TreeMap$Entry = 40 B, TreeMap = 48 B, BTreeMapNode = 32 B,
+    BPlusTreeMapNode = 40 B, BTreeMap/BPlusTreeMap = 72 B.</p>
 
 <pre>
 t = 64
@@ -259,13 +262,53 @@ Object[] check
 <h3>Totals</h3>
 <table>
     <thead>
-    <tr><th>Structure</th><th>Node[]</th><th>Object[]</th><th>Nodes</th><th>Map</th><th>Structure</th><th>+ Integers</th></tr>
+    <tr>
+        <th>Structure</th>
+        <th>Node[]</th>
+        <th>Object[]</th>
+        <th>Nodes</th>
+        <th>Map</th>
+        <th>Structure</th>
+        <th>+ Integers</th>
+    </tr>
     </thead>
     <tbody>
-    <tr><td>TreeMap</td><td>-</td><td>-</td><td>1,000,000 * 40 = 40,000,000</td><td>48</td><td>40,000,048</td><td>71,998,000</td></tr>
-    <tr><td>BTree (put)</td><td>248 * 536 = 132,928</td><td>31,746 * 528 = 16,761,888</td><td>15,873 * 32 = 507,936</td><td>72</td><td>17,402,824</td><td>49,400,776</td></tr>
-    <tr><td>B+Tree (put)</td><td>248 * 536 = 132,928</td><td>31,498 * 528 = 16,630,944</td><td>15,873 * 40 = 634,920</td><td>72</td><td>17,398,864</td><td>49,396,816</td></tr>
-    <tr><td>B+Tree (import 1.0f)</td><td>63 * 536 = 33,768</td><td>15,815 * 528 = 8,350,320</td><td>7,939 * 40 = 317,560</td><td>72</td><td>8,701,720</td><td>40,699,672</td></tr>
+    <tr>
+        <td>TreeMap</td>
+        <td>-</td>
+        <td>-</td>
+        <td>1,000,000 * 40 = 40,000,000</td>
+        <td>48</td>
+        <td>40,000,048</td>
+        <td>71,998,000</td>
+    </tr>
+    <tr>
+        <td>BTree (put)</td>
+        <td>248 * 536 = 132,928</td>
+        <td>31,746 * 528 = 16,761,888</td>
+        <td>15,873 * 32 = 507,936</td>
+        <td>72</td>
+        <td>17,402,824</td>
+        <td>49,400,776</td>
+    </tr>
+    <tr>
+        <td>B+Tree (put)</td>
+        <td>248 * 536 = 132,928</td>
+        <td>31,498 * 528 = 16,630,944</td>
+        <td>15,873 * 40 = 634,920</td>
+        <td>72</td>
+        <td>17,398,864</td>
+        <td>49,396,816</td>
+    </tr>
+    <tr>
+        <td>B+Tree (import 1.0f)</td>
+        <td>63 * 536 = 33,768</td>
+        <td>15,815 * 528 = 8,350,320</td>
+        <td>7,939 * 40 = 317,560</td>
+        <td>72</td>
+        <td>8,701,720</td>
+        <td>40,699,672</td>
+    </tr>
     </tbody>
 </table>
 

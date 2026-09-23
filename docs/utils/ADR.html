@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E" rel="icon"
+    <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='35' y='10' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='10' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Crect x='60' y='50' width='30' height='20' rx='4' fill='%23000' /%3E%3Cpath d='M50 30 L25 50 M50 30 L75 50' stroke='%23000' stroke-width='4' /%3E%3C/svg%3E"
+          rel="icon"
           type="image/svg+xml">
     <meta charset="UTF-8">
     <title>ChaosTree: Architecture Decision Records (ADR)</title>
@@ -196,7 +197,8 @@
 
 <h3>2. Pattern Matching and Sealed Classes</h3>
 <p>
-    The ChaosTree node structure relies on highly restrictive type hierarchies to ensure that the JIT compiler can aggressively
+    The ChaosTree node structure relies on highly restrictive type hierarchies to ensure that the JIT compiler can
+    aggressively
     inline operations.
     Using <b>Sealed Classes</b> (introduced in JDK 17) like <code>abstract sealed class AbstractNaryMapNode</code>
     allows the engine to strictly limit implementors to <code>BTreeMapNode</code> and <code>BPlusTreeMapNode</code>.
@@ -245,24 +247,27 @@
 
 <h3>1. The Custom API Trap</h3>
 <p>
-    Version 1.2.0 of ChaosTree was custom API which just look like  a tooling to teach it has slow speed and not rigorously tested. It must
-    be noted below version 2.0.0 there were 4 patch release. Which is just Sets of <b>(AVL, RBT, Splay, Treap, BST, B-Tree, B+Tree)</b> accounting to 7 trees.
-    <ul>
+    Version 1.2.0 of ChaosTree was custom API which just look like a tooling to teach it has slow speed and not
+    rigorously tested. It must
+    be noted below version 2.0.0 there were 4 patch release. Which is just Sets of <b>(AVL, RBT, Splay, Treap, BST,
+    B-Tree, B+Tree)</b> accounting to 7 trees.
+<ul>
     <li>v1.0.0 - <b>JDK 17+</b></li>
     <li>v1.0.1 - <b>JDK 17+</b> -Some minor bug fixes</li>
     <li>v1.1.0 - <b>JDK 17+</b> -Support to few of Navigable Set/Map API</li>
     <li>v1.2.0 - <b>JDK 11+</b></li>
 </ul>
-    It had its own custom insertion, retrieval, and iteration methods. While this made internal development easy, it
-    made adoption extremely difficult.
-    Java developers expect to be able to seamlessly drop a library map into existing codebases that depend on
-    <code>java.util.Map</code> or <code>java.util.NavigableMap</code>.
-    A custom API breaks polymorphic substitution and violates the Principle of Least Astonishment.
+It had its own custom insertion, retrieval, and iteration methods. While this made internal development easy, it
+made adoption extremely difficult.
+Java developers expect to be able to seamlessly drop a library map into existing codebases that depend on
+<code>java.util.Map</code> or <code>java.util.NavigableMap</code>.
+A custom API breaks polymorphic substitution and violates the Principle of Least Astonishment.
 </p>
 
 <h3>2. The Refactoring to Standard Interfaces</h3>
 <p>
-    The decision was made to extinguish out the old custom API entirely for <b>v2.0.0</b>. The mandate for v2.0.0 was strict
+    The decision was made to extinguish out the old custom API entirely for <b>v2.0.0</b>. The mandate for v2.0.0 was
+    strict
     and absolute:
     <b>ChaosTree must stand on equal footing with the JDK.</b>
 </p>
@@ -406,7 +411,8 @@
 <p>
     There is a physical crossover point where the mathematical advantage of <i>O(log N)</i> finally overcomes the
     hardware overhead of branch mispredictions and method calls. Through rigorous JMH profiling on the JVM, that exact
-    crossover point was discovered to be <b>12 elements</b>.It is not i.e., <b>12</b> came out for <b>Integer:32</b> for <b>String:8</b>
+    crossover point was discovered to be <b>12 elements</b>.It is not i.e., <b>12</b> came out for <b>Integer:32</b> for
+    <b>String:8</b>
     and for <b>Object:12</b> So I choose 12 as the <b>LINEAR_THRESHOLD.</b>
 </p>
 
@@ -693,8 +699,10 @@ ChaosTreeMapIterateBenchmark.iterateJavaTreeMap     20.650 ± 3.691     70.6
     random access, while <b>B+Trees</b> dominate sequential range queries.
 </p>
 <p>
-    Standard libraries also pick the best one suited for universal case. The JDK designers picked Red-Black Tree for <code>java.util.TreeMap</code>,
-    though it has <b>2x</b> depth for searching but it has less modification as compared to AVL, Some Tree are better suited for Read/Write. There is not a universal tree which is fully
+    Standard libraries also pick the best one suited for universal case. The JDK designers picked Red-Black Tree for
+    <code>java.util.TreeMap</code>,
+    though it has <b>2x</b> depth for searching but it has less modification as compared to AVL, Some Tree are better
+    suited for Read/Write. There is not a universal tree which is fully
     advanced in all fields.
 </p>
 
@@ -716,8 +724,10 @@ ChaosTreeMapIterateBenchmark.iterateJavaTreeMap     20.650 ± 3.691     70.6
     ChaosTree implements all four clashing competitors: <b>AvlTreeMap</b>, <b>RedBlackTreeMap</b>, <b>BTreeMap</b>, and
     <b>BPlusTreeMap</b>. I do not make the decision for you. You have the exact same highly-optimized, mathematically
     verified API for all four engines. You are encouraged to benchmark your exact payload, on your exact hardware,
-    against all four trees, and let the data decide which one to use. Have a fun with it <b>Note: If you see during benchmark any respective
-API is 2x slow it will be from Binary only(understand that thing is not optimized) You are encouraged to create a PR</b>
+    against all four trees, and let the data decide which one to use. Have a fun with it <b>Note: If you see during
+    benchmark any respective
+    API is 2x slow it will be from Binary only(understand that thing is not optimized) You are encouraged to create a
+    PR</b>
 </blockquote>
 
 
@@ -733,7 +743,8 @@ API is 2x slow it will be from Binary only(understand that thing is not optimize
         </tr>
         <tr>
             <th>Context:</th>
-            <td>The slow and non-phonk phase, iterative evolution of the <code>buildFromSorted</code> algorithm before arriving at the
+            <td>The slow and non-phonk phase, iterative evolution of the <code>buildFromSorted</code> algorithm before
+                arriving at the
                 final mathematical masterpiece.
             </td>
         </tr>
