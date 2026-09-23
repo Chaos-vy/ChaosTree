@@ -1235,14 +1235,14 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return !tooLow(key) && !tooHigh(key);
         }
 
-        boolean inRangeBound(Object key, boolean inclusive) {
-            if (!inClosedRange(key)) return false;
+        boolean outOfBounds(Object key, boolean inclusive) {
+            if (!inClosedRange(key)) return true;
             @SuppressWarnings("unchecked") K k = (K) key;
             if (inclusive) {
-                if (!fromStart && !loInclusive && compare(k, lo) == 0) return false;
-                return toEnd || hiInclusive || compare(k, hi) != 0;
+                if (!fromStart && !loInclusive && compare(k, lo) == 0) return true;
+                return !toEnd && !hiInclusive && compare(k, hi) == 0;
             }
-            return true;
+            return false;
         }
 
         @Override
@@ -1415,60 +1415,119 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return new TreeSubMap(fromStart, lo, loInclusive, toEnd, hi, hiInclusive, !descending);
         }
 
+        private boolean endUnbounded() {
+            return descending ? fromStart : toEnd;
+        }
+
+        private Map.Entry<K, V> iterationEnd() {
+            return lastEntry();
+        }
+
+        private final class UntilValueIterator implements Iterator<V> {
+            private final Iterator<Map.Entry<K, V>> it;
+            private final K lastKey;
+            private boolean done;
+
+            UntilValueIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
+                this.it = it;
+                this.lastKey = lastKey;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public V next() {
+                if (done) throw new NoSuchElementException();
+                Map.Entry<K, V> e = it.next();
+                if (e.getKey() == lastKey) done = true;
+                return e.getValue();
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
+        }
+
+        private Iterator<Map.Entry<K, V>> baseEntryIterator() {
+            return new Iterator<>() {
+                N nextNode = descending ? absHighest() : absLowest();
+                N lastReturned = null;
+                long expectedModCount = modCount;
+
+                @Override
+                public boolean hasNext() {
+                    if (modCount != expectedModCount) throw new ConcurrentModificationException();
+                    return nextNode != null;
+                }
+
+                @Override
+                public Map.Entry<K, V> next() {
+                    if (modCount != expectedModCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    if (nextNode == null) {
+                        throw new NoSuchElementException();
+                    }
+
+                    lastReturned = nextNode;
+
+                    if (descending) {
+                        nextNode = predecessor(nextNode);
+                    } else {
+                        nextNode = successor(nextNode);
+                    }
+
+                    return lastReturned;
+                }
+
+                @Override
+                public void remove() {
+                    if (lastReturned == null) {
+                        throw new IllegalStateException();
+                    }
+                    if (modCount != expectedModCount) {
+                        throw new ConcurrentModificationException();
+                    }
+
+                    if (!descending && lastReturned.left != null && lastReturned.right != null) {
+                        nextNode = lastReturned;
+                    }
+                    TreeSubMap.this.remove(lastReturned.key);
+                    expectedModCount = modCount;
+                    lastReturned = null;
+                }
+            };
+        }
+
         private transient Collection<V> subMapValuesView;
 
         @Override
         public Collection<V> values() {
             Collection<V> vs = subMapValuesView;
-            return (vs != null) ? vs : (subMapValuesView = new AbstractCollection<V>() {
+            return (vs != null) ? vs : (subMapValuesView = new AbstractCollection<>() {
                 @Override
                 public Iterator<V> iterator() {
-                    return new Iterator<V>() {
-                        N nextNode = descending ? absHighest() : absLowest();
-                        N lastReturned = null;
-                        long expectedModCount = modCount;
-
+                    Map.Entry<K, V> end = iterationEnd();
+                    if (end == null) return Collections.emptyIterator();
+                    Iterator<Map.Entry<K, V>> it = baseEntryIterator();
+                    return endUnbounded() ? new Iterator<>() {
                         @Override
                         public boolean hasNext() {
-                            if (modCount != expectedModCount) throw new ConcurrentModificationException();
-                            return nextNode != null;
+                            return it.hasNext();
                         }
-
                         @Override
                         public V next() {
-                            if (modCount != expectedModCount) throw new ConcurrentModificationException();
-                            if (nextNode == null) throw new NoSuchElementException();
-                            lastReturned = nextNode;
-                            if (descending) {
-                                nextNode = predecessor(nextNode);
-                                if (nextNode != null && tooLow(nextNode.key)) nextNode = null;
-                            } else {
-                                nextNode = successor(nextNode);
-                                if (nextNode != null && tooHigh(nextNode.key)) nextNode = null;
-                            }
-                            return lastReturned.value;
+                            return it.next().getValue();
                         }
-
                         @Override
                         public void remove() {
-                            if (lastReturned == null) {
-                                throw new IllegalStateException();
-                            }
-                            if (modCount != expectedModCount) {
-                                throw new ConcurrentModificationException();
-                            }
-
-                            if (!descending && lastReturned.left != null && lastReturned.right != null) {
-                                nextNode = lastReturned;
-                            }
-                            TreeSubMap.this.remove(lastReturned.key);
-                            if (nextNode == lastReturned && (!descending ? tooHigh(nextNode.key) : tooLow(nextNode.key))) {
-                                nextNode = null;
-                            }
-                            expectedModCount = modCount;
-                            lastReturned = null;
+                            it.remove();
                         }
-                    };
+                    } : new UntilValueIterator(it, end.getKey());
                 }
                 @Override
                 public int size() {
@@ -1488,7 +1547,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
             compare(fromKey, fromKey);
             compare(toKey, toKey);
-            if (!inRangeBound(fromKey, fromInclusive) || !inRangeBound(toKey, toInclusive))
+            if (outOfBounds(fromKey, fromInclusive) || outOfBounds(toKey, toInclusive))
                 throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(false, toKey, toInclusive, false, fromKey, fromInclusive, true);
@@ -1500,7 +1559,7 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         @Override
         public NavigableMap<K, V> headMap(K toKey, boolean inclusive) {
             compare(toKey, toKey);
-            if (!inRangeBound(toKey, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (outOfBounds(toKey, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(false, toKey, inclusive, toEnd, hi, hiInclusive, true);
             } else {
@@ -1511,11 +1570,40 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         @Override
         public NavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
             compare(fromKey, fromKey);
-            if (!inRangeBound(fromKey, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
+            if (outOfBounds(fromKey, inclusive)) throw new IllegalArgumentException("Requested bounds out of range");
             if (descending) {
                 return new TreeSubMap(fromStart, lo, loInclusive, false, fromKey, inclusive, true);
             } else {
                 return new TreeSubMap(false, fromKey, inclusive, toEnd, hi, hiInclusive, false);
+            }
+        }
+
+        private final class UntilEntryIterator implements Iterator<Map.Entry<K, V>> {
+            private final Iterator<Map.Entry<K, V>> it;
+            private final K lastKey;
+            private boolean done;
+
+            UntilEntryIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
+                this.it = it;
+                this.lastKey = lastKey;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public Map.Entry<K, V> next() {
+                if (done) throw new NoSuchElementException();
+                Map.Entry<K, V> e = it.next();
+                if (e.getKey() == lastKey) done = true;
+                return e;
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
             }
         }
 
@@ -1525,63 +1613,10 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
 
                 @Override
                 public Iterator<Map.Entry<K, V>> iterator() {
-                    return new Iterator<>() {
-                        N nextNode = descending ? absHighest() : absLowest();
-                        N lastReturned = null;
-                        long expectedModCount = modCount;
-
-                        @Override
-                        public boolean hasNext() {
-                            if (modCount != expectedModCount) throw new ConcurrentModificationException();
-                            return nextNode != null;
-                        }
-
-                        @Override
-                        public Map.Entry<K, V> next() {
-                            if (modCount != expectedModCount) {
-                                throw new ConcurrentModificationException();
-                            }
-                            if (nextNode == null) {
-                                throw new NoSuchElementException();
-                            }
-
-                            lastReturned = nextNode;
-
-                            if (descending) {
-                                nextNode = predecessor(nextNode);
-                                if (nextNode != null && tooLow(nextNode.key)) {
-                                    nextNode = null;
-                                }
-                            } else {
-                                nextNode = successor(nextNode);
-                                if (nextNode != null && tooHigh(nextNode.key)) {
-                                    nextNode = null;
-                                }
-                            }
-
-                            return lastReturned;
-                        }
-
-                        @Override
-                        public void remove() {
-                            if (lastReturned == null) {
-                                throw new IllegalStateException();
-                            }
-                            if (modCount != expectedModCount) {
-                                throw new ConcurrentModificationException();
-                            }
-
-                            if (!descending && lastReturned.left != null && lastReturned.right != null) {
-                                nextNode = lastReturned;
-                            }
-                            TreeSubMap.this.remove(lastReturned.key);
-                            if (nextNode == lastReturned && tooHigh(nextNode.key)) {
-                                nextNode = null;
-                            }
-                            expectedModCount = modCount;
-                            lastReturned = null;
-                        }
-                    };
+                    Map.Entry<K, V> end = iterationEnd();
+                    if (end == null) return Collections.emptyIterator();
+                    Iterator<Map.Entry<K, V>> it = baseEntryIterator();
+                    return endUnbounded() ? it : new UntilEntryIterator(it, end.getKey());
                 }
 
                 @Override

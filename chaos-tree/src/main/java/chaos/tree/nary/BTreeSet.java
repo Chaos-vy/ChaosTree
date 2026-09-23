@@ -670,7 +670,7 @@ public final class BTreeSet<E> extends AbstractNaryTreeSet<E, BTreeNode<E>> {
 
     @Override
     public Object[] toArray() {
-        Object[] array = new Object[size];
+        final Object[] array = new Object[size];
         if (size == 0 || root == null) return array;
         populateArray(root, array, 0);
         return array;

@@ -1087,8 +1087,8 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
     @Override
     public Object[][] exportFlatMatrix() {
-        Object[] keys = new Object[size];
-        Object[] values = new Object[size];
+        final Object[] keys = new Object[size];
+        final Object[] values = new Object[size];
         if (size == 0 || root == null) return new Object[][]{keys, values};
 
         populateFlatMatrix(root, keys, values, 0);

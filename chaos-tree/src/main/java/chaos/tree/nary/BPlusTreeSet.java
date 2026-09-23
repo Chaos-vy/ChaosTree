@@ -688,7 +688,7 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
     //You can use this or identify as exportFlatMatrix();
     @Override
     public Object[] toArray() {
-        Object[] array = new Object[size];
+        final Object[] array = new Object[size];
         if (size == 0 || root == null) return array;
         BPlusTreeNode<E> current = root;
         while (!current.isLeaf()) {
@@ -1030,7 +1030,6 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
                 return;
             }
 
-            // fast path: leaf lost exactly one key, so the next element shifted into idx0
             if (leaf.keyCount == oldCount - 1) {
                 if (idx0 < leaf.keyCount) {
                     if (leaf.keys[idx0] == nextTarget) {

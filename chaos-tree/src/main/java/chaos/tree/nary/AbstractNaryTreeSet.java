@@ -638,132 +638,69 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             return tailSet(fromElement, true);
         }
 
+        private boolean endUnbounded() {
+            return descending ? fromStart : toEnd;
+        }
+
+        private E iterationEnd() {
+            return descending ? getAbsLowest() : getAbsHighest();
+        }
+
+        private Iterator<E> startIterator() {
+            return descending
+                    ? baseDescendingIterator(toEnd ? null : hi, hiInclusive)
+                    : baseIterator(fromStart ? null : lo, loInclusive);
+        }
+
+        private Iterator<E> startDescendingIterator() {
+            return descending
+                    ? baseIterator(fromStart ? null : lo, loInclusive)
+                    : baseDescendingIterator(toEnd ? null : hi, hiInclusive);
+        }
+
         @Override
         public Iterator<E> iterator() {
-            return descending ? descendingIteratorImpl() : ascendingIteratorImpl();
+            E end = iterationEnd();
+            if (end == null) return Collections.emptyIterator();
+            Iterator<E> it = startIterator();
+            return endUnbounded() ? it : new UntilIterator(it, end);
         }
 
         @Override
         public Iterator<E> descendingIterator() {
-            return descending ? ascendingIteratorImpl() : descendingIteratorImpl();
+            E end = descending ? getAbsHighest() : getAbsLowest();
+            if (end == null) return Collections.emptyIterator();
+            Iterator<E> it = startDescendingIterator();
+            return (descending ? toEnd : fromStart) ? it : new UntilIterator(it, end);
         }
 
-        private Iterator<E> ascendingIteratorImpl() {
-            return new Iterator<>() {
-                private Iterator<E> backingIt = baseIterator(lo, loInclusive);
-                private E nextElement = null;
-                private E lastReturned = null;
-                private long expectedModCount = AbstractNaryTreeSet.this.modCount;
+        private final class UntilIterator implements Iterator<E> {
+            private final Iterator<E> it;
+            private final E lastElement;
+            private boolean done;
 
-                {
-                    advance();
-                }
+            UntilIterator(Iterator<E> it, E lastElement) {
+                this.it = it;
+                this.lastElement = lastElement;
+            }
 
-                private void advance() {
-                    if (backingIt.hasNext()) {
-                        nextElement = backingIt.next();
-                        if (tooHigh(nextElement)) nextElement = null;
-                    } else {
-                        nextElement = null;
-                    }
-                }
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
 
-                @Override
-                public boolean hasNext() {
-                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
-                        throw new ConcurrentModificationException();
-                    }
-                    return nextElement != null;
-                }
+            @Override
+            public E next() {
+                if (done) throw new NoSuchElementException();
+                E e = it.next();
+                if (e == lastElement) done = true;
+                return e;
+            }
 
-                @Override
-                public E next() {
-                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
-                        throw new ConcurrentModificationException();
-                    }
-                    if (nextElement == null) throw new NoSuchElementException();
-                    lastReturned = nextElement;
-                    advance();
-                    return lastReturned;
-                }
-
-                @Override
-                public void remove() {
-                    if (lastReturned == null) throw new IllegalStateException();
-                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
-                        throw new ConcurrentModificationException();
-                    }
-
-                    AbstractNaryTreeSet.this.remove(lastReturned);
-                    expectedModCount = AbstractNaryTreeSet.this.modCount;
-                    lastReturned = null;
-                    if (nextElement != null) {
-                        backingIt = baseIterator(nextElement, true);
-                        if (backingIt.hasNext()) {
-                            backingIt.next();
-                        }
-                    }
-                }
-            };
-        }
-
-        private Iterator<E> descendingIteratorImpl() {
-            return new Iterator<>() {
-                private Iterator<E> backingIt = baseDescendingIterator(hi, hiInclusive);
-                private E nextElement = null;
-                private E lastReturned = null;
-                private long expectedModCount = AbstractNaryTreeSet.this.modCount;
-
-                {
-                    advance();
-                }
-
-                private void advance() {
-                    if (backingIt.hasNext()) {
-                        nextElement = backingIt.next();
-                        if (tooLow(nextElement)) nextElement = null;
-                    } else {
-                        nextElement = null;
-                    }
-                }
-
-                @Override
-                public boolean hasNext() {
-                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
-                        throw new ConcurrentModificationException();
-                    }
-                    return nextElement != null;
-                }
-
-                @Override
-                public E next() {
-                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
-                        throw new ConcurrentModificationException();
-                    }
-                    if (nextElement == null) throw new NoSuchElementException();
-                    lastReturned = nextElement;
-                    advance();
-                    return lastReturned;
-                }
-
-                @Override
-                public void remove() {
-                    if (lastReturned == null) throw new IllegalStateException();
-                    if (expectedModCount != AbstractNaryTreeSet.this.modCount) {
-                        throw new ConcurrentModificationException();
-                    }
-
-                    AbstractNaryTreeSet.this.remove(lastReturned);
-                    expectedModCount = AbstractNaryTreeSet.this.modCount;
-                    lastReturned = null;
-                    if (nextElement != null) {
-                        backingIt = baseDescendingIterator(nextElement, true);
-                        if (backingIt.hasNext()) {
-                            backingIt.next();
-                        }
-                    }
-                }
-            };
+            @Override
+            public void remove() {
+                it.remove();
+            }
         }
     }
 }

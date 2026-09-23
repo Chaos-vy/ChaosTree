@@ -158,7 +158,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             return null;
         }
         N current = root;
-        int cmp = 0;
+        int cmp ;
         while (current != null) {
             cmp = compare(val, current.value);
             if (cmp == 0) return current;
@@ -698,14 +698,14 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             this.descending = descending;
         }
 
-        private boolean inRangeBound(E val, boolean inclusive) {
-            if (lo != null && compare(val, lo) < 0) return false;
-            if (hi != null && compare(val, hi) > 0) return false;
+        private boolean outOfBounds(E val, boolean inclusive) {
+            if (lo != null && compare(val, lo) < 0) return true;
+            if (hi != null && compare(val, hi) > 0) return true;
             if (inclusive) {
-                if (lo != null && !loInclusive && compare(val, lo) == 0) return false;
-                if (hi != null && !hiInclusive && compare(val, hi) == 0) return false;
+                if (lo != null && !loInclusive && compare(val, lo) == 0) return true;
+                return hi != null && !hiInclusive && compare(val, hi) == 0;
             }
-            return true;
+            return false;
         }
 
         private boolean tooLow(E e) {
@@ -796,17 +796,60 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             }
         }
 
+        private boolean endUnbounded() {
+            return descending ? lo == null : hi == null;
+        }
+
+        private E iterationEnd() {
+            return descending ? absLowest() : absHighest();
+        }
+
         @Override
         public Iterator<E> iterator() {
-            return descending ? descendingIteratorImpl() : ascendingIterator();
+            E end = iterationEnd();
+            if (end == null) return Collections.emptyIterator();
+            Iterator<E> it = descending ? descendingIteratorImpl() : ascendingIteratorImpl();
+            return endUnbounded() ? it : new UntilIterator(it, end);
         }
 
         @Override
         public Iterator<E> descendingIterator() {
-            return descending ? ascendingIterator() : descendingIteratorImpl();
+            E end = descending ? absHighest() : absLowest();
+            if (end == null) return Collections.emptyIterator();
+            Iterator<E> it = descending ? ascendingIteratorImpl() : descendingIteratorImpl();
+            return (descending ? hi == null : lo == null) ? it : new UntilIterator(it, end);
         }
 
-        private Iterator<E> ascendingIterator() {
+        private final class UntilIterator implements Iterator<E> {
+            private final Iterator<E> it;
+            private final E lastElement;
+            private boolean done;
+
+            UntilIterator(Iterator<E> it, E lastElement) {
+                this.it = it;
+                this.lastElement = lastElement;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public E next() {
+                if (done) throw new NoSuchElementException();
+                E e = it.next();
+                if (e == lastElement) done = true;
+                return e;
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
+        }
+
+        private Iterator<E> ascendingIteratorImpl() {
             return new Iterator<>() {
                 private N nextNode = getStartNode();
                 private E val = null;
@@ -833,7 +876,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                     if (modCount != expectedModCount) {
                         throw new ConcurrentModificationException();
                     }
-                    return nextNode != null && inRange(nextNode.value);
+                    return nextNode != null;
                 }
 
                 @Override
@@ -872,7 +915,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                     if (nextNode == null) {
                         throw new NoSuchElementException();
                     }
-                    if (!hasNext()) throw new NoSuchElementException();
                     val = nextNode.value;
                     nextNode = successor(nextNode);
                     return val;
@@ -906,7 +948,10 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
                 @Override
                 public boolean hasNext() {
-                    return nextNode != null && inRange(nextNode.value);
+                    if (modCount != expectedModCount) {
+                        throw new ConcurrentModificationException();
+                    }
+                    return nextNode != null;
                 }
 
                 @Override
@@ -945,7 +990,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
                     if (nextNode == null) {
                         throw new NoSuchElementException();
                     }
-                    if (!hasNext()) throw new NoSuchElementException();
                     val = nextNode.value;
                     nextNode = predecessor(nextNode);
                     return val;
@@ -991,18 +1035,28 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             return count;
         }
 
+        private E absLowest() {
+            E e = lo == null ? (AbstractBinaryTreeSet.this.isEmpty() ? null : AbstractBinaryTreeSet.this.first()) : (loInclusive ? AbstractBinaryTreeSet.this.ceiling(lo) : AbstractBinaryTreeSet.this.higher(lo));
+            return (e == null || tooHigh(e)) ? null : e;
+        }
+
+        private E absHighest() {
+            E e = hi == null ? (AbstractBinaryTreeSet.this.isEmpty() ? null : AbstractBinaryTreeSet.this.last()) : (hiInclusive ? AbstractBinaryTreeSet.this.floor(hi) : AbstractBinaryTreeSet.this.lower(hi));
+            return (e == null || tooLow(e)) ? null : e;
+        }
+
         @Override
         public E first() {
-            Iterator<E> i = iterator();
-            if (!i.hasNext()) throw new NoSuchElementException();
-            return i.next();
+            E e = descending ? absHighest() : absLowest();
+            if (e == null) throw new NoSuchElementException();
+            return e;
         }
 
         @Override
         public E last() {
-            Iterator<E> i = descendingIterator();
-            if (!i.hasNext()) throw new NoSuchElementException();
-            return i.next();
+            E e = descending ? absLowest() : absHighest();
+            if (e == null) throw new NoSuchElementException();
+            return e;
         }
 
         @Override
@@ -1038,11 +1092,11 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             compare(fromElement, fromElement);
             compare(toElement, toElement);
             if (descending) {
-                if (!inRangeBound(fromElement, fromInclusive) || !inRangeBound(toElement, toInclusive))
+                if (outOfBounds(fromElement, fromInclusive) || outOfBounds(toElement, toInclusive))
                     throw new IllegalArgumentException("Requested bounds are outside current window");
                 return new TreeSubSet(toElement, toInclusive, fromElement, fromInclusive, true);
             }
-            if (!inRangeBound(fromElement, fromInclusive) || !inRangeBound(toElement, toInclusive))
+            if (outOfBounds(fromElement, fromInclusive) || outOfBounds(toElement, toInclusive))
                 throw new IllegalArgumentException("Requested bounds are outside current window");
             return new TreeSubSet(fromElement, fromInclusive, toElement, toInclusive, false);
         }
@@ -1050,7 +1104,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         @Override
         public NavigableSet<E> headSet(E toElement, boolean inclusive) {
             compare(toElement, toElement);
-            if (!inRangeBound(toElement, inclusive))
+            if (outOfBounds(toElement, inclusive))
                 throw new IllegalArgumentException("Requested bound is outside current window");
             if (descending) {
                 return new TreeSubSet(toElement, inclusive, hi, hiInclusive, true);
@@ -1061,7 +1115,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         @Override
         public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
             compare(fromElement, fromElement);
-            if (!inRangeBound(fromElement, inclusive))
+            if (outOfBounds(fromElement, inclusive))
                 throw new IllegalArgumentException("Requested bound is outside current window");
             if (descending) {
                 return new TreeSubSet(lo, loInclusive, fromElement, inclusive, true);
