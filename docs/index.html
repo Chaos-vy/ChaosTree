@@ -65,6 +65,83 @@
             padding-left: 20px;
         }
 
+        details {
+            border: 1px solid #000;
+            margin: 12px 0 20px;
+            padding: 0 12px;
+            overflow-x: auto;
+        }
+
+        details[open] {
+            padding-bottom: 8px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+            padding: 8px 0;
+        }
+
+
+        .win {
+            color: #7c3aed;
+            font-weight: 700;
+        }
+
+        .err {
+            color: #aaa;
+        }
+
+        body.dark-mode .win {
+            color: #b794f6;
+        }
+
+        body.dark-mode .err {
+            color: #777;
+        }
+
+        figure.chart {
+            margin: 10px 0 24px;
+            padding: 0;
+        }
+
+        figure.chart svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            font-family: monospace;
+            color: #000;
+        }
+
+        figure.chart figcaption {
+            font-size: 13px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .chart .grid { stroke: currentColor; opacity: 0.12; stroke-width: 1; }
+        .chart .axis { stroke: currentColor; opacity: 0.6; stroke-width: 1.2; }
+        .chart text { fill: currentColor; font-size: 12px; }
+        .chart .ttl { font-size: 12px; font-weight: 700; }
+        .chart .ser { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .chart .c1 { stroke: #8b5cf6; }
+        .chart .c1f { fill: #8b5cf6; }
+        .chart .c2 { stroke: #2fae76; }
+        .chart .c2f { fill: #2fae76; }
+        .chart .c3 { stroke: #f08a24; }
+        .chart .c3f { fill: #f08a24; }
+        .chart .c4 { stroke: #e8629a; }
+        .chart .c4f { fill: #e8629a; }
+
+        body.dark-mode figure.chart svg { color: #e0e0e0; }
+        body.dark-mode .chart .c1 { stroke: #a78bfa; }
+        body.dark-mode .chart .c1f { fill: #a78bfa; }
+        body.dark-mode .chart .c2 { stroke: #5fd39a; }
+        body.dark-mode .chart .c2f { fill: #5fd39a; }
+        body.dark-mode .chart .c3 { stroke: #fbab5a; }
+        body.dark-mode .chart .c3f { fill: #fbab5a; }
+        body.dark-mode .chart .c4 { stroke: #f28cb8; }
+        body.dark-mode .chart .c4f { fill: #f28cb8; }
 
         body.dark-mode {
             background-color: #121212;
@@ -98,6 +175,10 @@
             background-color: #222;
         }
 
+        body.dark-mode details {
+            border-color: #555;
+        }
+
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -122,24 +203,92 @@
 </head>
 <body>
 <button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+<div style="text-align: center">
+    <h1>🌲 ChaosTree</h1>
+    <p class="bold">A zero-dependency, cache-aware NavigableSet and NavigableMap engine for Java 21+.</p>
 
-<h1>ChaosTree</h1>
-<h4>v2.0.1</h4>
-<p class="bold">A zero-dependency, cache-aware NavigableSet and NavigableMap engine for Java 21+.
-    v2.0.0 is removal of custom API in favor of full NavigableSet/Map and SequencedSet/Map compliance &mdash;
-    verified against 214,680 Guava testlib permutations and jqwik property tests run at 1M tries.
-    Built for bulk ingestion at scale, without the GC overhead of the JDK's own trees.</p>
-<blockquote>
-    <p>GitHub repo link: <a href="https://github.com/Chaos-vy/ChaosTree">https://github.com/Chaos-vy/ChaosTree</a>.</p>
-
-    <p>A zero-allocation, mechanically sympathetic Java 21 Search Tree engine that mathematically respects the JDK.</p>
-    <p>Minimum JDK Requirement :<i>0xCAFEBABE 0000 0041 |</i>
-        <i class="bold">JDK 21+</i>
+    <p>
+        <a href="https://github.com/Chaos-vy/ChaosTree">GitHub</a> &middot;
+        <a href="https://search.maven.org/artifact/io.github.chaos-vy/chaos-tree">Maven Central</a> &middot;
+        <a href="#benchmarks">Benchmarks</a> &middot;
+        <a href="#getting-started">Getting Started</a>
     </p>
-</blockquote>
 
+    <p>
+        <a href="#"><img alt="Supported JVM Versions"
+                         src="https://img.shields.io/badge/JVM-21+-brightgreen.svg?&logo=openjdk"></a>
+        <a href="https://search.maven.org/artifact/io.github.chaos-vy/chaos-tree"><img alt="Maven Central"
+                                                                                       src="https://img.shields.io/maven-central/v/io.github.chaos-vy/chaos-tree.svg?label=maven%20central"></a>
+        <a href="https://github.com/Chaos-vy/ChaosTree/releases"><img alt="GitHub release"
+                                                                      src="https://img.shields.io/github/v/release/Chaos-vy/ChaosTree"></a>
+        <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Chaos-vy/ChaosTree"></a>
+        <a href="https://github.com/Chaos-vy/ChaosTree/actions"><img alt="Coverage"
+                                                                     src="https://raw.githubusercontent.com/Chaos-vy/ChaosTree/badges/.github/badges/jacoco.svg"></a>
+        <a href="https://codecov.io/gh/Chaos-vy/ChaosTree"><img alt="codecov"
+                                                                src="https://codecov.io/gh/Chaos-vy/ChaosTree/graph/badge.svg?token=V6LKTLXZA2"></a>
+    </p>
+
+    <blockquote>
+        <p>A zero-allocation, mechanically sympathetic Java 21 Search Tree engine that mathematically respects the
+            JDK.</p>
+        <p>Minimum JDK Requirement: <i>0xCAFEBABE 0000 0041</i> &mdash; <i class="bold">JDK 21+</i></p>
+    </blockquote>
+
+</div>
+
+<h2>v2.0.1 — testing, coverage &amp; optimization</h2>
+<p>
+    Two weeks of testing, refactoring, benchmarking, and edge-case fixes on top of v2.0.0. Line coverage went from
+    80.9% to 95.8%; branch coverage from 77% to 91%.
+</p>
+
+<h2>Why ChaosTree</h2>
 <table>
-    <caption>Supported Data Structures</caption>
+    <thead>
+    <tr>
+        <th>Property</th>
+        <th style="text-align:left">What it means</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="bold">Cache-locality first</td>
+        <td style="text-align:left">
+            N-ary nodes pack into pre-allocated, exact-capacity arrays &mdash; up to ~40% fewer memory stalls on
+            large range scans vs. pointer-chasing structures.
+        </td>
+    </tr>
+    <tr>
+        <td class="bold">O(N) bulk loading</td>
+        <td style="text-align:left">
+            <code>buildFromSorted</code> and <code>importFlatMatrix</code> construct trees directly from sorted
+            data, with a tunable fill factor <code>[0.5, 1.0]</code>.
+        </td>
+    </tr>
+    <tr>
+        <td class="bold">Strictly compatible</td>
+        <td style="text-align:left">
+            Built on JDK 21 <code>SequencedCollection</code> / <code>SequencedSet</code> / <code>SequencedMap</code>.
+            Validated against 214,000+ Guava Testlib cases for exact <code>TreeMap</code>/<code>TreeSet</code>
+            semantics.
+        </td>
+    </tr>
+    <tr>
+        <td class="bold">Serializable &amp; Cloneable</td>
+        <td style="text-align:left">Native O(N) bulk-load restoration on deserialize; full <code>Cloneable</code>
+            support.
+        </td>
+    </tr>
+    <tr>
+        <td class="bold">Zero dependencies</td>
+        <td style="text-align:left">Nothing else on the classpath.</td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Supported Data Structures</h2>
+<table>
+    <caption>Set / Map pairs, one implementation each</caption>
     <thead>
     <tr>
         <th>Set</th>
@@ -148,12 +297,12 @@
     </thead>
     <tbody>
     <tr>
-        <td>Avl Tree Set</td>
-        <td>Avl Tree Map</td>
+        <td>AVL Tree Set</td>
+        <td>AVL Tree Map</td>
     </tr>
     <tr>
-        <td>Red Black Tree Set</td>
-        <td>Red Black Tree Map</td>
+        <td>Red-Black Tree Set</td>
+        <td>Red-Black Tree Map</td>
     </tr>
     <tr>
         <td>B-Tree Set</td>
@@ -167,18 +316,48 @@
 </table>
 
 <p>
-    The engine stands on equal footing with the JDK—and for bulk ingestion, it is 10x+ faster.
-    The custom API surface is strictly minimal. But every custom method unleashes Chaos.
+    The engine stands on equal footing with the JDK &mdash; and for bulk ingestion, it's 10x+ faster. The custom
+    API surface is strictly minimal, but every custom method unleashes Chaos.
 </p>
 
+<details open>
+    <summary>Custom API surface (4 methods)</summary>
+    <table>
+        <thead>
+        <tr>
+            <th>Method</th>
+            <th style="text-align:left">What it does</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>display()</code> / <code>display(Style.ASCII/UNICODE)</code></td>
+            <td style="text-align:left">Prints the tree structure to stdout for debugging.</td>
+        </tr>
+        <tr>
+            <td><code>importFlatMatrix(matrix, factor)</code></td>
+            <td style="text-align:left">N-ary only. O(N) bulk-load from a pre-sorted 2D array via arraycopy.</td>
+        </tr>
+        <tr>
+            <td><code>exportFlatMatrix()</code></td>
+            <td style="text-align:left">N-ary only. Serializes the tree back to a flat 2D array.</td>
+        </tr>
+        <tr>
+            <td><code>buildFromSorted(Iterator, factor)</code></td>
+            <td style="text-align:left">N-ary only. O(N) bulk-load from any sorted iterator.</td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="err">The last 3 methods are N-ary-tree specific &mdash; Binary family trees (AVL/RBT) only expose <code>display()</code>.
+    </p>
+</details>
 
-<ul>
-    <li>display() & display(Style.ASCII/UNICODE)</li>
-    <li>importFlatMatrix(matrix, factor)</li>
-    <li>exportFlatMatrix()</li>
-    <li>buildFromSorted(Iterator, factor)</li>
-</ul>
-<p>The last <b>3</b> API are <b>Nary-Tree</b> Specific.</p>
+<h2 id="getting-started">Getting Started</h2>
+<pre>&lt;dependency&gt;
+    &lt;groupId&gt;io.github.chaos-vy&lt;/groupId&gt;
+    &lt;artifactId&gt;chaos-tree&lt;/artifactId&gt;
+    &lt;version&gt;2.0.1&lt;/version&gt;
+&lt;/dependency&gt;</pre>
 <hr>
 <h2>1. The Guava testlib</h2>
 <p>
@@ -277,120 +456,558 @@
 <hr>
 
 
-<h2>1. The Truth (168x Sequential / 2.07x Random)</h2>
-<p>Benchmark environment: Java 21.0.12 (OpenJDK), JMH 1.37, -Xms4g -Xmx4g -XX:+UseParallelGC -XX:+AlwaysPreTouch.<br>
-    3 forks, 5 measurement iterations, 5,000,000 integer keys, single run per table.</p>
+<h2>1. The Truth (Bulk Load up to 145x / Sequential 2.8x / Random 1.7x at 1M (Trails Below 100K))</h2>
+<p>Benchmark: <code>WriteHeavyMap</code>, JMH avgt, degree 64, factor 0.75f, sizes 1,000 to 1,000,000 integer keys.<br>
+    30 warmup iterations x 500ms, 30 measurement iterations x 500ms, 3 forks (Cnt = 90 per cell),
+    <code>-Xms8G -Xmx8G -XX:+AlwaysPreTouch</code>.<br>
+    Scores are mean &plusmn; JMH error (light) and the fastest score per size is violet. Values under 100 &micro;s are
+    shown in &micro;s; larger values are shown in ms.</p>
 
-<h3>1a. Sequential Keys (factor 0.75f)</h3>
+<pre>
+java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap \
+    -wi 30 -w 500ms -i 30 -r 500ms -f 3 \
+    -p size=1000,10000,100000,1000000 \
+    -jvmArgs "-Xms8G -Xmx8G -XX:+AlwaysPreTouch" \
+    -tu us
+</pre>
+
+<h3>1a. Bulk Load (sorted input)</h3>
+<p>
+    <strong>Result:</strong> <code>importFlatMatrix</code> at factor 0.75f is a steady <b>~8x faster</b> than the JDK's
+    own
+    bulk loader from 10,000 keys up (6.11x at 1,000). At factor 1.0f (fully packed nodes) it is <b>9.7&ndash;10.7x</b>
+    faster
+    from 10,000 keys up (7.93x at 1,000). Against JDK sequential <code>put</code> at 1,000,000 keys it is <b>118x
+    faster</b> at
+    0.75f (0.994 ms vs 117.514 ms) and <b>145x faster</b> at 1.0f (0.808 ms vs 117.514 ms). The iterator-based
+    <code>bulkLoad</code> is only <b>8&ndash;15% faster</b> than <code>TreeMap</code>: the per-element iterator cost
+    dominates,
+    so the real gain comes from handing the engine a flat array.
+</p>
+<blockquote>
+    <b>Caveat on bulkLoad (Iterator):</b> the small gap over <code>TreeMap.bulkLoad</code> (8&ndash;15%) is expected. It
+    is
+    what a genuine O(N) build looks like: both loaders do the same linear work, and that work is memory-bound. Every
+    element
+    has to be spilled out of RAM, fetched into the CPU through the iterator, and written into a node, so that fetch is
+    the cost
+    being measured, not the tree logic. The iteration source in these runs was also a sorted map, so the timing includes
+    walking
+    that map's nodes as well. Treat <code>bulkLoad</code> as the truthful O(N) baseline. <code>importFlatMatrix</code>
+    is faster
+    because it skips the per-element iterator entirely.
+</blockquote>
+<blockquote>
+    <b>Why importFlatMatrix costs about 1 ns per key:</b> it does not read the array element by element. It copies whole
+    chunks
+    of the flat array into the nodes with <code>System.arraycopy</code>, which the JVM compiles to a bulk memory move at
+    JDK-intrinsic speed. There is no per-key iterator call, no comparison and no rotation, so the cost is memory
+    bandwidth for
+    the copy rather than per-element work. That is why it sits far below the O(N) iterator path above.
+</blockquote>
 <table>
-    <caption>5,000,000 Element Insertion — Sequential Key Order</caption>
+    <caption>Bulk construction from sorted data</caption>
     <thead>
     <tr>
-        <th>Benchmark (Strategy)</th>
-        <th>Complexity</th>
-        <th>Score (ms/op)</th>
-        <th>Allocated (Bytes/op)</th>
-        <th>GC Time (ms)</th>
+        <th>Benchmark</th>
+        <th>1,000</th>
+        <th>10,000</th>
+        <th>100,000</th>
+        <th>1,000,000</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-        <td>B+Tree.dragonFeed (Native, factor 0.75f)</td>
-        <td>O(N)</td>
-        <td>5.451</td>
-        <td>58,058,576</td>
-        <td>649</td>
+        <td>B+Tree.importFlatMatrix (factor 0.75f)</td>
+        <td>1.187 <span class="err">&plusmn; 0.006 &micro;s</span></td>
+        <td>9.477 <span class="err">&plusmn; 0.047 &micro;s</span></td>
+        <td>96.573 <span class="err">&plusmn; 0.531 &micro;s</span></td>
+        <td>0.994 <span class="err">&plusmn; 0.005 ms</span></td>
     </tr>
     <tr>
         <td>B+Tree.bulkLoad (Iterator)</td>
-        <td>O(N)</td>
-        <td>41.202</td>
-        <td>58,298,864</td>
-        <td>197</td>
+        <td>6.545 <span class="err">&plusmn; 0.068 &micro;s</span></td>
+        <td>71.279 <span class="err">&plusmn; 0.223 &micro;s</span></td>
+        <td>0.685 <span class="err">&plusmn; 0.006 ms</span></td>
+        <td>7.214 <span class="err">&plusmn; 0.037 ms</span></td>
     </tr>
     <tr>
         <td>JDK TreeMap.bulkLoad (SortedMap)</td>
-        <td>O(N)</td>
-        <td>80.988</td>
-        <td>200,000,311</td>
-        <td>1,022</td>
+        <td>7.247 <span class="err">&plusmn; 0.109 &micro;s</span></td>
+        <td>77.559 <span class="err">&plusmn; 0.414 &micro;s</span></td>
+        <td>0.790 <span class="err">&plusmn; 0.006 ms</span></td>
+        <td>7.811 <span class="err">&plusmn; 0.020 ms</span></td>
+    </tr>
+
+    <tr>
+        <td>B+Tree.importFlatMatrix (factor 1.0f)</td>
+        <td><span class="win">0.914</span> <span class="err">&plusmn; 0.009 &micro;s</span></td>
+        <td><span class="win">7.258</span> <span class="err">&plusmn; 0.097 &micro;s</span></td>
+        <td><span class="win">75.121</span> <span class="err">&plusmn; 1.147 &micro;s</span></td>
+        <td><span class="win">0.808</span> <span class="err">&plusmn; 0.016 ms</span></td>
     </tr>
     <tr>
-        <td>B+Tree.iterativePut (Sequential)</td>
-        <td>O(N log N)</td>
-        <td>300.806</td>
-        <td>86,994,836</td>
-        <td>673</td>
+        <td><b>Speedup: importFlatMatrix 0.75f vs TreeMap</b></td>
+        <td>6.11x</td>
+        <td>8.18x</td>
+        <td>8.18x</td>
+        <td>7.86x</td>
     </tr>
     <tr>
-        <td>JDK TreeMap.iterativePut (Sequential)</td>
-        <td>O(N log N)</td>
-        <td>917.328</td>
-        <td>200,001,987</td>
-        <td>717</td>
+        <td><b>Speedup: bulkLoad (Iterator) vs TreeMap</b></td>
+        <td>1.11x</td>
+        <td>1.09x</td>
+        <td>1.15x</td>
+        <td>1.08x</td>
+    </tr>
+    <tr>
+        <td><b>Speedup: importFlatMatrix 1.0f vs TreeMap</b></td>
+        <td>7.93x</td>
+        <td>10.69x</td>
+        <td>10.52x</td>
+        <td>9.67x</td>
     </tr>
     </tbody>
 </table>
 
-<p>
-    <strong>Result:</strong> <code>dragonFeed</code> is <b>168x faster</b> than standard JDK sequential insertion, <b>14.9x
-    faster</b> than the JDK's own bulk loader, and allocates <b>71% less heap</b> than either JDK path.
-</p>
-<p>
-    <strong>The Mechanism:</strong> Given strictly sorted input, <code>dragonFeed</code> bypasses the entire
-    tree-routing layer. It skips comparisons and rotations entirely, constructing nodes directly via chunked <code>System.arraycopy()</code>.
-    That is the source of the 168x speedup—it is a data-oriented hardware bypass, not a magic iterative insert.
-</p>
+<figure class="chart">
+    <svg viewBox="0 0 700 380" role="img"
+         aria-label="Chart of bulk load time per operation for B+Tree importFlatMatrix at 0.75f and 1.0f, B+Tree bulkLoad and JDK TreeMap bulkLoad at 1,000 to 1,000,000 keys"
+         xmlns="http://www.w3.org/2000/svg">
+        <text class="ttl" x="78" y="18">Bulk load, sorted input (lower is better)</text>
+        <line class="grid" x1="78" y1="322.0" x2="676" y2="322.0"/>
+        <text x="70" y="326.0" text-anchor="end">1 &micro;s</text>
+        <line class="grid" x1="78" y1="252.5" x2="676" y2="252.5"/>
+        <text x="70" y="256.5" text-anchor="end">10 &micro;s</text>
+        <line class="grid" x1="78" y1="183.0" x2="676" y2="183.0"/>
+        <text x="70" y="187.0" text-anchor="end">100 &micro;s</text>
+        <line class="grid" x1="78" y1="113.5" x2="676" y2="113.5"/>
+        <text x="70" y="117.5" text-anchor="end">1 ms</text>
+        <line class="grid" x1="78" y1="44.0" x2="676" y2="44.0"/>
+        <text x="70" y="48.0" text-anchor="end">10 ms</text>
+        <line class="axis" x1="78" y1="44" x2="78" y2="322"/>
+        <line class="axis" x1="78" y1="322" x2="676" y2="322"/>
+        <text x="78.0" y="342" text-anchor="middle">1,000</text>
+        <text x="277.3" y="342" text-anchor="middle">10,000</text>
+        <text x="476.7" y="342" text-anchor="middle">100,000</text>
+        <text x="676.0" y="342" text-anchor="middle">1,000,000</text>
+        <text x="377.0" y="372" text-anchor="middle">keys (log scale)</text>
+        <text x="12" y="34">time / op (log scale)</text>
+        <line class="ser c1" x1="92" y1="52" x2="126" y2="52"/>
+        <polygon points="109.0,47.2 113.8,52.0 109.0,56.8 104.2,52.0" class="c1f"></polygon>
+        <text x="136" y="56">B+Tree.importFlatMatrix (0.75f)</text>
+        <line class="ser c2" x1="92" y1="72" x2="126" y2="72"/>
+        <circle cx="109.0" cy="72.0" r="3.8" class="c2f"></circle>
+        <text x="136" y="76">B+Tree.bulkLoad (Iterator)</text>
+        <line class="ser c3" x1="92" y1="92" x2="126" y2="92"/>
+        <rect x="105.5" y="88.5" width="7" height="7" rx="1.5" class="c3f"></rect>
+        <text x="136" y="96">JDK TreeMap.bulkLoad</text>
+        <line class="ser c4" x1="92" y1="112" x2="126" y2="112"/>
+        <polygon points="109.0,107.0 113.6,115.6 104.4,115.6" class="c4f"></polygon>
+        <text x="136" y="116">B+Tree.importFlatMatrix (1.0f)</text>
+        <path class="ser c1"
+              d="M78.0,316.8 C144.4,295.9 210.9,276.3 277.3,254.1 C343.8,232.0 410.2,207.5 476.7,184.1 C543.1,160.6 609.6,137.1 676.0,113.7"/>
+        <polygon points="78.0,312.0 82.8,316.8 78.0,321.6 73.2,316.8" class="c1f"><title>B+Tree.importFlatMatrix
+            (0.75f), 1,000 keys: 1.187 &micro;s/op</title></polygon>
+        <polygon points="277.3,249.3 282.1,254.1 277.3,258.9 272.5,254.1" class="c1f"><title>B+Tree.importFlatMatrix
+            (0.75f), 10,000 keys: 9.477 &micro;s/op</title></polygon>
+        <polygon points="476.7,179.3 481.5,184.1 476.7,188.9 471.9,184.1" class="c1f"><title>B+Tree.importFlatMatrix
+            (0.75f), 100,000 keys: 96.573 &micro;s/op</title></polygon>
+        <polygon points="676.0,108.9 680.8,113.7 676.0,118.5 671.2,113.7" class="c1f"><title>B+Tree.importFlatMatrix
+            (0.75f), 1,000,000 keys: 993.756 &micro;s/op</title></polygon>
+        <path class="ser c2"
+              d="M78.0,265.3 C144.4,241.3 210.9,216.6 277.3,193.2 C343.8,169.8 410.2,148.2 476.7,124.9 C543.1,101.7 609.6,77.5 676.0,53.9"/>
+        <circle cx="78.0" cy="265.3" r="3.8" class="c2f"><title>B+Tree.bulkLoad (Iterator), 1,000 keys: 6.545 &micro;
+            s/op</title></circle>
+        <circle cx="277.3" cy="193.2" r="3.8" class="c2f"><title>B+Tree.bulkLoad (Iterator), 10,000 keys: 71.279 &micro;
+            s/op</title></circle>
+        <circle cx="476.7" cy="124.9" r="3.8" class="c2f"><title>B+Tree.bulkLoad (Iterator), 100,000 keys: 684.551
+            &micro;s/op</title></circle>
+        <circle cx="676.0" cy="53.9" r="3.8" class="c2f"><title>B+Tree.bulkLoad (Iterator), 1,000,000 keys: 7,214.462
+            &micro;s/op</title></circle>
+        <path class="ser c3"
+              d="M78.0,262.2 C144.4,238.4 210.9,214.3 277.3,190.7 C343.8,167.1 410.2,143.8 476.7,120.6 C543.1,97.4 609.6,74.5 676.0,51.5"/>
+        <rect x="74.5" y="258.7" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.bulkLoad, 1,000 keys:
+            7.247 &micro;s/op</title></rect>
+        <rect x="273.8" y="187.2" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.bulkLoad, 10,000 keys:
+            77.559 &micro;s/op</title></rect>
+        <rect x="473.2" y="117.1" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.bulkLoad, 100,000 keys:
+            790.398 &micro;s/op</title></rect>
+        <rect x="672.5" y="48.0" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.bulkLoad, 1,000,000 keys:
+            7,810.716 &micro;s/op</title></rect>
+        <path class="ser c4"
+              d="M78.0,324.7 C144.4,303.9 210.9,284.4 277.3,262.2 C343.8,240.0 410.2,215.3 476.7,191.6 C543.1,167.9 609.6,143.8 676.0,119.9"/>
+        <polygon points="78.0,319.7 82.6,328.3 73.4,328.3" class="c4f"><title>B+Tree.importFlatMatrix (1.0f), 1,000
+            keys: 0.914 &micro;s/op</title></polygon>
+        <polygon points="277.3,257.2 281.9,265.8 272.7,265.8" class="c4f"><title>B+Tree.importFlatMatrix (1.0f), 10,000
+            keys: 7.258 &micro;s/op</title></polygon>
+        <polygon points="476.7,186.6 481.3,195.2 472.1,195.2" class="c4f"><title>B+Tree.importFlatMatrix (1.0f), 100,000
+            keys: 75.121 &micro;s/op</title></polygon>
+        <polygon points="676.0,114.9 680.6,123.5 671.4,123.5" class="c4f"><title>B+Tree.importFlatMatrix (1.0f),
+            1,000,000 keys: 808.086 &micro;s/op</title></polygon>
+    </svg>
+    <figcaption>Bulk load time per operation. Log-log axes; curves are smoothed between the four measured sizes.
+    </figcaption>
+</figure>
 
-<h3>1b. Random-Order Keys (factor 0.75f)</h3>
+<h3>1b. Sequential Put (one key at a time, ascending)</h3>
 <p>
-    Sequential keys are the happy phase for any tree structure. Every insert lands physically adjacent to the last one,
-    perfectly accommodating the CPU's L1 cache prefetcher. Real-world entropy is rarely this forgiving. Here are the
-    same 5,000,000 elements inserted in <b>uniformly random order</b> (fixed seed, same key/value pairs; bulk-loading
-    bypasses cannot apply here).
+    <strong>Result:</strong> Without any bulk path, B+Tree wins every size and the lead grows with N
+    (<b>1.50x &rarr; 2.76x</b>). <code>importFlatMatrix</code> is still <b>43x faster</b> than B+Tree's own
+    sequential put at 1,000,000 keys (0.994 ms vs 42.647 ms).
 </p>
-
 <table>
-    <caption>5,000,000 Element Insertion — Random Key Order</caption>
+    <caption>Iterative put, sequential key order</caption>
     <thead>
     <tr>
-        <th>Benchmark (Strategy)</th>
-        <th>Score (ms/op)</th>
-        <th>Allocated (Bytes/op)</th>
-        <th>GC Time (ms)</th>
+        <th>Benchmark</th>
+        <th>1,000</th>
+        <th>10,000</th>
+        <th>100,000</th>
+        <th>1,000,000</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>B+Tree.sequentialPut</td>
+        <td><span class="win">26.268</span> <span class="err">&plusmn; 0.045 &micro;s</span></td>
+        <td><span class="win">0.253</span> <span class="err">&plusmn; 0.002 ms</span></td>
+        <td><span class="win">3.283</span> <span class="err">&plusmn; 0.016 ms</span></td>
+        <td><span class="win">42.647</span> <span class="err">&plusmn; 1.073 ms</span></td>
+    </tr>
+    <tr>
+        <td>JDK TreeMap.sequentialPut</td>
+        <td>39.507 <span class="err">&plusmn; 0.232 &micro;s</span></td>
+        <td>0.586 <span class="err">&plusmn; 0.017 ms</span></td>
+        <td>8.191 <span class="err">&plusmn; 0.142 ms</span></td>
+        <td>117.514 <span class="err">&plusmn; 0.752 ms</span></td>
+    </tr>
+    <tr>
+        <td><b>Speedup (JDK / B+Tree)</b></td>
+        <td>1.50x</td>
+        <td>2.31x</td>
+        <td>2.49x</td>
+        <td>2.76x</td>
+    </tr>
+    </tbody>
+</table>
+
+<figure class="chart">
+    <svg viewBox="0 0 700 380" role="img"
+         aria-label="Chart of sequential put time per operation for B+Tree and JDK TreeMap at 1,000 to 1,000,000 keys"
+         xmlns="http://www.w3.org/2000/svg">
+        <text class="ttl" x="78" y="18">Sequential put, ascending keys (lower is better)</text>
+        <line class="grid" x1="78" y1="322.0" x2="676" y2="322.0"/>
+        <text x="70" y="326.0" text-anchor="end">10 &micro;s</text>
+        <line class="grid" x1="78" y1="266.4" x2="676" y2="266.4"/>
+        <text x="70" y="270.4" text-anchor="end">100 &micro;s</text>
+        <line class="grid" x1="78" y1="210.8" x2="676" y2="210.8"/>
+        <text x="70" y="214.8" text-anchor="end">1 ms</text>
+        <line class="grid" x1="78" y1="155.2" x2="676" y2="155.2"/>
+        <text x="70" y="159.2" text-anchor="end">10 ms</text>
+        <line class="grid" x1="78" y1="99.6" x2="676" y2="99.6"/>
+        <text x="70" y="103.6" text-anchor="end">100 ms</text>
+        <line class="grid" x1="78" y1="44.0" x2="676" y2="44.0"/>
+        <text x="70" y="48.0" text-anchor="end">1 s</text>
+        <line class="axis" x1="78" y1="44" x2="78" y2="322"/>
+        <line class="axis" x1="78" y1="322" x2="676" y2="322"/>
+        <text x="78.0" y="342" text-anchor="middle">1,000</text>
+        <text x="277.3" y="342" text-anchor="middle">10,000</text>
+        <text x="476.7" y="342" text-anchor="middle">100,000</text>
+        <text x="676.0" y="342" text-anchor="middle">1,000,000</text>
+        <text x="377.0" y="372" text-anchor="middle">keys (log scale)</text>
+        <text x="12" y="34">time / op (log scale)</text>
+        <line class="ser c1" x1="92" y1="52" x2="126" y2="52"/>
+        <circle cx="109.0" cy="52.0" r="3.8" class="c1f"></circle>
+        <text x="136" y="56">B+Tree.sequentialPut</text>
+        <line class="ser c3" x1="92" y1="72" x2="126" y2="72"/>
+        <rect x="105.5" y="68.5" width="7" height="7" rx="1.5" class="c3f"></rect>
+        <text x="136" y="76">JDK TreeMap.sequentialPut</text>
+        <path class="ser c1"
+              d="M78.0,298.7 C144.4,280.4 210.9,263.4 277.3,244.0 C343.8,224.5 410.2,202.7 476.7,182.1 C543.1,161.5 609.6,140.8 676.0,120.2"/>
+        <circle cx="78.0" cy="298.7" r="3.8" class="c1f"><title>B+Tree.sequentialPut, 1,000 keys: 26.268 &micro;
+            s/op</title></circle>
+        <circle cx="277.3" cy="244.0" r="3.8" class="c1f"><title>B+Tree.sequentialPut, 10,000 keys: 253.347 &micro;
+            s/op</title></circle>
+        <circle cx="476.7" cy="182.1" r="3.8" class="c1f"><title>B+Tree.sequentialPut, 100,000 keys: 3,283.051 &micro;
+            s/op</title></circle>
+        <circle cx="676.0" cy="120.2" r="3.8" class="c1f"><title>B+Tree.sequentialPut, 1,000,000 keys: 42,646.838&micro;
+            s/op</title></circle>
+        <path class="ser c3"
+              d="M78.0,288.8 C144.4,267.1 210.9,245.2 277.3,223.7 C343.8,202.2 410.2,181.4 476.7,160.0 C543.1,138.7 609.6,117.1 676.0,95.7"/>
+        <rect x="74.5" y="285.3" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.sequentialPut, 1,000 keys:
+            39.507 &micro;s/op</title></rect>
+        <rect x="273.8" y="220.2" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.sequentialPut, 10,000
+            keys: 586.229 &micro;s/op</title></rect>
+        <rect x="473.2" y="156.5" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.sequentialPut, 100,000
+            keys: 8,190.759 &micro;s/op</title></rect>
+        <rect x="672.5" y="92.2" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.sequentialPut, 1,000,000
+            keys: 117,513.945 &micro;s/op</title></rect>
+    </svg>
+    <figcaption>Sequential put time per operation, final 30-warmup run. Log-log axes; curves are smoothed between the
+        four measured sizes.
+    </figcaption>
+</figure>
+
+<h3>1c. Random Put (uniformly random order)</h3>
+<p>
+    <strong>Result:</strong> B+Tree is <b>slower</b> than <code>TreeMap</code> at 1,000 (1.52x) and 10,000 (1.13x) keys,
+    then
+    pulls ahead at 100,000 (<b>1.24x</b>) and 1,000,000 (<b>1.69x</b>), both clear of the error bars. The 1,000,000
+    figure
+    reproduces: an independent 25-warmup run measured 438.784 ms for B+Tree, within 0.5% of the 440.925 ms here. The
+    earlier
+    5- and 10-warmup runs (634&ndash;662 ms) were not yet at steady state, and <code>TreeMap</code> is the noisier of
+    the two at
+    1,000,000 (744 ms here vs 812 ms in that run).
+</p>
+<blockquote>
+    <b>Why random put flips at about 20,000 keys:</b> this is not a slow design, it is a different cost model. While the
+    data
+    lives inside the L2 cache, a memory hop costs almost nothing and the only thing separating the two trees is the work
+    per
+    insert. <code>TreeMap</code> just links one new node. B+Tree has to shift array slots inside the leaf to keep it
+    sorted, and
+    with no cache misses to save, that shifting is pure extra work. Once the data starts spilling between L2 and L3,
+    every
+    miss costs on the order of 4&ndash;25 ns (the L1-to-L3 transition), and the layouts diverge. The per-key cost shows
+    it:
+    <code>TreeMap</code> goes 129 &rarr; 247 &rarr; 744 ns/key from 10,000 to 100,000 to 1,000,000 keys, while B+Tree
+    goes
+    146 &rarr; 200 &rarr; 441 ns/key, because its wide nodes need far fewer pointer hops per lookup. The crossover sits
+    between
+    10,000 and 100,000 keys; interpolating the two ratios on a log scale puts it near 20,000 keys.
+</blockquote>
+
+<table>
+    <caption>Iterative put, random key order</caption>
+    <thead>
+    <tr>
+        <th>Benchmark</th>
+        <th>1,000</th>
+        <th>10,000</th>
+        <th>100,000</th>
+        <th>1,000,000</th>
     </tr>
     </thead>
     <tbody>
     <tr>
         <td>B+Tree.randomPut</td>
-        <td>3,535.158 &plusmn; 399.494</td>
-        <td>62,784,682</td>
-        <td>620</td>
+        <td>82.826 <span class="err">&plusmn; 0.143 &micro;s</span></td>
+        <td>1.458 <span class="err">&plusmn; 0.010 ms</span></td>
+        <td><span class="win">19.968</span> <span class="err">&plusmn; 0.152 ms</span></td>
+        <td><span class="win">440.925</span> <span class="err">&plusmn; 11.550 ms</span></td>
     </tr>
     <tr>
         <td>JDK TreeMap.randomPut</td>
-        <td>7,314.133 &plusmn; 483.405</td>
-        <td>200,005,846</td>
-        <td>342</td>
+        <td><span class="win">54.558</span> <span class="err">&plusmn; 1.613 &micro;s</span></td>
+        <td><span class="win">1.292</span> <span class="err">&plusmn; 0.016 ms</span></td>
+        <td>24.722 <span class="err">&plusmn; 0.150 ms</span></td>
+        <td>743.592 <span class="err">&plusmn; 15.617 ms</span></td>
+    </tr>
+    <tr>
+        <td><b>Speedup (JDK / B+Tree)</b></td>
+        <td>0.66x (B+Tree slower)</td>
+        <td>0.89x (B+Tree slower)</td>
+        <td>1.24x</td>
+        <td>1.69x</td>
     </tr>
     </tbody>
 </table>
 
-<p>
-    <strong>Result:</strong> Under random insertion, ChaosTree is <b>2.07x faster</b> than the JDK and allocates <b>3.2x
-    less heap</b>. I am stating this plainly because showcasing only the sequential 168x best-case is marketing, not
-    engineering. The gap narrows precisely because random insertion destroys the CPU cache-locality advantage for <i>both</i>
-    structures. The massive slowdown versus the sequential run (300ms &rarr; 3,535ms) tracks entirely with L3 cache
-    misses. The latency tax comes directly from random pointer-chasing across the heap, not allocation.
-</p>
+<figure class="chart">
+    <svg viewBox="0 0 700 380" role="img"
+         aria-label="Chart of random put time per operation for B+Tree and JDK TreeMap at 1,000 to 1,000,000 keys"
+         xmlns="http://www.w3.org/2000/svg">
+        <text class="ttl" x="78" y="18">Random put, uniformly random keys (lower is better)</text>
+        <line class="grid" x1="78" y1="322.0" x2="676" y2="322.0"/>
+        <text x="70" y="326.0" text-anchor="end">10 &micro;s</text>
+        <line class="grid" x1="78" y1="266.4" x2="676" y2="266.4"/>
+        <text x="70" y="270.4" text-anchor="end">100 &micro;s</text>
+        <line class="grid" x1="78" y1="210.8" x2="676" y2="210.8"/>
+        <text x="70" y="214.8" text-anchor="end">1 ms</text>
+        <line class="grid" x1="78" y1="155.2" x2="676" y2="155.2"/>
+        <text x="70" y="159.2" text-anchor="end">10 ms</text>
+        <line class="grid" x1="78" y1="99.6" x2="676" y2="99.6"/>
+        <text x="70" y="103.6" text-anchor="end">100 ms</text>
+        <line class="grid" x1="78" y1="44.0" x2="676" y2="44.0"/>
+        <text x="70" y="48.0" text-anchor="end">1 s</text>
+        <line class="axis" x1="78" y1="44" x2="78" y2="322"/>
+        <line class="axis" x1="78" y1="322" x2="676" y2="322"/>
+        <text x="78.0" y="342" text-anchor="middle">1,000</text>
+        <text x="277.3" y="342" text-anchor="middle">10,000</text>
+        <text x="476.7" y="342" text-anchor="middle">100,000</text>
+        <text x="676.0" y="342" text-anchor="middle">1,000,000</text>
+        <text x="377.0" y="372" text-anchor="middle">keys (log scale)</text>
+        <text x="12" y="34">time / op (log scale)</text>
+        <line class="ser c1" x1="92" y1="52" x2="126" y2="52"/>
+        <circle cx="109.0" cy="52.0" r="3.8" class="c1f"></circle>
+        <text x="136" y="56">B+Tree.randomPut</text>
+        <line class="ser c3" x1="92" y1="72" x2="126" y2="72"/>
+        <rect x="105.5" y="68.5" width="7" height="7" rx="1.5" class="c3f"></rect>
+        <text x="136" y="76">JDK TreeMap.randomPut</text>
+        <path class="ser c1"
+              d="M78.0,270.9 C144.4,247.9 210.9,223.8 277.3,201.7 C343.8,179.6 410.2,161.5 476.7,138.5 C543.1,115.5 609.6,88.7 676.0,63.8"/>
+        <circle cx="78.0" cy="270.9" r="3.8" class="c1f"><title>B+Tree.randomPut, 1,000 keys: 82.826 &micro;s/op</title>
+        </circle>
+        <circle cx="277.3" cy="201.7" r="3.8" class="c1f"><title>B+Tree.randomPut, 10,000 keys: 1,458.066 &micro;
+            s/op</title></circle>
+        <circle cx="476.7" cy="138.5" r="3.8" class="c1f"><title>B+Tree.randomPut, 100,000 keys: 19,967.755 &micro;
+            s/op</title></circle>
+        <circle cx="676.0" cy="63.8" r="3.8" class="c1f"><title>B+Tree.randomPut, 1,000,000 keys: 440,925.000 &micro;
+            s/op</title></circle>
+        <path class="ser c3"
+              d="M78.0,281.0 C144.4,255.6 210.9,229.2 277.3,204.6 C343.8,180.0 410.2,158.9 476.7,133.3 C543.1,107.8 609.6,78.6 676.0,51.2"/>
+        <rect x="74.5" y="277.5" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 1,000 keys:
+            54.558 &micro;s/op</title></rect>
+        <rect x="273.8" y="201.1" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 10,000 keys:
+            1,291.662 &micro;s/op</title></rect>
+        <rect x="473.2" y="129.8" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 100,000 keys:
+            24,721.893 &micro;s/op</title></rect>
+        <rect x="672.5" y="47.7" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 1,000,000 keys:
+            743,592.290 &micro;s/op</title></rect>
+    </svg>
+    <figcaption>Random put time per operation, final 30-warmup run. Log-log axes; curves are smoothed between the four
+        measured sizes. The lines cross between 10,000 and 100,000 keys.
+    </figcaption>
+</figure>
+
+<h3>1d. Raw JMH Output</h3>
+<details>
+    <summary>Raw JMH output (unedited, &micro;s/op)</summary>
+    <p><b>Final run</b> (30 warmup, 30 measurement, 3 forks, 8 GB heap, Cnt 90): all groups; used for every table above
+        except the 1.0f row.</p>
+    <pre>
+Benchmark                                (degree)  (factor)   (size)  Mode  Cnt       Score       Error  Units
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75     1000  avgt   90       6.545 &plusmn;     0.068  us/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75    10000  avgt   90      71.279 &plusmn;     0.223  us/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75   100000  avgt   90     684.551 &plusmn;     5.785  us/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75  1000000  avgt   90    7214.462 &plusmn;    36.871  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75     1000  avgt   90       7.247 &plusmn;     0.109  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75    10000  avgt   90      77.559 &plusmn;     0.414  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75   100000  avgt   90     790.398 &plusmn;     6.364  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75  1000000  avgt   90    7810.716 &plusmn;    20.176  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75     1000  avgt   90       1.187 &plusmn;     0.006  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75    10000  avgt   90       9.477 &plusmn;     0.047  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75   100000  avgt   90      96.573 &plusmn;     0.531  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75  1000000  avgt   90     993.756 &plusmn;     4.856  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75     1000  avgt   90      82.826 &plusmn;     0.143  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75    10000  avgt   90    1458.066 &plusmn;    10.075  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75   100000  avgt   90   19967.755 &plusmn;   151.510  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75  1000000  avgt   90  440925.000 &plusmn; 11549.655  us/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75     1000  avgt   90      54.558 &plusmn;     1.613  us/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75    10000  avgt   90    1291.662 &plusmn;    15.997  us/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75   100000  avgt   90   24721.893 &plusmn;   150.351  us/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75  1000000  avgt   90  743592.290 &plusmn; 15617.036  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75     1000  avgt   90      26.268 &plusmn;     0.045  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75    10000  avgt   90     253.347 &plusmn;     2.409  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75   100000  avgt   90    3283.051 &plusmn;    15.638  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75  1000000  avgt   90   42646.838 &plusmn;  1073.419  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75     1000  avgt   90      39.507 &plusmn;     0.232  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75    10000  avgt   90     586.229 &plusmn;    17.472  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75   100000  avgt   90    8190.759 &plusmn;   141.593  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75  1000000  avgt   90  117513.945 &plusmn;   752.163  us/op
+</pre>
+    <p><b>Earlier run 6</b> (25 warmup, 8 GB heap): random put at 100,000 and 1,000,000 only. Reproduces the final run's
+        B+Tree 1M number.</p>
+    <pre>
+Benchmark                          (degree)  (factor)   (size)  Mode  Cnt       Score       Error  Units
+WriteHeavyMap.randomPutBPlusTree         64      0.75   100000  avgt   30   20151.058 &plusmn;   311.744  us/op
+WriteHeavyMap.randomPutBPlusTree         64      0.75  1000000  avgt   30  438783.731 &plusmn; 20008.037  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75   100000  avgt   30   24483.164 &plusmn;   918.616  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75  1000000  avgt   30  811810.332 &plusmn; 60286.389  us/op
+</pre>
+    <p><b>Earlier run 1 (5 warmup, 4 GB heap): all groups. Contains two pairs of identical rows, kept as printed.</b>
+        Superseded by the final run.</p>
+    <pre>
+Benchmark                                (degree)  (factor)   (size)  Mode  Cnt       Score        Error  Units
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75     1000  avgt   30       6.357 &plusmn;      0.086  us/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75    10000  avgt   30      72.462 &plusmn;      0.756  us/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75   100000  avgt   30     700.431 &plusmn;     26.249  us/op
+WriteHeavyMap.bulkLoadBPlusTree                64      0.75  1000000  avgt   30    7268.431 &plusmn;     63.402  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75     1000  avgt   30       7.249 &plusmn;      0.147  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75    10000  avgt   30      77.489 &plusmn;      1.031  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75   100000  avgt   30     802.014 &plusmn;     22.681  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap               64      0.75  1000000  avgt   30    7834.431 &plusmn;     27.534  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75     1000  avgt   30       1.195 &plusmn;      0.007  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75    10000  avgt   30       9.385 &plusmn;      0.049  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75   100000  avgt   30      96.554 &plusmn;      0.847  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      0.75  1000000  avgt   30     991.461 &plusmn;      5.401  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75     1000  avgt   30      84.806 &plusmn;      0.952  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75    10000  avgt   30    1517.730 &plusmn;     28.338  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75  1000000  avgt   30  662390.649 &plusmn;  36447.760  us/op   (dup)
+WriteHeavyMap.randomPutBPlusTree               64      0.75   100000  avgt   30   25853.828 &plusmn;   1332.499  us/op
+WriteHeavyMap.randomPutBPlusTree               64      0.75  1000000  avgt   30  662390.649 &plusmn;  36447.760  us/op   (dup)
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75     1000  avgt   30      52.942 &plusmn;      1.807  us/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75    10000  avgt   30    1323.350 &plusmn;     11.028  us/op
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75   100000  avgt   30   27222.846 &plusmn;   2099.565  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75    10000  avgt   30     249.754 &plusmn;      1.337  us/op   (dup)
+WriteHeavyMap.randomPutJdkTreeMap              64      0.75  1000000  avgt   30  877932.912 &plusmn; 101682.681  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75     1000  avgt   30      26.288 &plusmn;      0.123  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75    10000  avgt   30     249.754 &plusmn;      1.337  us/op   (dup)
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75   100000  avgt   30    3282.640 &plusmn;     28.744  us/op
+WriteHeavyMap.sequentialPutBPlusTree           64      0.75  1000000  avgt   30   39703.910 &plusmn;    524.402  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75     1000  avgt   30      38.042 &plusmn;      0.354  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75    10000  avgt   30     577.758 &plusmn;     44.782  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75   100000  avgt   30    8071.844 &plusmn;     81.200  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75  1000000  avgt   30  118280.552 &plusmn;   1212.898  us/op
+</pre>
+    <p><b>Earlier run 2 (10 warmup, 8 GB heap): random put.</b> Superseded by the final run.</p>
+    <pre>
+Benchmark                          (degree)  (factor)   (size)  Mode  Cnt       Score       Error  Units
+WriteHeavyMap.randomPutBPlusTree         64      0.75     1000  avgt   30      79.265 &plusmn;     3.180  us/op
+WriteHeavyMap.randomPutBPlusTree         64      0.75    10000  avgt   30    1470.393 &plusmn;     3.334  us/op
+WriteHeavyMap.randomPutBPlusTree         64      0.75   100000  avgt   30   22689.996 &plusmn;  1642.736  us/op
+WriteHeavyMap.randomPutBPlusTree         64      0.75  1000000  avgt   30  634115.125 &plusmn; 25871.664  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75     1000  avgt   30      56.034 &plusmn;     3.817  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75    10000  avgt   30    1291.868 &plusmn;    20.114  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75   100000  avgt   30   24990.211 &plusmn;   587.341  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75  1000000  avgt   30  710875.236 &plusmn; 49282.962  us/op
+</pre>
+    <p><b>Earlier run 3 (10 warmup, 8 GB heap): sequential put.</b> Superseded by the final run.</p>
+    <pre>
+Benchmark                              (degree)  (factor)   (size)  Mode  Cnt       Score      Error  Units
+WriteHeavyMap.sequentialPutBPlusTree         64      0.75     1000  avgt   30      26.399 &plusmn;    0.379  us/op
+WriteHeavyMap.sequentialPutBPlusTree         64      0.75    10000  avgt   30     253.799 &plusmn;    3.763  us/op
+WriteHeavyMap.sequentialPutBPlusTree         64      0.75   100000  avgt   30    3255.864 &plusmn;   22.881  us/op
+WriteHeavyMap.sequentialPutBPlusTree         64      0.75  1000000  avgt   30   41547.678 &plusmn; 1657.712  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap        64      0.75     1000  avgt   30      38.599 &plusmn;    0.441  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap        64      0.75    10000  avgt   30     617.020 &plusmn;    8.036  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap        64      0.75   100000  avgt   30    8019.732 &plusmn;   31.269  us/op
+WriteHeavyMap.sequentialPutJdkTreeMap        64      0.75  1000000  avgt   30  117103.580 &plusmn;  618.069  us/op
+</pre>
+    <p><b>Earlier run 4 (10 warmup, 8 GB heap): bulkLoad.</b> Superseded by the final run.</p>
+    <pre>
+Benchmark                         (degree)  (factor)   (size)  Mode  Cnt     Score    Error  Units
+WriteHeavyMap.bulkLoadBPlusTree         64      0.75     1000  avgt   30     6.545 &plusmn;  0.171  us/op
+WriteHeavyMap.bulkLoadBPlusTree         64      0.75    10000  avgt   30    71.221 &plusmn;  0.405  us/op
+WriteHeavyMap.bulkLoadBPlusTree         64      0.75   100000  avgt   30   663.264 &plusmn;  3.219  us/op
+WriteHeavyMap.bulkLoadBPlusTree         64      0.75  1000000  avgt   30  7197.990 &plusmn; 33.201  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap        64      0.75     1000  avgt   30     7.235 &plusmn;  0.156  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap        64      0.75    10000  avgt   30    78.209 &plusmn;  0.749  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap        64      0.75   100000  avgt   30   804.539 &plusmn; 30.005  us/op
+WriteHeavyMap.bulkLoadJdkTreeMap        64      0.75  1000000  avgt   30  7839.714 &plusmn; 46.373  us/op
+</pre>
+    <p><b>Earlier run 5 (10 warmup, 8 GB heap): importFlatMatrix at factor 0.75f and 1.0f. The 1.0f rows are the source
+        of the 1.0f row in 1a.</b> Superseded by the final run.</p>
+    <pre>
+Benchmark                                (degree)  (factor)   (size)  Mode  Cnt     Score    Error  Units
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f     1000  avgt   30     1.209 &plusmn;  0.026  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f    10000  avgt   30     9.373 &plusmn;  0.053  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f   100000  avgt   30    98.174 &plusmn;  2.222  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64     0.75f  1000000  avgt   30  1031.904 &plusmn; 23.689  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f     1000  avgt   30     0.914 &plusmn;  0.009  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f    10000  avgt   30     7.258 &plusmn;  0.097  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f   100000  avgt   30    75.121 &plusmn;  1.147  us/op
+WriteHeavyMap.importFlatMatrixBPlusTree        64      1.0f  1000000  avgt   30   808.086 &plusmn; 15.839  us/op
+</pre>
+</details>
 
 <p>
-    <strong>The JMH Profiler Artifact:</strong> If you read the raw JMH output, you will notice an anomaly: ChaosTree
-    reports a higher <code>gc.time</code> (620ms) despite allocating 3.2x less garbage than <code>TreeMap</code>. I
-    rooted this via raw <code>-Xlog:gc</code> logs. It is a JMH timing-window artifact. <code>TreeMap</code>'s GC pauses
-    happened to straddle unmeasured warmup iterations, causing JMH's secondary metric to undercount its true pause cost.
-    A byte-for-byte log comparison of single pauses proved they are identical (~205ms to move ~645MB). The primary
-    <code>Score</code> column is immune to this artifact.
+    <strong>Takeaway:</strong> ChaosTree's advantage is structural: when the input is sorted or can be handed over as a
+    flat matrix, use
+    <code>importFlatMatrix</code> / <code>buildFromSorted</code>. For unsorted single-key inserts it is competitive only
+    at large N. As data crosses the L2/L3 cache cliff the performance gets increased.
 </p>
 
 <hr>
