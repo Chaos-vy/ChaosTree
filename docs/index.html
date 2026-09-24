@@ -123,6 +123,9 @@
         .chart .axis { stroke: currentColor; opacity: 0.6; stroke-width: 1.2; }
         .chart text { fill: currentColor; font-size: 12px; }
         .chart .ttl { font-size: 12px; font-weight: 700; }
+        .chart .band { fill: currentColor; opacity: 0.12; }
+        .chart .cross { stroke: currentColor; opacity: 0.35; stroke-width: 1.2; }
+        .chart .note { font-size: 11px; opacity: 0.85; }
         .chart .ser { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .chart .c1 { stroke: #8b5cf6; }
         .chart .c1f { fill: #8b5cf6; }
@@ -203,6 +206,7 @@
 </head>
 <body>
 <button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+
 <div style="text-align: center">
     <h1>🌲 ChaosTree</h1>
     <p class="bold">A zero-dependency, cache-aware NavigableSet and NavigableMap engine for Java 21+.</p>
@@ -776,7 +780,7 @@ java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap \
     goes
     146 &rarr; 200 &rarr; 441 ns/key, because its wide nodes need far fewer pointer hops per lookup. The crossover sits
     between
-    10,000 and 100,000 keys; interpolating the two ratios on a log scale puts it near 20,000 keys.
+    10,000 and 100,000 keys; interpolating the two ratios on a log scale puts it near 25,000 keys.
 </blockquote>
 
 <table>
@@ -816,9 +820,7 @@ java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap \
 </table>
 
 <figure class="chart">
-    <svg viewBox="0 0 700 380" role="img"
-         aria-label="Chart of random put time per operation for B+Tree and JDK TreeMap at 1,000 to 1,000,000 keys"
-         xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 700 380" role="img" aria-label="Chart of random put time per operation for B+Tree and JDK TreeMap from 1,000 to 1,000,000 keys, with extra points at 20,000, 25,000 and 30,000 keys" xmlns="http://www.w3.org/2000/svg">
         <text class="ttl" x="78" y="18">Random put, uniformly random keys (lower is better)</text>
         <line class="grid" x1="78" y1="322.0" x2="676" y2="322.0"/>
         <text x="70" y="326.0" text-anchor="end">10 &micro;s</text>
@@ -840,37 +842,36 @@ java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap \
         <text x="676.0" y="342" text-anchor="middle">1,000,000</text>
         <text x="377.0" y="372" text-anchor="middle">keys (log scale)</text>
         <text x="12" y="34">time / op (log scale)</text>
+        <rect class="band" x="336.7" y="44" width="35.8" height="278"/>
+        <text class="note" x="378.4" y="58">20K&ndash;30K keys: crossover</text>
+        <text class="note" x="348.7" y="312" text-anchor="end">TreeMap faster (in cache)</text>
+        <text class="note" x="380.4" y="312">B+Tree faster (spills L2/L3)</text>
         <line class="ser c1" x1="92" y1="52" x2="126" y2="52"/>
-        <circle cx="109.0" cy="52.0" r="3.8" class="c1f"></circle>
+        <circle cx="109.0" cy="52.0" r="3.6" class="c1f"></circle>
         <text x="136" y="56">B+Tree.randomPut</text>
         <line class="ser c3" x1="92" y1="72" x2="126" y2="72"/>
-        <rect x="105.5" y="68.5" width="7" height="7" rx="1.5" class="c3f"></rect>
+        <rect x="105.7" y="68.7" width="6.6" height="6.6" rx="1.5" class="c3f"></rect>
         <text x="136" y="76">JDK TreeMap.randomPut</text>
-        <path class="ser c1"
-              d="M78.0,270.9 C144.4,247.9 210.9,223.8 277.3,201.7 C343.8,179.6 410.2,161.5 476.7,138.5 C543.1,115.5 609.6,88.7 676.0,63.8"/>
-        <circle cx="78.0" cy="270.9" r="3.8" class="c1f"><title>B+Tree.randomPut, 1,000 keys: 82.826 &micro;s/op</title>
-        </circle>
-        <circle cx="277.3" cy="201.7" r="3.8" class="c1f"><title>B+Tree.randomPut, 10,000 keys: 1,458.066 &micro;
-            s/op</title></circle>
-        <circle cx="476.7" cy="138.5" r="3.8" class="c1f"><title>B+Tree.randomPut, 100,000 keys: 19,967.755 &micro;
-            s/op</title></circle>
-        <circle cx="676.0" cy="63.8" r="3.8" class="c1f"><title>B+Tree.randomPut, 1,000,000 keys: 440,925.000 &micro;
-            s/op</title></circle>
-        <path class="ser c3"
-              d="M78.0,281.0 C144.4,255.6 210.9,229.2 277.3,204.6 C343.8,180.0 410.2,158.9 476.7,133.3 C543.1,107.8 609.6,78.6 676.0,51.2"/>
-        <rect x="74.5" y="277.5" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 1,000 keys:
-            54.558 &micro;s/op</title></rect>
-        <rect x="273.8" y="201.1" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 10,000 keys:
-            1,291.662 &micro;s/op</title></rect>
-        <rect x="473.2" y="129.8" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 100,000 keys:
-            24,721.893 &micro;s/op</title></rect>
-        <rect x="672.5" y="47.7" width="7" height="7" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 1,000,000 keys:
-            743,592.290 &micro;s/op</title></rect>
+        <path class="ser c1" d="M78.0,270.9 C144.4,247.9 210.9,223.7 277.3,201.7 C297.3,195.1 317.3,189.0 337.3,182.8 C343.8,180.9 350.2,179.0 356.7,177.0 C361.9,175.4 367.2,173.7 372.4,172.0 C407.2,160.9 441.9,150.6 476.7,138.5 C543.1,115.4 609.6,88.7 676.0,63.8"/>
+        <circle cx="78.0" cy="270.9" r="3.6" class="c1f"><title>B+Tree.randomPut, 1,000 keys: 82.826 &micro;s/op</title></circle>
+        <circle cx="277.3" cy="201.7" r="3.6" class="c1f"><title>B+Tree.randomPut, 10,000 keys: 1,458.066 &micro;s/op</title></circle>
+        <circle cx="337.3" cy="182.8" r="3.6" class="c1f"><title>B+Tree.randomPut, 20,000 keys: 3,183.041 &micro;s/op</title></circle>
+        <circle cx="356.7" cy="177.0" r="3.6" class="c1f"><title>B+Tree.randomPut, 25,000 keys: 4,055.041 &micro;s/op</title></circle>
+        <circle cx="372.4" cy="172.0" r="3.6" class="c1f"><title>B+Tree.randomPut, 30,000 keys: 4,989.438 &micro;s/op</title></circle>
+        <circle cx="476.7" cy="138.5" r="3.6" class="c1f"><title>B+Tree.randomPut, 100,000 keys: 19,967.755 &micro;s/op</title></circle>
+        <circle cx="676.0" cy="63.8" r="3.6" class="c1f"><title>B+Tree.randomPut, 1,000,000 keys: 440,925.000 &micro;s/op</title></circle>
+        <path class="ser c3" d="M78.0,281.0 C144.4,255.6 210.9,229.2 277.3,204.6 C297.3,197.2 317.3,190.0 337.3,183.3 C343.8,181.1 350.2,179.4 356.7,177.1 C361.9,175.3 367.2,172.9 372.4,171.0 C407.2,157.9 441.9,146.8 476.7,133.3 C543.1,107.7 609.6,78.6 676.0,51.2"/>
+        <rect x="74.7" y="277.7" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 1,000 keys: 54.558 &micro;s/op</title></rect>
+        <rect x="274.0" y="201.3" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 10,000 keys: 1,291.662 &micro;s/op</title></rect>
+        <rect x="334.0" y="180.0" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 20,000 keys: 3,126.890 &micro;s/op</title></rect>
+        <rect x="353.4" y="173.8" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 25,000 keys: 4,029.297 &micro;s/op</title></rect>
+        <rect x="369.1" y="167.7" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 30,000 keys: 5,204.324 &micro;s/op</title></rect>
+        <rect x="473.4" y="130.0" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 100,000 keys: 24,721.893 &micro;s/op</title></rect>
+        <rect x="672.7" y="47.9" width="6.6" height="6.6" rx="1.5" class="c3f"><title>JDK TreeMap.randomPut, 1,000,000 keys: 743,592.290 &micro;s/op</title></rect>
     </svg>
-    <figcaption>Random put time per operation, final 30-warmup run. Log-log axes; curves are smoothed between the four
-        measured sizes. The lines cross between 10,000 and 100,000 keys.
-    </figcaption>
+    <figcaption>Random put time per operation. Log-log axes; curves are smoothed between the measured sizes. The shaded band marks the crossover between 20,000 and 30,000 keys; the two trees are tied within error at 20,000 and 30,000.</figcaption>
 </figure>
+
 
 <h3>1d. Raw JMH Output</h3>
 <details>
@@ -907,6 +908,18 @@ WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75     1000  avgt   90 
 WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75    10000  avgt   90     586.229 &plusmn;    17.472  us/op
 WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75   100000  avgt   90    8190.759 &plusmn;   141.593  us/op
 WriteHeavyMap.sequentialPutJdkTreeMap          64      0.75  1000000  avgt   90  117513.945 &plusmn;   752.163  us/op
+</pre>
+    <p><b>Crossover zoom runs</b> (random put, Cnt 30): 25,000 and 30,000 keys, then 20,000 keys.</p>
+    <pre>
+Benchmark                          (degree)  (factor)  (size)  Mode  Cnt     Score    Error  Units
+WriteHeavyMap.randomPutBPlusTree         64      0.75   25000  avgt   30  4055.041 &plusmn;  9.999  us/op
+WriteHeavyMap.randomPutBPlusTree         64      0.75   30000  avgt   30  4989.438 &plusmn; 20.363  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75   25000  avgt   30  4029.297 &plusmn; 25.271  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75   30000  avgt   30  5204.324 &plusmn; 33.204  us/op
+
+Benchmark                          (degree)  (factor)  (size)  Mode  Cnt     Score    Error  Units
+WriteHeavyMap.randomPutBPlusTree         64      0.75   20000  avgt   30  3183.041 &plusmn; 12.010  us/op
+WriteHeavyMap.randomPutJdkTreeMap        64      0.75   20000  avgt   30  3126.890 &plusmn; 57.405  us/op
 </pre>
     <p><b>Earlier run 6</b> (25 warmup, 8 GB heap): random put at 100,000 and 1,000,000 only. Reproduces the final run's
         B+Tree 1M number.</p>

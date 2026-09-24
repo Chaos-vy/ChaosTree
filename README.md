@@ -187,7 +187,7 @@ Over a 10,000x increase in data size, `TreeMap`'s worst case grows **~145x** (89
 
 **Takeaway:** below ~280K entries, a flat array wins on pure iteration. Past that, `BPlusTreeMap`'s cache-friendly leaf layout takes over, and the gap widens with scale.
 
-More reports: [Insert-heavy](https://chaos-vy.github.io/ChaosTree/benchmark/nary-insert-heavy.html) · [Read-heavy](https://chaos-vy.github.io/ChaosTree/benchmark/nary-read-heavy.html) · [Mixed workload](https://chaos-vy.github.io/ChaosTree/benchmark/nary-mixed-workload.html) · [The Amortization Quirk](https://chaos-vy.github.io/ChaosTree/utils/Slow-at-low-dataset.html)
+More reports: [Insert-heavy](https://chaos-vy.github.io/ChaosTree/benchmark/nary-insert-heavy.html) · [Read-heavy](https://chaos-vy.github.io/ChaosTree/benchmark/nary-read-heavy.html) · [Mixed workload](https://chaos-vy.github.io/ChaosTree/benchmark/nary-mixed-workload.html) · [Slow at low dataset(Cold) only](https://chaos-vy.github.io/ChaosTree/utils/Slow-at-low-dataset.html)
 
 ---
 
