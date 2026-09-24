@@ -61,19 +61,19 @@ public class BulkLoadSetBenchmark {
     }
 
     @Benchmark
-    public SortedSet<Integer> treeSet_JdkStandard() {
+    public SortedSet<Integer> treeSetJdkStandard() {
         return new TreeSet<>(sourceTreeSet);
     }
 
     @Benchmark
-    public SortedSet<Integer> chaosTree_LoadedFromTreeSetIterator() {
+    public SortedSet<Integer> chaosTreeLoadedFromTreeSetIterator() {
         return BTreeSet.Builder.<Integer>create(64).factor(0.9f)
                 .importSorted(sourceTreeSet.iterator())
                 .build();
     }
 
     @Benchmark
-    public SortedSet<Integer> chaosTree_IteratorLoad() {
+    public SortedSet<Integer> chaosTreeIteratorLoad() {
         CustomArrayIterator iterator = new CustomArrayIterator(data);
         return BTreeSet.Builder.<Integer>create(64).factor(0.9f)
                 .importSorted(iterator)
@@ -81,7 +81,7 @@ public class BulkLoadSetBenchmark {
     }
 
     @Benchmark
-    public SortedSet<Integer> chaosTree_DragonFeedArrayLoad() {
+    public SortedSet<Integer> chaosTreeDragonFeedArrayLoad() {
         return BTreeSet.Builder.<Integer>create(64).factor(0.9f)
                 .importFlatArray(data)
                 .build();
