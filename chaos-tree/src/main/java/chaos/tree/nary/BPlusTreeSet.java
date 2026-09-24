@@ -770,8 +770,8 @@ public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<
         }
 
         public BPlusTreeSet.Builder<E> degree(int degree) {
-            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
-                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            if (degree < 3 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 3 and less than Integer.MAX_VALUE/2");
             }
             this.degree = degree;
             return this;
