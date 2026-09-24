@@ -25,32 +25,32 @@ public class BinaryMapApiTest extends AbstractNavigableMapApiTest {
         runScenario(new AvlTreeMap<>(), initial, actions);
     }
 
-    @Example
+    @Property(tries = 1000)
     void rbtEdgeCases() {
         edgeCases(RedBlackTreeMap::new);
     }
 
-    @Example
+    @Property(tries = 1000)
     void avlEdgeCases() {
         edgeCases(AvlTreeMap::new);
     }
 
-    @Example
+    @Property(tries = 1000)
     void rbtFailFastIterators() {
         failFast(RedBlackTreeMap::new);
     }
 
-    @Example
+    @Property(tries = 1000)
     void avlFailFastIterators() {
         failFast(AvlTreeMap::new);
     }
 
-    @Example
+    @Property(tries = 1000)
     void rbtFunctionsThatMutateTheMap() {
         mutatingFunctions(RedBlackTreeMap::new);
     }
 
-    @Example
+    @Property(tries = 1000)
     void avlFunctionsThatMutateTheMap() {
         mutatingFunctions(AvlTreeMap::new);
     }

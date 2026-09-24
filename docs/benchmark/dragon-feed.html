@@ -62,6 +62,22 @@
             text-decoration: underline;
         }
 
+        .chart-box {
+            border: 1px solid #000;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #fafafa;
+        }
+
+        .chart-box canvas {
+            max-height: 340px;
+        }
+
+        .chart-caption {
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
 
         body.dark-mode {
             background-color: #121212;
@@ -93,6 +109,11 @@
 
         body.dark-mode th {
             background-color: #222;
+        }
+
+        body.dark-mode .chart-box {
+            background-color: #1a1a1a;
+            border-color: #444;
         }
 
         body.dark-mode .err {
@@ -232,6 +253,15 @@ java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap.importFlatMatrixBPlus
     effect: <code>1.0f</code> beats <code>0.5f</code> by roughly 35–42% across every size.
 </p>
 
+<div class="chart-box">
+    <canvas id="pathComparisonChart" height="120"></canvas>
+    <p class="chart-caption">
+        importFlatMatrix vs. buildFromSorted at factor=1.0f, log-log scale. The gap between the two lines is the
+        whole point of the Dragon Feed: arraycopy-based ingestion stays roughly an order of magnitude faster than
+        iterator-driven construction at every size, and the gap widens as size grows.
+    </p>
+</div>
+
 <h3>Factor vs. Memory — importFlatMatrix, size = 1,000,000</h3>
 <p>
     Same path, finer-grained factor sweep, with JMH's <code>gc.alloc.rate.norm</code> profiler enabled to see
@@ -244,132 +274,138 @@ java -jar ct-benchmark/target/benchmarks.jar WriteHeavyMap.importFlatMatrixBPlus
     -p factor=0.5f,0.6f,0.7f,0.8f,0.9f,1.0f \
     -f 3 -wi 10 -w 1 -r 1 -i 10 -tu ms -prof gc -rf text -rff dragonFeedMemory.txt
 </pre>
-<table>
+<table class="bench">
     <thead>
-    <table class="bench">
-        <thead>
-        <tr>
-            <th>Factor</th>
-            <th>Time (ms/op)</th>
-            <th>Alloc Rate (MB/sec)</th>
-            <th>Alloc/op (B/op)</th>
-            <th>Tree Size (MB)</th>
-            <th>GC Count</th>
-            <th>GC Time (ms)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>0.5f</td>
-            <td>1.483 <span class="err">± 0.009</span></td>
-            <td>11273.263 <span class="err">± 69.080</span></td>
-            <td>17538210.268</td>
-            <td>16.73</td>
-            <td>248</td>
-            <td>384</td>
-        </tr>
-        <tr>
-            <td>0.6f</td>
-            <td>1.241 <span class="err">± 0.005</span></td>
-            <td>11213.114 <span class="err">± 46.660</span></td>
-            <td>14592160.594</td>
-            <td>13.91</td>
-            <td>258</td>
-            <td>384</td>
-        </tr>
-        <tr>
-            <td>0.7f</td>
-            <td>1.097 <span class="err">± 0.007</span></td>
-            <td>10976.941 <span class="err">± 70.795</span></td>
-            <td>12628127.598</td>
-            <td>12.04</td>
-            <td>259</td>
-            <td>329</td>
-        </tr>
-        <tr>
-            <td>0.8f</td>
-            <td>0.954 <span class="err">± 0.006</span></td>
-            <td>10950.163 <span class="err">± 69.089</span></td>
-            <td>10952094.603</td>
-            <td>10.44</td>
-            <td>258</td>
-            <td>354</td>
-        </tr>
-        <tr>
-            <td>0.9f</td>
-            <td>0.845 <span class="err">± 0.004</span></td>
-            <td>10901.292 <span class="err">± 46.037</span></td>
-            <td>9664125.850</td>
-            <td>9.22</td>
-            <td>282</td>
-            <td>337</td>
-        </tr>
-        <tr>
-            <td><strong>1.0f</strong></td>
-            <td><strong>0.777</strong> <span class="err">± 0.008</span></td>
-            <td><strong>10682.879</strong> <span class="err">± 114.768</span></td>
-            <td><strong>8701725.380</strong></td>
-            <td><strong>8.30</strong></td>
-            <td>279</td>
-            <td>343</td>
-        </tr>
-        </tbody>
-    </table>
-    <p>
-        <code>Tree Size (MB)</code> is <code>Alloc/op</code> converted to MB — for a bulk import benchmark this is
-        effectively the resident size of the built tree, since each op constructs one fresh tree from scratch.
-        <code>0.5f → 1.0f</code> shrinks it from 16.73 MB to 8.30 MB, roughly halving memory footprint for
-        1,000,000 entries, while time drops ~48% in step.
-    </p>
+    <tr>
+        <th>Factor</th>
+        <th>Time (ms/op)</th>
+        <th>Alloc Rate (MB/sec)</th>
+        <th>Alloc/op (B/op)</th>
+        <th>Tree Size (MB)</th>
+        <th>GC Count</th>
+        <th>GC Time (ms)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>0.5f</td>
+        <td>1.483 <span class="err">± 0.009</span></td>
+        <td>11273.263 <span class="err">± 69.080</span></td>
+        <td>17538210.268</td>
+        <td>16.73</td>
+        <td>248</td>
+        <td>384</td>
+    </tr>
+    <tr>
+        <td>0.6f</td>
+        <td>1.241 <span class="err">± 0.005</span></td>
+        <td>11213.114 <span class="err">± 46.660</span></td>
+        <td>14592160.594</td>
+        <td>13.91</td>
+        <td>258</td>
+        <td>384</td>
+    </tr>
+    <tr>
+        <td>0.7f</td>
+        <td>1.097 <span class="err">± 0.007</span></td>
+        <td>10976.941 <span class="err">± 70.795</span></td>
+        <td>12628127.598</td>
+        <td>12.04</td>
+        <td>259</td>
+        <td>329</td>
+    </tr>
+    <tr>
+        <td>0.8f</td>
+        <td>0.954 <span class="err">± 0.006</span></td>
+        <td>10950.163 <span class="err">± 69.089</span></td>
+        <td>10952094.603</td>
+        <td>10.44</td>
+        <td>258</td>
+        <td>354</td>
+    </tr>
+    <tr>
+        <td>0.9f</td>
+        <td>0.845 <span class="err">± 0.004</span></td>
+        <td>10901.292 <span class="err">± 46.037</span></td>
+        <td>9664125.850</td>
+        <td>9.22</td>
+        <td>282</td>
+        <td>337</td>
+    </tr>
+    <tr>
+        <td><strong>1.0f</strong></td>
+        <td><strong>0.777</strong> <span class="err">± 0.008</span></td>
+        <td><strong>10682.879</strong> <span class="err">± 114.768</span></td>
+        <td><strong>8701725.380</strong></td>
+        <td><strong>8.30</strong></td>
+        <td>279</td>
+        <td>343</td>
+    </tr>
+    </tbody>
+</table>
+<p>
+    <code>Tree Size (MB)</code> is <code>Alloc/op</code> converted to MB — for a bulk import benchmark this is
+    effectively the resident size of the built tree, since each op constructs one fresh tree from scratch.
+    <code>0.5f → 1.0f</code> shrinks it from 16.73 MB to 8.30 MB, roughly halving memory footprint for
+    1,000,000 entries, while time drops ~48% in step.
+</p>
 
-    <h3>buildFromSorted — iterator-driven build</h3>
-    <table class="bench">
-        <thead>
-        <tr>
-            <th>Factor</th>
-            <th>10,000</th>
-            <th>100,000</th>
-            <th>1,000,000</th>
-            <th>10,000,000</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>0.5f</td>
-            <td>74.251 <span class="err">± 0.847</span></td>
-            <td>700.342 <span class="err">± 15.937</span></td>
-            <td>7640.535 <span class="err">± 68.402</span></td>
-            <td>82775.216 <span class="err">± 4449.711</span></td>
-        </tr>
-        <tr>
-            <td>0.75f</td>
-            <td>72.601 <span class="err">± 0.235</span></td>
-            <td>705.388 <span class="err">± 14.247</span></td>
-            <td>7597.012 <span class="err">± 35.819</span></td>
-            <td>83992.645 <span class="err">± 4933.130</span></td>
-        </tr>
-        <tr>
-            <td>1.0f</td>
-            <td>73.762 <span class="err">± 1.303</span></td>
-            <td>689.406 <span class="err">± 6.192</span></td>
-            <td>7619.628 <span class="err">± 46.503</span></td>
-            <td>84430.291 <span class="err">± 5037.158</span></td>
-        </tr>
-        </tbody>
-    </table>
-    <p>
-        All values in microseconds per operation, same layout as above — down a column compares factors at fixed
-        size, across a row shows one factor's scaling.
+<div class="chart-box">
+    <canvas id="factorSweepChart" height="120"></canvas>
+    <p class="chart-caption">
+        Factor sweep at size=1,000,000: build time (line, left axis) tracks tree memory footprint (bars, right
+        axis) almost linearly — confirming allocation volume, not comparator/traversal cost, dominates this path.
     </p>
-    <p>
-        Here the three factors sit within each other's error bars at every size — packing density only controls node
-        occupancy, and it's a second-order effect compared to the per-entry comparator/iterator/split cost that
-        dominates this path.
-    </p>
+</div>
 
-    <h2>Usage</h2>
-    <h3>1. By Constructor</h3>
-    <pre>
+<h3>buildFromSorted — iterator-driven build</h3>
+<table class="bench">
+    <thead>
+    <tr>
+        <th>Factor</th>
+        <th>10,000</th>
+        <th>100,000</th>
+        <th>1,000,000</th>
+        <th>10,000,000</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>0.5f</td>
+        <td>74.251 <span class="err">± 0.847</span></td>
+        <td>700.342 <span class="err">± 15.937</span></td>
+        <td>7640.535 <span class="err">± 68.402</span></td>
+        <td>82775.216 <span class="err">± 4449.711</span></td>
+    </tr>
+    <tr>
+        <td>0.75f</td>
+        <td>72.601 <span class="err">± 0.235</span></td>
+        <td>705.388 <span class="err">± 14.247</span></td>
+        <td>7597.012 <span class="err">± 35.819</span></td>
+        <td>83992.645 <span class="err">± 4933.130</span></td>
+    </tr>
+    <tr>
+        <td>1.0f</td>
+        <td>73.762 <span class="err">± 1.303</span></td>
+        <td>689.406 <span class="err">± 6.192</span></td>
+        <td>7619.628 <span class="err">± 46.503</span></td>
+        <td>84430.291 <span class="err">± 5037.158</span></td>
+    </tr>
+    </tbody>
+</table>
+<p>
+    All values in microseconds per operation, same layout as above — down a column compares factors at fixed
+    size, across a row shows one factor's scaling.
+</p>
+<p>
+    Here the three factors sit within each other's error bars at every size — packing density only controls node
+    occupancy, and it's a second-order effect compared to the per-entry comparator/iterator/split cost that
+    dominates this path.
+</p>
+
+<h2>Usage</h2>
+<h3>1. By Constructor</h3>
+<pre>
 // Use the Dragon at top gear (1.0f)
 // It is advised to leave a space for future operation.
 // 1. Prepare your sorted data matrix
@@ -384,157 +420,304 @@ BPlusTreeMap<Integer, String> fastMap = new BPlusTreeMap<>(
         .importFlatMatrix(matrix)
         .build()
 );
-    </pre>
-    <h3>2. By Public API through array</h3>
+</pre>
+<h3>2. By Public API through array</h3>
 
-    <strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
+<strong>WARNING: THE TRUE DRAGON OF CHAOSTREE.</strong>
 
-    This is a high-performance, Data-Oriented, cache-aware array ingestion engine.
-    It is hungry for raw array throughput, but it is extremely unforgiving.
-    Use with absolute precision.
+This is a high-performance, Data-Oriented, cache-aware array ingestion engine.
+It is hungry for raw array throughput, but it is extremely unforgiving.
+Use with absolute precision.
 
-    <strong>THE FLAT MATRIX RULES:</strong>
+<strong>THE FLAT MATRIX RULES:</strong>
 
-    <ul>
-        <li>
-            <strong>Matrix Layout:</strong>
-            The blast parameter must be exactly 2D:
-            <code>blast[0]</code> contains the keys, and
-            <code>blast[1]</code> contains the values.
-        </li>
+<ul>
+    <li>
+        <strong>Matrix Layout:</strong>
+        The blast parameter must be exactly 2D:
+        <code>blast[0]</code> contains the keys, and
+        <code>blast[1]</code> contains the values.
+    </li>
 
-        <li>
-            <strong>Array Integrity:</strong>
-            Neither array can be null, and both must be of exactly equal length.
-        </li>
+    <li>
+        <strong>Array Integrity:</strong>
+        Neither array can be null, and both must be of exactly equal length.
+    </li>
 
-        <li>
-            <strong>No Null Keys:</strong>
-            A key must never be null.
-            If a value is empty/missing, you must explicitly place
-            <code>null</code> in the value array at that index.
-        </li>
+    <li>
+        <strong>No Null Keys:</strong>
+        A key must never be null.
+        If a value is empty/missing, you must explicitly place
+        <code>null</code> in the value array at that index.
+    </li>
 
-        <li>
-            <strong>Strictly Sorted:</strong>
-            The keys array <strong>MUST</strong> be strictly sorted according
-            to the tree's comparator.
-            Feeding unsorted data will instantly and silently corrupt
-            the entire tree structure.
-        </li>
+    <li>
+        <strong>Strictly Sorted:</strong>
+        The keys array <strong>MUST</strong> be strictly sorted according
+        to the tree's comparator.
+        Feeding unsorted data will instantly and silently corrupt
+        the entire tree structure.
+    </li>
 
-        <li>
-            <strong>Minimum Degree:</strong>
-            This API relies on chunked array-copying and only services
-            trees with a degree &gt;= 32.
-        </li>
+    <li>
+        <strong>Minimum Degree:</strong>
+        This API relies on chunked array-copying and only services
+        trees with a degree &gt;= 32.
+    </li>
 
-        <li>
-            <strong>FILL FACTOR:</strong>
-            The factor determines node occupancy and has strict limits
-            between <code>0.5f</code> and <code>1.0f</code>.
-            A factor of <code>0.75f</code> is highly recommended for bulk loading.
-            This packs the nodes densely while leaving exactly enough buffer room
-            to prevent future insertions from triggering massive, cascading
-            split operations.
-            <strong>Hold the Chaos!</strong>
-        </li>
-    </ul>
+    <li>
+        <strong>FILL FACTOR:</strong>
+        The factor determines node occupancy and has strict limits
+        between <code>0.5f</code> and <code>1.0f</code>.
+        A factor of <code>0.75f</code> is highly recommended for bulk loading.
+        This packs the nodes densely while leaving exactly enough buffer room
+        to prevent future insertions from triggering massive, cascading
+        split operations.
+        <strong>Hold the Chaos!</strong>
+    </li>
+</ul>
 
-    <strong>Method:</strong>
-    <i>abstract void importFlatMatrix(Object[][] blast, float factor);</i>
+<strong>Method:</strong>
+<i>abstract void importFlatMatrix(Object[][] blast, float factor);</i>
 
-    <strong>Parameters:</strong>
+<strong>Parameters:</strong>
 
-    <strong>blast</strong>
-    A 2D array where <code>blast[0]</code> is the sorted keys and
-    <code>blast[1]</code> is the mapped values.
+<strong>blast</strong>
+A 2D array where <code>blast[0]</code> is the sorted keys and
+<code>blast[1]</code> is the mapped values.
 
-    <strong>factor</strong>
-    The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
+<strong>factor</strong>
+The node fill factor, restricted to the range <code>[0.5, 1.0]</code>.
 
-    <pre>
-    // Awaken the Dragon at top gear (1.0f)
-    Object[][] blast = new Object[][]{sortedKeys, values};
-    float factor = 1.0f;
+<pre>
+// Awaken the Dragon at top gear (1.0f)
+Object[][] blast = new Object[][]{sortedKeys, values};
+float factor = 1.0f;
 
-    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;();
-    //this creates a default degree of 64 and comparator null!
-    map.importFlatMatrix(blast, factor);
-    </pre>
+BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;();
+//this creates a default degree of 64 and comparator null!
+map.importFlatMatrix(blast, factor);
+</pre>
 
-    <h3>3. By Public API through Sorted Map.Entry</h3>
+<h3>3. By Public API through Sorted Map.Entry</h3>
 
-    <strong>Streams strictly sorted data directly into the tree in O(N) time.</strong>
+<strong>Streams strictly sorted data directly into the tree in O(N) time.</strong>
 
-    <p>
-        <strong>WARNING:</strong>
-        The provided iterator <strong>MUST</strong> yield elements in strict
-        ascending order according to this tree's comparator.
-        If the data is unsorted, the tree structure will be corrupted.
-    </p>
+<p>
+    <strong>WARNING:</strong>
+    The provided iterator <strong>MUST</strong> yield elements in strict
+    ascending order according to this tree's comparator.
+    If the data is unsorted, the tree structure will be corrupted.
+</p>
 
-    <p><strong>FILL FACTOR:</strong></p>
+<p><strong>FILL FACTOR:</strong></p>
 
-    <ul>
-        <li>
-            A value between <code>0.5</code> and <code>1.0</code> representing
-            how full to pack each node.
-        </li>
-        <li>
-            Use <code>1.0f</code> for read-only data.
-        </li>
-        <li>
-            Use a lower value to leave room for future insertions.
-        </li>
-        <li>
-            A value of <code>0.9f</code> is used for bulk loading in my tree.
-        </li>
-        <li>
-            For read purposes, you can use <code>1.0f</code>, but after that,
-            any insert or remove operation will trigger massive split, merge,
-            borrow, and array-shifting operations.
-        </li>
-    </ul>
+<ul>
+    <li>
+        A value between <code>0.5</code> and <code>1.0</code> representing
+        how full to pack each node.
+    </li>
+    <li>
+        Use <code>1.0f</code> for read-only data.
+    </li>
+    <li>
+        Use a lower value to leave room for future insertions.
+    </li>
+    <li>
+        A value of <code>0.9f</code> is used for bulk loading in my tree.
+    </li>
+    <li>
+        For read purposes, you can use <code>1.0f</code>, but after that,
+        any insert or remove operation will trigger massive split, merge,
+        borrow, and array-shifting operations.
+    </li>
+</ul>
 
-    <p><strong>Parameters:</strong></p>
+<p><strong>Parameters:</strong></p>
 
-    <ul>
-        <li>
-            <strong>sortedData:</strong>
-            An iterator providing strictly sorted elements.
-        </li>
-        <li>
-            <strong>fillFactor:</strong>
-            A value between <code>0.5</code> and <code>1.0</code> representing
-            how full to pack each node.
-        </li>
-    </ul>
-    <i>public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor)</i> The
-    <strong>factor</strong> provide the node density <strong>[0.5f, 1f]</strong> more you pack the less it's take
-    memory.
-    <i>Internally used in Serialization at a factor of <strong>0.75f.</strong></i>
-    <pre>
-    // Use the Dragon at top gear (1.0f)
-    BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;();
-    //this creates a default degree of 64 and comparator null!
-    map.buildFromSorted(iterator, factor);
-    </pre>
+<ul>
+    <li>
+        <strong>sortedData:</strong>
+        An iterator providing strictly sorted elements.
+    </li>
+    <li>
+        <strong>fillFactor:</strong>
+        A value between <code>0.5</code> and <code>1.0</code> representing
+        how full to pack each node.
+    </li>
+</ul>
+<i>public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor)</i> The
+<strong>factor</strong> provide the node density <strong>[0.5f, 1f]</strong> more you pack the less it's take
+memory.
+<i>Internally used in Serialization at a factor of <strong>0.75f.</strong></i>
+<pre>
+// Use the Dragon at top gear (1.0f)
+BPlusTreeMap&lt;Integer, String&gt; map = new BPlusTreeMap&lt;&gt;();
+//this creates a default degree of 64 and comparator null!
+map.buildFromSorted(iterator, factor);
+</pre>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
 
-    <script>
-        const toggleBtn = document.getElementById('theme-toggle');
-        const body = document.body;
-        const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark-mode');
+    }
 
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            body.classList.add('dark-mode');
+    function chartColors() {
+        const dark = body.classList.contains('dark-mode');
+        return {
+            text: dark ? '#e0e0e0' : '#000000',
+            grid: dark ? '#444444' : '#cccccc',
+            line1: dark ? '#66b3ff' : '#000000',
+            line2: dark ? '#c9a3ff' : '#666666',
+            bar: dark ? '#66b3ff' : '#000000'
+        };
+    }
+
+    const sizes = [10000, 100000, 1000000, 10000000];
+    const importFlatMatrix = [7.319, 75.207, 791.220, 9726.478];
+    const buildFromSorted = [73.762, 689.406, 7619.628, 84430.291];
+
+    const factors = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+    const timeMs = [1.483, 1.241, 1.097, 0.954, 0.845, 0.777];
+    const treeSizeMb = [16.73, 13.91, 12.04, 10.44, 9.22, 8.30];
+
+    let c = chartColors();
+
+    const pathChart = new Chart(document.getElementById('pathComparisonChart'), {
+        type: 'line',
+        data: {
+            labels: sizes,
+            datasets: [
+                {
+                    label: 'importFlatMatrix (arraycopy)',
+                    data: importFlatMatrix,
+                    borderColor: c.line1,
+                    backgroundColor: c.line1,
+                    tension: 0.15
+                },
+                {
+                    label: 'buildFromSorted (iterator)',
+                    data: buildFromSorted,
+                    borderColor: c.line2,
+                    backgroundColor: c.line2,
+                    tension: 0.15
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'logarithmic',
+                    title: { display: true, text: 'Entries (n)', color: c.text },
+                    ticks: { color: c.text },
+                    grid: { color: c.grid }
+                },
+                y: {
+                    type: 'logarithmic',
+                    title: { display: true, text: 'Time (µs/op)', color: c.text },
+                    ticks: { color: c.text },
+                    grid: { color: c.grid }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: c.text } },
+                title: { display: true, text: 'Ingestion Path @ factor=1.0f (log-log)', color: c.text }
+            }
         }
+    });
 
-        toggleBtn.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    const factorChart = new Chart(document.getElementById('factorSweepChart'), {
+        type: 'bar',
+        data: {
+            labels: factors.map(f => f.toFixed(1) + 'f'),
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Tree Size (MB)',
+                    data: treeSizeMb,
+                    backgroundColor: c.bar + '55',
+                    borderColor: c.bar,
+                    borderWidth: 1,
+                    yAxisID: 'yMb'
+                },
+                {
+                    type: 'line',
+                    label: 'Time (ms/op)',
+                    data: timeMs,
+                    borderColor: c.line2,
+                    backgroundColor: c.line2,
+                    yAxisID: 'yMs',
+                    tension: 0.15
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: { display: true, text: 'Packing Factor', color: c.text },
+                    ticks: { color: c.text },
+                    grid: { color: c.grid }
+                },
+                yMb: {
+                    position: 'right',
+                    title: { display: true, text: 'Tree Size (MB)', color: c.text },
+                    ticks: { color: c.text },
+                    grid: { display: false }
+                },
+                yMs: {
+                    position: 'left',
+                    title: { display: true, text: 'Time (ms/op)', color: c.text },
+                    ticks: { color: c.text },
+                    grid: { color: c.grid }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: c.text } },
+                title: { display: true, text: 'Factor Sweep @ size=1,000,000', color: c.text }
+            }
+        }
+    });
+
+    function refreshChartColors() {
+        c = chartColors();
+
+        pathChart.data.datasets[0].borderColor = c.line1;
+        pathChart.data.datasets[0].backgroundColor = c.line1;
+        pathChart.data.datasets[1].borderColor = c.line2;
+        pathChart.data.datasets[1].backgroundColor = c.line2;
+        [pathChart.options.scales.x, pathChart.options.scales.y].forEach(s => {
+            s.title.color = c.text;
+            s.ticks.color = c.text;
+            s.grid.color = c.grid;
         });
-    </script>
+        pathChart.options.plugins.legend.labels.color = c.text;
+        pathChart.options.plugins.title.color = c.text;
+        pathChart.update();
+
+        factorChart.data.datasets[0].backgroundColor = c.bar + '55';
+        factorChart.data.datasets[0].borderColor = c.bar;
+        factorChart.data.datasets[1].borderColor = c.line2;
+        factorChart.data.datasets[1].backgroundColor = c.line2;
+        [factorChart.options.scales.x, factorChart.options.scales.yMb, factorChart.options.scales.yMs].forEach(s => {
+            s.title.color = c.text;
+            s.ticks.color = c.text;
+        });
+        factorChart.options.scales.yMs.grid.color = c.grid;
+        factorChart.options.plugins.legend.labels.color = c.text;
+        factorChart.options.plugins.title.color = c.text;
+        factorChart.update();
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        refreshChartColors();
+    });
+</script>
 </body>
 </html>

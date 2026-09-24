@@ -615,6 +615,12 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
     @Override
     @SuppressWarnings("unchecked")
     public void buildFromSorted(Iterator<? extends Map.Entry<? extends K, ? extends V>> it, float factor) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Bulk load is only permitted on an empty tree.");
+        }
+        if (factor < 0.5f || factor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
         if (!it.hasNext()) {
             return;
         }
@@ -808,6 +814,9 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
 
 
     public void importFlatMatrix(Object[][] flatMatrix, float factor) {
+        if (factor < 0.5f || factor > 1.0f) {
+            throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");
+        }
         if (flatMatrix == null || flatMatrix.length == 0) return;
 
         if (flatMatrix.length < 2 || flatMatrix[0].length != flatMatrix[1].length) {
@@ -1132,8 +1141,8 @@ public final class BTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BTreeMapNode
         }
 
         public BTreeMap.Builder<K, V> degree(int degree) {
-            if (degree < 2 || degree > Integer.MAX_VALUE / 2) {
-                throw new IllegalArgumentException("Degree must be at least 2 and less than Integer.MAX_VALUE/2");
+            if (degree < 3 || degree > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("Degree must be at least 3 and less than Integer.MAX_VALUE/2");
             }
             this.degree = degree;
             return this;

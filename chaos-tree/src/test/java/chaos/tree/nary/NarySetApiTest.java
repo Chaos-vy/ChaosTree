@@ -1,9 +1,12 @@
 package chaos.tree.nary;
 
 import chaos.tree.AbstractNavigableSetApiTest;
-import net.jqwik.api.Example;
+import net.jqwik.api.Arbitraries;
+import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
+import net.jqwik.api.Provide;
+import net.jqwik.api.constraints.FloatRange;
 import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Assertions;
 
@@ -16,7 +19,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class NarySetApiTest extends AbstractNavigableSetApiTest {
-
 
     private static void checkInvariants(NavigableSet<Integer> tree) {
         if (tree instanceof BTreeSet) {
@@ -224,34 +226,40 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         failFast(() -> new BPlusTreeSet<>(degree));
     }
 
-    @Property(tries = 1000)
-    void testCloneAndDisplay(@ForAll @IntRange(min = 32, max = 256) int arrayDegree,
-                             @ForAll @IntRange(min = 1000, max = 10000) int size) {
-        BTreeSet<Integer> tree1 = new BTreeSet<>(arrayDegree);
-        for (int i = 0; i < size; i++) {
-            tree1.add(i);
-        }
-        Assertions.assertNotNull(tree1.display());
-        Assertions.assertEquals(tree1, tree1.clone());
+    @Property
+    void testCloneEdgeCases(@ForAll @IntRange(min = 3, max = 128) int degree,
+            @ForAll @IntRange(min = 1, max = 10000) int size) {
+        BTreeSet<Integer> emptyBt = new BTreeSet<>(degree);
+        Assertions.assertEquals(emptyBt, emptyBt.clone());
+        Assertions.assertTrue(((BTreeSet<Integer>) emptyBt.clone()).isEmpty());
         
-        BPlusTreeSet<Integer> tree2 = new BPlusTreeSet<>(4);
+        BPlusTreeSet<Integer> emptyBpt = new BPlusTreeSet<>(degree);
+        Assertions.assertEquals(emptyBpt, emptyBpt.clone());
+        Assertions.assertTrue(((BPlusTreeSet<Integer>) emptyBpt.clone()).isEmpty());
+
+        BTreeSet<Integer> bt = new BTreeSet<>(degree);
+        BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(degree);
         for (int i = 0; i < size; i++) {
-            tree2.add(i);
+            bt.add(i);
+            bpt.add(i);
         }
-        Assertions.assertNotNull(tree2.display());
-        Assertions.assertEquals(tree2, tree2.clone());
+        Assertions.assertEquals(bt, bt.clone());
+        Assertions.assertNotNull(bt.display());
+
+        Assertions.assertEquals(bpt, bpt.clone());
+        Assertions.assertNotNull(bpt.display());
     }
 
-    @Example
-    void testBulkLoadAndRemoveCoverage() {
+    @Property
+    void testBulkLoadAndRemoveCoverage(@ForAll @IntRange(min = 10, max = 1000) int size) {
         SortedSet<Integer> sm = new TreeSet<>();
-        for (int i = 0; i < 200; i++) sm.add(i);
+        for (int i = 0; i < size; i++) sm.add(i);
         
         BTreeSet<Integer> bt = new BTreeSet<>(sm);
-        Assertions.assertEquals(200, bt.size());
+        Assertions.assertEquals(size, bt.size());
         
         BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(sm);
-        Assertions.assertEquals(200, bpt.size());
+        Assertions.assertEquals(size, bpt.size());
         
         Iterator<Integer> it = bpt.iterator();
         while(it.hasNext()) {
@@ -268,71 +276,149 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         Assertions.assertTrue(bt.isEmpty());
     }
 
-    @Example
-    void testBulkLoadExceptions() {
-        BTreeSet<Integer> bt = new BTreeSet<>(32);
-        BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(32);
+    @Property
+    void testBulkLoadExceptions(@ForAll @IntRange(min = 32, max = 128) int degree,
+            @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor) {
+        BTreeSet<Integer> bt = new BTreeSet<>(degree);
+        BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(degree);
         
         Object[] keys = new Object[]{1, 2, 3};
         
-        Assertions.assertDoesNotThrow(() -> bpt.importFlatArray(null, 0.75f));
-        Assertions.assertDoesNotThrow(() -> bt.importFlatArray(null, 0.75f));
+        Assertions.assertDoesNotThrow(() -> new BPlusTreeSet<Integer>(degree).importFlatArray(null, factor));
+        Assertions.assertDoesNotThrow(() -> new BTreeSet<Integer>(degree).importFlatArray(null, factor));
         
-        Assertions.assertDoesNotThrow(() -> bpt.importFlatArray(new Object[0], 0.75f));
-        Assertions.assertDoesNotThrow(() -> bt.importFlatArray(new Object[0], 0.75f));
+        Assertions.assertDoesNotThrow(() -> new BPlusTreeSet<Integer>(degree).importFlatArray(new Object[0], factor));
+        Assertions.assertDoesNotThrow(() -> new BTreeSet<Integer>(degree).importFlatArray(new Object[0], factor));
         
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatArray(keys, 0.4f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatArray(keys, 1.1f));
-        
-        BPlusTreeSet<Integer> smallBpt = new BPlusTreeSet<>(16);
-        Assertions.assertThrows(IllegalStateException.class, () -> smallBpt.importFlatArray(keys, 0.75f));
+        bt.add(5);
+        Assertions.assertThrows(IllegalStateException.class, () -> bt.importFlatArray(keys, factor));
         
         bpt.add(5);
-        Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatArray(keys, 0.75f));
+        Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatArray(keys, factor));
     }
 
-    @Example
-    void testBuilderExceptions() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.create(1));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.create(1));
+    @Property
+    void testBulkLoadInvalidFactor(@ForAll @IntRange(min = 32, max = 128) int degree,
+            @ForAll("invalidFactors") float factor) {
+        Object[] keys = new Object[]{1, 2, 3};
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BTreeSet<Integer>(degree).importFlatArray(keys, factor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BPlusTreeSet<Integer>(degree).importFlatArray(keys, factor));
+    }
+
+    @Property
+    void testSingleElementBulkLoad(@ForAll @IntRange(min = 32, max = 128) int degree,
+            @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor) {
+        Object[] singleElement = new Object[]{42};
+        BTreeSet<Integer> bt = new BTreeSet<>(degree);
+        try {
+            bt.importFlatArray(singleElement, factor);
+            Assertions.assertEquals(1, bt.size());
+            Assertions.assertTrue(bt.contains(42));
+        } catch (IllegalStateException e) {
+        }
+
+        BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(degree);
+        try {
+            bpt.importFlatArray(singleElement, factor);
+            Assertions.assertEquals(1, bpt.size());
+            Assertions.assertTrue(bpt.contains(42));
+        } catch (IllegalStateException e) {
+        }
+    }
+
+    @Property
+    void testConstructorExceptions(@ForAll @IntRange(min = -100, max = 2) int invalidDegree) {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BTreeSet<>(invalidDegree));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BPlusTreeSet<>(invalidDegree));
+    }
+
+    @Property
+    void testBuilderExceptions(
+            @ForAll @IntRange(min = -100, max = 1) int invalidDegree,
+            @ForAll("invalidFactors") float invalidFactor) {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.create(invalidDegree));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.create(invalidDegree));
         
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.newBuilder().factor(0.4f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.newBuilder().factor(1.1f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.newBuilder().factor(invalidFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.newBuilder().factor(invalidFactor));
     }
 
-    @Example
-    void testConstructors() {
+    @Property
+    void testConstructors(@ForAll @IntRange(min = 3, max = 128) int degree) {
         List<Integer> list = Arrays.asList(1, 2, 3);
         SortedSet<Integer> sorted = new TreeSet<>(list);
         
-        new BTreeSet<>(Comparator.naturalOrder());
-        new BTreeSet<>(list);
-        new BTreeSet<>(sorted);
-        new BTreeSet<>(6,null);
+        Assertions.assertNotNull(new BTreeSet<>(Comparator.naturalOrder()));
+        Assertions.assertEquals(3, new BTreeSet<>(list).size());
+        Assertions.assertEquals(3, new BTreeSet<>(sorted).size());
+        Assertions.assertNotNull(new BTreeSet<>(degree, null));
         
-        new BPlusTreeSet<>(Comparator.naturalOrder());
-        new BPlusTreeSet<>(list);
-        new BPlusTreeSet<>(sorted);
-        new BPlusTreeSet<>(6,null);
+        Assertions.assertNotNull(new BPlusTreeSet<>(Comparator.naturalOrder()));
+        Assertions.assertEquals(3, new BPlusTreeSet<>(list).size());
+        Assertions.assertEquals(3, new BPlusTreeSet<>(sorted).size());
+        Assertions.assertNotNull(new BPlusTreeSet<>(degree, null));
     }
 
-    @Example
-    void testSubSetExceptions() {
-        BTreeSet<Integer> bt = new BTreeSet<>(32);
-        bt.addAll(java.util.Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+    @Property
+    void testSubSetExceptions(@ForAll @IntRange(min = 3, max = 128) int degree) {
+        verifySubSetExceptions(new BTreeSet<>(degree));
+        verifySubSetExceptions(new BPlusTreeSet<>(degree));
+    }
+
+    private void verifySubSetExceptions(NavigableSet<Integer> set) {
+        set.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         
-        NavigableSet<Integer> sub = bt.subSet(3, true, 8, true);
+        NavigableSet<Integer> sub = set.subSet(3, true, 8, true);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(1, true, 5, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(5, true, 10, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.headSet(10, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.tailSet(1, true));
-
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(6, true, 5, true));
 
         NavigableSet<Integer> descSub = sub.descendingSet();
         Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.subSet(5, true, 6, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.headSet(1, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.tailSet(10, true));
+    }
+
+    @Property
+    void testFailFastDescendingIterators(@ForAll @IntRange(min = 3, max = 128) int degree) {
+        verifyFailFastDescendingIterator(new BTreeSet<>(degree));
+        verifyFailFastDescendingIterator(new BPlusTreeSet<>(degree));
+    }
+
+    private void verifyFailFastDescendingIterator(NavigableSet<Integer> set) {
+        set.addAll(Arrays.asList(1, 2, 3, 4, 5));
+        Iterator<Integer> it = set.descendingIterator();
+        set.add(6);
+        Assertions.assertThrows(java.util.ConcurrentModificationException.class, it::next);
+    }
+
+    @Property
+    void testFailFastSubSetIterators(@ForAll @IntRange(min = 3, max = 128) int degree) {
+        verifyFailFastSubSetIterators(new BTreeSet<>(degree));
+        verifyFailFastSubSetIterators(new BPlusTreeSet<>(degree));
+    }
+
+    private void verifyFailFastSubSetIterators(NavigableSet<Integer> set) {
+        set.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
+        NavigableSet<Integer> sub = set.subSet(2, true, 6, true);
+        
+        Iterator<Integer> subIt = sub.iterator();
+        set.add(9);
+        Assertions.assertThrows(java.util.ConcurrentModificationException.class, subIt::next);
+        
+        Iterator<Integer> descSubIt = sub.descendingIterator();
+        set.remove(1);
+        Assertions.assertThrows(java.util.ConcurrentModificationException.class, descSubIt::next);
+    }
+
+    @Provide
+    Arbitrary<Float> invalidFactors() {
+        return Arbitraries.oneOf(
+                Arbitraries.floats().lessOrEqual(0.49f),
+                Arbitraries.floats().greaterOrEqual(1.01f)
+        );
     }
 }

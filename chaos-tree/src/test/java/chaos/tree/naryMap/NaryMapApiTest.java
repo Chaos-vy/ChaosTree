@@ -1,9 +1,9 @@
 package chaos.tree.naryMap;
 
 import chaos.tree.AbstractNavigableMapApiTest;
-import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
+import net.jqwik.api.constraints.FloatRange;
 import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Assertions;
 
@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.ConcurrentModificationException;
 
 public class NaryMapApiTest extends AbstractNavigableMapApiTest {
 
@@ -228,33 +229,56 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
 
     @Property(tries = 1000)
     void testCloneAndDisplay(@ForAll @IntRange(min = 3, max = 128) int degree,
-                             @ForAll @IntRange(min = 1000, max = 10000) int size)
-     {
-        BTreeMap<Integer, Integer> tree1 = new BTreeMap<Integer, Integer>(degree);
-         for (int i = 0; i < size; i++) {
-             tree1.put(i,i);
-         }
+                             @ForAll @IntRange(min = 1, max = 10000) int size) {
+        BTreeMap<Integer, Integer> tree1 = new BTreeMap<>(degree);
+        for (int i = 0; i < size; i++) {
+            tree1.put(i, i);
+        }
         Assertions.assertNotNull(tree1.display());
         Assertions.assertEquals(tree1, tree1.clone());
         
-        BPlusTreeMap<Integer, Integer> tree2 = new BPlusTreeMap<>(4);
-         for (int i = 0; i < size; i++) {
-             tree2.put(i,i);
-         }
+        BPlusTreeMap<Integer, Integer> tree2 = new BPlusTreeMap<>(degree);
+        for (int i = 0; i < size; i++) {
+            tree2.put(i, i);
+        }
         Assertions.assertNotNull(tree2.display());
         Assertions.assertEquals(tree2, tree2.clone());
     }
 
-    @Example
-    void testBulkLoadAndRemoveCoverage() {
+    @Property
+    void testCloneEmptyTrees(@ForAll @IntRange(min = 3, max = 128) int degree) {
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
+        Assertions.assertEquals(bt, bt.clone());
+        Assertions.assertTrue(((BTreeMap<?,?>)bt.clone()).isEmpty());
+        
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
+        Assertions.assertEquals(bpt, bpt.clone());
+        Assertions.assertTrue(((BPlusTreeMap<?,?>)bpt.clone()).isEmpty());
+    }
+
+    @Property
+    void testSingleElementBulkLoad(@ForAll @IntRange(min = 3, max = 128) int degree) {
         SortedMap<Integer, Integer> sm = new TreeMap<>();
-        for (int i = 0; i < 200; i++) sm.put(i, i);
+        sm.put(1, 1);
         
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(sm);
-        Assertions.assertEquals(200, bt.size());
+        Assertions.assertEquals(1, bt.size());
         
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(sm);
-        Assertions.assertEquals(200, bpt.size());
+        Assertions.assertEquals(1, bpt.size());
+    }
+
+    @Property
+    void testBulkLoadAndRemoveCoverage(@ForAll @IntRange(min = 3, max = 128) int degree,
+                                       @ForAll @IntRange(min = 10, max = 200) int size) {
+        SortedMap<Integer, Integer> sm = new TreeMap<>();
+        for (int i = 0; i < size; i++) sm.put(i, i);
+        
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(sm);
+        Assertions.assertEquals(size, bt.size());
+        
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(sm);
+        Assertions.assertEquals(size, bpt.size());
         
         Iterator<Integer> it = bpt.keySet().iterator();
         while(it.hasNext()) {
@@ -271,47 +295,76 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         Assertions.assertTrue(bt.isEmpty());
     }
 
-    @Example
-    void testBulkLoadExceptions() {
-        BTreeMap<Integer, Integer> bt = new BTreeMap<>(32);
-        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(32);
+    @Property
+    void testMatrixImportValidation(@ForAll @IntRange(min = 32, max = 128) int degree,
+                                    @ForAll @FloatRange(min = 0.5f, max = 1.0f) float validFactor) {
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
+        
+        Assertions.assertDoesNotThrow(() -> bpt.importFlatMatrix(new Object[0][0], validFactor));
+        Assertions.assertDoesNotThrow(() -> bt.importFlatMatrix(new Object[0][0], validFactor));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[1][0], validFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, validFactor));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[1][0], validFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, validFactor));
         
         Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
-        
-        Assertions.assertDoesNotThrow(() -> bpt.importFlatMatrix(new Object[0][0], 0.75f));
-        Assertions.assertDoesNotThrow(() -> bt.importFlatMatrix(new Object[0][0],0.75f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[1][0], 0.75f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, 0.75f));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[1][0], 0.75f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, 0.75f));
-        
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, 0.4f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, 1.1f));
-        
         BPlusTreeMap<Integer, Integer> smallBpt = new BPlusTreeMap<>(16);
-        Assertions.assertThrows(IllegalStateException.class, () -> smallBpt.importFlatMatrix(matrix, 0.75f));
+        Assertions.assertThrows(IllegalStateException.class, () -> smallBpt.importFlatMatrix(matrix, validFactor));
         BTreeMap<Integer, Integer> smallBt = new BTreeMap<>(16);
-        Assertions.assertThrows(IllegalStateException.class, () -> smallBt.importFlatMatrix(matrix, 0.75f));
+        Assertions.assertThrows(IllegalStateException.class, () -> smallBt.importFlatMatrix(matrix, validFactor));
+    }
+
+    @Property
+    void testFactorExceptions(@ForAll @IntRange(min = 32, max = 128) int degree,
+                              @ForAll @FloatRange(min = -10.0f, max = 0.49f) float lowFactor,
+                              @ForAll @FloatRange(min = 1.01f, max = 10.0f) float highFactor) {
+        Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, lowFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, highFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(matrix, lowFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(matrix, highFactor));
+        
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.newBuilder().factor(lowFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.newBuilder().factor(highFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.newBuilder().factor(lowFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.newBuilder().factor(highFactor));
+    }
+
+    @Property
+    void testBuilderDegreeExceptions(@ForAll @IntRange(min = -100, max = 1) int invalidDegree) {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.create(invalidDegree));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.create(invalidDegree));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BTreeMap<>(invalidDegree));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BPlusTreeMap<>(invalidDegree));
+    }
+
+    @Property
+    void testStateExceptionsOnNonEmpty(@ForAll @IntRange(min = 3, max = 128) int degree,
+                                       @ForAll @FloatRange(min = 0.5f, max = 1.0f) float validFactor) {
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
         
         bpt.put(5, 5);
-        bt.put(5,5);
-        Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatMatrix(matrix, 0.75f));
-        Assertions.assertThrows(IllegalStateException.class, () -> bt.importFlatMatrix(matrix, 0.75f));
-    }
-
-
-    @Example
-    void testBuilderExceptions() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.create(1));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.create(1));
+        bt.put(5, 5);
+        Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
         
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.newBuilder().factor(0.4f));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.newBuilder().factor(1.1f));
+        Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatMatrix(matrix, validFactor));
+        Assertions.assertThrows(IllegalStateException.class, () -> bt.importFlatMatrix(matrix, validFactor));
+        
+        SortedMap<Integer, Integer> sm = new TreeMap<>();
+        sm.put(1, 1);
+        Assertions.assertThrows(IllegalStateException.class, () -> bpt.buildFromSorted(sm.entrySet().iterator(), validFactor));
+        Assertions.assertThrows(IllegalStateException.class, () -> bt.buildFromSorted(sm.entrySet().iterator(), validFactor));
     }
 
-    @Example
-    void testConstructors() {
+    @Property
+    void testConstructors(@ForAll @IntRange(min = 3, max = 128) int degree) {
         Map<Integer, Integer> map = new HashMap<>();
         map.put(1, 1);
         SortedMap<Integer, Integer> sorted = new TreeMap<>(map);
@@ -319,31 +372,65 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         new BTreeMap<>(Comparator.naturalOrder());
         new BTreeMap<>(map);
         new BTreeMap<>(sorted);
-        new BTreeMap<>(58,null);
+        new BTreeMap<>(degree, null);
         
         new BPlusTreeMap<>(Comparator.naturalOrder());
         new BPlusTreeMap<>(map);
         new BPlusTreeMap<>(sorted);
-        new BPlusTreeMap<>(58,null);
+        new BPlusTreeMap<>(degree, null);
     }
 
-    @net.jqwik.api.Example
-    void testSubSetExceptions() {
-        chaos.tree.naryMap.BTreeMap<Integer, Integer> bt = new chaos.tree.naryMap.BTreeMap<>(32);
-        for(int i=1; i<=10; i++) bt.put(i, i);
+    @Property
+    void testSubSetExceptions(@ForAll @IntRange(min = 3, max = 128) int degree) {
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
+        for(int i = 1; i <= 10; i++) bt.put(i, i);
         
-        java.util.NavigableMap<Integer, Integer> sub = bt.subMap(3, true, 8, true);
+        NavigableMap<Integer, Integer> sub = bt.subMap(3, true, 8, true);
         
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(1, true, 5, true));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(5, true, 10, true));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.headMap(10, true));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.tailMap(1, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(1, true, 5, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(5, true, 10, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.headMap(10, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.tailMap(1, true));
         
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(6, true, 5, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(6, true, 5, true));
         
-        java.util.NavigableMap<Integer, Integer> descSub = sub.descendingMap();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.subMap(5, true, 6, true));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.headMap(1, true));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.tailMap(10, true));
+        NavigableMap<Integer, Integer> descSub = sub.descendingMap();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.subMap(5, true, 6, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.headMap(1, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.tailMap(10, true));
+
+        NavigableMap<Integer, Integer> validDescSub = descSub.subMap(7, true, 4, true);
+        Assertions.assertEquals(4, validDescSub.size());
+    }
+
+    @Property
+    void testFailFastSubMapAndDescendingIterators(@ForAll @IntRange(min = 3, max = 128) int degree) {
+        BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
+        for(int i = 0; i < 10; i++) bt.put(i, i);
+        
+        Iterator<Integer> descIt = bt.descendingKeySet().iterator();
+        descIt.next();
+        bt.put(100, 100);
+        Assertions.assertThrows(ConcurrentModificationException.class, descIt::next);
+        
+        bt.remove(100);
+        Iterator<Integer> subIt = bt.subMap(2, 8).keySet().iterator();
+        subIt.next();
+        bt.put(500, 500);
+        Assertions.assertThrows(ConcurrentModificationException.class, subIt::next);
+
+        BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
+        for(int i = 0; i < 10; i++) bpt.put(i, i);
+        
+        Iterator<Integer> descIt2 = bpt.descendingKeySet().iterator();
+        descIt2.next();
+        bpt.put(100, 100);
+        Assertions.assertThrows(ConcurrentModificationException.class, descIt2::next);
+        
+        bpt.remove(100);
+        Iterator<Integer> subIt2 = bpt.subMap(2, 8).keySet().iterator();
+        subIt2.next();
+        bpt.put(500, 500);
+        Assertions.assertThrows(ConcurrentModificationException.class, subIt2::next);
     }
 }
