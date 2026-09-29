@@ -1187,10 +1187,14 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
     }
 
     final class TreeSubMap extends AbstractMap<K, V> implements NavigableMap<K, V>, Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
         final K lo, hi;
         final boolean fromStart, toEnd;
         final boolean loInclusive, hiInclusive;
         final boolean descending;
+        private transient Collection<V> subMapValuesView;
 
         TreeSubMap(boolean fromStart, K lo, boolean loInclusive, boolean toEnd, K hi, boolean hiInclusive, boolean descending) {
             if (!fromStart && !toEnd) {
@@ -1250,7 +1254,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             if (!inRange(key)) throw new IllegalArgumentException("key out of range");
             return AbstractBinaryTreeMap.this.put(key, value);
         }
-
 
         @Override
         public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> rf) {
@@ -1423,35 +1426,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             return lastEntry();
         }
 
-        private final class UntilValueIterator implements Iterator<V> {
-            private final Iterator<Map.Entry<K, V>> it;
-            private final K lastKey;
-            private boolean done;
-
-            UntilValueIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
-                this.it = it;
-                this.lastKey = lastKey;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return !done && it.hasNext();
-            }
-
-            @Override
-            public V next() {
-                if (done) throw new NoSuchElementException();
-                Map.Entry<K, V> e = it.next();
-                if (e.getKey() == lastKey) done = true;
-                return e.getValue();
-            }
-
-            @Override
-            public void remove() {
-                it.remove();
-            }
-        }
-
         private Iterator<Map.Entry<K, V>> baseEntryIterator() {
             return new Iterator<>() {
                 N nextNode = descending ? absHighest() : absLowest();
@@ -1503,8 +1477,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
             };
         }
 
-        private transient Collection<V> subMapValuesView;
-
         @Override
         public Collection<V> values() {
             Collection<V> vs = subMapValuesView;
@@ -1519,24 +1491,29 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                         public boolean hasNext() {
                             return it.hasNext();
                         }
+
                         @Override
                         public V next() {
                             return it.next().getValue();
                         }
+
                         @Override
                         public void remove() {
                             it.remove();
                         }
                     } : new UntilValueIterator(it, end.getKey());
                 }
+
                 @Override
                 public int size() {
                     return TreeSubMap.this.size();
                 }
+
                 @Override
                 public boolean contains(Object o) {
                     return TreeSubMap.this.containsValue(o);
                 }
+
                 @Override
                 public void clear() {
                     TreeSubMap.this.clear();
@@ -1575,35 +1552,6 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
                 return new TreeSubMap(fromStart, lo, loInclusive, false, fromKey, inclusive, true);
             } else {
                 return new TreeSubMap(false, fromKey, inclusive, toEnd, hi, hiInclusive, false);
-            }
-        }
-
-        private final class UntilEntryIterator implements Iterator<Map.Entry<K, V>> {
-            private final Iterator<Map.Entry<K, V>> it;
-            private final K lastKey;
-            private boolean done;
-
-            UntilEntryIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
-                this.it = it;
-                this.lastKey = lastKey;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return !done && it.hasNext();
-            }
-
-            @Override
-            public Map.Entry<K, V> next() {
-                if (done) throw new NoSuchElementException();
-                Map.Entry<K, V> e = it.next();
-                if (e.getKey() == lastKey) done = true;
-                return e;
-            }
-
-            @Override
-            public void remove() {
-                it.remove();
             }
         }
 
@@ -1682,6 +1630,64 @@ sealed abstract class AbstractBinaryTreeMap<K, V, N extends AbstractBinaryMapNod
         N absHighest() {
             N e = toEnd ? rightMostNode() : (hiInclusive ? getFloorNode(hi) : getLowerNode(hi));
             return (e == null || tooLow(e.key)) ? null : e;
+        }
+
+        private final class UntilValueIterator implements Iterator<V> {
+            private final Iterator<Map.Entry<K, V>> it;
+            private final K lastKey;
+            private boolean done;
+
+            UntilValueIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
+                this.it = it;
+                this.lastKey = lastKey;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public V next() {
+                if (done) throw new NoSuchElementException();
+                Map.Entry<K, V> e = it.next();
+                if (e.getKey() == lastKey) done = true;
+                return e.getValue();
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
+        }
+
+        private final class UntilEntryIterator implements Iterator<Map.Entry<K, V>> {
+            private final Iterator<Map.Entry<K, V>> it;
+            private final K lastKey;
+            private boolean done;
+
+            UntilEntryIterator(Iterator<Map.Entry<K, V>> it, K lastKey) {
+                this.it = it;
+                this.lastKey = lastKey;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public Map.Entry<K, V> next() {
+                if (done) throw new NoSuchElementException();
+                Map.Entry<K, V> e = it.next();
+                if (e.getKey() == lastKey) done = true;
+                return e;
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
         }
     }
 }
