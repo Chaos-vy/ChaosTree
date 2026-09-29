@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
@@ -22,6 +21,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Consumer;
 
 /**
  * Base Engine for B-Tree and B+Tree variants.
@@ -57,7 +57,38 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
 
     @Override
     public Spliterator<E> spliterator() {
-        return Spliterators.spliterator(this, Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
+        Spliterator<E> spliterator = Spliterators.spliterator(this, Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
+        return new Spliterator<>() {
+            @Override
+            public boolean tryAdvance(Consumer<? super E> action) {
+                return spliterator.tryAdvance(action);
+            }
+
+            @Override
+            public void forEachRemaining(Consumer<? super E> action) {
+                spliterator.forEachRemaining(action);
+            }
+
+            @Override
+            public Spliterator<E> trySplit() {
+                return spliterator.trySplit();
+            }
+
+            @Override
+            public long estimateSize() {
+                return spliterator.estimateSize();
+            }
+
+            @Override
+            public int characteristics() {
+                return spliterator.characteristics();
+            }
+
+            @Override
+            public Comparator<? super E> getComparator() {
+                return comparator();
+            }
+        };
     }
 
     public abstract void buildFromSorted(Iterator<? extends E> it, float f);
@@ -395,6 +426,9 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
     }
 
     private final class NarySubSet extends AbstractSet<E> implements NavigableSet<E>, Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
         private final boolean fromStart;
         private final E lo;
         private final boolean loInclusive;
@@ -579,7 +613,38 @@ sealed abstract class AbstractNaryTreeSet<E, N extends AbstractNaryNode<E, N>> e
             if (!descending) {
                 chars |= Spliterator.SORTED;
             }
-            return Spliterators.spliterator(this, chars);
+            Spliterator<E> spliterator = Spliterators.spliterator(this, chars);
+            return new Spliterator<>() {
+                @Override
+                public boolean tryAdvance(Consumer<? super E> action) {
+                    return spliterator.tryAdvance(action);
+                }
+
+                @Override
+                public void forEachRemaining(Consumer<? super E> action) {
+                    spliterator.forEachRemaining(action);
+                }
+
+                @Override
+                public Spliterator<E> trySplit() {
+                    return spliterator.trySplit();
+                }
+
+                @Override
+                public long estimateSize() {
+                    return spliterator.estimateSize();
+                }
+
+                @Override
+                public int characteristics() {
+                    return spliterator.characteristics();
+                }
+
+                @Override
+                public Comparator<? super E> getComparator() {
+                    return comparator();
+                }
+            };
         }
 
         @Override
