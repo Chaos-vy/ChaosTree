@@ -7,11 +7,14 @@
     <parent>
         <groupId>io.github.chaos-vy</groupId>
         <artifactId>chaos-tree-parent</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.2</version>
     </parent>
 
     <artifactId>chaos-tree</artifactId>
-    <name>ct-core</name>
+    <name>ChaosTree</name>
+    <description>Zero-dependency, cache-aware Java NavigableMap and NavigableSet library based on B-Trees and B+Trees.
+        Features N-ary tree families, extensive JMH benchmarks, and hardware-counter-backed performance analysis.
+    </description>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>

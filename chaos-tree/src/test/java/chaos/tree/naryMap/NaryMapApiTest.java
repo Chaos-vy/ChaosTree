@@ -8,6 +8,7 @@ import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.ConcurrentModificationException;
 
 public class NaryMapApiTest extends AbstractNavigableMapApiTest {
 
@@ -34,7 +34,8 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         }
         int expectedDepth = -1;
         int sizeCount = validateBTreeNode(tree.root, true, 0, new int[]{expectedDepth}, tree.degree, tree);
-        if (sizeCount != tree.size()) throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
+        if (sizeCount != tree.size())
+            throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
     }
 
     private static int validateBTreeNode(BTreeMapNode<Integer, Integer> node, boolean isRoot, int depth, int[] expectedDepth, int degree, BTreeMap<Integer, Integer> tree) {
@@ -46,7 +47,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         if (!isRoot && node.keyCount < minKeys) throw new AssertionError("Node underfull: " + node.keyCount);
 
         for (int i = 0; i < node.keyCount - 1; i++) {
-            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i+1]) >= 0) {
+            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i + 1]) >= 0) {
                 throw new AssertionError("Keys not strictly increasing in node");
             }
         }
@@ -62,7 +63,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
                 if (child.parent != node) throw new AssertionError("Incorrect parent pointer");
 
                 if (i > 0) {
-                    if (tree.compare(getMin(child), (Integer) node.keys[i-1]) <= 0) {
+                    if (tree.compare(getMin(child), (Integer) node.keys[i - 1]) <= 0) {
                         throw new AssertionError("Child keys not strictly greater than left separator");
                     }
                 }
@@ -94,8 +95,9 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         }
         int expectedDepth = -1;
         int sizeCount = validateBPlusTreeNode(tree.root, true, 0, new int[]{expectedDepth}, tree.degree, tree);
-        if (sizeCount != tree.size()) throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
-        
+        if (sizeCount != tree.size())
+            throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
+
         BPlusTreeMapNode<Integer, Integer> curr = tree.root;
         if (curr != null) {
             while (!curr.isLeaf()) curr = curr.child[0];
@@ -127,7 +129,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         if (!isRoot && node.keyCount < minKeys) throw new AssertionError("Node underfull: " + node.keyCount);
 
         for (int i = 0; i < node.keyCount - 1; i++) {
-            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i+1]) >= 0) {
+            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i + 1]) >= 0) {
                 throw new AssertionError("Keys not strictly increasing in node");
             }
         }
@@ -144,7 +146,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
                 if (child.parent != node) throw new AssertionError("Incorrect parent pointer");
 
                 if (i > 0) {
-                    if (tree.compare(getMinPlus(child), (Integer) node.keys[i-1]) < 0) {
+                    if (tree.compare(getMinPlus(child), (Integer) node.keys[i - 1]) < 0) {
                         throw new AssertionError("Child min key less than left separator");
                     }
                 }
@@ -236,7 +238,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         }
         Assertions.assertNotNull(tree1.display());
         Assertions.assertEquals(tree1, tree1.clone());
-        
+
         BPlusTreeMap<Integer, Integer> tree2 = new BPlusTreeMap<>(degree);
         for (int i = 0; i < size; i++) {
             tree2.put(i, i);
@@ -249,21 +251,21 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
     void testCloneEmptyTrees(@ForAll @IntRange(min = 3, max = 128) int degree) {
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
         Assertions.assertEquals(bt, bt.clone());
-        Assertions.assertTrue(((BTreeMap<?,?>)bt.clone()).isEmpty());
-        
+        Assertions.assertTrue(((BTreeMap<?, ?>) bt.clone()).isEmpty());
+
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
         Assertions.assertEquals(bpt, bpt.clone());
-        Assertions.assertTrue(((BPlusTreeMap<?,?>)bpt.clone()).isEmpty());
+        Assertions.assertTrue(((BPlusTreeMap<?, ?>) bpt.clone()).isEmpty());
     }
 
     @Property
     void testSingleElementBulkLoad(@ForAll @IntRange(min = 3, max = 128) int degree) {
         SortedMap<Integer, Integer> sm = new TreeMap<>();
         sm.put(1, 1);
-        
+
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(sm);
         Assertions.assertEquals(1, bt.size());
-        
+
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(sm);
         Assertions.assertEquals(1, bpt.size());
     }
@@ -273,22 +275,22 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
                                        @ForAll @IntRange(min = 10, max = 200) int size) {
         SortedMap<Integer, Integer> sm = new TreeMap<>();
         for (int i = 0; i < size; i++) sm.put(i, i);
-        
+
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(sm);
         Assertions.assertEquals(size, bt.size());
-        
+
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(sm);
         Assertions.assertEquals(size, bpt.size());
-        
+
         Iterator<Integer> it = bpt.keySet().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             it.next();
             it.remove();
         }
         Assertions.assertTrue(bpt.isEmpty());
 
         Iterator<Integer> revIt = bt.descendingKeySet().iterator();
-        while(revIt.hasNext()) {
+        while (revIt.hasNext()) {
             revIt.next();
             revIt.remove();
         }
@@ -300,28 +302,28 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
                                     @ForAll @FloatRange(min = 0.5f, max = 1.0f) float validFactor) {
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
-        
+
         Assertions.assertDoesNotThrow(() -> bpt.importFlatMatrix(new Object[0][0], validFactor));
         Assertions.assertDoesNotThrow(() -> bt.importFlatMatrix(new Object[0][0], validFactor));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[1][0], validFactor));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, validFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(new Object[][]{new Object[]{1}, new Object[0]}, validFactor));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[1][0], validFactor));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[][] { new Object[]{1}, new Object[0] }, validFactor));
-        
-        Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(new Object[][]{new Object[]{1}, new Object[0]}, validFactor));
+
+        Object[][] matrix = new Object[][]{new Object[]{1}, new Object[]{1}};
         BPlusTreeMap<Integer, Integer> smallBpt = new BPlusTreeMap<>(16);
-        Assertions.assertThrows(IllegalStateException.class, () -> smallBpt.importFlatMatrix(matrix, validFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> smallBpt.importFlatMatrix(matrix, validFactor));
         BTreeMap<Integer, Integer> smallBt = new BTreeMap<>(16);
-        Assertions.assertThrows(IllegalStateException.class, () -> smallBt.importFlatMatrix(matrix, validFactor));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> smallBt.importFlatMatrix(matrix, validFactor));
     }
 
     @Property
     void testFactorExceptions(@ForAll @IntRange(min = 32, max = 128) int degree,
                               @ForAll @FloatRange(min = -10.0f, max = 0.49f) float lowFactor,
                               @ForAll @FloatRange(min = 1.01f, max = 10.0f) float highFactor) {
-        Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
+        Object[][] matrix = new Object[][]{new Object[]{1}, new Object[]{1}};
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
 
@@ -329,7 +331,7 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> bpt.importFlatMatrix(matrix, highFactor));
         Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(matrix, lowFactor));
         Assertions.assertThrows(IllegalArgumentException.class, () -> bt.importFlatMatrix(matrix, highFactor));
-        
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.newBuilder().factor(lowFactor));
         Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeMap.Builder.newBuilder().factor(highFactor));
         Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeMap.Builder.newBuilder().factor(lowFactor));
@@ -349,14 +351,14 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
                                        @ForAll @FloatRange(min = 0.5f, max = 1.0f) float validFactor) {
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
-        
+
         bpt.put(5, 5);
         bt.put(5, 5);
-        Object[][] matrix = new Object[][] { new Object[]{1}, new Object[]{1} };
-        
+        Object[][] matrix = new Object[][]{new Object[]{1}, new Object[]{1}};
+
         Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatMatrix(matrix, validFactor));
         Assertions.assertThrows(IllegalStateException.class, () -> bt.importFlatMatrix(matrix, validFactor));
-        
+
         SortedMap<Integer, Integer> sm = new TreeMap<>();
         sm.put(1, 1);
         Assertions.assertThrows(IllegalStateException.class, () -> bpt.buildFromSorted(sm.entrySet().iterator(), validFactor));
@@ -368,12 +370,12 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         Map<Integer, Integer> map = new HashMap<>();
         map.put(1, 1);
         SortedMap<Integer, Integer> sorted = new TreeMap<>(map);
-        
+
         new BTreeMap<>(Comparator.naturalOrder());
         new BTreeMap<>(map);
         new BTreeMap<>(sorted);
         new BTreeMap<>(degree, null);
-        
+
         new BPlusTreeMap<>(Comparator.naturalOrder());
         new BPlusTreeMap<>(map);
         new BPlusTreeMap<>(sorted);
@@ -383,17 +385,17 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
     @Property
     void testSubSetExceptions(@ForAll @IntRange(min = 3, max = 128) int degree) {
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
-        for(int i = 1; i <= 10; i++) bt.put(i, i);
-        
+        for (int i = 1; i <= 10; i++) bt.put(i, i);
+
         NavigableMap<Integer, Integer> sub = bt.subMap(3, true, 8, true);
-        
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(1, true, 5, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(5, true, 10, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.headMap(10, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.tailMap(1, true));
-        
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subMap(6, true, 5, true));
-        
+
         NavigableMap<Integer, Integer> descSub = sub.descendingMap();
         Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.subMap(5, true, 6, true));
         Assertions.assertThrows(IllegalArgumentException.class, () -> descSub.headMap(1, true));
@@ -406,13 +408,13 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
     @Property
     void testFailFastSubMapAndDescendingIterators(@ForAll @IntRange(min = 3, max = 128) int degree) {
         BTreeMap<Integer, Integer> bt = new BTreeMap<>(degree);
-        for(int i = 0; i < 10; i++) bt.put(i, i);
-        
+        for (int i = 0; i < 10; i++) bt.put(i, i);
+
         Iterator<Integer> descIt = bt.descendingKeySet().iterator();
         descIt.next();
         bt.put(100, 100);
         Assertions.assertThrows(ConcurrentModificationException.class, descIt::next);
-        
+
         bt.remove(100);
         Iterator<Integer> subIt = bt.subMap(2, 8).keySet().iterator();
         subIt.next();
@@ -420,13 +422,13 @@ public class NaryMapApiTest extends AbstractNavigableMapApiTest {
         Assertions.assertThrows(ConcurrentModificationException.class, subIt::next);
 
         BPlusTreeMap<Integer, Integer> bpt = new BPlusTreeMap<>(degree);
-        for(int i = 0; i < 10; i++) bpt.put(i, i);
-        
+        for (int i = 0; i < 10; i++) bpt.put(i, i);
+
         Iterator<Integer> descIt2 = bpt.descendingKeySet().iterator();
         descIt2.next();
         bpt.put(100, 100);
         Assertions.assertThrows(ConcurrentModificationException.class, descIt2::next);
-        
+
         bpt.remove(100);
         Iterator<Integer> subIt2 = bpt.subMap(2, 8).keySet().iterator();
         subIt2.next();

@@ -38,14 +38,14 @@ public class BulkLoadMapPropertyTest {
         tree.buildFromSorted(new EntryRangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
         validateBTreeMap(tree.root, tree.minKeys);
-        if(degree>=32){
+        if (degree >= 32) {
             Object[][] flat = new Object[2][n];
             for (int i = 0; i < n; i++) {
                 flat[0][i] = i;
                 flat[1][i] = i;
             }
             tree.clear();
-            tree.importFlatMatrix(flat,factor);
+            tree.importFlatMatrix(flat, factor);
         }
     }
 
@@ -74,14 +74,14 @@ public class BulkLoadMapPropertyTest {
         tree.buildFromSorted(new EntryRangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
         validateBPlusTreeMap(tree.root, tree.minKeys);
-        if(degree>=32){
+        if (degree >= 32) {
             Object[][] flat = new Object[2][n];
             for (int i = 0; i < n; i++) {
                 flat[0][i] = i;
                 flat[1][i] = i;
             }
             tree.clear();
-            tree.importFlatMatrix(flat,factor);
+            tree.importFlatMatrix(flat, factor);
         }
     }
 
