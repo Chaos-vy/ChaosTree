@@ -1,10 +1,15 @@
 package chaos.tree.binary;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 
 public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
+
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE001C4A05L;
+
 
     public AvlTreeSet() {
         super();
@@ -19,7 +24,9 @@ public final class AvlTreeSet<E> extends AbstractBinaryTreeSet<E, AvlNode<E>> {
         addAll(m);
     }
 
+    @SuppressWarnings("unchecked")
     public AvlTreeSet(SortedSet<? extends E> s) {
+        super((Comparator<? super E>) s.comparator());
         buildFromSorted(s.size(), s.iterator());
     }
 

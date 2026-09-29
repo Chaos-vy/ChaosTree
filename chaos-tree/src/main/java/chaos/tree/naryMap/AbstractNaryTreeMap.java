@@ -529,6 +529,9 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     }
 
     private final class SubNaryMap extends AbstractMap<K, V> implements NavigableMap<K, V>, Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
         private final boolean fromStart, toEnd;
         private final K lo;
         private final boolean loInclusive;
@@ -1130,13 +1133,16 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
     }
 
     private final class DescendingMapFacade extends AbstractMap<K, V> implements NavigableMap<K, V>, Serializable {
+
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+        private transient Collection<V> descendingValuesView;
+
         @Override
         public Comparator<? super K> comparator() {
             Comparator<? super K> cmp = AbstractNaryTreeMap.this.comparator();
             return (cmp == null) ? Collections.reverseOrder() : Collections.reverseOrder(cmp);
         }
-
-        private transient Collection<V> descendingValuesView;
 
         @Override
         public Collection<V> values() {
@@ -1146,14 +1152,17 @@ abstract sealed class AbstractNaryTreeMap<K, V, N extends AbstractNaryMapNode<K,
                 public Iterator<V> iterator() {
                     return AbstractNaryTreeMap.this.descendingValueIterator(null, true);
                 }
+
                 @Override
                 public int size() {
                     return AbstractNaryTreeMap.this.size();
                 }
+
                 @Override
                 public boolean contains(Object o) {
                     return AbstractNaryTreeMap.this.containsValue(o);
                 }
+
                 @Override
                 public void clear() {
                     AbstractNaryTreeMap.this.clear();

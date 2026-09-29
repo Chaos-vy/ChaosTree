@@ -1,10 +1,14 @@
 package chaos.tree.binaryMap;
 
+import java.io.Serial;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
 
 public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, RbtMapNode<K, V>> {
+
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE004C4A05L;
 
 
     public RedBlackTreeMap() {
@@ -21,6 +25,7 @@ public final class RedBlackTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, Rbt
     }
 
     public RedBlackTreeMap(SortedMap<K, ? extends V> m) {
+        super(m.comparator());
         buildFromSorted(m.size(), m.entrySet().iterator());
     }
 

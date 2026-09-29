@@ -1,10 +1,15 @@
 package chaos.tree.binaryMap;
 
+import java.io.Serial;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
 
 public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNode<K, V>> {
+
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE003C4A05L;
+
 
     public AvlTreeMap() {
         super();
@@ -20,6 +25,7 @@ public final class AvlTreeMap<K, V> extends AbstractBinaryTreeMap<K, V, AvlMapNo
     }
 
     public AvlTreeMap(SortedMap<K, ? extends V> m) {
+        super(m.comparator());
         buildFromSorted(m.size(), m.entrySet().iterator());
     }
 

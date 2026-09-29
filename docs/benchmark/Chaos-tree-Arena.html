@@ -1,0 +1,2933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>ChaosTree | Arena Map Benchmark</title>
+    <style>body {
+        --fg: #000;
+        --bg: #fff;
+        --mut: #666;
+        --grid: #d8d8d8;
+        --violet: #6d28d9;
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: monospace;
+        line-height: 1.6;
+        color: var(--fg);
+        background: var(--bg)
+    }
+
+    h1, h2 {
+        border-bottom: 1px solid var(--fg);
+        padding-bottom: 5px;
+        margin-top: 40px
+    }
+
+    h3 {
+        margin-top: 34px;
+        margin-bottom: 8px
+    }
+
+    table {
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        width: 100%;
+        font-size: .95em
+    }
+
+    th, td {
+        border: 1px solid var(--fg);
+        padding: 6px 10px;
+        text-align: left
+    }
+
+    th {
+        background: #f4f4f4
+    }
+
+    blockquote {
+        border-left: 3px solid var(--fg);
+        margin: 20px 0;
+        padding-left: 15px;
+        font-style: italic
+    }
+
+    pre {
+        border: 1px solid var(--fg);
+        padding: 10px 12px;
+        overflow-x: auto;
+        font-size: .92em
+    }
+
+    a {
+        color: #00e;
+        text-decoration: none
+    }
+
+    body.dark-mode {
+        --fg: #e0e0e0;
+        --bg: #121212;
+        --mut: #999;
+        --grid: #333;
+        --violet: #a78bfa
+    }
+
+    body.dark-mode th {
+        background: #222
+    }
+
+    body.dark-mode a {
+        color: #66b3ff
+    }
+
+    .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: transparent;
+        border: 1px solid var(--fg);
+        color: var(--fg);
+        cursor: pointer;
+        padding: 5px 10px;
+        font-family: monospace;
+        font-size: 14px;
+        border-radius: 5px;
+        z-index: 1000
+    }
+
+    .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0 14px
+    }
+
+    .tabs button {
+        font-family: monospace;
+        font-size: 14px;
+        cursor: pointer;
+        background: transparent;
+        color: var(--fg);
+        border: 1px solid var(--fg);
+        border-radius: 5px;
+        padding: 4px 12px
+    }
+
+    .tabs button.on {
+        background: var(--fg);
+        color: var(--bg)
+    }
+
+    .tabs button.pending {
+        opacity: .5
+    }
+
+    td.win {
+        color: var(--violet);
+        font-weight: bold
+    }
+
+    td.tie {
+        color: var(--violet)
+    }
+
+    td.num, th.num {
+        text-align: right;
+        white-space: nowrap
+    }
+
+    .e {
+        opacity: .45;
+        font-weight: normal
+    }
+
+    .violet {
+        color: var(--violet);
+        font-weight: bold
+    }
+
+    .swatch {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        vertical-align: middle;
+        margin-right: 4px
+    }
+
+    .sw-win {
+        background: var(--violet)
+    }
+
+    .sw-tie {
+        background: var(--fg);
+        outline: 2px solid var(--violet);
+        outline-offset: -2px
+    }
+
+    .sw-oth {
+        background: var(--fg)
+    }
+
+    .sw-err {
+        background: var(--fg);
+        opacity: .4
+    }
+
+    .grid2 {
+        display: grid;
+        grid-template-columns:1fr 1fr;
+        gap: 18px 24px
+    }
+
+    @media (max-width: 860px) {
+        .grid2 {
+            grid-template-columns:1fr
+        }
+    }
+
+    svg.chart {
+        width: 100%;
+        height: auto;
+        display: block
+    }
+
+    svg text {
+        font-family: monospace;
+        fill: var(--fg);
+        font-size: 11px
+    }
+
+    svg .ttl {
+        font-size: 12.5px;
+        font-weight: bold
+    }
+
+    svg .tick {
+        fill: var(--mut);
+        font-size: 10px
+    }
+
+    svg .grid {
+        stroke: var(--grid)
+    }
+
+    svg .axis {
+        stroke: var(--fg)
+    }
+
+    svg .w {
+        fill: var(--violet);
+        font-weight: bold
+    }
+
+    svg .bar {
+        fill: var(--fg)
+    }
+
+    svg .bar.win {
+        fill: var(--violet)
+    }
+
+    svg .bar.tie {
+        stroke: var(--violet);
+        stroke-width: 2
+    }
+
+    svg .eout {
+        stroke: var(--fg);
+        stroke-width: 2;
+        opacity: .4
+    }
+
+    svg .eout.win, svg .eout.tie {
+        stroke: var(--violet)
+    }
+
+    svg .ein {
+        stroke: var(--bg);
+        stroke-width: 2;
+        opacity: .55
+    }
+
+    svg .sl {
+        fill: none
+    }
+
+    svg .sl.chaos {
+        stroke: var(--fg);
+        stroke-width: 2.2
+    }
+
+    svg .sl.oth {
+        stroke: var(--mut);
+        stroke-width: 1.2
+    }
+
+    svg .dot.chaos {
+        fill: var(--fg)
+    }
+
+    svg .dot.oth {
+        fill: var(--mut)
+    }
+
+    svg .dot.win {
+        fill: var(--violet);
+        stroke: var(--bg);
+        stroke-width: 1.5
+    }
+
+    svg .ptl {
+        fill: var(--mut)
+    }
+
+    svg .ptl.chaos {
+        fill: var(--fg)
+    }
+
+    .note {
+        color: var(--mut);
+        font-size: .9em;
+        margin: 6px 0 14px
+    }
+
+    .empty {
+        border: 1px dashed var(--mut);
+        padding: 18px;
+        color: var(--mut)
+    }
+    </style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle">🌓 Theme</button>
+<h1>Arena Map Benchmark: ChaosTree vs JDK, Fastutil, Eclipse</h1>
+<blockquote>One repeatable mixed workload of <code>get</code>, <code>put</code> and <code>remove</code> on sorted maps,
+    at 10K, 100K and 1M entries. Score is time per operation (ns/op), single-threaded. Lower is better.<br><br><span
+            class="violet">Violet</span> marks the winner. Error (JMH 99.9% confidence interval) is drawn at lower
+    opacity than the data.
+</blockquote>
+
+<h2>1. What this benchmark measures</h2>
+<p>The map is filled once with <code>size</code> keys, inserted by plain <code>put</code> in shuffled order (seed 42).
+    Then every invocation runs 100,000 operations read from a pre-generated pool of 2M packed (op, key) entries. Keys
+    are uniform over <code>0 … 2×size-1</code>. The cursor advances between invocations, so the map evolves and no
+    rebuild happens between them. Keys and values are pre-boxed <code>Integer</code>s, so the timed loop does no RNG
+    work and allocates nothing. Results go to a <code>Blackhole</code>. The op stream is identical for every map at a
+    given seed and mix.</p>
+<p>A mix such as <code>50,25,25</code> means 50% get, 25% put, 25% remove. Mixes with equal put and remove (<code>50,25,25</code>,
+    <code>20,40,40</code>, <code>80,10,10</code>) hold the tree near half full. Mixes with 0% remove saturate the tree,
+    so they measure lookup and overwrite on a full tree.</p>
+<h2>2. System and reproduction</h2>
+<table>
+    <tbody>
+    <tr>
+        <th>CPU</th>
+        <td>Intel Core i5-13450HX</td>
+    </tr>
+    <tr>
+        <th>Heap</th>
+        <td>Pinned: <code>-Xms4g -Xmx4g -XX:+AlwaysPreTouch</code></td>
+    </tr>
+    <tr>
+        <th>GC</th>
+        <td><code>-XX:+UseParallelGC</code>, the same for every map</td>
+    </tr>
+    <tr>
+        <th>JMH settings</th>
+        <td>3 forks, 10 warmup x 1s, 10 measurement x 1s (30 samples per row).
+            <code>@OperationsPerInvocation(100000)</code>, so scores are ns/op.
+        </td>
+    </tr>
+    <tr>
+        <th>Mixes</th>
+        <td><code>[50,25,25]</code> <code>[20,40,40]</code> <code>[80,10,10]</code> <code>[70,30,0]</code> <code>[50,50,0]</code>
+            <code>[30,70,0]</code></td>
+    </tr>
+    <tr>
+        <th>Maps</th>
+        <td>ChaosBPlusTree and ChaosBTree (degree 64), ChaosAVL, ChaosRBT, JDK TreeMap, JDK ConcurrentSkipListMap
+            (single-thread reference only), Fastutil AVL/RBT (<code>Object2Object</code>), Eclipse TreeSortedMap, and
+            Fastutil <code>Int2IntAVLTreeMap</code> / <code>Int2IntRBTreeMap</code> (class <code>ArenaPrimitive</code>,
+            primitive int keys, no boxing)
+        </td>
+    </tr>
+    </tbody>
+</table>
+<blockquote>
+    I did <b>ArenaObject</b> in multiple files (10k,100K,1M) as the ETA: 3hr
+</blockquote>
+<pre>java -jar ct-benchmark/target/benchmarks.jar ArenaObject \
+  -p size=10000,100000,1000000 -f 3 -wi 10 -w 1s -i 10 -r 1s \
+  -jvmArgsAppend "-Xms4g -Xmx4g -XX:+AlwaysPreTouch -XX:+UseParallelGC"
+</pre>
+<pre>java -jar ct-benchmark/target/benchmarks.jar ArenaPrimitive \
+  -p size=10000,100000,1000000 -f 3 -wi 10 -w 1s -i 10 -r 1s \
+  -jvmArgsAppend "-Xms4g -Xmx4g -XX:+AlwaysPreTouch -XX:+UseParallelGC"</pre>
+<h2>3. Results</h2>
+<div class="tabs" id="tabs">
+    <button class=" " data-t="s10000" type="button">10K</button>
+    <button class="on " data-t="s100000" type="button">100K</button>
+    <button class=" " data-t="s1000000" type="button">1M</button>
+    <button class=" " data-t="all" type="button">All sizes</button>
+</div>
+<div class="pane" hidden id="s10000"><h3>Time per operation by mix, 10K entries (ns/op)</h3>
+    <div class="grid2">
+        <div>
+            <svg aria-label="get 50%  put 25%  remove 25%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 50% put 25% remove 25%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="235.5" x2="235.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="235.5" y="283">50</text>
+                <line class="grid" x1="281.1" x2="281.1" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="281.1" y="283">100</text>
+                <line class="grid" x1="326.6" x2="326.6" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="326.6" y="283">150</text>
+                <line class="grid" x1="372.2" x2="372.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="372.2" y="283">200</text>
+                <line class="grid" x1="417.7" x2="417.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="417.7" y="283">250</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBTree</text>
+                <rect class="bar win" height="12" width="119.8" x="190" y="33.0"/>
+                <line class="ein" x1="309.5" x2="309.8" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="309.8" x2="310.1" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="310.1" x2="310.1" y1="35.0" y2="43.0"/>
+                <text class="w" x="317.1" y="43.0">131.5
+                    <tspan opacity=".45">±0.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">ChaosBPlusTree</text>
+                <rect class="bar tie" height="12" width="120.1" x="190" y="55.0"/>
+                <line class="ein" x1="309.6" x2="310.1" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="310.1" x2="310.6" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="310.6" x2="310.6" y1="57.0" y2="65.0"/>
+                <text class="" x="317.6" y="65.0">131.8
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="123.3" x="190" y="77.0"/>
+                <line class="ein" x1="312.9" x2="313.3" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="313.3" x2="313.6" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="313.6" x2="313.6" y1="79.0" y2="87.0"/>
+                <text class="" x="320.6" y="87.0">135.3
+                    <tspan opacity=".45">±0.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="126.6" x="190" y="99.0"/>
+                <line class="ein" x1="316.3" x2="316.6" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="316.6" x2="316.8" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="316.8" x2="316.8" y1="101.0" y2="109.0"/>
+                <text class="" x="323.8" y="109.0">138.9
+                    <tspan opacity=".45">±0.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="136.6" x="190" y="121.0"/>
+                <line class="ein" x1="326.1" x2="326.6" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="326.6" x2="327.0" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="327.0" x2="327.0" y1="123.0" y2="131.0"/>
+                <text class="" x="334.0" y="131.0">149.9
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="139.0" x="190" y="143.0"/>
+                <line class="ein" x1="327.6" x2="329.0" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="329.0" x2="330.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="330.3" x2="330.3" y1="145.0" y2="153.0"/>
+                <text class="" x="337.3" y="153.0">152.6
+                    <tspan opacity=".45">±1.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="150.1" x="190" y="165.0"/>
+                <line class="ein" x1="339.2" x2="340.1" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="340.1" x2="341.0" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="341.0" x2="341.0" y1="167.0" y2="175.0"/>
+                <text class="" x="348.0" y="175.0">164.8
+                    <tspan opacity=".45">±1.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="150.9" x="190" y="187.0"/>
+                <line class="ein" x1="339.9" x2="340.9" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="340.9" x2="341.8" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="341.8" x2="341.8" y1="189.0" y2="197.0"/>
+                <text class="" x="348.8" y="197.0">165.6
+                    <tspan opacity=".45">±1.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="153.1" x="190" y="209.0"/>
+                <line class="ein" x1="342.7" x2="343.1" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="343.1" x2="343.6" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="343.6" x2="343.6" y1="211.0" y2="219.0"/>
+                <text class="" x="350.6" y="219.0">168.1
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="156.0" x="190" y="231.0"/>
+                <line class="ein" x1="345.4" x2="346.0" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="346.0" x2="346.6" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="346.6" x2="346.6" y1="233.0" y2="241.0"/>
+                <text class="" x="353.6" y="241.0">171.3
+                    <tspan opacity=".45">±0.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="247.5" x="190" y="253.0"/>
+                <line class="ein" x1="433.8" x2="437.5" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="437.5" x2="441.2" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="441.2" x2="441.2" y1="255.0" y2="263.0"/>
+                <text class="" x="448.2" y="263.0">271.7
+                    <tspan opacity=".45">±4.1</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 20%  put 40%  remove 40%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 20% put 40% remove 40%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="235.5" x2="235.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="235.5" y="283">50</text>
+                <line class="grid" x1="281.1" x2="281.1" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="281.1" y="283">100</text>
+                <line class="grid" x1="326.6" x2="326.6" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="326.6" y="283">150</text>
+                <line class="grid" x1="372.2" x2="372.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="372.2" y="283">200</text>
+                <line class="grid" x1="417.7" x2="417.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="417.7" y="283">250</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="124.6" x="190" y="33.0"/>
+                <line class="ein" x1="313.9" x2="314.6" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="314.6" x2="315.3" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="315.3" x2="315.3" y1="35.0" y2="43.0"/>
+                <text class="w" x="322.3" y="43.0">136.8
+                    <tspan opacity=".45">±0.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">ChaosBTree</text>
+                <rect class="bar " height="12" width="129.0" x="190" y="55.0"/>
+                <line class="ein" x1="318.2" x2="319.0" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="319.0" x2="319.8" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="319.8" x2="319.8" y1="57.0" y2="65.0"/>
+                <text class="" x="326.8" y="65.0">141.7
+                    <tspan opacity=".45">±0.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="130.6" x="190" y="77.0"/>
+                <line class="ein" x1="320.0" x2="320.6" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="320.6" x2="321.1" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="321.1" x2="321.1" y1="79.0" y2="87.0"/>
+                <text class="" x="328.1" y="87.0">143.4
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="134.0" x="190" y="99.0"/>
+                <line class="ein" x1="322.5" x2="324.0" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="324.0" x2="325.6" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="325.6" x2="325.6" y1="101.0" y2="109.0"/>
+                <text class="" x="332.6" y="109.0">147.2
+                    <tspan opacity=".45">±1.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="146.8" x="190" y="121.0"/>
+                <line class="ein" x1="335.8" x2="336.8" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="336.8" x2="337.9" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="337.9" x2="337.9" y1="123.0" y2="131.0"/>
+                <text class="" x="344.9" y="131.0">161.2
+                    <tspan opacity=".45">±1.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="148.3" x="190" y="143.0"/>
+                <line class="ein" x1="337.0" x2="338.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="338.3" x2="339.6" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="339.6" x2="339.6" y1="145.0" y2="153.0"/>
+                <text class="" x="346.6" y="153.0">162.8
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="156.0" x="190" y="165.0"/>
+                <line class="ein" x1="344.8" x2="346.0" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="346.0" x2="347.3" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="347.3" x2="347.3" y1="167.0" y2="175.0"/>
+                <text class="" x="354.3" y="175.0">171.3
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="161.7" x="190" y="187.0"/>
+                <line class="ein" x1="350.8" x2="351.7" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="351.7" x2="352.6" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="352.6" x2="352.6" y1="189.0" y2="197.0"/>
+                <text class="" x="359.6" y="197.0">177.5
+                    <tspan opacity=".45">±1.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="163.2" x="190" y="209.0"/>
+                <line class="ein" x1="351.8" x2="353.2" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="353.2" x2="354.7" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="354.7" x2="354.7" y1="211.0" y2="219.0"/>
+                <text class="" x="361.7" y="219.0">179.2
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="165.7" x="190" y="231.0"/>
+                <line class="ein" x1="354.5" x2="355.7" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="355.7" x2="356.9" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="356.9" x2="356.9" y1="233.0" y2="241.0"/>
+                <text class="" x="363.9" y="241.0">181.9
+                    <tspan opacity=".45">±1.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="268.1" x="190" y="253.0"/>
+                <line class="ein" x1="456.1" x2="458.1" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="458.1" x2="460.0" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="460.0" x2="460.0" y1="255.0" y2="263.0"/>
+                <text class="" x="467.0" y="263.0">294.3
+                    <tspan opacity=".45">±2.1</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 80%  put 10%  remove 10%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 80% put 10% remove 10%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="235.5" x2="235.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="235.5" y="283">50</text>
+                <line class="grid" x1="281.1" x2="281.1" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="281.1" y="283">100</text>
+                <line class="grid" x1="326.6" x2="326.6" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="326.6" y="283">150</text>
+                <line class="grid" x1="372.2" x2="372.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="372.2" y="283">200</text>
+                <line class="grid" x1="417.7" x2="417.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="417.7" y="283">250</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="107.9" x="190" y="33.0"/>
+                <line class="ein" x1="297.7" x2="297.9" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="297.9" x2="298.1" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="298.1" x2="298.1" y1="35.0" y2="43.0"/>
+                <text class="w" x="305.1" y="43.0">118.5
+                    <tspan opacity=".45">±0.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">ChaosBTree</text>
+                <rect class="bar " height="12" width="111.4" x="190" y="55.0"/>
+                <line class="ein" x1="300.6" x2="301.4" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="301.4" x2="302.3" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="302.3" x2="302.3" y1="57.0" y2="65.0"/>
+                <text class="" x="309.3" y="65.0">122.3
+                    <tspan opacity=".45">±0.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="112.0" x="190" y="77.0"/>
+                <line class="ein" x1="301.4" x2="302.0" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="302.0" x2="302.6" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="302.6" x2="302.6" y1="79.0" y2="87.0"/>
+                <text class="" x="309.6" y="87.0">123.0
+                    <tspan opacity=".45">±0.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="113.1" x="190" y="99.0"/>
+                <line class="ein" x1="302.6" x2="303.1" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="303.1" x2="303.6" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="303.6" x2="303.6" y1="101.0" y2="109.0"/>
+                <text class="" x="310.6" y="109.0">124.2
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="128.3" x="190" y="121.0"/>
+                <line class="ein" x1="317.0" x2="318.3" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="318.3" x2="319.5" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="319.5" x2="319.5" y1="123.0" y2="131.0"/>
+                <text class="" x="326.5" y="131.0">140.8
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="128.3" x="190" y="143.0"/>
+                <line class="ein" x1="316.7" x2="318.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="318.3" x2="319.9" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="319.9" x2="319.9" y1="145.0" y2="153.0"/>
+                <text class="" x="326.9" y="153.0">140.9
+                    <tspan opacity=".45">±1.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="141.0" x="190" y="165.0"/>
+                <line class="ein" x1="330.4" x2="331.0" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="331.0" x2="331.5" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="331.5" x2="331.5" y1="167.0" y2="175.0"/>
+                <text class="" x="338.5" y="175.0">154.8
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="141.2" x="190" y="187.0"/>
+                <line class="ein" x1="329.7" x2="331.2" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="331.2" x2="332.7" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="332.7" x2="332.7" y1="189.0" y2="197.0"/>
+                <text class="" x="339.7" y="197.0">155.0
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="144.8" x="190" y="209.0"/>
+                <line class="ein" x1="333.3" x2="334.8" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="334.8" x2="336.2" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="336.2" x2="336.2" y1="211.0" y2="219.0"/>
+                <text class="" x="343.2" y="219.0">158.9
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="150.4" x="190" y="231.0"/>
+                <line class="ein" x1="339.1" x2="340.4" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="340.4" x2="341.7" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="341.7" x2="341.7" y1="233.0" y2="241.0"/>
+                <text class="" x="348.7" y="241.0">165.1
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="216.6" x="190" y="253.0"/>
+                <line class="ein" x1="404.2" x2="406.6" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="406.6" x2="409.1" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="409.1" x2="409.1" y1="255.0" y2="263.0"/>
+                <text class="" x="416.1" y="263.0">237.8
+                    <tspan opacity=".45">±2.7</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 70%  put 30%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 70% put 30% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="235.5" x2="235.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="235.5" y="283">50</text>
+                <line class="grid" x1="281.1" x2="281.1" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="281.1" y="283">100</text>
+                <line class="grid" x1="326.6" x2="326.6" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="326.6" y="283">150</text>
+                <line class="grid" x1="372.2" x2="372.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="372.2" y="283">200</text>
+                <line class="grid" x1="417.7" x2="417.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="417.7" y="283">250</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">FastutilAVLIntNative</text>
+                <rect class="bar win" height="12" width="100.3" x="190" y="33.0"/>
+                <line class="ein" x1="290.0" x2="290.3" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="290.3" x2="290.6" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="290.6" x2="290.6" y1="35.0" y2="43.0"/>
+                <text class="w" x="297.6" y="43.0">110.1
+                    <tspan opacity=".45">±0.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="100.8" x="190" y="55.0"/>
+                <line class="ein" x1="290.6" x2="290.8" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="290.8" x2="291.0" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="291.0" x2="291.0" y1="57.0" y2="65.0"/>
+                <text class="" x="298.0" y="65.0">110.7
+                    <tspan opacity=".45">±0.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">ChaosBTree</text>
+                <rect class="bar " height="12" width="110.6" x="190" y="77.0"/>
+                <line class="ein" x1="300.1" x2="300.6" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="300.6" x2="301.1" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="301.1" x2="301.1" y1="79.0" y2="87.0"/>
+                <text class="" x="308.1" y="87.0">121.4
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">ChaosBPlusTree</text>
+                <rect class="bar " height="12" width="115.8" x="190" y="99.0"/>
+                <line class="ein" x1="305.4" x2="305.8" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="305.8" x2="306.3" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="306.3" x2="306.3" y1="101.0" y2="109.0"/>
+                <text class="" x="313.3" y="109.0">127.2
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="125.3" x="190" y="121.0"/>
+                <line class="ein" x1="314.5" x2="315.3" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="315.3" x2="316.1" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="316.1" x2="316.1" y1="123.0" y2="131.0"/>
+                <text class="" x="323.1" y="131.0">137.5
+                    <tspan opacity=".45">±0.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="125.3" x="190" y="143.0"/>
+                <line class="ein" x1="314.1" x2="315.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="315.3" x2="316.6" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="316.6" x2="316.6" y1="145.0" y2="153.0"/>
+                <text class="" x="323.6" y="153.0">137.6
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="127.0" x="190" y="165.0"/>
+                <line class="ein" x1="315.9" x2="317.0" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="317.0" x2="318.1" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="318.1" x2="318.1" y1="167.0" y2="175.0"/>
+                <text class="" x="325.1" y="175.0">139.4
+                    <tspan opacity=".45">±1.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="131.1" x="190" y="187.0"/>
+                <line class="ein" x1="320.5" x2="321.1" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="321.1" x2="321.6" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="321.6" x2="321.6" y1="189.0" y2="197.0"/>
+                <text class="" x="328.6" y="197.0">143.9
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="131.8" x="190" y="209.0"/>
+                <line class="ein" x1="320.3" x2="321.8" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="321.8" x2="323.3" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="323.3" x2="323.3" y1="211.0" y2="219.0"/>
+                <text class="" x="330.3" y="219.0">144.7
+                    <tspan opacity=".45">±1.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="132.2" x="190" y="231.0"/>
+                <line class="ein" x1="320.8" x2="322.2" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="322.2" x2="323.7" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="323.7" x2="323.7" y1="233.0" y2="241.0"/>
+                <text class="" x="330.7" y="241.0">145.2
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="203.9" x="190" y="253.0"/>
+                <line class="ein" x1="390.4" x2="393.9" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="393.9" x2="397.3" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="397.3" x2="397.3" y1="255.0" y2="263.0"/>
+                <text class="" x="404.3" y="263.0">223.8
+                    <tspan opacity=".45">±3.8</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 50%  put 50%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 50% put 50% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="235.5" x2="235.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="235.5" y="283">50</text>
+                <line class="grid" x1="281.1" x2="281.1" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="281.1" y="283">100</text>
+                <line class="grid" x1="326.6" x2="326.6" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="326.6" y="283">150</text>
+                <line class="grid" x1="372.2" x2="372.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="372.2" y="283">200</text>
+                <line class="grid" x1="417.7" x2="417.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="417.7" y="283">250</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">FastutilAVLIntNative</text>
+                <rect class="bar win" height="12" width="102.4" x="190" y="33.0"/>
+                <line class="ein" x1="291.9" x2="292.4" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="292.4" x2="292.9" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="292.9" x2="292.9" y1="35.0" y2="43.0"/>
+                <text class="w" x="299.9" y="43.0">112.5
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="106.0" x="190" y="55.0"/>
+                <line class="ein" x1="295.7" x2="296.0" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="296.0" x2="296.3" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="296.3" x2="296.3" y1="57.0" y2="65.0"/>
+                <text class="" x="303.3" y="65.0">116.4
+                    <tspan opacity=".45">±0.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">ChaosBPlusTree</text>
+                <rect class="bar " height="12" width="114.0" x="190" y="77.0"/>
+                <line class="ein" x1="303.5" x2="304.0" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="304.0" x2="304.4" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="304.4" x2="304.4" y1="79.0" y2="87.0"/>
+                <text class="" x="311.4" y="87.0">125.1
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">ChaosBTree</text>
+                <rect class="bar " height="12" width="114.5" x="190" y="99.0"/>
+                <line class="ein" x1="303.4" x2="304.5" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="304.5" x2="305.6" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="305.6" x2="305.6" y1="101.0" y2="109.0"/>
+                <text class="" x="312.6" y="109.0">125.7
+                    <tspan opacity=".45">±1.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="125.3" x="190" y="121.0"/>
+                <line class="ein" x1="314.8" x2="315.3" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="315.3" x2="315.8" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="315.8" x2="315.8" y1="123.0" y2="131.0"/>
+                <text class="" x="322.8" y="131.0">137.6
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="127.3" x="190" y="143.0"/>
+                <line class="ein" x1="316.6" x2="317.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="317.3" x2="318.0" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="318.0" x2="318.0" y1="145.0" y2="153.0"/>
+                <text class="" x="325.0" y="153.0">139.8
+                    <tspan opacity=".45">±0.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="129.5" x="190" y="165.0"/>
+                <line class="ein" x1="318.3" x2="319.5" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="319.5" x2="320.8" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="320.8" x2="320.8" y1="167.0" y2="175.0"/>
+                <text class="" x="327.8" y="175.0">142.2
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="133.4" x="190" y="187.0"/>
+                <line class="ein" x1="321.0" x2="323.4" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="323.4" x2="325.8" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="325.8" x2="325.8" y1="189.0" y2="197.0"/>
+                <text class="" x="332.8" y="197.0">146.5
+                    <tspan opacity=".45">±2.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="134.9" x="190" y="209.0"/>
+                <line class="ein" x1="323.5" x2="324.9" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="324.9" x2="326.2" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="326.2" x2="326.2" y1="211.0" y2="219.0"/>
+                <text class="" x="333.2" y="219.0">148.1
+                    <tspan opacity=".45">±1.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="136.4" x="190" y="231.0"/>
+                <line class="ein" x1="325.5" x2="326.4" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="326.4" x2="327.3" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="327.3" x2="327.3" y1="233.0" y2="241.0"/>
+                <text class="" x="334.3" y="241.0">149.8
+                    <tspan opacity=".45">±1.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="198.1" x="190" y="253.0"/>
+                <line class="ein" x1="386.6" x2="388.1" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="388.1" x2="389.7" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="389.7" x2="389.7" y1="255.0" y2="263.0"/>
+                <text class="" x="396.7" y="263.0">217.6
+                    <tspan opacity=".45">±1.7</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 30%  put 70%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 30% put 70% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="235.5" x2="235.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="235.5" y="283">50</text>
+                <line class="grid" x1="281.1" x2="281.1" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="281.1" y="283">100</text>
+                <line class="grid" x1="326.6" x2="326.6" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="326.6" y="283">150</text>
+                <line class="grid" x1="372.2" x2="372.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="372.2" y="283">200</text>
+                <line class="grid" x1="417.7" x2="417.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="417.7" y="283">250</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">FastutilAVLIntNative</text>
+                <rect class="bar win" height="12" width="103.5" x="190" y="33.0"/>
+                <line class="ein" x1="293.0" x2="293.5" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="293.5" x2="293.9" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="293.9" x2="293.9" y1="35.0" y2="43.0"/>
+                <text class="w" x="300.9" y="43.0">113.6
+                    <tspan opacity=".45">±0.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="107.8" x="190" y="55.0"/>
+                <line class="ein" x1="297.6" x2="297.8" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="297.8" x2="297.9" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="297.9" x2="297.9" y1="57.0" y2="65.0"/>
+                <text class="" x="304.9" y="65.0">118.3
+                    <tspan opacity=".45">±0.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">ChaosBTree</text>
+                <rect class="bar " height="12" width="112.6" x="190" y="77.0"/>
+                <line class="ein" x1="301.9" x2="302.6" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="302.6" x2="303.2" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="303.2" x2="303.2" y1="79.0" y2="87.0"/>
+                <text class="" x="310.2" y="87.0">123.6
+                    <tspan opacity=".45">±0.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">ChaosBPlusTree</text>
+                <rect class="bar " height="12" width="113.4" x="190" y="99.0"/>
+                <line class="ein" x1="302.8" x2="303.4" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="303.4" x2="304.1" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="304.1" x2="304.1" y1="101.0" y2="109.0"/>
+                <text class="" x="311.1" y="109.0">124.5
+                    <tspan opacity=".45">±0.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="124.7" x="190" y="121.0"/>
+                <line class="ein" x1="313.6" x2="314.7" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="314.7" x2="315.8" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="315.8" x2="315.8" y1="123.0" y2="131.0"/>
+                <text class="" x="322.8" y="131.0">136.9
+                    <tspan opacity=".45">±1.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="127.9" x="190" y="143.0"/>
+                <line class="ein" x1="317.1" x2="317.9" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="317.9" x2="318.8" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="318.8" x2="318.8" y1="145.0" y2="153.0"/>
+                <text class="" x="325.8" y="153.0">140.5
+                    <tspan opacity=".45">±1.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="128.8" x="190" y="165.0"/>
+                <line class="ein" x1="318.1" x2="318.8" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="318.8" x2="319.5" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="319.5" x2="319.5" y1="167.0" y2="175.0"/>
+                <text class="" x="326.5" y="175.0">141.4
+                    <tspan opacity=".45">±0.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="131.8" x="190" y="187.0"/>
+                <line class="ein" x1="321.0" x2="321.8" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="321.8" x2="322.5" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="322.5" x2="322.5" y1="189.0" y2="197.0"/>
+                <text class="" x="329.5" y="197.0">144.7
+                    <tspan opacity=".45">±0.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="137.4" x="190" y="209.0"/>
+                <line class="ein" x1="326.4" x2="327.4" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="327.4" x2="328.5" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="328.5" x2="328.5" y1="211.0" y2="219.0"/>
+                <text class="" x="335.5" y="219.0">150.9
+                    <tspan opacity=".45">±1.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="138.6" x="190" y="231.0"/>
+                <line class="ein" x1="327.9" x2="328.6" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="328.6" x2="329.4" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="329.4" x2="329.4" y1="233.0" y2="241.0"/>
+                <text class="" x="336.4" y="241.0">152.2
+                    <tspan opacity=".45">±0.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="203.2" x="190" y="253.0"/>
+                <line class="ein" x1="391.7" x2="393.2" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="393.2" x2="394.6" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="394.6" x2="394.6" y1="255.0" y2="263.0"/>
+                <text class="" x="401.6" y="263.0">223.1
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+            </svg>
+        </div>
+    </div>
+    <h3>Time table, 10K (ns/op)</h3>
+    <div style="overflow-x:auto">
+        <table>
+            <thead>
+            <tr>
+                <th>Map</th>
+                <th class="num">50,25,25</th>
+                <th class="num">20,40,40</th>
+                <th class="num">80,10,10</th>
+                <th class="num">70,30,0</th>
+                <th class="num">50,50,0</th>
+                <th class="num">30,70,0</th>
+                <th class="num">Mean</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>FastutilAVLIntNative</td>
+                <td class="num ">135.3 <span class="e">±0.4</span></td>
+                <td class="num ">143.4 <span class="e">±0.6</span></td>
+                <td class="num ">123.0 <span class="e">±0.7</span></td>
+                <td class="num win">110.1 <span class="e">±0.3</span></td>
+                <td class="num win">112.5 <span class="e">±0.6</span></td>
+                <td class="num win">113.6 <span class="e">±0.5</span></td>
+                <td class="num win">123.0 <span class="e">±0.2</span></td>
+            </tr>
+            <tr>
+                <td>FastutilRBTIntNative</td>
+                <td class="num ">138.9 <span class="e">±0.3</span></td>
+                <td class="num ">147.2 <span class="e">±1.7</span></td>
+                <td class="num ">124.2 <span class="e">±0.6</span></td>
+                <td class="num ">110.7 <span class="e">±0.2</span></td>
+                <td class="num ">116.4 <span class="e">±0.3</span></td>
+                <td class="num ">118.3 <span class="e">±0.2</span></td>
+                <td class="num ">126.0 <span class="e">±0.3</span></td>
+            </tr>
+            <tr>
+                <td>ChaosBPlusTree</td>
+                <td class="num tie">131.8 <span class="e">±0.5</span></td>
+                <td class="num win">136.8 <span class="e">±0.8</span></td>
+                <td class="num win">118.5 <span class="e">±0.2</span></td>
+                <td class="num ">127.2 <span class="e">±0.5</span></td>
+                <td class="num ">125.1 <span class="e">±0.5</span></td>
+                <td class="num ">124.5 <span class="e">±0.7</span></td>
+                <td class="num ">127.3 <span class="e">±0.2</span></td>
+            </tr>
+            <tr>
+                <td>ChaosBTree</td>
+                <td class="num win">131.5 <span class="e">±0.3</span></td>
+                <td class="num ">141.7 <span class="e">±0.9</span></td>
+                <td class="num ">122.3 <span class="e">±0.9</span></td>
+                <td class="num ">121.4 <span class="e">±0.5</span></td>
+                <td class="num ">125.7 <span class="e">±1.2</span></td>
+                <td class="num ">123.6 <span class="e">±0.7</span></td>
+                <td class="num ">127.7 <span class="e">±0.3</span></td>
+            </tr>
+            <tr>
+                <td>JDKTreeMap</td>
+                <td class="num ">149.9 <span class="e">±0.5</span></td>
+                <td class="num ">161.2 <span class="e">±1.1</span></td>
+                <td class="num ">140.9 <span class="e">±1.8</span></td>
+                <td class="num ">137.6 <span class="e">±1.4</span></td>
+                <td class="num ">142.2 <span class="e">±1.4</span></td>
+                <td class="num ">141.4 <span class="e">±0.8</span></td>
+                <td class="num ">145.5 <span class="e">±0.5</span></td>
+            </tr>
+            <tr>
+                <td>EclipseRBT</td>
+                <td class="num ">152.6 <span class="e">±1.5</span></td>
+                <td class="num ">162.8 <span class="e">±1.4</span></td>
+                <td class="num ">140.8 <span class="e">±1.4</span></td>
+                <td class="num ">139.4 <span class="e">±1.2</span></td>
+                <td class="num ">139.8 <span class="e">±0.8</span></td>
+                <td class="num ">140.5 <span class="e">±1.0</span></td>
+                <td class="num ">146.0 <span class="e">±0.5</span></td>
+            </tr>
+            <tr>
+                <td>ChaosAVL</td>
+                <td class="num ">171.3 <span class="e">±0.7</span></td>
+                <td class="num ">179.2 <span class="e">±1.6</span></td>
+                <td class="num ">165.1 <span class="e">±1.4</span></td>
+                <td class="num ">137.5 <span class="e">±0.9</span></td>
+                <td class="num ">137.6 <span class="e">±0.6</span></td>
+                <td class="num ">136.9 <span class="e">±1.2</span></td>
+                <td class="num ">154.6 <span class="e">±0.5</span></td>
+            </tr>
+            <tr>
+                <td>ChaosRBT</td>
+                <td class="num ">165.6 <span class="e">±1.0</span></td>
+                <td class="num ">171.3 <span class="e">±1.4</span></td>
+                <td class="num ">158.9 <span class="e">±1.6</span></td>
+                <td class="num ">145.2 <span class="e">±1.6</span></td>
+                <td class="num ">146.5 <span class="e">±2.6</span></td>
+                <td class="num ">144.7 <span class="e">±0.8</span></td>
+                <td class="num ">155.4 <span class="e">±0.7</span></td>
+            </tr>
+            <tr>
+                <td>FastutilAVLObj</td>
+                <td class="num ">164.8 <span class="e">±1.0</span></td>
+                <td class="num ">177.5 <span class="e">±1.0</span></td>
+                <td class="num ">154.8 <span class="e">±0.6</span></td>
+                <td class="num ">143.9 <span class="e">±0.6</span></td>
+                <td class="num ">149.8 <span class="e">±1.0</span></td>
+                <td class="num ">152.2 <span class="e">±0.9</span></td>
+                <td class="num ">157.2 <span class="e">±0.4</span></td>
+            </tr>
+            <tr>
+                <td>FastutilRBTObj</td>
+                <td class="num ">168.1 <span class="e">±0.5</span></td>
+                <td class="num ">181.9 <span class="e">±1.3</span></td>
+                <td class="num ">155.0 <span class="e">±1.6</span></td>
+                <td class="num ">144.7 <span class="e">±1.7</span></td>
+                <td class="num ">148.1 <span class="e">±1.5</span></td>
+                <td class="num ">150.9 <span class="e">±1.2</span></td>
+                <td class="num ">158.1 <span class="e">±0.5</span></td>
+            </tr>
+            <tr>
+                <td>JDKConcurrentSkipListMap</td>
+                <td class="num ">271.7 <span class="e">±4.1</span></td>
+                <td class="num ">294.3 <span class="e">±2.1</span></td>
+                <td class="num ">237.8 <span class="e">±2.7</span></td>
+                <td class="num ">223.8 <span class="e">±3.8</span></td>
+                <td class="num ">217.6 <span class="e">±1.7</span></td>
+                <td class="num ">223.1 <span class="e">±1.6</span></td>
+                <td class="num ">244.7 <span class="e">±1.2</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="note">Score ± JMH error. Rows sorted by mean over the six mixes.</p></div>
+<div class="pane" id="s100000"><h3>Time per operation by mix, 100K entries (ns/op)</h3>
+    <div class="grid2">
+        <div>
+            <svg aria-label="get 50%  put 25%  remove 25%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 50% put 25% remove 25%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="271.9" x2="271.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="271.9" y="283">200</text>
+                <line class="grid" x1="353.8" x2="353.8" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="353.8" y="283">400</text>
+                <line class="grid" x1="435.7" x2="435.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="435.7" y="283">600</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBTree</text>
+                <rect class="bar win" height="12" width="85.0" x="190" y="33.0"/>
+                <line class="ein" x1="274.3" x2="275.0" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="275.0" x2="275.7" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="275.7" x2="275.7" y1="35.0" y2="43.0"/>
+                <text class="w" x="282.7" y="43.0">207.7
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">ChaosBPlusTree</text>
+                <rect class="bar " height="12" width="86.5" x="190" y="55.0"/>
+                <line class="ein" x1="276.2" x2="276.5" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="276.5" x2="276.8" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="276.8" x2="276.8" y1="57.0" y2="65.0"/>
+                <text class="" x="283.8" y="65.0">211.3
+                    <tspan opacity=".45">±0.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="116.3" x="190" y="77.0"/>
+                <line class="ein" x1="305.2" x2="306.3" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="306.3" x2="307.4" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="307.4" x2="307.4" y1="79.0" y2="87.0"/>
+                <text class="" x="314.4" y="87.0">284.1
+                    <tspan opacity=".45">±2.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="119.9" x="190" y="99.0"/>
+                <line class="ein" x1="308.5" x2="309.9" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="309.9" x2="311.3" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="311.3" x2="311.3" y1="101.0" y2="109.0"/>
+                <text class="" x="318.3" y="109.0">292.8
+                    <tspan opacity=".45">±3.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="141.2" x="190" y="121.0"/>
+                <line class="ein" x1="330.2" x2="331.2" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="331.2" x2="332.1" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="332.1" x2="332.1" y1="123.0" y2="131.0"/>
+                <text class="" x="339.1" y="131.0">344.8
+                    <tspan opacity=".45">±2.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="145.6" x="190" y="143.0"/>
+                <line class="ein" x1="328.6" x2="335.6" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="335.6" x2="342.5" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="342.5" x2="342.5" y1="145.0" y2="153.0"/>
+                <text class="" x="349.5" y="153.0">355.6
+                    <tspan opacity=".45">±17.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="156.7" x="190" y="165.0"/>
+                <line class="ein" x1="336.1" x2="346.7" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="346.7" x2="357.3" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="357.3" x2="357.3" y1="167.0" y2="175.0"/>
+                <text class="" x="364.3" y="175.0">382.7
+                    <tspan opacity=".45">±26.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="156.9" x="190" y="187.0"/>
+                <line class="ein" x1="345.5" x2="346.9" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="346.9" x2="348.4" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="348.4" x2="348.4" y1="189.0" y2="197.0"/>
+                <text class="" x="355.4" y="197.0">383.3
+                    <tspan opacity=".45">±3.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="158.9" x="190" y="209.0"/>
+                <line class="ein" x1="342.9" x2="348.9" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="348.9" x2="354.8" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="354.8" x2="354.8" y1="211.0" y2="219.0"/>
+                <text class="" x="361.8" y="219.0">388.0
+                    <tspan opacity=".45">±14.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="162.9" x="190" y="231.0"/>
+                <line class="ein" x1="350.7" x2="352.9" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="352.9" x2="355.1" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="355.1" x2="355.1" y1="233.0" y2="241.0"/>
+                <text class="" x="362.1" y="241.0">397.9
+                    <tspan opacity=".45">±5.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="256.1" x="190" y="253.0"/>
+                <line class="ein" x1="438.8" x2="446.1" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="446.1" x2="453.5" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="453.5" x2="453.5" y1="255.0" y2="263.0"/>
+                <text class="" x="460.5" y="263.0">625.6
+                    <tspan opacity=".45">±17.9</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 20%  put 40%  remove 40%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 20% put 40% remove 40%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="271.9" x2="271.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="271.9" y="283">200</text>
+                <line class="grid" x1="353.8" x2="353.8" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="353.8" y="283">400</text>
+                <line class="grid" x1="435.7" x2="435.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="435.7" y="283">600</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="88.9" x="190" y="33.0"/>
+                <line class="ein" x1="278.5" x2="278.9" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="278.9" x2="279.3" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="279.3" x2="279.3" y1="35.0" y2="43.0"/>
+                <text class="w" x="286.3" y="43.0">217.1
+                    <tspan opacity=".45">±0.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">ChaosBTree</text>
+                <rect class="bar tie" height="12" width="89.2" x="190" y="55.0"/>
+                <line class="ein" x1="278.6" x2="279.2" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="279.2" x2="279.9" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="279.9" x2="279.9" y1="57.0" y2="65.0"/>
+                <text class="" x="286.9" y="65.0">217.9
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="122.5" x="190" y="77.0"/>
+                <line class="ein" x1="310.7" x2="312.5" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="312.5" x2="314.3" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="314.3" x2="314.3" y1="79.0" y2="87.0"/>
+                <text class="" x="321.3" y="87.0">299.2
+                    <tspan opacity=".45">±4.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="125.0" x="190" y="99.0"/>
+                <line class="ein" x1="313.9" x2="315.0" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="315.0" x2="316.0" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="316.0" x2="316.0" y1="101.0" y2="109.0"/>
+                <text class="" x="323.0" y="109.0">305.3
+                    <tspan opacity=".45">±2.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="163.9" x="190" y="121.0"/>
+                <line class="ein" x1="344.4" x2="353.9" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="353.9" x2="363.5" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="363.5" x2="363.5" y1="123.0" y2="131.0"/>
+                <text class="" x="370.5" y="131.0">400.4
+                    <tspan opacity=".45">±23.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="164.3" x="190" y="143.0"/>
+                <line class="ein" x1="343.3" x2="354.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="354.3" x2="365.3" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="365.3" x2="365.3" y1="145.0" y2="153.0"/>
+                <text class="" x="372.3" y="153.0">401.3
+                    <tspan opacity=".45">±26.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="164.9" x="190" y="165.0"/>
+                <line class="ein" x1="353.3" x2="354.9" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="354.9" x2="356.5" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="356.5" x2="356.5" y1="167.0" y2="175.0"/>
+                <text class="" x="363.5" y="175.0">402.7
+                    <tspan opacity=".45">±3.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="167.8" x="190" y="187.0"/>
+                <line class="ein" x1="351.9" x2="357.8" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="357.8" x2="363.7" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="363.7" x2="363.7" y1="189.0" y2="197.0"/>
+                <text class="" x="370.7" y="197.0">409.9
+                    <tspan opacity=".45">±14.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="168.9" x="190" y="209.0"/>
+                <line class="ein" x1="350.2" x2="358.9" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="358.9" x2="367.5" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="367.5" x2="367.5" y1="211.0" y2="219.0"/>
+                <text class="" x="374.5" y="219.0">412.5
+                    <tspan opacity=".45">±21.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="177.8" x="190" y="231.0"/>
+                <line class="ein" x1="364.1" x2="367.8" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="367.8" x2="371.5" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="371.5" x2="371.5" y1="233.0" y2="241.0"/>
+                <text class="" x="378.5" y="241.0">434.3
+                    <tspan opacity=".45">±9.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="266.8" x="190" y="253.0"/>
+                <line class="ein" x1="453.7" x2="456.8" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="456.8" x2="460.0" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="460.0" x2="460.0" y1="255.0" y2="263.0"/>
+                <text class="" x="467.0" y="263.0">651.8
+                    <tspan opacity=".45">±7.7</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 80%  put 10%  remove 10%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 80% put 10% remove 10%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="271.9" x2="271.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="271.9" y="283">200</text>
+                <line class="grid" x1="353.8" x2="353.8" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="353.8" y="283">400</text>
+                <line class="grid" x1="435.7" x2="435.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="435.7" y="283">600</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBTree</text>
+                <rect class="bar win" height="12" width="82.2" x="190" y="33.0"/>
+                <line class="ein" x1="271.3" x2="272.2" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="272.2" x2="273.1" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="273.1" x2="273.1" y1="35.0" y2="43.0"/>
+                <text class="w" x="280.1" y="43.0">200.8
+                    <tspan opacity=".45">±2.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">ChaosBPlusTree</text>
+                <rect class="bar tie" height="12" width="83.1" x="190" y="55.0"/>
+                <line class="ein" x1="272.0" x2="273.1" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="273.1" x2="274.1" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="274.1" x2="274.1" y1="57.0" y2="65.0"/>
+                <text class="" x="281.1" y="65.0">202.9
+                    <tspan opacity=".45">±2.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="96.8" x="190" y="77.0"/>
+                <line class="ein" x1="286.2" x2="286.8" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="286.8" x2="287.4" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="287.4" x2="287.4" y1="79.0" y2="87.0"/>
+                <text class="" x="294.4" y="87.0">236.4
+                    <tspan opacity=".45">±1.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="97.4" x="190" y="99.0"/>
+                <line class="ein" x1="286.7" x2="287.4" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="287.4" x2="288.2" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="288.2" x2="288.2" y1="101.0" y2="109.0"/>
+                <text class="" x="295.2" y="109.0">238.0
+                    <tspan opacity=".45">±1.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="122.2" x="190" y="121.0"/>
+                <line class="ein" x1="310.9" x2="312.2" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="312.2" x2="313.4" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="313.4" x2="313.4" y1="123.0" y2="131.0"/>
+                <text class="" x="320.4" y="131.0">298.4
+                    <tspan opacity=".45">±3.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="132.6" x="190" y="143.0"/>
+                <line class="ein" x1="321.1" x2="322.6" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="322.6" x2="324.2" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="324.2" x2="324.2" y1="145.0" y2="153.0"/>
+                <text class="" x="331.2" y="153.0">324.0
+                    <tspan opacity=".45">±3.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="136.8" x="190" y="165.0"/>
+                <line class="ein" x1="326.2" x2="326.8" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="326.8" x2="327.3" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="327.3" x2="327.3" y1="167.0" y2="175.0"/>
+                <text class="" x="334.3" y="175.0">334.0
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="137.7" x="190" y="187.0"/>
+                <line class="ein" x1="310.8" x2="327.7" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="327.7" x2="344.5" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="344.5" x2="344.5" y1="189.0" y2="197.0"/>
+                <text class="" x="351.5" y="197.0">336.3
+                    <tspan opacity=".45">±41.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="138.2" x="190" y="209.0"/>
+                <line class="ein" x1="327.3" x2="328.2" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="328.2" x2="329.1" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="329.1" x2="329.1" y1="211.0" y2="219.0"/>
+                <text class="" x="336.1" y="219.0">337.5
+                    <tspan opacity=".45">±2.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="141.7" x="190" y="231.0"/>
+                <line class="ein" x1="326.0" x2="331.7" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="331.7" x2="337.3" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="337.3" x2="337.3" y1="233.0" y2="241.0"/>
+                <text class="" x="344.3" y="241.0">346.0
+                    <tspan opacity=".45">±13.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="230.7" x="190" y="253.0"/>
+                <line class="ein" x1="417.8" x2="420.7" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="420.7" x2="423.5" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="423.5" x2="423.5" y1="255.0" y2="263.0"/>
+                <text class="" x="430.5" y="263.0">563.4
+                    <tspan opacity=".45">±7.0</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 70%  put 30%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 70% put 30% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="271.9" x2="271.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="271.9" y="283">200</text>
+                <line class="grid" x1="353.8" x2="353.8" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="353.8" y="283">400</text>
+                <line class="grid" x1="435.7" x2="435.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="435.7" y="283">600</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">FastutilRBTIntNative</text>
+                <rect class="bar win" height="12" width="85.2" x="190" y="33.0"/>
+                <line class="ein" x1="274.4" x2="275.2" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="275.2" x2="276.1" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="276.1" x2="276.1" y1="35.0" y2="43.0"/>
+                <text class="w" x="283.1" y="43.0">208.2
+                    <tspan opacity=".45">±2.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">FastutilAVLIntNative</text>
+                <rect class="bar tie" height="12" width="86.9" x="190" y="55.0"/>
+                <line class="ein" x1="274.9" x2="276.9" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="276.9" x2="278.9" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="278.9" x2="278.9" y1="57.0" y2="65.0"/>
+                <text class="" x="285.9" y="65.0">212.3
+                    <tspan opacity=".45">±5.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">ChaosBTree</text>
+                <rect class="bar " height="12" width="88.1" x="190" y="77.0"/>
+                <line class="ein" x1="276.5" x2="278.1" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="278.1" x2="279.7" y1="83.0" y2="83.0"/>
+                <line class="eout " x1="279.7" x2="279.7" y1="79.0" y2="87.0"/>
+                <text class="" x="286.7" y="87.0">215.2
+                    <tspan opacity=".45">±3.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">ChaosBPlusTree</text>
+                <rect class="bar " height="12" width="90.9" x="190" y="99.0"/>
+                <line class="ein" x1="278.6" x2="280.9" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="280.9" x2="283.1" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="283.1" x2="283.1" y1="101.0" y2="109.0"/>
+                <text class="" x="290.1" y="109.0">221.9
+                    <tspan opacity=".45">±5.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="123.4" x="190" y="121.0"/>
+                <line class="ein" x1="312.9" x2="313.4" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="313.4" x2="314.0" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="314.0" x2="314.0" y1="123.0" y2="131.0"/>
+                <text class="" x="321.0" y="131.0">301.5
+                    <tspan opacity=".45">±1.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="126.2" x="190" y="143.0"/>
+                <line class="ein" x1="315.0" x2="316.2" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="316.2" x2="317.4" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="317.4" x2="317.4" y1="145.0" y2="153.0"/>
+                <text class="" x="324.4" y="153.0">308.3
+                    <tspan opacity=".45">±3.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="128.6" x="190" y="165.0"/>
+                <line class="ein" x1="317.6" x2="318.6" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="318.6" x2="319.7" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="319.7" x2="319.7" y1="167.0" y2="175.0"/>
+                <text class="" x="326.7" y="175.0">314.2
+                    <tspan opacity=".45">±2.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="129.7" x="190" y="187.0"/>
+                <line class="ein" x1="318.5" x2="319.7" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="319.7" x2="321.0" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="321.0" x2="321.0" y1="189.0" y2="197.0"/>
+                <text class="" x="328.0" y="197.0">316.9
+                    <tspan opacity=".45">±3.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="135.0" x="190" y="209.0"/>
+                <line class="ein" x1="323.4" x2="325.0" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="325.0" x2="326.6" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="326.6" x2="326.6" y1="211.0" y2="219.0"/>
+                <text class="" x="333.6" y="219.0">329.7
+                    <tspan opacity=".45">±3.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="146.2" x="190" y="231.0"/>
+                <line class="ein" x1="326.1" x2="336.2" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="336.2" x2="346.3" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="346.3" x2="346.3" y1="233.0" y2="241.0"/>
+                <text class="" x="353.3" y="241.0">357.1
+                    <tspan opacity=".45">±24.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="222.3" x="190" y="253.0"/>
+                <line class="ein" x1="411.3" x2="412.3" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="412.3" x2="413.4" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="413.4" x2="413.4" y1="255.0" y2="263.0"/>
+                <text class="" x="420.4" y="263.0">543.0
+                    <tspan opacity=".45">±2.6</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 50%  put 50%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 50% put 50% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="271.9" x2="271.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="271.9" y="283">200</text>
+                <line class="grid" x1="353.8" x2="353.8" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="353.8" y="283">400</text>
+                <line class="grid" x1="435.7" x2="435.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="435.7" y="283">600</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="86.3" x="190" y="33.0"/>
+                <line class="ein" x1="275.0" x2="276.3" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="276.3" x2="277.6" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="277.6" x2="277.6" y1="35.0" y2="43.0"/>
+                <text class="w" x="284.6" y="43.0">210.8
+                    <tspan opacity=".45">±3.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">FastutilRBTIntNative</text>
+                <rect class="bar tie" height="12" width="88.3" x="190" y="55.0"/>
+                <line class="ein" x1="276.8" x2="278.3" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="278.3" x2="279.7" y1="61.0" y2="61.0"/>
+                <line class="eout tie" x1="279.7" x2="279.7" y1="57.0" y2="65.0"/>
+                <text class="" x="286.7" y="65.0">215.6
+                    <tspan opacity=".45">±3.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">ChaosBTree</text>
+                <rect class="bar tie" height="12" width="88.7" x="190" y="77.0"/>
+                <line class="ein" x1="277.4" x2="278.7" y1="83.0" y2="83.0"/>
+                <line class="eout tie" x1="278.7" x2="279.9" y1="83.0" y2="83.0"/>
+                <line class="eout tie" x1="279.9" x2="279.9" y1="79.0" y2="87.0"/>
+                <text class="" x="286.9" y="87.0">216.6
+                    <tspan opacity=".45">±3.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="90.3" x="190" y="99.0"/>
+                <line class="ein" x1="279.5" x2="280.3" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="280.3" x2="281.0" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="281.0" x2="281.0" y1="101.0" y2="109.0"/>
+                <text class="" x="288.0" y="109.0">220.5
+                    <tspan opacity=".45">±1.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="127.2" x="190" y="121.0"/>
+                <line class="ein" x1="316.5" x2="317.2" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="317.2" x2="317.9" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="317.9" x2="317.9" y1="123.0" y2="131.0"/>
+                <text class="" x="324.9" y="131.0">310.7
+                    <tspan opacity=".45">±1.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="127.5" x="190" y="143.0"/>
+                <line class="ein" x1="315.2" x2="317.5" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="317.5" x2="319.8" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="319.8" x2="319.8" y1="145.0" y2="153.0"/>
+                <text class="" x="326.8" y="153.0">311.5
+                    <tspan opacity=".45">±5.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="131.4" x="190" y="165.0"/>
+                <line class="ein" x1="320.4" x2="321.4" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="321.4" x2="322.3" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="322.3" x2="322.3" y1="167.0" y2="175.0"/>
+                <text class="" x="329.3" y="175.0">320.9
+                    <tspan opacity=".45">±2.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="131.9" x="190" y="187.0"/>
+                <line class="ein" x1="320.0" x2="321.9" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="321.9" x2="323.9" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="323.9" x2="323.9" y1="189.0" y2="197.0"/>
+                <text class="" x="330.9" y="197.0">322.2
+                    <tspan opacity=".45">±4.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="137.0" x="190" y="209.0"/>
+                <line class="ein" x1="321.5" x2="327.0" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="327.0" x2="332.5" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="332.5" x2="332.5" y1="211.0" y2="219.0"/>
+                <text class="" x="339.5" y="219.0">334.6
+                    <tspan opacity=".45">±13.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="165.3" x="190" y="231.0"/>
+                <line class="ein" x1="338.9" x2="355.3" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="355.3" x2="371.8" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="371.8" x2="371.8" y1="233.0" y2="241.0"/>
+                <text class="" x="378.8" y="241.0">403.8
+                    <tspan opacity=".45">±40.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="225.6" x="190" y="253.0"/>
+                <line class="ein" x1="413.7" x2="415.6" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="415.6" x2="417.5" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="417.5" x2="417.5" y1="255.0" y2="263.0"/>
+                <text class="" x="424.5" y="263.0">551.0
+                    <tspan opacity=".45">±4.6</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 30%  put 70%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 30% put 70% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="271.9" x2="271.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="271.9" y="283">200</text>
+                <line class="grid" x1="353.8" x2="353.8" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="353.8" y="283">400</text>
+                <line class="grid" x1="435.7" x2="435.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="435.7" y="283">600</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43.0">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="88.0" x="190" y="33.0"/>
+                <line class="ein" x1="276.3" x2="278.0" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="278.0" x2="279.8" y1="39.0" y2="39.0"/>
+                <line class="eout win" x1="279.8" x2="279.8" y1="35.0" y2="43.0"/>
+                <text class="w" x="286.8" y="43.0">215.0
+                    <tspan opacity=".45">±4.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65.0">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="91.7" x="190" y="55.0"/>
+                <line class="ein" x1="280.0" x2="281.7" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="281.7" x2="283.3" y1="61.0" y2="61.0"/>
+                <line class="eout " x1="283.3" x2="283.3" y1="57.0" y2="65.0"/>
+                <text class="" x="290.3" y="65.0">223.9
+                    <tspan opacity=".45">±4.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87.0">ChaosBTree</text>
+                <rect class="bar tie" height="12" width="92.1" x="190" y="77.0"/>
+                <line class="ein" x1="277.9" x2="282.1" y1="83.0" y2="83.0"/>
+                <line class="eout tie" x1="282.1" x2="286.3" y1="83.0" y2="83.0"/>
+                <line class="eout tie" x1="286.3" x2="286.3" y1="79.0" y2="87.0"/>
+                <text class="" x="293.3" y="87.0">225.0
+                    <tspan opacity=".45">±10.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109.0">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="92.6" x="190" y="99.0"/>
+                <line class="ein" x1="281.8" x2="282.6" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="282.6" x2="283.3" y1="105.0" y2="105.0"/>
+                <line class="eout " x1="283.3" x2="283.3" y1="101.0" y2="109.0"/>
+                <text class="" x="290.3" y="109.0">226.2
+                    <tspan opacity=".45">±1.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131.0">ChaosAVL</text>
+                <rect class="bar " height="12" width="129.0" x="190" y="121.0"/>
+                <line class="ein" x1="311.2" x2="319.0" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="319.0" x2="326.7" y1="127.0" y2="127.0"/>
+                <line class="eout " x1="326.7" x2="326.7" y1="123.0" y2="131.0"/>
+                <text class="" x="333.7" y="131.0">315.0
+                    <tspan opacity=".45">±18.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153.0">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="130.7" x="190" y="143.0"/>
+                <line class="ein" x1="319.7" x2="320.7" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="320.7" x2="321.8" y1="149.0" y2="149.0"/>
+                <line class="eout " x1="321.8" x2="321.8" y1="145.0" y2="153.0"/>
+                <text class="" x="328.8" y="153.0">319.3
+                    <tspan opacity=".45">±2.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175.0">JDKTreeMap</text>
+                <rect class="bar " height="12" width="131.9" x="190" y="165.0"/>
+                <line class="ein" x1="320.6" x2="321.9" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="321.9" x2="323.2" y1="171.0" y2="171.0"/>
+                <line class="eout " x1="323.2" x2="323.2" y1="167.0" y2="175.0"/>
+                <text class="" x="330.2" y="175.0">322.2
+                    <tspan opacity=".45">±3.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197.0">ChaosRBT</text>
+                <rect class="bar " height="12" width="133.8" x="190" y="187.0"/>
+                <line class="ein" x1="322.8" x2="323.8" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="323.8" x2="324.9" y1="193.0" y2="193.0"/>
+                <line class="eout " x1="324.9" x2="324.9" y1="189.0" y2="197.0"/>
+                <text class="" x="331.9" y="197.0">326.9
+                    <tspan opacity=".45">±2.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219.0">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="134.9" x="190" y="209.0"/>
+                <line class="ein" x1="323.9" x2="324.9" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="324.9" x2="325.8" y1="215.0" y2="215.0"/>
+                <line class="eout " x1="325.8" x2="325.8" y1="211.0" y2="219.0"/>
+                <text class="" x="332.8" y="219.0">329.4
+                    <tspan opacity=".45">±2.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241.0">EclipseRBT</text>
+                <rect class="bar " height="12" width="138.2" x="190" y="231.0"/>
+                <line class="ein" x1="324.0" x2="328.2" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="328.2" x2="332.4" y1="237.0" y2="237.0"/>
+                <line class="eout " x1="332.4" x2="332.4" y1="233.0" y2="241.0"/>
+                <text class="" x="339.4" y="241.0">337.6
+                    <tspan opacity=".45">±10.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263.0">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="231.5" x="190" y="253.0"/>
+                <line class="ein" x1="417.7" x2="421.5" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="421.5" x2="425.3" y1="259.0" y2="259.0"/>
+                <line class="eout " x1="425.3" x2="425.3" y1="255.0" y2="263.0"/>
+                <text class="" x="432.3" y="263.0">565.5
+                    <tspan opacity=".45">±9.4</tspan>
+                </text>
+            </svg>
+        </div>
+    </div>
+    <h3>Time table, 100K (ns/op)</h3>
+    <div style="overflow-x:auto">
+        <table>
+            <thead>
+            <tr>
+                <th>Map</th>
+                <th class="num">50,25,25</th>
+                <th class="num">20,40,40</th>
+                <th class="num">80,10,10</th>
+                <th class="num">70,30,0</th>
+                <th class="num">50,50,0</th>
+                <th class="num">30,70,0</th>
+                <th class="num">Mean</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>ChaosBPlusTree</td>
+                <td class="num ">211.3 <span class="e">±0.6</span></td>
+                <td class="num win">217.1 <span class="e">±0.9</span></td>
+                <td class="num tie">202.9 <span class="e">±2.5</span></td>
+                <td class="num ">221.9 <span class="e">±5.6</span></td>
+                <td class="num win">210.8 <span class="e">±3.1</span></td>
+                <td class="num win">215.0 <span class="e">±4.2</span></td>
+                <td class="num win">213.2 <span class="e">±1.4</span></td>
+            </tr>
+            <tr>
+                <td>ChaosBTree</td>
+                <td class="num win">207.7 <span class="e">±1.6</span></td>
+                <td class="num tie">217.9 <span class="e">±1.6</span></td>
+                <td class="num win">200.8 <span class="e">±2.2</span></td>
+                <td class="num ">215.2 <span class="e">±3.8</span></td>
+                <td class="num tie">216.6 <span class="e">±3.1</span></td>
+                <td class="num tie">225.0 <span class="e">±10.2</span></td>
+                <td class="num tie">213.8 <span class="e">±2.0</span></td>
+            </tr>
+            <tr>
+                <td>FastutilAVLIntNative</td>
+                <td class="num ">284.1 <span class="e">±2.7</span></td>
+                <td class="num ">299.2 <span class="e">±4.4</span></td>
+                <td class="num ">238.0 <span class="e">±1.9</span></td>
+                <td class="num tie">212.3 <span class="e">±5.0</span></td>
+                <td class="num ">220.5 <span class="e">±1.9</span></td>
+                <td class="num ">226.2 <span class="e">±1.8</span></td>
+                <td class="num ">246.7 <span class="e">±1.3</span></td>
+            </tr>
+            <tr>
+                <td>FastutilRBTIntNative</td>
+                <td class="num ">292.8 <span class="e">±3.4</span></td>
+                <td class="num ">305.3 <span class="e">±2.6</span></td>
+                <td class="num ">236.4 <span class="e">±1.5</span></td>
+                <td class="num win">208.2 <span class="e">±2.1</span></td>
+                <td class="num tie">215.6 <span class="e">±3.6</span></td>
+                <td class="num ">223.9 <span class="e">±4.0</span></td>
+                <td class="num ">247.0 <span class="e">±1.2</span></td>
+            </tr>
+            <tr>
+                <td>JDKTreeMap</td>
+                <td class="num ">344.8 <span class="e">±2.3</span></td>
+                <td class="num ">401.3 <span class="e">±26.9</span></td>
+                <td class="num ">298.4 <span class="e">±3.0</span></td>
+                <td class="num ">314.2 <span class="e">±2.5</span></td>
+                <td class="num ">320.9 <span class="e">±2.3</span></td>
+                <td class="num ">322.2 <span class="e">±3.2</span></td>
+                <td class="num ">333.6 <span class="e">±4.6</span></td>
+            </tr>
+            <tr>
+                <td>FastutilRBTObj</td>
+                <td class="num ">383.3 <span class="e">±3.6</span></td>
+                <td class="num ">402.7 <span class="e">±3.9</span></td>
+                <td class="num ">346.0 <span class="e">±13.9</span></td>
+                <td class="num ">301.5 <span class="e">±1.4</span></td>
+                <td class="num ">310.7 <span class="e">±1.6</span></td>
+                <td class="num ">319.3 <span class="e">±2.6</span></td>
+                <td class="num ">343.9 <span class="e">±2.5</span></td>
+            </tr>
+            <tr>
+                <td>FastutilAVLObj</td>
+                <td class="num ">388.0 <span class="e">±14.5</span></td>
+                <td class="num ">409.9 <span class="e">±14.4</span></td>
+                <td class="num ">334.0 <span class="e">±1.4</span></td>
+                <td class="num ">308.3 <span class="e">±3.0</span></td>
+                <td class="num ">322.2 <span class="e">±4.7</span></td>
+                <td class="num ">329.4 <span class="e">±2.4</span></td>
+                <td class="num ">348.6 <span class="e">±3.6</span></td>
+            </tr>
+            <tr>
+                <td>ChaosRBT</td>
+                <td class="num ">382.7 <span class="e">±26.0</span></td>
+                <td class="num ">412.5 <span class="e">±21.1</span></td>
+                <td class="num ">324.0 <span class="e">±3.9</span></td>
+                <td class="num ">329.7 <span class="e">±3.9</span></td>
+                <td class="num ">334.6 <span class="e">±13.4</span></td>
+                <td class="num ">326.9 <span class="e">±2.6</span></td>
+                <td class="num ">351.7 <span class="e">±6.1</span></td>
+            </tr>
+            <tr>
+                <td>ChaosAVL</td>
+                <td class="num ">397.9 <span class="e">±5.4</span></td>
+                <td class="num ">434.3 <span class="e">±9.1</span></td>
+                <td class="num ">337.5 <span class="e">±2.3</span></td>
+                <td class="num ">316.9 <span class="e">±3.0</span></td>
+                <td class="num ">311.5 <span class="e">±5.6</span></td>
+                <td class="num ">315.0 <span class="e">±18.9</span></td>
+                <td class="num ">352.2 <span class="e">±3.8</span></td>
+            </tr>
+            <tr>
+                <td>EclipseRBT</td>
+                <td class="num ">355.6 <span class="e">±17.0</span></td>
+                <td class="num ">400.4 <span class="e">±23.2</span></td>
+                <td class="num ">336.3 <span class="e">±41.2</span></td>
+                <td class="num ">357.1 <span class="e">±24.7</span></td>
+                <td class="num ">403.8 <span class="e">±40.2</span></td>
+                <td class="num ">337.6 <span class="e">±10.2</span></td>
+                <td class="num ">365.1 <span class="e">±11.6</span></td>
+            </tr>
+            <tr>
+                <td>JDKConcurrentSkipListMap</td>
+                <td class="num ">625.6 <span class="e">±17.9</span></td>
+                <td class="num ">651.8 <span class="e">±7.7</span></td>
+                <td class="num ">563.4 <span class="e">±7.0</span></td>
+                <td class="num ">543.0 <span class="e">±2.6</span></td>
+                <td class="num ">551.0 <span class="e">±4.6</span></td>
+                <td class="num ">565.5 <span class="e">±9.4</span></td>
+                <td class="num ">583.4 <span class="e">±3.9</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="note">Score ± JMH error. Rows sorted by mean over the six mixes.</p></div>
+<div class="pane" hidden id="s1000000"><h3>Time per operation by mix, 1M entries (ns/op)</h3>
+    <div class="grid2">
+        <div>
+            <svg aria-label="get 50%  put 25%  remove 25%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 50% put 25% remove 25%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="254.7" x2="254.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="254.7" y="283">500</text>
+                <line class="grid" x1="319.5" x2="319.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="319.5" y="283">1000</text>
+                <line class="grid" x1="384.2" x2="384.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="384.2" y="283">1500</text>
+                <line class="grid" x1="448.9" x2="448.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="448.9" y="283">2000</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43">ChaosBTree</text>
+                <rect class="bar win" height="12" width="65.9" x="190" y="33"/>
+                <line class="ein" x1="255.6" x2="255.9" y1="39" y2="39"/>
+                <line class="eout win" x1="255.9" x2="256.1" y1="39" y2="39"/>
+                <line class="eout win" x1="256.1" x2="256.1" y1="35" y2="43"/>
+                <text class="w" x="263.1" y="43">508.7
+                    <tspan opacity=".45">±1.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65">ChaosBPlusTree</text>
+                <rect class="bar tie" height="12" width="66.0" x="190" y="55"/>
+                <line class="ein" x1="255.5" x2="256.0" y1="61" y2="61"/>
+                <line class="eout tie" x1="256.0" x2="256.6" y1="61" y2="61"/>
+                <line class="eout tie" x1="256.6" x2="256.6" y1="57" y2="65"/>
+                <text class="" x="263.6" y="65">509.9
+                    <tspan opacity=".45">±4.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="75.1" x="190" y="77"/>
+                <line class="ein" x1="264.4" x2="265.1" y1="83" y2="83"/>
+                <line class="eout " x1="265.1" x2="265.9" y1="83" y2="83"/>
+                <line class="eout " x1="265.9" x2="265.9" y1="79" y2="87"/>
+                <text class="" x="272.9" y="87">580.5
+                    <tspan opacity=".45">±5.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="77.2" x="190" y="99"/>
+                <line class="ein" x1="264.8" x2="267.2" y1="105" y2="105"/>
+                <line class="eout " x1="267.2" x2="269.6" y1="105" y2="105"/>
+                <line class="eout " x1="269.6" x2="269.6" y1="101" y2="109"/>
+                <text class="" x="276.6" y="109">596.2
+                    <tspan opacity=".45">±18.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131">ChaosAVL</text>
+                <rect class="bar " height="12" width="135.4" x="190" y="121"/>
+                <line class="ein" x1="324.5" x2="325.4" y1="127" y2="127"/>
+                <line class="eout " x1="325.4" x2="326.2" y1="127" y2="127"/>
+                <line class="eout " x1="326.2" x2="326.2" y1="123" y2="131"/>
+                <text class="" x="333.2" y="131">1045.6
+                    <tspan opacity=".45">±6.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153">ChaosRBT</text>
+                <rect class="bar " height="12" width="137.0" x="190" y="143"/>
+                <line class="ein" x1="326.3" x2="327.0" y1="149" y2="149"/>
+                <line class="eout " x1="327.0" x2="327.8" y1="149" y2="149"/>
+                <line class="eout " x1="327.8" x2="327.8" y1="145" y2="153"/>
+                <text class="" x="334.8" y="153">1058.5
+                    <tspan opacity=".45">±5.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="140.0" x="190" y="165"/>
+                <line class="ein" x1="328.4" x2="330.0" y1="171" y2="171"/>
+                <line class="eout " x1="330.0" x2="331.7" y1="171" y2="171"/>
+                <line class="eout " x1="331.7" x2="331.7" y1="167" y2="175"/>
+                <text class="" x="338.7" y="175">1081.7
+                    <tspan opacity=".45">±12.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197">EclipseRBT</text>
+                <rect class="bar " height="12" width="140.3" x="190" y="187"/>
+                <line class="ein" x1="329.6" x2="330.3" y1="193" y2="193"/>
+                <line class="eout " x1="330.3" x2="331.1" y1="193" y2="193"/>
+                <line class="eout " x1="331.1" x2="331.1" y1="189" y2="197"/>
+                <text class="" x="338.1" y="197">1084.1
+                    <tspan opacity=".45">±5.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219">JDKTreeMap</text>
+                <rect class="bar " height="12" width="140.7" x="190" y="209"/>
+                <line class="ein" x1="325.5" x2="330.7" y1="215" y2="215"/>
+                <line class="eout " x1="330.7" x2="335.9" y1="215" y2="215"/>
+                <line class="eout " x1="335.9" x2="335.9" y1="211" y2="219"/>
+                <text class="" x="342.9" y="219">1086.8
+                    <tspan opacity=".45">±40.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="143.6" x="190" y="231"/>
+                <line class="ein" x1="332.7" x2="333.6" y1="237" y2="237"/>
+                <line class="eout " x1="333.6" x2="334.5" y1="237" y2="237"/>
+                <line class="eout " x1="334.5" x2="334.5" y1="233" y2="241"/>
+                <text class="" x="341.5" y="241">1109.5
+                    <tspan opacity=".45">±7.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="247.2" x="190" y="253"/>
+                <line class="ein" x1="430.2" x2="437.2" y1="259" y2="259"/>
+                <line class="eout " x1="437.2" x2="444.3" y1="259" y2="259"/>
+                <line class="eout " x1="444.3" x2="444.3" y1="255" y2="263"/>
+                <text class="" x="451.3" y="263">1909.8
+                    <tspan opacity=".45">±54.3</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 20%  put 40%  remove 40%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 20% put 40% remove 40%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="254.7" x2="254.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="254.7" y="283">500</text>
+                <line class="grid" x1="319.5" x2="319.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="319.5" y="283">1000</text>
+                <line class="grid" x1="384.2" x2="384.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="384.2" y="283">1500</text>
+                <line class="grid" x1="448.9" x2="448.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="448.9" y="283">2000</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="69.5" x="190" y="33"/>
+                <line class="ein" x1="259.3" x2="259.5" y1="39" y2="39"/>
+                <line class="eout win" x1="259.5" x2="259.7" y1="39" y2="39"/>
+                <line class="eout win" x1="259.7" x2="259.7" y1="35" y2="43"/>
+                <text class="w" x="266.7" y="43">537.0
+                    <tspan opacity=".45">±1.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65">ChaosBTree</text>
+                <rect class="bar " height="12" width="70.2" x="190" y="55"/>
+                <line class="ein" x1="259.9" x2="260.2" y1="61" y2="61"/>
+                <line class="eout " x1="260.2" x2="260.5" y1="61" y2="61"/>
+                <line class="eout " x1="260.5" x2="260.5" y1="57" y2="65"/>
+                <text class="" x="267.5" y="65">542.5
+                    <tspan opacity=".45">±2.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87">FastutilRBTIntNative</text>
+                <rect class="bar " height="12" width="86.3" x="190" y="77"/>
+                <line class="ein" x1="275.5" x2="276.3" y1="83" y2="83"/>
+                <line class="eout " x1="276.3" x2="277.0" y1="83" y2="83"/>
+                <line class="eout " x1="277.0" x2="277.0" y1="79" y2="87"/>
+                <text class="" x="284.0" y="87">666.6
+                    <tspan opacity=".45">±5.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="89.7" x="190" y="99"/>
+                <line class="ein" x1="278.9" x2="279.7" y1="105" y2="105"/>
+                <line class="eout " x1="279.7" x2="280.6" y1="105" y2="105"/>
+                <line class="eout " x1="280.6" x2="280.6" y1="101" y2="109"/>
+                <text class="" x="287.6" y="109">693.2
+                    <tspan opacity=".45">±6.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131">ChaosAVL</text>
+                <rect class="bar " height="12" width="142.9" x="190" y="121"/>
+                <line class="ein" x1="331.9" x2="332.9" y1="127" y2="127"/>
+                <line class="eout " x1="332.9" x2="333.9" y1="127" y2="127"/>
+                <line class="eout " x1="333.9" x2="333.9" y1="123" y2="131"/>
+                <text class="" x="340.9" y="131">1103.7
+                    <tspan opacity=".45">±7.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153">ChaosRBT</text>
+                <rect class="bar " height="12" width="147.2" x="190" y="143"/>
+                <line class="ein" x1="332.9" x2="337.2" y1="149" y2="149"/>
+                <line class="eout " x1="337.2" x2="341.6" y1="149" y2="149"/>
+                <line class="eout " x1="341.6" x2="341.6" y1="145" y2="153"/>
+                <text class="" x="348.6" y="153">1137.3
+                    <tspan opacity=".45">±33.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175">JDKTreeMap</text>
+                <rect class="bar " height="12" width="148.8" x="190" y="165"/>
+                <line class="ein" x1="331.4" x2="338.8" y1="171" y2="171"/>
+                <line class="eout " x1="338.8" x2="346.3" y1="171" y2="171"/>
+                <line class="eout " x1="346.3" x2="346.3" y1="167" y2="175"/>
+                <text class="" x="353.3" y="175">1149.8
+                    <tspan opacity=".45">±57.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197">EclipseRBT</text>
+                <rect class="bar " height="12" width="152.0" x="190" y="187"/>
+                <line class="ein" x1="337.5" x2="342.0" y1="193" y2="193"/>
+                <line class="eout " x1="342.0" x2="346.6" y1="193" y2="193"/>
+                <line class="eout " x1="346.6" x2="346.6" y1="189" y2="197"/>
+                <text class="" x="353.6" y="197">1174.5
+                    <tspan opacity=".45">±35.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="154.1" x="190" y="209"/>
+                <line class="ein" x1="341.5" x2="344.1" y1="215" y2="215"/>
+                <line class="eout " x1="344.1" x2="346.7" y1="215" y2="215"/>
+                <line class="eout " x1="346.7" x2="346.7" y1="211" y2="219"/>
+                <text class="" x="353.7" y="219">1190.4
+                    <tspan opacity=".45">±19.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="164.6" x="190" y="231"/>
+                <line class="ein" x1="346.3" x2="354.6" y1="237" y2="237"/>
+                <line class="eout " x1="354.6" x2="362.8" y1="237" y2="237"/>
+                <line class="eout " x1="362.8" x2="362.8" y1="233" y2="241"/>
+                <text class="" x="369.8" y="241">1271.3
+                    <tspan opacity=".45">±63.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="258.9" x="190" y="253"/>
+                <line class="ein" x1="443.9" x2="448.9" y1="259" y2="259"/>
+                <line class="eout " x1="448.9" x2="453.8" y1="259" y2="259"/>
+                <line class="eout " x1="453.8" x2="453.8" y1="255" y2="263"/>
+                <text class="" x="460.8" y="263">1999.9
+                    <tspan opacity=".45">±38.3</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 80%  put 10%  remove 10%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 80% put 10% remove 10%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="254.7" x2="254.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="254.7" y="283">500</text>
+                <line class="grid" x1="319.5" x2="319.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="319.5" y="283">1000</text>
+                <line class="grid" x1="384.2" x2="384.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="384.2" y="283">1500</text>
+                <line class="grid" x1="448.9" x2="448.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="448.9" y="283">2000</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43">FastutilRBTIntNative</text>
+                <rect class="bar win" height="12" width="58.4" x="190" y="33"/>
+                <line class="ein" x1="246.9" x2="248.4" y1="39" y2="39"/>
+                <line class="eout win" x1="248.4" x2="250.0" y1="39" y2="39"/>
+                <line class="eout win" x1="250.0" x2="250.0" y1="35" y2="43"/>
+                <text class="w" x="257.0" y="43">451.3
+                    <tspan opacity=".45">±11.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65">FastutilAVLIntNative</text>
+                <rect class="bar tie" height="12" width="59.7" x="190" y="55"/>
+                <line class="ein" x1="249.0" x2="249.7" y1="61" y2="61"/>
+                <line class="eout tie" x1="249.7" x2="250.3" y1="61" y2="61"/>
+                <line class="eout tie" x1="250.3" x2="250.3" y1="57" y2="65"/>
+                <text class="" x="257.3" y="65">460.8
+                    <tspan opacity=".45">±4.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87">ChaosBTree</text>
+                <rect class="bar " height="12" width="60.4" x="190" y="77"/>
+                <line class="ein" x1="250.2" x2="250.4" y1="83" y2="83"/>
+                <line class="eout " x1="250.4" x2="250.6" y1="83" y2="83"/>
+                <line class="eout " x1="250.6" x2="250.6" y1="79" y2="87"/>
+                <text class="" x="257.6" y="87">466.5
+                    <tspan opacity=".45">±1.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109">ChaosBPlusTree</text>
+                <rect class="bar tie" height="12" width="60.5" x="190" y="99"/>
+                <line class="ein" x1="249.4" x2="250.5" y1="105" y2="105"/>
+                <line class="eout tie" x1="250.5" x2="251.7" y1="105" y2="105"/>
+                <line class="eout tie" x1="251.7" x2="251.7" y1="101" y2="109"/>
+                <text class="" x="258.7" y="109">467.7
+                    <tspan opacity=".45">±8.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131">ChaosAVL</text>
+                <rect class="bar " height="12" width="119.0" x="190" y="121"/>
+                <line class="ein" x1="308.4" x2="309.0" y1="127" y2="127"/>
+                <line class="eout " x1="309.0" x2="309.7" y1="127" y2="127"/>
+                <line class="eout " x1="309.7" x2="309.7" y1="123" y2="131"/>
+                <text class="" x="316.7" y="131">919.4
+                    <tspan opacity=".45">±4.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153">JDKTreeMap</text>
+                <rect class="bar " height="12" width="120.0" x="190" y="143"/>
+                <line class="ein" x1="304.0" x2="310.0" y1="149" y2="149"/>
+                <line class="eout " x1="310.0" x2="316.0" y1="149" y2="149"/>
+                <line class="eout " x1="316.0" x2="316.0" y1="145" y2="153"/>
+                <text class="" x="323.0" y="153">926.9
+                    <tspan opacity=".45">±46.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175">EclipseRBT</text>
+                <rect class="bar " height="12" width="120.9" x="190" y="165"/>
+                <line class="ein" x1="309.8" x2="310.9" y1="171" y2="171"/>
+                <line class="eout " x1="310.9" x2="312.1" y1="171" y2="171"/>
+                <line class="eout " x1="312.1" x2="312.1" y1="167" y2="175"/>
+                <text class="" x="319.1" y="175">934.2
+                    <tspan opacity=".45">±9.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="121.0" x="190" y="187"/>
+                <line class="ein" x1="309.7" x2="311.0" y1="193" y2="193"/>
+                <line class="eout " x1="311.0" x2="312.3" y1="193" y2="193"/>
+                <line class="eout " x1="312.3" x2="312.3" y1="189" y2="197"/>
+                <text class="" x="319.3" y="197">934.6
+                    <tspan opacity=".45">±9.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219">ChaosRBT</text>
+                <rect class="bar " height="12" width="121.5" x="190" y="209"/>
+                <line class="ein" x1="310.7" x2="311.5" y1="215" y2="215"/>
+                <line class="eout " x1="311.5" x2="312.3" y1="215" y2="215"/>
+                <line class="eout " x1="312.3" x2="312.3" y1="211" y2="219"/>
+                <text class="" x="319.3" y="219">938.6
+                    <tspan opacity=".45">±6.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="129.4" x="190" y="231"/>
+                <line class="ein" x1="313.0" x2="319.4" y1="237" y2="237"/>
+                <line class="eout " x1="319.4" x2="325.8" y1="237" y2="237"/>
+                <line class="eout " x1="325.8" x2="325.8" y1="233" y2="241"/>
+                <text class="" x="332.8" y="241">999.8
+                    <tspan opacity=".45">±49.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="220.5" x="190" y="253"/>
+                <line class="ein" x1="394.0" x2="410.5" y1="259" y2="259"/>
+                <line class="eout " x1="410.5" x2="427.0" y1="259" y2="259"/>
+                <line class="eout " x1="427.0" x2="427.0" y1="255" y2="263"/>
+                <text class="" x="434.0" y="263">1703.3
+                    <tspan opacity=".45">±127.6</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 70%  put 30%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 70% put 30% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="254.7" x2="254.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="254.7" y="283">500</text>
+                <line class="grid" x1="319.5" x2="319.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="319.5" y="283">1000</text>
+                <line class="grid" x1="384.2" x2="384.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="384.2" y="283">1500</text>
+                <line class="grid" x1="448.9" x2="448.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="448.9" y="283">2000</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43">FastutilRBTIntNative</text>
+                <rect class="bar win" height="12" width="67.2" x="190" y="33"/>
+                <line class="ein" x1="256.6" x2="257.2" y1="39" y2="39"/>
+                <line class="eout win" x1="257.2" x2="257.9" y1="39" y2="39"/>
+                <line class="eout win" x1="257.9" x2="257.9" y1="35" y2="43"/>
+                <text class="w" x="264.9" y="43">519.4
+                    <tspan opacity=".45">±5.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65">ChaosBTree</text>
+                <rect class="bar tie" height="12" width="68.2" x="190" y="55"/>
+                <line class="ein" x1="257.8" x2="258.2" y1="61" y2="61"/>
+                <line class="eout tie" x1="258.2" x2="258.6" y1="61" y2="61"/>
+                <line class="eout tie" x1="258.6" x2="258.6" y1="57" y2="65"/>
+                <text class="" x="265.6" y="65">526.7
+                    <tspan opacity=".45">±3.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87">FastutilAVLIntNative</text>
+                <rect class="bar tie" height="12" width="69.0" x="190" y="77"/>
+                <line class="ein" x1="257.8" x2="259.0" y1="83" y2="83"/>
+                <line class="eout tie" x1="259.0" x2="260.2" y1="83" y2="83"/>
+                <line class="eout tie" x1="260.2" x2="260.2" y1="79" y2="87"/>
+                <text class="" x="267.2" y="87">532.9
+                    <tspan opacity=".45">±9.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109">ChaosBPlusTree</text>
+                <rect class="bar " height="12" width="69.2" x="190" y="99"/>
+                <line class="ein" x1="258.3" x2="259.2" y1="105" y2="105"/>
+                <line class="eout " x1="259.2" x2="260.0" y1="105" y2="105"/>
+                <line class="eout " x1="260.0" x2="260.0" y1="101" y2="109"/>
+                <text class="" x="267.0" y="109">534.3
+                    <tspan opacity=".45">±6.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131">ChaosAVL</text>
+                <rect class="bar " height="12" width="130.9" x="190" y="121"/>
+                <line class="ein" x1="318.3" x2="320.9" y1="127" y2="127"/>
+                <line class="eout " x1="320.9" x2="323.4" y1="127" y2="127"/>
+                <line class="eout " x1="323.4" x2="323.4" y1="123" y2="131"/>
+                <text class="" x="330.4" y="131">1010.9
+                    <tspan opacity=".45">±19.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="137.1" x="190" y="143"/>
+                <line class="ein" x1="324.0" x2="327.1" y1="149" y2="149"/>
+                <line class="eout " x1="327.1" x2="330.2" y1="149" y2="149"/>
+                <line class="eout " x1="330.2" x2="330.2" y1="145" y2="153"/>
+                <text class="" x="337.2" y="153">1059.0
+                    <tspan opacity=".45">±23.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175">EclipseRBT</text>
+                <rect class="bar " height="12" width="140.5" x="190" y="165"/>
+                <line class="ein" x1="329.0" x2="330.5" y1="171" y2="171"/>
+                <line class="eout " x1="330.5" x2="332.0" y1="171" y2="171"/>
+                <line class="eout " x1="332.0" x2="332.0" y1="167" y2="175"/>
+                <text class="" x="339.0" y="175">1085.0
+                    <tspan opacity=".45">±11.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="147.2" x="190" y="187"/>
+                <line class="ein" x1="331.3" x2="337.2" y1="193" y2="193"/>
+                <line class="eout " x1="337.2" x2="343.2" y1="193" y2="193"/>
+                <line class="eout " x1="343.2" x2="343.2" y1="189" y2="197"/>
+                <text class="" x="350.2" y="197">1137.4
+                    <tspan opacity=".45">±45.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219">ChaosRBT</text>
+                <rect class="bar " height="12" width="152.1" x="190" y="209"/>
+                <line class="ein" x1="322.0" x2="342.1" y1="215" y2="215"/>
+                <line class="eout " x1="342.1" x2="362.3" y1="215" y2="215"/>
+                <line class="eout " x1="362.3" x2="362.3" y1="211" y2="219"/>
+                <text class="" x="369.3" y="219">1175.3
+                    <tspan opacity=".45">±155.8</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241">JDKTreeMap</text>
+                <rect class="bar " height="12" width="172.1" x="190" y="231"/>
+                <line class="ein" x1="346.8" x2="362.1" y1="237" y2="237"/>
+                <line class="eout " x1="362.1" x2="377.4" y1="237" y2="237"/>
+                <line class="eout " x1="377.4" x2="377.4" y1="233" y2="241"/>
+                <text class="" x="384.4" y="241">1329.2
+                    <tspan opacity=".45">±118.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="243.6" x="190" y="253"/>
+                <line class="ein" x1="425.5" x2="433.6" y1="259" y2="259"/>
+                <line class="eout " x1="433.6" x2="441.7" y1="259" y2="259"/>
+                <line class="eout " x1="441.7" x2="441.7" y1="255" y2="263"/>
+                <text class="" x="448.7" y="263">1881.5
+                    <tspan opacity=".45">±62.5</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 50%  put 50%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 50% put 50% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="254.7" x2="254.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="254.7" y="283">500</text>
+                <line class="grid" x1="319.5" x2="319.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="319.5" y="283">1000</text>
+                <line class="grid" x1="384.2" x2="384.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="384.2" y="283">1500</text>
+                <line class="grid" x1="448.9" x2="448.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="448.9" y="283">2000</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43">ChaosBPlusTree</text>
+                <rect class="bar win" height="12" width="71.8" x="190" y="33"/>
+                <line class="ein" x1="261.1" x2="261.8" y1="39" y2="39"/>
+                <line class="eout win" x1="261.8" x2="262.5" y1="39" y2="39"/>
+                <line class="eout win" x1="262.5" x2="262.5" y1="35" y2="43"/>
+                <text class="w" x="269.5" y="43">554.6
+                    <tspan opacity=".45">±5.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65">FastutilRBTIntNative</text>
+                <rect class="bar tie" height="12" width="71.9" x="190" y="55"/>
+                <line class="ein" x1="261.5" x2="261.9" y1="61" y2="61"/>
+                <line class="eout tie" x1="261.9" x2="262.3" y1="61" y2="61"/>
+                <line class="eout tie" x1="262.3" x2="262.3" y1="57" y2="65"/>
+                <text class="" x="269.3" y="65">555.4
+                    <tspan opacity=".45">±3.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87">ChaosBTree</text>
+                <rect class="bar " height="12" width="73.7" x="190" y="77"/>
+                <line class="ein" x1="262.8" x2="263.7" y1="83" y2="83"/>
+                <line class="eout " x1="263.7" x2="264.6" y1="83" y2="83"/>
+                <line class="eout " x1="264.6" x2="264.6" y1="79" y2="87"/>
+                <text class="" x="271.6" y="87">569.1
+                    <tspan opacity=".45">±6.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109">FastutilAVLIntNative</text>
+                <rect class="bar " height="12" width="75.5" x="190" y="99"/>
+                <line class="ein" x1="264.3" x2="265.5" y1="105" y2="105"/>
+                <line class="eout " x1="265.5" x2="266.6" y1="105" y2="105"/>
+                <line class="eout " x1="266.6" x2="266.6" y1="101" y2="109"/>
+                <text class="" x="273.6" y="109">582.9
+                    <tspan opacity=".45">±9.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131">ChaosAVL</text>
+                <rect class="bar " height="12" width="125.7" x="190" y="121"/>
+                <line class="ein" x1="314.5" x2="315.7" y1="127" y2="127"/>
+                <line class="eout " x1="315.7" x2="317.0" y1="127" y2="127"/>
+                <line class="eout " x1="317.0" x2="317.0" y1="123" y2="131"/>
+                <text class="" x="324.0" y="131">971.4
+                    <tspan opacity=".45">±9.5</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="141.6" x="190" y="143"/>
+                <line class="ein" x1="329.7" x2="331.6" y1="149" y2="149"/>
+                <line class="eout " x1="331.6" x2="333.5" y1="149" y2="149"/>
+                <line class="eout " x1="333.5" x2="333.5" y1="145" y2="153"/>
+                <text class="" x="340.5" y="153">1094.0
+                    <tspan opacity=".45">±14.9</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175">ChaosRBT</text>
+                <rect class="bar " height="12" width="145.5" x="190" y="165"/>
+                <line class="ein" x1="330.8" x2="335.5" y1="171" y2="171"/>
+                <line class="eout " x1="335.5" x2="340.3" y1="171" y2="171"/>
+                <line class="eout " x1="340.3" x2="340.3" y1="167" y2="175"/>
+                <text class="" x="347.3" y="175">1124.1
+                    <tspan opacity=".45">±36.7</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197">JDKTreeMap</text>
+                <rect class="bar " height="12" width="150.1" x="190" y="187"/>
+                <line class="ein" x1="334.5" x2="340.1" y1="193" y2="193"/>
+                <line class="eout " x1="340.1" x2="345.7" y1="193" y2="193"/>
+                <line class="eout " x1="345.7" x2="345.7" y1="189" y2="197"/>
+                <text class="" x="352.7" y="197">1159.6
+                    <tspan opacity=".45">±43.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="152.8" x="190" y="209"/>
+                <line class="ein" x1="341.1" x2="342.8" y1="215" y2="215"/>
+                <line class="eout " x1="342.8" x2="344.4" y1="215" y2="215"/>
+                <line class="eout " x1="344.4" x2="344.4" y1="211" y2="219"/>
+                <text class="" x="351.4" y="219">1180.1
+                    <tspan opacity=".45">±13.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241">EclipseRBT</text>
+                <rect class="bar " height="12" width="160.8" x="190" y="231"/>
+                <line class="ein" x1="337.5" x2="350.8" y1="237" y2="237"/>
+                <line class="eout " x1="350.8" x2="364.2" y1="237" y2="237"/>
+                <line class="eout " x1="364.2" x2="364.2" y1="233" y2="241"/>
+                <text class="" x="371.2" y="241">1242.4
+                    <tspan opacity=".45">±103.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="248.9" x="190" y="253"/>
+                <line class="ein" x1="438.0" x2="438.9" y1="259" y2="259"/>
+                <line class="eout " x1="438.9" x2="439.8" y1="259" y2="259"/>
+                <line class="eout " x1="439.8" x2="439.8" y1="255" y2="263"/>
+                <text class="" x="446.8" y="263">1922.4
+                    <tspan opacity=".45">±6.9</tspan>
+                </text>
+            </svg>
+        </div>
+        <div>
+            <svg aria-label="get 30%  put 70%  remove 0%" class="chart" role="img" viewBox="0 0 560 290">
+                <text class="ttl" x="0" y="14">get 30% put 70% remove 0%</text>
+                <line class="grid" x1="190.0" x2="190.0" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="190.0" y="283">0</text>
+                <line class="grid" x1="254.7" x2="254.7" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="254.7" y="283">500</text>
+                <line class="grid" x1="319.5" x2="319.5" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="319.5" y="283">1000</text>
+                <line class="grid" x1="384.2" x2="384.2" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="384.2" y="283">1500</text>
+                <line class="grid" x1="448.9" x2="448.9" y1="24" y2="270"/>
+                <text class="tick" text-anchor="middle" x="448.9" y="283">2000</text>
+                <line class="axis" x1="190" x2="190" y1="24" y2="270"/>
+                <text class="w" text-anchor="end" x="182" y="43">FastutilRBTIntNative</text>
+                <rect class="bar win" height="12" width="75.1" x="190" y="33"/>
+                <line class="ein" x1="262.4" x2="265.1" y1="39" y2="39"/>
+                <line class="eout win" x1="265.1" x2="267.7" y1="39" y2="39"/>
+                <line class="eout win" x1="267.7" x2="267.7" y1="35" y2="43"/>
+                <text class="w" x="274.7" y="43">580.0
+                    <tspan opacity=".45">±20.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="65">ChaosBPlusTree</text>
+                <rect class="bar tie" height="12" width="75.7" x="190" y="55"/>
+                <line class="ein" x1="265.3" x2="265.7" y1="61" y2="61"/>
+                <line class="eout tie" x1="265.7" x2="266.1" y1="61" y2="61"/>
+                <line class="eout tie" x1="266.1" x2="266.1" y1="57" y2="65"/>
+                <text class="" x="273.1" y="65">584.8
+                    <tspan opacity=".45">±3.1</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="87">ChaosBTree</text>
+                <rect class="bar tie" height="12" width="77.1" x="190" y="77"/>
+                <line class="ein" x1="266.4" x2="267.1" y1="83" y2="83"/>
+                <line class="eout tie" x1="267.1" x2="267.8" y1="83" y2="83"/>
+                <line class="eout tie" x1="267.8" x2="267.8" y1="79" y2="87"/>
+                <text class="" x="274.8" y="87">595.7
+                    <tspan opacity=".45">±5.3</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="109">FastutilAVLIntNative</text>
+                <rect class="bar tie" height="12" width="78.4" x="190" y="99"/>
+                <line class="ein" x1="267.6" x2="268.4" y1="105" y2="105"/>
+                <line class="eout tie" x1="268.4" x2="269.3" y1="105" y2="105"/>
+                <line class="eout tie" x1="269.3" x2="269.3" y1="101" y2="109"/>
+                <text class="" x="276.3" y="109">606.0
+                    <tspan opacity=".45">±6.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="131">ChaosAVL</text>
+                <rect class="bar " height="12" width="122.6" x="190" y="121"/>
+                <line class="ein" x1="310.9" x2="312.6" y1="127" y2="127"/>
+                <line class="eout " x1="312.6" x2="314.2" y1="127" y2="127"/>
+                <line class="eout " x1="314.2" x2="314.2" y1="123" y2="131"/>
+                <text class="" x="321.2" y="131">946.9
+                    <tspan opacity=".45">±12.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="153">JDKTreeMap</text>
+                <rect class="bar " height="12" width="141.6" x="190" y="143"/>
+                <line class="ein" x1="328.7" x2="331.6" y1="149" y2="149"/>
+                <line class="eout " x1="331.6" x2="334.5" y1="149" y2="149"/>
+                <line class="eout " x1="334.5" x2="334.5" y1="145" y2="153"/>
+                <text class="" x="341.5" y="153">1093.9
+                    <tspan opacity=".45">±22.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="175">FastutilRBTObj</text>
+                <rect class="bar " height="12" width="143.7" x="190" y="165"/>
+                <line class="ein" x1="331.4" x2="333.7" y1="171" y2="171"/>
+                <line class="eout " x1="333.7" x2="335.9" y1="171" y2="171"/>
+                <line class="eout " x1="335.9" x2="335.9" y1="167" y2="175"/>
+                <text class="" x="342.9" y="175">1109.7
+                    <tspan opacity=".45">±17.4</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="197">EclipseRBT</text>
+                <rect class="bar " height="12" width="143.7" x="190" y="187"/>
+                <line class="ein" x1="331.8" x2="333.7" y1="193" y2="193"/>
+                <line class="eout " x1="333.7" x2="335.6" y1="193" y2="193"/>
+                <line class="eout " x1="335.6" x2="335.6" y1="189" y2="197"/>
+                <text class="" x="342.6" y="197">1110.2
+                    <tspan opacity=".45">±14.6</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="219">FastutilAVLObj</text>
+                <rect class="bar " height="12" width="148.2" x="190" y="209"/>
+                <line class="ein" x1="334.0" x2="338.2" y1="215" y2="215"/>
+                <line class="eout " x1="338.2" x2="342.4" y1="215" y2="215"/>
+                <line class="eout " x1="342.4" x2="342.4" y1="211" y2="219"/>
+                <text class="" x="349.4" y="219">1144.7
+                    <tspan opacity=".45">±32.2</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="241">ChaosRBT</text>
+                <rect class="bar " height="12" width="159.5" x="190" y="231"/>
+                <line class="ein" x1="341.9" x2="349.5" y1="237" y2="237"/>
+                <line class="eout " x1="349.5" x2="357.1" y1="237" y2="237"/>
+                <line class="eout " x1="357.1" x2="357.1" y1="233" y2="241"/>
+                <text class="" x="364.1" y="241">1232.1
+                    <tspan opacity=".45">±59.0</tspan>
+                </text>
+                <text class="" text-anchor="end" x="182" y="263">JDKConcurrentSkipListMap</text>
+                <rect class="bar " height="12" width="265.2" x="190" y="253"/>
+                <line class="ein" x1="450.4" x2="455.2" y1="259" y2="259"/>
+                <line class="eout " x1="455.2" x2="460.0" y1="259" y2="259"/>
+                <line class="eout " x1="460.0" x2="460.0" y1="255" y2="263"/>
+                <text class="" x="467.0" y="263">2048.6
+                    <tspan opacity=".45">±37.1</tspan>
+                </text>
+            </svg>
+        </div>
+    </div>
+    <h3>Time table, 1M (ns/op)</h3>
+    <div style="overflow-x:auto">
+        <table>
+            <thead>
+            <tr>
+                <th>Map</th>
+                <th class="num">50,25,25</th>
+                <th class="num">20,40,40</th>
+                <th class="num">80,10,10</th>
+                <th class="num">70,30,0</th>
+                <th class="num">50,50,0</th>
+                <th class="num">30,70,0</th>
+                <th class="num">Mean</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>ChaosBPlusTree</td>
+                <td class="num tie">509.9 <span class="e">±4.2</span></td>
+                <td class="num win">537.0 <span class="e">±1.5</span></td>
+                <td class="num tie">467.7 <span class="e">±8.9</span></td>
+                <td class="num ">534.3 <span class="e">±6.5</span></td>
+                <td class="num win">554.6 <span class="e">±5.1</span></td>
+                <td class="num tie">584.8 <span class="e">±3.1</span></td>
+                <td class="num win">531.4 <span class="e">±2.2</span></td>
+            </tr>
+            <tr>
+                <td>ChaosBTree</td>
+                <td class="num win">508.7 <span class="e">±1.8</span></td>
+                <td class="num ">542.5 <span class="e">±2.4</span></td>
+                <td class="num ">466.5 <span class="e">±1.7</span></td>
+                <td class="num tie">526.7 <span class="e">±3.4</span></td>
+                <td class="num ">569.1 <span class="e">±6.9</span></td>
+                <td class="num tie">595.7 <span class="e">±5.3</span></td>
+                <td class="num tie">534.9 <span class="e">±1.7</span></td>
+            </tr>
+            <tr>
+                <td>FastutilRBTIntNative</td>
+                <td class="num ">580.5 <span class="e">±5.7</span></td>
+                <td class="num ">666.6 <span class="e">±5.8</span></td>
+                <td class="num win">451.3 <span class="e">±11.8</span></td>
+                <td class="num win">519.4 <span class="e">±5.3</span></td>
+                <td class="num tie">555.4 <span class="e">±3.0</span></td>
+                <td class="num win">580.0 <span class="e">±20.4</span></td>
+                <td class="num ">558.9 <span class="e">±4.3</span></td>
+            </tr>
+            <tr>
+                <td>FastutilAVLIntNative</td>
+                <td class="num ">596.2 <span class="e">±18.6</span></td>
+                <td class="num ">693.2 <span class="e">±6.8</span></td>
+                <td class="num tie">460.8 <span class="e">±4.9</span></td>
+                <td class="num tie">532.9 <span class="e">±9.3</span></td>
+                <td class="num ">582.9 <span class="e">±9.2</span></td>
+                <td class="num tie">606.0 <span class="e">±6.2</span></td>
+                <td class="num ">578.7 <span class="e">±4.2</span></td>
+            </tr>
+            <tr>
+                <td>ChaosAVL</td>
+                <td class="num ">1045.6 <span class="e">±6.3</span></td>
+                <td class="num ">1103.7 <span class="e">±7.7</span></td>
+                <td class="num ">919.4 <span class="e">±4.9</span></td>
+                <td class="num ">1010.9 <span class="e">±19.8</span></td>
+                <td class="num ">971.4 <span class="e">±9.5</span></td>
+                <td class="num ">946.9 <span class="e">±12.6</span></td>
+                <td class="num ">999.6 <span class="e">±4.6</span></td>
+            </tr>
+            <tr>
+                <td>EclipseRBT</td>
+                <td class="num ">1084.1 <span class="e">±5.7</span></td>
+                <td class="num ">1174.5 <span class="e">±35.0</span></td>
+                <td class="num ">934.2 <span class="e">±9.2</span></td>
+                <td class="num ">1085.0 <span class="e">±11.6</span></td>
+                <td class="num ">1242.4 <span class="e">±103.0</span></td>
+                <td class="num ">1110.2 <span class="e">±14.6</span></td>
+                <td class="num ">1105.1 <span class="e">±18.5</span></td>
+            </tr>
+            <tr>
+                <td>FastutilRBTObj</td>
+                <td class="num ">1109.5 <span class="e">±7.1</span></td>
+                <td class="num ">1271.3 <span class="e">±63.7</span></td>
+                <td class="num ">999.8 <span class="e">±49.6</span></td>
+                <td class="num ">1059.0 <span class="e">±23.9</span></td>
+                <td class="num ">1094.0 <span class="e">±14.9</span></td>
+                <td class="num ">1109.7 <span class="e">±17.4</span></td>
+                <td class="num ">1107.2 <span class="e">±14.6</span></td>
+            </tr>
+            <tr>
+                <td>ChaosRBT</td>
+                <td class="num ">1058.5 <span class="e">±5.9</span></td>
+                <td class="num ">1137.3 <span class="e">±33.8</span></td>
+                <td class="num ">938.6 <span class="e">±6.2</span></td>
+                <td class="num ">1175.3 <span class="e">±155.8</span></td>
+                <td class="num ">1124.1 <span class="e">±36.7</span></td>
+                <td class="num ">1232.1 <span class="e">±59.0</span></td>
+                <td class="num ">1111.0 <span class="e">±29.0</span></td>
+            </tr>
+            <tr>
+                <td>FastutilAVLObj</td>
+                <td class="num ">1081.7 <span class="e">±12.6</span></td>
+                <td class="num ">1190.4 <span class="e">±19.8</span></td>
+                <td class="num ">934.6 <span class="e">±9.8</span></td>
+                <td class="num ">1137.4 <span class="e">±45.7</span></td>
+                <td class="num ">1180.1 <span class="e">±13.0</span></td>
+                <td class="num ">1144.7 <span class="e">±32.2</span></td>
+                <td class="num ">1111.5 <span class="e">±10.5</span></td>
+            </tr>
+            <tr>
+                <td>JDKTreeMap</td>
+                <td class="num ">1086.8 <span class="e">±40.1</span></td>
+                <td class="num ">1149.8 <span class="e">±57.5</span></td>
+                <td class="num ">926.9 <span class="e">±46.2</span></td>
+                <td class="num ">1329.2 <span class="e">±118.3</span></td>
+                <td class="num ">1159.6 <span class="e">±43.1</span></td>
+                <td class="num ">1093.9 <span class="e">±22.4</span></td>
+                <td class="num ">1124.4 <span class="e">±25.5</span></td>
+            </tr>
+            <tr>
+                <td>JDKConcurrentSkipListMap</td>
+                <td class="num ">1909.8 <span class="e">±54.3</span></td>
+                <td class="num ">1999.9 <span class="e">±38.3</span></td>
+                <td class="num ">1703.3 <span class="e">±127.6</span></td>
+                <td class="num ">1881.5 <span class="e">±62.5</span></td>
+                <td class="num ">1922.4 <span class="e">±6.9</span></td>
+                <td class="num ">2048.6 <span class="e">±37.1</span></td>
+                <td class="num ">1910.9 <span class="e">±26.9</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="note">Score ± JMH error. Rows sorted by mean over the six mixes.</p></div>
+<div class="pane" hidden id="all"><h3>Scaling with size (ns/op)</h3>
+    <svg aria-label="Mean ns/op versus size" class="chart" role="img" viewBox="0 0 980 440">
+        <line class="grid" x1="70" x2="760" y1="394.0" y2="394.0"/>
+        <text class="tick" text-anchor="end" x="62" y="397.0">100</text>
+        <line class="grid" x1="70" x2="760" y1="306.5" y2="306.5"/>
+        <text class="tick" text-anchor="end" x="62" y="309.5">200</text>
+        <line class="grid" x1="70" x2="760" y1="255.4" y2="255.4"/>
+        <text class="tick" text-anchor="end" x="62" y="258.4">300</text>
+        <line class="grid" x1="70" x2="760" y1="190.9" y2="190.9"/>
+        <text class="tick" text-anchor="end" x="62" y="193.9">500</text>
+        <line class="grid" x1="70" x2="760" y1="148.5" y2="148.5"/>
+        <text class="tick" text-anchor="end" x="62" y="151.5">700</text>
+        <line class="grid" x1="70" x2="760" y1="103.5" y2="103.5"/>
+        <text class="tick" text-anchor="end" x="62" y="106.5">1000</text>
+        <line class="grid" x1="70" x2="760" y1="52.3" y2="52.3"/>
+        <text class="tick" text-anchor="end" x="62" y="55.3">1500</text>
+        <line class="grid" x1="70" x2="760" y1="16.0" y2="16.0"/>
+        <text class="tick" text-anchor="end" x="62" y="19.0">2000</text>
+        <line class="grid" x1="70.0" x2="70.0" y1="16" y2="394"/>
+        <text class="tick" text-anchor="middle" x="70.0" y="410">10K</text>
+        <line class="grid" x1="415.0" x2="415.0" y1="16" y2="394"/>
+        <text class="tick" text-anchor="middle" x="415.0" y="410">100K</text>
+        <line class="grid" x1="760.0" x2="760.0" y1="16" y2="394"/>
+        <text class="tick" text-anchor="middle" x="760.0" y="410">1M</text>
+        <line class="axis" x1="70" x2="70" y1="16" y2="394"/>
+        <line class="axis" x1="70" x2="760" y1="394" y2="394"/>
+        <text class="tick" text-anchor="end" x="62" y="12">ns/op</text>
+        <text class="tick" text-anchor="middle" x="415.0" y="434">size (log scale)</text>
+        <polyline class="sl chaos" points="70.0,363.5 415.0,298.5 760.0,183.2" stroke-dasharray=""/>
+        <circle class="dot chaos" cx="70.0" cy="363.5" r="3.2"/>
+        <circle class="dot chaos" cx="415.0" cy="298.5" r="3.2"/>
+        <circle class="dot chaos" cx="760.0" cy="183.2" r="3.2"/>
+        <polyline class="sl chaos" points="70.0,363.1 415.0,298.1 760.0,182.4" stroke-dasharray="7 4"/>
+        <circle class="dot chaos" cx="70.0" cy="363.1" r="3.2"/>
+        <circle class="dot chaos" cx="415.0" cy="298.1" r="3.2"/>
+        <circle class="dot chaos" cx="760.0" cy="182.4" r="3.2"/>
+        <polyline class="sl chaos" points="70.0,339.0 415.0,235.1 760.0,103.5" stroke-dasharray="2 3"/>
+        <circle class="dot chaos" cx="70.0" cy="339.0" r="3.2"/>
+        <circle class="dot chaos" cx="415.0" cy="235.1" r="3.2"/>
+        <circle class="dot chaos" cx="760.0" cy="103.5" r="3.2"/>
+        <polyline class="sl chaos" points="70.0,338.4 415.0,235.3 760.0,90.2" stroke-dasharray="9 3 2 3"/>
+        <circle class="dot chaos" cx="70.0" cy="338.4" r="3.2"/>
+        <circle class="dot chaos" cx="415.0" cy="235.3" r="3.2"/>
+        <circle class="dot chaos" cx="760.0" cy="90.2" r="3.2"/>
+        <polyline class="sl oth" points="70.0,364.8 415.0,279.9 760.0,176.9" stroke-dasharray="5 3"/>
+        <circle class="dot oth" cx="70.0" cy="364.8" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="279.9" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="176.9" r="3.2"/>
+        <polyline class="sl oth" points="70.0,367.9 415.0,280.1 760.0,172.5" stroke-dasharray="1 3"/>
+        <circle class="dot oth" cx="70.0" cy="367.9" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="280.1" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="172.5" r="3.2"/>
+        <polyline class="sl oth" points="70.0,346.2 415.0,230.6 760.0,90.9" stroke-dasharray="8 2"/>
+        <circle class="dot oth" cx="70.0" cy="346.2" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="230.6" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="90.9" r="3.2"/>
+        <polyline class="sl oth" points="70.0,336.2 415.0,238.1 760.0,90.6" stroke-dasharray="3 3"/>
+        <circle class="dot oth" cx="70.0" cy="336.2" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="238.1" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="90.6" r="3.2"/>
+        <polyline class="sl oth" points="70.0,336.9 415.0,236.4 760.0,90.1" stroke-dasharray="6 2 1 2"/>
+        <circle class="dot oth" cx="70.0" cy="336.9" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="236.4" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="90.1" r="3.2"/>
+        <polyline class="sl oth" points="70.0,346.7 415.0,242.0 760.0,88.7" stroke-dasharray="4 2 1 2 1 2"/>
+        <circle class="dot oth" cx="70.0" cy="346.7" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="242.0" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="88.7" r="3.2"/>
+        <polyline class="sl oth" points="70.0,281.1 415.0,171.5 760.0,21.7" stroke-dasharray="10 3"/>
+        <circle class="dot oth" cx="70.0" cy="281.1" r="3.2"/>
+        <circle class="dot oth" cx="415.0" cy="171.5" r="3.2"/>
+        <circle class="dot oth" cx="760.0" cy="21.7" r="3.2"/>
+        <circle class="dot win" cx="70.0" cy="367.9" r="6.5"><title>FastutilAVLIntNative</title></circle>
+        <circle class="dot win" cx="415.0" cy="298.5" r="6.5"><title>ChaosBPlusTree</title></circle>
+        <circle class="dot win" cx="760.0" cy="183.2" r="6.5"><title>ChaosBPlusTree</title></circle>
+        <text class="ptl chaos" x="770.0" y="211.0">ChaosBPlusTree</text>
+        <text class="ptl chaos" x="770.0" y="199.5">ChaosBTree</text>
+        <text class="ptl chaos" x="770.0" y="150.2">ChaosAVL</text>
+        <text class="ptl chaos" x="770.0" y="115.7">ChaosRBT</text>
+        <text class="ptl " x="770.0" y="188.0">FastutilRBTIntNative</text>
+        <text class="ptl " x="770.0" y="176.5">FastutilAVLIntNative</text>
+        <text class="ptl " x="770.0" y="138.7">EclipseRBT</text>
+        <text class="ptl " x="770.0" y="127.2">FastutilRBTObj</text>
+        <text class="ptl " x="770.0" y="104.2">FastutilAVLObj</text>
+        <text class="ptl " x="770.0" y="92.7">JDKTreeMap</text>
+        <text class="ptl " x="770.0" y="25.7">JDKConcurrentSkipListMap</text>
+    </svg>
+    <p class="note">Mean over the six mixes. Black lines are Chaos maps, grey lines are the others. The <span
+            class="violet">violet dot</span> is the fastest map at that size.</p>
+    <h3>Mean time by size (ns/op)</h3>
+    <div style="overflow-x:auto">
+        <table>
+            <thead>
+            <tr>
+                <th>Map</th>
+                <th class="num">10K</th>
+                <th class="num">100K</th>
+                <th class="num">100K / 10K</th>
+                <th class="num">1M</th>
+                <th class="num">1M / 100K</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>ChaosBPlusTree</td>
+                <td class="num ">127.3 <span class="e">±0.2</span></td>
+                <td class="num win">213.2 <span class="e">±1.4</span></td>
+                <td class="num">1.67x</td>
+                <td class="num win">531.4 <span class="e">±2.2</span></td>
+                <td class="num">2.49x</td>
+            </tr>
+            <tr>
+                <td>ChaosBTree</td>
+                <td class="num ">127.7 <span class="e">±0.3</span></td>
+                <td class="num tie">213.8 <span class="e">±2.0</span></td>
+                <td class="num">1.67x</td>
+                <td class="num tie">534.9 <span class="e">±1.7</span></td>
+                <td class="num">2.50x</td>
+            </tr>
+            <tr>
+                <td>FastutilRBTIntNative</td>
+                <td class="num ">126.0 <span class="e">±0.3</span></td>
+                <td class="num ">247.0 <span class="e">±1.2</span></td>
+                <td class="num">1.96x</td>
+                <td class="num ">558.9 <span class="e">±4.3</span></td>
+                <td class="num">2.26x</td>
+            </tr>
+            <tr>
+                <td>FastutilAVLIntNative</td>
+                <td class="num win">123.0 <span class="e">±0.2</span></td>
+                <td class="num ">246.7 <span class="e">±1.3</span></td>
+                <td class="num">2.01x</td>
+                <td class="num ">578.7 <span class="e">±4.2</span></td>
+                <td class="num">2.35x</td>
+            </tr>
+            <tr>
+                <td>ChaosAVL</td>
+                <td class="num ">154.6 <span class="e">±0.5</span></td>
+                <td class="num ">352.2 <span class="e">±3.8</span></td>
+                <td class="num">2.28x</td>
+                <td class="num ">999.6 <span class="e">±4.6</span></td>
+                <td class="num">2.84x</td>
+            </tr>
+            <tr>
+                <td>EclipseRBT</td>
+                <td class="num ">146.0 <span class="e">±0.5</span></td>
+                <td class="num ">365.1 <span class="e">±11.6</span></td>
+                <td class="num">2.50x</td>
+                <td class="num ">1105.1 <span class="e">±18.5</span></td>
+                <td class="num">3.03x</td>
+            </tr>
+            <tr>
+                <td>FastutilRBTObj</td>
+                <td class="num ">158.1 <span class="e">±0.5</span></td>
+                <td class="num ">343.9 <span class="e">±2.5</span></td>
+                <td class="num">2.18x</td>
+                <td class="num ">1107.2 <span class="e">±14.6</span></td>
+                <td class="num">3.22x</td>
+            </tr>
+            <tr>
+                <td>ChaosRBT</td>
+                <td class="num ">155.4 <span class="e">±0.7</span></td>
+                <td class="num ">351.7 <span class="e">±6.1</span></td>
+                <td class="num">2.26x</td>
+                <td class="num ">1111.0 <span class="e">±29.0</span></td>
+                <td class="num">3.16x</td>
+            </tr>
+            <tr>
+                <td>FastutilAVLObj</td>
+                <td class="num ">157.2 <span class="e">±0.4</span></td>
+                <td class="num ">348.6 <span class="e">±3.6</span></td>
+                <td class="num">2.22x</td>
+                <td class="num ">1111.5 <span class="e">±10.5</span></td>
+                <td class="num">3.19x</td>
+            </tr>
+            <tr>
+                <td>JDKTreeMap</td>
+                <td class="num ">145.5 <span class="e">±0.5</span></td>
+                <td class="num ">333.6 <span class="e">±4.6</span></td>
+                <td class="num">2.29x</td>
+                <td class="num ">1124.4 <span class="e">±25.5</span></td>
+                <td class="num">3.37x</td>
+            </tr>
+            <tr>
+                <td>JDKConcurrentSkipListMap</td>
+                <td class="num ">244.7 <span class="e">±1.2</span></td>
+                <td class="num ">583.4 <span class="e">±3.9</span></td>
+                <td class="num">2.38x</td>
+                <td class="num ">1910.9 <span class="e">±26.9</span></td>
+                <td class="num">3.28x</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="note">Mean ns/op over the six mixes. Violet = fastest, tie = error overlaps the fastest. Sorted by the
+        largest size.</p></div>
+<h2>4. How to read this page</h2>
+<table>
+    <tbody>
+    <tr>
+        <td><span class="swatch sw-win"></span>Violet bar / violet bold cell</td>
+        <td>Lowest mean in that column. The winner.</td>
+    </tr>
+    <tr>
+        <td><span class="swatch sw-tie"></span>Outlined bar / violet cell</td>
+        <td>Its error interval overlaps the winner's. Treat as a statistical tie.</td>
+    </tr>
+    <tr>
+        <td><span class="swatch sw-oth"></span>Black bar</td>
+        <td>Slower than the winner beyond the error.</td>
+    </tr>
+    <tr>
+        <td><span class="swatch sw-err"></span>Pale whisker / pale ±value</td>
+        <td>JMH error, at lower opacity than the data.</td>
+    </tr>
+    </tbody>
+</table>
+<h2>5. Caveats</h2>
+<ul>
+    <li><b>ChaosBPlusTree and ChaosAVL at 100K</b> are from a rerun of the identical command, because the first pass had
+        wide errors (±32 and ±70). Other rows with wide errors (EclipseRBT, ChaosRBT) may be inflated the same way. Same
+        way there were three combination which had error varying around might be 10~12% which did go through reran.
+    </li>
+    <li><b>No rebuild between invocations.</b> The map evolves across the run, so results reflect steady-state churn,
+        not a fresh build.
+    </li>
+    <li><b>0%-remove mixes</b> run on a saturated tree and are not comparable to the put=remove mixes.</li>
+    <li><b>Boxing.</b> Every map except the two <code>IntNative</code> ones uses boxed <code>Integer</code> keys. The
+        <code>IntNative</code> maps are Fastutil at its best (no boxing, no <code>Comparable</code> calls), so they are
+        a ceiling reference, not a like-for-like competitor. They come from a separate class and run with the same
+        workload code, seed and mixes.
+    </li>
+    <li><b>JDKConcurrentSkipListMap</b> pays for concurrency this single-threaded benchmark does not use.</li>
+</ul>
+<h2>6. Findings:</h2>
+<ul>
+    <li>
+        <b>FastUtil lacks an O(N) bulk-load:</b> FastUtil does not have an O(N) bulk-load capability (like <b>buildFromSorted()</b>). 
+        When initialized with sorted data, it falls back to sequential O(log N) <b>put()</b> calls. 
+        To maintain a level playing field, bulk-loading benchmarks were excluded from this arena.
+    </li>
+
+    <li>
+        <b>Where is MapDB?</b> MapDB was initially included, but even its in-memory modes rely heavily on serialization 
+        and byte-array copying. This generated a massive GC footprint that severely degraded benchmark stability and 
+        polluted the heap, even at the lowest datasets. It was ultimately excluded for fairness.
+    </li>
+
+    <li>
+        <b>N-ary Tree Iterator Escape Analysis (EA):</b> B+Tree iterators are streamlined enough that they consistently benefit 
+        from JVM Escape Analysis and are completely scalar-replaced (zero heap allocation). In contrast, B-Tree iterators require 
+        complex traversal state, which defeats EA and forces a 40B heap allocation per iterator. To strictly adhere to JDK interface 
+        contracts, aggressive iterator reuse/flyweight patterns were avoided, leaving the allocation intact.
+    </li>
+
+</ul>
+
+<p><a href="../index.html">← Back to ChaosTree</a></p>
+<script>
+    const b = document.body, ls = {
+        get: k => {
+            try {
+                return localStorage.getItem(k)
+            } catch {
+                return null
+            }
+        }, set: (k, v) => {
+            try {
+                localStorage.setItem(k, v)
+            } catch {
+            }
+        }
+    };
+    const th = ls.get('theme');
+    if (th === 'dark' || (!th && matchMedia('(prefers-color-scheme: dark)').matches)) b.classList.add('dark-mode');
+    document.getElementById('theme-toggle').onclick = () => {
+        b.classList.toggle('dark-mode');
+        ls.set('theme', b.classList.contains('dark-mode') ? 'dark' : 'light')
+    };
+    document.getElementById('tabs').onclick = e => {
+        const t = e.target.closest('button');
+        if (!t) return;
+        document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === t));
+        document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== t.dataset.t)
+    };
+</script>
+</body>
+</html>

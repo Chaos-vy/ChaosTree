@@ -35,7 +35,8 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         }
         int expectedDepth = -1;
         int sizeCount = validateBTreeNode((BTreeNode<Integer>) tree.root, true, 0, new int[]{expectedDepth}, tree.degree, tree);
-        if (sizeCount != tree.size()) throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
+        if (sizeCount != tree.size())
+            throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
     }
 
     private static int validateBTreeNode(BTreeNode<Integer> node, boolean isRoot, int depth, int[] expectedDepth, int degree, BTreeSet<Integer> tree) {
@@ -47,7 +48,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         if (!isRoot && node.keyCount < minKeys) throw new AssertionError("Node underfull: " + node.keyCount);
 
         for (int i = 0; i < node.keyCount - 1; i++) {
-            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i+1]) >= 0) {
+            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i + 1]) >= 0) {
                 throw new AssertionError("Keys not strictly increasing in node");
             }
         }
@@ -63,7 +64,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
                 if (child.parent != node) throw new AssertionError("Incorrect parent pointer");
 
                 if (i > 0) {
-                    if (tree.compare(getMin(child), (Integer) node.keys[i-1]) <= 0) {
+                    if (tree.compare(getMin(child), (Integer) node.keys[i - 1]) <= 0) {
                         throw new AssertionError("Child keys not strictly greater than left separator");
                     }
                 }
@@ -94,10 +95,11 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
             return;
         }
         int expectedDepth = -1;
-        int sizeCount = validateBPlusTreeNode( tree.root, true, 0, new int[]{expectedDepth}, tree.degree, tree);
-        if (sizeCount != tree.size()) throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
-        
-        BPlusTreeNode<Integer> curr =tree.root;
+        int sizeCount = validateBPlusTreeNode(tree.root, true, 0, new int[]{expectedDepth}, tree.degree, tree);
+        if (sizeCount != tree.size())
+            throw new AssertionError("Size mismatch: tracked=" + tree.size() + " actual=" + sizeCount);
+
+        BPlusTreeNode<Integer> curr = tree.root;
         if (curr != null) {
             while (!curr.isLeaf()) curr = curr.child[0];
         }
@@ -128,7 +130,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
         if (!isRoot && node.keyCount < minKeys) throw new AssertionError("Node underfull: " + node.keyCount);
 
         for (int i = 0; i < node.keyCount - 1; i++) {
-            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i+1]) >= 0) {
+            if (tree.compare((Integer) node.keys[i], (Integer) node.keys[i + 1]) >= 0) {
                 throw new AssertionError("Keys not strictly increasing in node");
             }
         }
@@ -145,7 +147,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
                 if (child.parent != node) throw new AssertionError("Incorrect parent pointer");
 
                 if (i > 0) {
-                    if (tree.compare(getMinPlus(child), (Integer) node.keys[i-1]) < 0) {
+                    if (tree.compare(getMinPlus(child), (Integer) node.keys[i - 1]) < 0) {
                         throw new AssertionError("Child min key less than left separator");
                     }
                 }
@@ -228,11 +230,11 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
 
     @Property
     void testCloneEdgeCases(@ForAll @IntRange(min = 3, max = 128) int degree,
-            @ForAll @IntRange(min = 1, max = 10000) int size) {
+                            @ForAll @IntRange(min = 1, max = 10000) int size) {
         BTreeSet<Integer> emptyBt = new BTreeSet<>(degree);
         Assertions.assertEquals(emptyBt, emptyBt.clone());
         Assertions.assertTrue(((BTreeSet<Integer>) emptyBt.clone()).isEmpty());
-        
+
         BPlusTreeSet<Integer> emptyBpt = new BPlusTreeSet<>(degree);
         Assertions.assertEquals(emptyBpt, emptyBpt.clone());
         Assertions.assertTrue(((BPlusTreeSet<Integer>) emptyBpt.clone()).isEmpty());
@@ -254,22 +256,22 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
     void testBulkLoadAndRemoveCoverage(@ForAll @IntRange(min = 10, max = 1000) int size) {
         SortedSet<Integer> sm = new TreeSet<>();
         for (int i = 0; i < size; i++) sm.add(i);
-        
+
         BTreeSet<Integer> bt = new BTreeSet<>(sm);
         Assertions.assertEquals(size, bt.size());
-        
+
         BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(sm);
         Assertions.assertEquals(size, bpt.size());
-        
+
         Iterator<Integer> it = bpt.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             it.next();
             it.remove();
         }
         Assertions.assertTrue(bpt.isEmpty());
 
         Iterator<Integer> revIt = bt.descendingIterator();
-        while(revIt.hasNext()) {
+        while (revIt.hasNext()) {
             revIt.next();
             revIt.remove();
         }
@@ -278,28 +280,28 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
 
     @Property
     void testBulkLoadExceptions(@ForAll @IntRange(min = 32, max = 128) int degree,
-            @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor) {
+                                @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor) {
         BTreeSet<Integer> bt = new BTreeSet<>(degree);
         BPlusTreeSet<Integer> bpt = new BPlusTreeSet<>(degree);
-        
+
         Object[] keys = new Object[]{1, 2, 3};
-        
+
         Assertions.assertDoesNotThrow(() -> new BPlusTreeSet<Integer>(degree).importFlatArray(null, factor));
         Assertions.assertDoesNotThrow(() -> new BTreeSet<Integer>(degree).importFlatArray(null, factor));
-        
+
         Assertions.assertDoesNotThrow(() -> new BPlusTreeSet<Integer>(degree).importFlatArray(new Object[0], factor));
         Assertions.assertDoesNotThrow(() -> new BTreeSet<Integer>(degree).importFlatArray(new Object[0], factor));
-        
+
         bt.add(5);
         Assertions.assertThrows(IllegalStateException.class, () -> bt.importFlatArray(keys, factor));
-        
+
         bpt.add(5);
         Assertions.assertThrows(IllegalStateException.class, () -> bpt.importFlatArray(keys, factor));
     }
 
     @Property
     void testBulkLoadInvalidFactor(@ForAll @IntRange(min = 32, max = 128) int degree,
-            @ForAll("invalidFactors") float factor) {
+                                   @ForAll("invalidFactors") float factor) {
         Object[] keys = new Object[]{1, 2, 3};
         Assertions.assertThrows(IllegalArgumentException.class, () -> new BTreeSet<Integer>(degree).importFlatArray(keys, factor));
         Assertions.assertThrows(IllegalArgumentException.class, () -> new BPlusTreeSet<Integer>(degree).importFlatArray(keys, factor));
@@ -307,7 +309,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
 
     @Property
     void testSingleElementBulkLoad(@ForAll @IntRange(min = 32, max = 128) int degree,
-            @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor) {
+                                   @ForAll @FloatRange(min = 0.5f, max = 1.0f) float factor) {
         Object[] singleElement = new Object[]{42};
         BTreeSet<Integer> bt = new BTreeSet<>(degree);
         try {
@@ -338,7 +340,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
             @ForAll("invalidFactors") float invalidFactor) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.create(invalidDegree));
         Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.create(invalidDegree));
-        
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> BTreeSet.Builder.newBuilder().factor(invalidFactor));
         Assertions.assertThrows(IllegalArgumentException.class, () -> BPlusTreeSet.Builder.newBuilder().factor(invalidFactor));
     }
@@ -347,12 +349,12 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
     void testConstructors(@ForAll @IntRange(min = 3, max = 128) int degree) {
         List<Integer> list = Arrays.asList(1, 2, 3);
         SortedSet<Integer> sorted = new TreeSet<>(list);
-        
+
         Assertions.assertNotNull(new BTreeSet<>(Comparator.naturalOrder()));
         Assertions.assertEquals(3, new BTreeSet<>(list).size());
         Assertions.assertEquals(3, new BTreeSet<>(sorted).size());
         Assertions.assertNotNull(new BTreeSet<>(degree, null));
-        
+
         Assertions.assertNotNull(new BPlusTreeSet<>(Comparator.naturalOrder()));
         Assertions.assertEquals(3, new BPlusTreeSet<>(list).size());
         Assertions.assertEquals(3, new BPlusTreeSet<>(sorted).size());
@@ -367,7 +369,7 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
 
     private void verifySubSetExceptions(NavigableSet<Integer> set) {
         set.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        
+
         NavigableSet<Integer> sub = set.subSet(3, true, 8, true);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> sub.subSet(1, true, 5, true));
@@ -404,11 +406,11 @@ public class NarySetApiTest extends AbstractNavigableSetApiTest {
     private void verifyFailFastSubSetIterators(NavigableSet<Integer> set) {
         set.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
         NavigableSet<Integer> sub = set.subSet(2, true, 6, true);
-        
+
         Iterator<Integer> subIt = sub.iterator();
         set.add(9);
         Assertions.assertThrows(java.util.ConcurrentModificationException.class, subIt::next);
-        
+
         Iterator<Integer> descSubIt = sub.descendingIterator();
         set.remove(1);
         Assertions.assertThrows(java.util.ConcurrentModificationException.class, descSubIt::next);

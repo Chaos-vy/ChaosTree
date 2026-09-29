@@ -1,10 +1,15 @@
 package chaos.tree.binary;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 
 public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E>> {
+
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE002C4A05L;
+
 
     public RedBlackTreeSet() {
         super();
@@ -19,7 +24,9 @@ public final class RedBlackTreeSet<E> extends AbstractBinaryTreeSet<E, RbtNode<E
         addAll(m);
     }
 
+    @SuppressWarnings("unchecked")
     public RedBlackTreeSet(SortedSet<? extends E> s) {
+        super((Comparator<? super E>) s.comparator());
         buildFromSorted(s.size(), s.iterator());
     }
 

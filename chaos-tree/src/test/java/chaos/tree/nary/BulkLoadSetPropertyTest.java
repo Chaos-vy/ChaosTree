@@ -36,7 +36,7 @@ public class BulkLoadSetPropertyTest {
         tree.buildFromSorted(new RangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
         validateBTreeSet(tree.root, tree.minKeys);
-        if (degree>=32) {
+        if (degree >= 32) {
             Object[] flat = new Object[n];
             for (int i = 0; i < n; i++) {
                 flat[i] = i;
@@ -72,7 +72,7 @@ public class BulkLoadSetPropertyTest {
         tree.buildFromSorted(new RangeIterator(n), factor);
         Assertions.assertEquals(n, tree.size());
         validateBPlusTreeSet(tree.root, tree.minKeys);
-        if(degree>=32) {
+        if (degree >= 32) {
             Object[] flat = new Object[n];
             for (int i = 0; i < n; i++) {
                 flat[i] = i;

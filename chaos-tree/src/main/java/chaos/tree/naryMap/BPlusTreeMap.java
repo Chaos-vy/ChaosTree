@@ -1,6 +1,7 @@
 package chaos.tree.naryMap;
 
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -15,6 +16,8 @@ import java.util.function.Function;
 
 public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTreeMapNode<K, V>> {
 
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
 
     private static final int DEFAULT_DEGREE = 64;
     private BPlusTreeMapNode<K, V> builderPrevLeaf;
@@ -33,7 +36,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
     }
 
     public BPlusTreeMap(SortedMap<K, ? extends V> m) {
-        super(DEFAULT_DEGREE, null);
+        super(DEFAULT_DEGREE, m.comparator());
         buildFromSorted(m.entrySet().iterator(), 0.75f);
     }
 
@@ -814,7 +817,7 @@ public final class BPlusTreeMap<K, V> extends AbstractNaryTreeMap<K, V, BPlusTre
         }
         if (flatMatrix[0].length == 0) return;
         if (degree < 32) {
-            throw new IllegalStateException("Bulk load is only supported for large chunks; degree must be at least 32.");
+            throw new IllegalArgumentException("Bulk load is only supported for large chunks; degree must be at least 32.");
         }
         if (factor < 0.5f || factor > 1.0f) {
             throw new IllegalArgumentException("Fill factor must be between 0.5 and 1.0");

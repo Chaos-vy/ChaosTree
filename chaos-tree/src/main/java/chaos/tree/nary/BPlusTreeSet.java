@@ -1,5 +1,6 @@
 package chaos.tree.nary;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -11,6 +12,9 @@ import java.util.SortedSet;
 import java.util.function.Consumer;
 
 public final class BPlusTreeSet<E> extends AbstractNaryTreeSet<E, BPlusTreeNode<E>> {
+
+    @Serial
+    private static final long serialVersionUID = 0xCAFEBABE000C4A05L;
 
     private static final int DEFAULT_DEGREE = 64;
     private BPlusTreeNode<E> builderPrevLeaf;
