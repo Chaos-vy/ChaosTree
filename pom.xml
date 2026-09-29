@@ -35,7 +35,7 @@
         <connection>scm:git:git://github.com/Chaos-vy/ChaosTree.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/Chaos-vy/ChaosTree.git</developerConnection>
         <url>https://github.com/Chaos-vy/ChaosTree</url>
-        <tag>v2.0.1</tag>
+        <tag>v2.0.2</tag>
     </scm>
 
     <properties>
