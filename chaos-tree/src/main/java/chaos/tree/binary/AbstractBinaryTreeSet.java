@@ -158,7 +158,7 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             return null;
         }
         N current = root;
-        int cmp ;
+        int cmp;
         while (current != null) {
             cmp = compare(val, current.value);
             if (cmp == 0) return current;
@@ -429,8 +429,39 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
     @Override
     public Spliterator<E> spliterator() {
-        return Spliterators.spliteratorUnknownSize(iterator(),
+        Spliterator<E> spliterator = Spliterators.spliteratorUnknownSize(iterator(),
                 Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED);
+        return new Spliterator<>() {
+            @Override
+            public boolean tryAdvance(Consumer<? super E> action) {
+                return spliterator.tryAdvance(action);
+            }
+
+            @Override
+            public void forEachRemaining(Consumer<? super E> action) {
+                spliterator.forEachRemaining(action);
+            }
+
+            @Override
+            public Spliterator<E> trySplit() {
+                return spliterator.trySplit();
+            }
+
+            @Override
+            public long estimateSize() {
+                return spliterator.estimateSize();
+            }
+
+            @Override
+            public int characteristics() {
+                return spliterator.characteristics();
+            }
+
+            @Override
+            public Comparator<? super E> getComparator() {
+                return comparator();
+            }
+        };
     }
 
     @Override
@@ -820,35 +851,6 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
             return (descending ? hi == null : lo == null) ? it : new UntilIterator(it, end);
         }
 
-        private final class UntilIterator implements Iterator<E> {
-            private final Iterator<E> it;
-            private final E lastElement;
-            private boolean done;
-
-            UntilIterator(Iterator<E> it, E lastElement) {
-                this.it = it;
-                this.lastElement = lastElement;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return !done && it.hasNext();
-            }
-
-            @Override
-            public E next() {
-                if (done) throw new NoSuchElementException();
-                E e = it.next();
-                if (e == lastElement) done = true;
-                return e;
-            }
-
-            @Override
-            public void remove() {
-                it.remove();
-            }
-        }
-
         private Iterator<E> ascendingIteratorImpl() {
             return new Iterator<>() {
                 private N nextNode = getStartNode();
@@ -999,7 +1001,38 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
 
         @Override
         public Spliterator<E> spliterator() {
-            return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.DISTINCT | (descending ? 0 : Spliterator.SORTED));
+            Spliterator<E> spliterator = Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.DISTINCT | (descending ? 0 : Spliterator.SORTED));
+            return new Spliterator<>() {
+                @Override
+                public boolean tryAdvance(Consumer<? super E> action) {
+                    return spliterator.tryAdvance(action);
+                }
+
+                @Override
+                public void forEachRemaining(Consumer<? super E> action) {
+                    spliterator.forEachRemaining(action);
+                }
+
+                @Override
+                public Spliterator<E> trySplit() {
+                    return spliterator.trySplit();
+                }
+
+                @Override
+                public long estimateSize() {
+                    return spliterator.estimateSize();
+                }
+
+                @Override
+                public int characteristics() {
+                    return spliterator.characteristics();
+                }
+
+                @Override
+                public Comparator<? super E> getComparator() {
+                    return comparator();
+                }
+            };
         }
 
         @Override
@@ -1136,6 +1169,35 @@ sealed abstract class AbstractBinaryTreeSet<E, N extends AbstractBinaryNode<E, N
         @Override
         public SortedSet<E> tailSet(E fromElement) {
             return tailSet(fromElement, true);
+        }
+
+        private final class UntilIterator implements Iterator<E> {
+            private final Iterator<E> it;
+            private final E lastElement;
+            private boolean done;
+
+            UntilIterator(Iterator<E> it, E lastElement) {
+                this.it = it;
+                this.lastElement = lastElement;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return !done && it.hasNext();
+            }
+
+            @Override
+            public E next() {
+                if (done) throw new NoSuchElementException();
+                E e = it.next();
+                if (e == lastElement) done = true;
+                return e;
+            }
+
+            @Override
+            public void remove() {
+                it.remove();
+            }
         }
     }
 }
