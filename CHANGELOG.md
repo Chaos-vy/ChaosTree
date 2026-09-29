@@ -4,6 +4,22 @@ All notable changes to ChaosTree will be documented in this file. I believe in b
 change, and fix.
 
 ---
+## [2.0.2] - Latest
+
+**The Latest stable release**
+
+- Fixed missing comparator assignment in `SortedMap` constructors.
+- Fixed `SortedSet` constructors silently falling to `null` comparator.
+- Fixed comparator-based `Spliterator` behavior.
+- Optimized the slow-path iterator in `AbstractBinaryTreeMap`.
+- Improved iterator handling across `SubMap` and subset views.
+- Added missing `Serial` annotations.
+- Added third-party benchmark comparisons and analysis graphs.
+- Updated benchmark documentation for v2.0.2.
+
+## [2.0.1]
+ 
+- Testing, massive bug fixes and  optimization
 
 ## [2.0.0] - 2026-09-08
 
