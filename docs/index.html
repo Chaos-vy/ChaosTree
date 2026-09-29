@@ -240,11 +240,11 @@
 
 </div>
 
-<h2>v2.0.1 — testing, coverage &amp; optimization</h2>
+<h2>v2.0.2 — Constructor, Iterator & Serialization Fixes</h2>
 <p>
-    Two weeks of testing, refactoring, benchmarking, and edge-case fixes on top of v2.0.0. Line coverage went from
-    80.9% to 95.8%; branch coverage from 77% to 91%.
+    Fixed missing Serial annotations, optimized the slow-path iterator in AbstractBinaryTreeMap, and fixed comparator handling across constructors and Spliterators.
 </p>
+
 
 <h2>Why ChaosTree</h2>
 <table>
@@ -1095,7 +1095,11 @@ JVM: OpenJDK 64-Bit Server VM (build 21.0.12)
     </li>
     <li>
         <strong><a href="benchmark/dragon-feed.html">The Dragon Feed (Bulk Load)</a></strong><br>
-        Deep dive into the 168x sequential bypass strategy and random insertion behavior.
+        Deep dive into the 145x sequential bypass strategy and random insertion behavior.
+    </li>
+    <li>
+        <strong><a href="benchmark/Chaos-tree-Arena.html">Benchmark against 3rd-party libraries</a></strong><br>
+        A comprehensive benchmark suite comparing ChaosTree against FastUtil, Eclipse Collections, and other libraries.
     </li>
 </ul>
 
